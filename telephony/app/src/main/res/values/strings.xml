@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">TelephonyExample</string>
+    <string name="area_code">Area code</string>
+    <string name="no_results">No results.</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="my_phone_numbers">My Phone Numbers</string>
+    <string name="deregister">Deregister</string>
+    <string name="activity_sudos">Sudos</string>
+    <string name="info">Info</string>
+    <string name="name">Name</string>
+    <string name="create">Create</string>
+    <string name="phone_numbers">Phone Numbers</string>
+    <string name="provision_phone_number">+ Provision Phone Number</string>
+    <string name="united_states_us">United States (US)</string>
+    <string name="loading_sudos">Loading Sudos</string>
+    <string name="enter_an_area_code">Enter an Area Code</string>
+    <string name="enter_sudo_label">Enter Sudo Label</string>
+    <string name="choose_label_detail">Choose any label you would like for your Sudo: Shopping, Dating, etc.</string>
+    <string name="your_number">Your Number</string>
+    <string name="delete">Delete</string>
+    <string name="conversations">Conversations</string>
+    <string name="compose_message">+ Compose Message</string>
+    <string name="send">Send</string>
+    <string name="remote_number">Remote Number</string>
+    <string name="type">Type</string>
+    <string name="time">Time</string>
+    <string name="status">Status</string>
+    <string name="body">Body</string>
+
+</resources>
