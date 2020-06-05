@@ -43,8 +43,7 @@ class ComposeMessageActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         app = (application as App)
-        val parcelablePhoneNumber = intent.getParcelableExtra("number") as ParcelablePhoneNumber
-        this.localNumber = parcelablePhoneNumber.toPhoneNumber()
+        localNumber = intent.getParcelableExtra("number") as PhoneNumber
         val remoteNumber: String? = intent.getStringExtra("remoteNumber")
         editText_recipientPhone.setText(remoteNumber)
 

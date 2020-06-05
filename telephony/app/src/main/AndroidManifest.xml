@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".MessageDetailsActivity"></activity>
+        <activity android:name=".MessageDetailsActivity" />
         <activity android:name=".ConversationDetailsActivity" />
         <activity android:name=".ComposeMessageActivity" />
         <activity android:name=".ConversationListActivity" />
@@ -32,9 +32,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".AllPhoneNumbersActivity"
-            android:screenOrientation="fullSensor" />
         <activity
             android:name=".SudosActivity"
             android:screenOrientation="fullSensor"

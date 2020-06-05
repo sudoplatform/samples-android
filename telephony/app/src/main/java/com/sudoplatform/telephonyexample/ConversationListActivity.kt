@@ -24,8 +24,7 @@ class ConversationListActivity : AppCompatActivity(), PhoneMessageSubscriber {
         setContentView(R.layout.activity_conversation_list)
 
         app = (application as App)
-        val parcelablePhoneNumber = intent.getParcelableExtra("number") as ParcelablePhoneNumber
-        this.number = parcelablePhoneNumber.toPhoneNumber()
+        number = intent.getParcelableExtra("number") as PhoneNumber
         title = "Phone Number"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
@@ -34,27 +33,25 @@ class ConversationListActivity : AppCompatActivity(), PhoneMessageSubscriber {
 
         button_composeMessage.setOnClickListener {
             val intent = Intent(this, ComposeMessageActivity::class.java)
-            intent.putExtra("number", parcelablePhoneNumber)
+            intent.putExtra("number", number)
             startActivity(intent)
         }
 
         adapter = ConversationAdapter(conversationList) { conversation ->
             val intent = Intent(this, ConversationDetailsActivity::class.java)
-            // TODO: send entire conversation object in intent once data classes are parcelable
-            intent.putExtra("conversation", conversation.id)
-            intent.putExtra("number", parcelablePhoneNumber)
+            intent.putExtra("conversation", conversation)
+            intent.putExtra("number", number)
             startActivity(intent)
         }
 
         recyclerView_conversations.adapter = adapter
         recyclerView_conversations.layoutManager = LinearLayoutManager(this)
-        listConversations()
-        app.sudoTelephonyClient.subscribeToPhoneMessages(this, null)
     }
 
     override fun onResume() {
         super.onResume()
         listConversations()
+        app.sudoTelephonyClient.subscribeToPhoneMessages(this, null)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -113,27 +110,37 @@ class ConversationListActivity : AppCompatActivity(), PhoneMessageSubscriber {
     }
 
     private fun listConversations() {
-        showLoading()
-        app.sudoTelephonyClient.getConversations(number, null, null) { result ->
-            hideLoading()
-            runOnUiThread {
-                when (result) {
-                    is Result.Success -> {
-                        conversationList.clear()
-                        conversationList.addAll(result.value.items)
-                        adapter.notifyDataSetChanged()
-                    }
-                    is Result.Error -> {
-                        AlertDialog.Builder(this)
-                            .setTitle("Failed to list conversations")
-                            .setMessage(result.throwable.toString())
-                            .setPositiveButton("Try Again") { _, _ -> listConversations() }
-                            .setNegativeButton("Cancel") { _, _ -> }
-                            .show()
+        fun fetchPageOfConversations(listToken: String?) {
+            app.sudoTelephonyClient.getConversations(number, null, listToken) { result ->
+                runOnUiThread {
+                    when (result) {
+                        is Result.Success -> {
+                            if (listToken == null) {
+                                conversationList.clear()
+                            }
+                            conversationList.addAll(result.value.items)
+                            if (result.value.nextToken != null) {
+                                fetchPageOfConversations(result.value.nextToken)
+                            } else {
+                                adapter.notifyDataSetChanged()
+                                hideLoading()
+                            }
+                        }
+                        is Result.Error -> {
+                            hideLoading()
+                            AlertDialog.Builder(this)
+                                .setTitle("Failed to list conversations")
+                                .setMessage(result.throwable.toString())
+                                .setPositiveButton("Try Again") { _, _ -> listConversations() }
+                                .setNegativeButton("Cancel") { _, _ -> }
+                                .show()
+                        }
                     }
                 }
             }
         }
+        showLoading()
+        fetchPageOfConversations(null)
     }
 
     private fun showLoading(text: String? = "") = runOnUiThread {
@@ -147,7 +154,7 @@ class ConversationListActivity : AppCompatActivity(), PhoneMessageSubscriber {
         progressText.visibility = View.GONE
     }
 
-    override fun connectionStatusChanged(state: PhoneMessageSubscriber.ConnectionState) {
+    override fun connectionStatusChanged(state: TelephonySubscriber.ConnectionState) {
     }
 
     override fun phoneMessageReceived(phoneMessage: PhoneMessage) {

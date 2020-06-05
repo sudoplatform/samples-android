@@ -29,6 +29,7 @@
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="0dp"
         android:layout_toEndOf="@id/imageView_send_receive"
+        android:layout_toStartOf="@id/imageView"
         android:orientation="vertical">
 
         <TextView

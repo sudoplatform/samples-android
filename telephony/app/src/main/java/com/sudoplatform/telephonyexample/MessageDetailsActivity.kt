@@ -27,9 +27,10 @@ class MessageDetailsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_message_details)
         title = "Message Details"
         app = (application as App)
-        getMessage(intent.getStringExtra("messageId"))
+        message = intent.getParcelableExtra("message")
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
+        displayMessage()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -37,7 +38,7 @@ class MessageDetailsActivity : AppCompatActivity() {
         return true
     }
 
-    private fun updateUI() {
+    private fun displayMessage() {
         if (message != null) {
             val direction = if (message!!.direction == MessageDirection.INBOUND) "Incoming" else "Outgoing"
             val type = if (message!!.media.isEmpty()) "SMS" else "MMS"
@@ -110,29 +111,6 @@ class MessageDetailsActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun getMessage(id: String) {
-        showLoading()
-        app.sudoTelephonyClient.getMessage(id) { result ->
-            hideLoading()
-            runOnUiThread {
-                when (result) {
-                    is Result.Success -> {
-                        message = result.value
-                        updateUI()
-                    }
-                    is Result.Error -> {
-                        AlertDialog.Builder(this)
-                            .setTitle("Failed to load message")
-                            .setMessage("${result.throwable}")
-                            .setPositiveButton("Try Again") { _, _ ->  getMessage(id) }
-                            .setNegativeButton("Cancel") { _, _ -> }
-                            .show()
-                    }
-                }
-            }
-        }
     }
 
     private fun deleteMessage() {
