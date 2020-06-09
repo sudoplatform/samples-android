@@ -9,6 +9,7 @@ import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudouser.RegisterResult
+import com.sudoplatform.sudouser.RegistrationChallengeType
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
 import kotlinx.android.synthetic.main.activity_register.*
@@ -38,6 +39,13 @@ class RegisterActivity : AppCompatActivity() {
         hideLoading()
         buttonRegister.text = "Register / Login"
         buttonRegister.isEnabled = true
+
+        val data = this.intent.data
+        if (data != null) {
+            app.sudoUserClient.processFederatedSignInTokens(data)
+            val intent = Intent(this, SudosActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun registerAndSignIn() {
@@ -54,36 +62,68 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
 
-        if (app.sudoUserClient.isRegistered() == true) {
-            // If already registered, sign in
-            signIn()
-        } else {
-            val privateKey: String
-            val publicKey: String
-
-            try {
-                privateKey =
-                    app.assets.open("register_key.private").bufferedReader().use {
-                        it.readText().trim()
-                    }
-                publicKey =
-                    app.assets.open("register_key.public").bufferedReader().use {
-                        it.readText().trim()
-                    }
-            } catch (e: java.io.IOException) {
-                errorLogger?.error("Failed to load TEST registration keys: $e")
-                errorLogger?.outputError(Error(e))
-                showRegistrationFailure(e)
-                return
-            }
-
-            val authProvider = TESTAuthenticationProvider("testRegisterAudience", privateKey, publicKey, app.keyManager)
-            // register with auth provider
-            app.sudoUserClient.registerWithAuthenticationProvider(authProvider, "dummy_rid") { result ->
+        val challengeTypes = app.sudoUserClient.getSupportedRegistrationChallengeType()
+        if (challengeTypes.contains(RegistrationChallengeType.FSSO)) {
+            app.sudoUserClient.presentFederatedSignInUI { result ->
                 when (result) {
-                    // sign in upon successful registration
-                    is RegisterResult.Success -> { signIn() }
-                    is RegisterResult.Failure -> { showRegistrationFailure(result.error) }
+                    is SignInResult.Success -> {
+                        val intent = Intent(this, SudosActivity::class.java)
+                        startActivity(intent)
+                    }
+                    is SignInResult.Failure -> {
+                        hideLoading()
+                        runOnUiThread {
+                            buttonRegister.text = "Register / Login"
+                            buttonRegister.isEnabled = true
+                            Toast.makeText(this, "Failed to Login: ${result.error}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        } else {
+            if (app.sudoUserClient.isRegistered()) {
+                // If already registered, sign in
+                signIn()
+            } else {
+                val privateKey: String
+                val publicKey: String
+
+                try {
+                    privateKey =
+                        app.assets.open("register_key.private").bufferedReader().use {
+                            it.readText().trim()
+                        }
+                    publicKey =
+                        app.assets.open("register_key.public").bufferedReader().use {
+                            it.readText().trim()
+                        }
+                } catch (e: java.io.IOException) {
+                    errorLogger?.error("Failed to load TEST registration keys: $e")
+                    errorLogger?.outputError(Error(e))
+                    showRegistrationFailure(e)
+                    return
+                }
+
+                val authProvider = TESTAuthenticationProvider(
+                    "testRegisterAudience",
+                    privateKey,
+                    publicKey,
+                    app.keyManager
+                )
+                // register with auth provider
+                app.sudoUserClient.registerWithAuthenticationProvider(
+                    authProvider,
+                    "dummy_rid"
+                ) { result ->
+                    when (result) {
+                        // sign in upon successful registration
+                        is RegisterResult.Success -> {
+                            signIn()
+                        }
+                        is RegisterResult.Failure -> {
+                            showRegistrationFailure(result.error)
+                        }
+                    }
                 }
             }
         }

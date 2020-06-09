@@ -23,6 +23,17 @@ android {
     packagingOptions {
         pickFirst("META-INF/atomicfu.kotlin_module")
     }
+// To inline the bytecode built with JVM target 1.8 into
+// bytecode that is being built with JVM target 1.6. (e.g. navArgs)
+
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -36,8 +47,12 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation 'com.google.android.material:material:1.1.0-alpha07'
 
-    api 'com.sudoplatform:sudotelephony:2.1.5'
+    api 'com.sudoplatform:sudouser:7.4.0'
+    api 'com.sudoplatform:sudotelephony:2.2.0'
 
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.0.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.0.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }

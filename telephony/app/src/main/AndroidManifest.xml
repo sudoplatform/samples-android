@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name=".App"
@@ -16,13 +17,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
+        <activity android:name=".StartCallActivity" />
         <activity android:name=".MessageDetailsActivity" />
         <activity android:name=".ConversationDetailsActivity" />
         <activity android:name=".ComposeMessageActivity" />
-        <activity android:name=".ConversationListActivity" />
+        <activity android:name=".PhoneNumberActionsActivity" />
         <activity android:name=".CreateSudoActivity" />
         <activity android:name=".ProvisionNumberActivity" />
         <activity android:name=".SudoDetailActivity" />
+        <activity android:name=".VoiceCallActivity" />
         <activity
             android:name=".RegisterActivity"
             android:theme="@style/AppThemeNoActionBar">
@@ -30,6 +33,12 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.sudoplatform.telephonyexample"/>
             </intent-filter>
         </activity>
         <activity

@@ -1,7 +1,7 @@
 package com.sudoplatform.telephonyexample
 
-import com.anonyome.keymanager.KeyManager
-import com.anonyome.keymanager.KeyManagerFactory
+import com.sudoplatform.sudokeymanager.KeyManagerFactory
+import com.sudoplatform.sudokeymanager.KeyManagerInterface
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
@@ -17,7 +17,7 @@ class App : android.app.Application() {
     lateinit var sudoUserClient: SudoUserClient
     lateinit var sudoProfilesClient: SudoProfilesClient
     lateinit var sudoTelephonyClient: SudoTelephonyClient
-    lateinit var keyManager: KeyManager
+    lateinit var keyManager: KeyManagerInterface
 
     override fun onCreate() {
         super.onCreate()
@@ -34,6 +34,6 @@ class App : android.app.Application() {
         sudoTelephonyClient = DefaultSudoTelephonyClient(this, sudoUserClient, sudoProfilesClient)
 
         // create key manager
-        keyManager = KeyManagerFactory(this).createAndroidKeyManager() as KeyManager
+        keyManager = KeyManagerFactory(this).createAndroidKeyManager()
     }
 }

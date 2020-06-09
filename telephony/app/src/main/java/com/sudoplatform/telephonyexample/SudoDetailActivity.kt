@@ -28,7 +28,7 @@ class SudoDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         adapter = ProvisionedPhoneNumberAdapter(numberList) { number ->
-            val intent = Intent(this, ConversationListActivity::class.java)
+            val intent = Intent(this, PhoneNumberActionsActivity::class.java)
             intent.putExtra("number", number)
             startActivity(intent)
         }
