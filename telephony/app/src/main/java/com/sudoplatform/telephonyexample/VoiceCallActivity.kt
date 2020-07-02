@@ -14,10 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
 import com.sudoplatform.sudotelephony.*
 import kotlinx.android.synthetic.main.activity_voice_call.*
-import java.lang.Exception
 import java.util.*
+import kotlin.Exception
 
-class VoiceCallActivity : AppCompatActivity(), ActiveCallSubscriber {
+class VoiceCallActivity : AppCompatActivity(), ActiveCallListener {
     private lateinit var app: App
     private lateinit var localNumber: PhoneNumber
     private lateinit var remoteNumber: String
@@ -59,19 +59,7 @@ class VoiceCallActivity : AppCompatActivity(), ActiveCallSubscriber {
         callStatusText.setTextColor(yourNumberText.textColors.defaultColor)
         callStatusText.text = getString(R.string.status_initiating)
 
-        app.sudoTelephonyClient.createVoiceCall(localNumber, remoteNumber) { result ->
-            when (result) {
-                is Result.Success -> {
-                    activeVoiceCall = result.value
-                    activeVoiceCall.subscribe(this)
-                    onConnect()
-                }
-
-                is Result.Error -> {
-                    onConnectionFailure(result.throwable)
-                }
-            }
-        }
+        app.sudoTelephonyClient.createVoiceCall(localNumber, remoteNumber, this)
     }
 
     override fun onBackPressed() {
@@ -136,20 +124,6 @@ class VoiceCallActivity : AppCompatActivity(), ActiveCallSubscriber {
         startDurationTimer()
     }
 
-    private fun onConnectionFailure(throwable: Throwable) {
-        if (isDestroyed) { return }
-
-        callStatusText.setTextColor(getColor(R.color.colorRed))
-        callStatusText.text = getString(R.string.status_failed)
-
-        AlertDialog.Builder(this)
-            .setTitle("Failed to initiate call")
-            .setMessage("${throwable}")
-            .setPositiveButton("Try Again") { _, _ -> initiateCall() }
-            .setNegativeButton("Cancel") { _, _ -> }
-            .show()
-    }
-
     private fun onDisconnect () {
         isConnected = false
         title = getString(R.string.title_voice_call)
@@ -159,6 +133,25 @@ class VoiceCallActivity : AppCompatActivity(), ActiveCallSubscriber {
         constraintLayoutMute.visibility = View.INVISIBLE
         constraintLayoutSpeaker.visibility = View.INVISIBLE
         endCallMenu?.getItem(0)?.title = getString(R.string.button_done)
+    }
+
+    override fun activeVoiceCallDidConnect(call: ActiveVoiceCall) {
+        this.activeVoiceCall = call
+        onConnect()
+    }
+
+    override fun activeVoiceCallDidFailToConnect(exception: Exception) {
+        if (isDestroyed) { return }
+
+        callStatusText.setTextColor(getColor(R.color.colorRed))
+        callStatusText.text = getString(R.string.status_failed)
+
+        AlertDialog.Builder(this)
+            .setTitle("Failed to initiate call")
+            .setMessage("${exception}")
+            .setPositiveButton("Try Again") { _, _ -> initiateCall() }
+            .setNegativeButton("Cancel") { _, _ -> }
+            .show()
     }
 
     override fun activeVoiceCallDidDisconnect(call: ActiveVoiceCall, exception: Exception?) {

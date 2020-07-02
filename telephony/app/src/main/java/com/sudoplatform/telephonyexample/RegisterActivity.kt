@@ -86,15 +86,15 @@ class RegisterActivity : AppCompatActivity() {
                 signIn()
             } else {
                 val privateKey: String
-                val publicKey: String
+                var keyId: String
 
                 try {
                     privateKey =
                         app.assets.open("register_key.private").bufferedReader().use {
                             it.readText().trim()
                         }
-                    publicKey =
-                        app.assets.open("register_key.public").bufferedReader().use {
+                    keyId =
+                        app.assets.open("register_key.id").bufferedReader().use {
                             it.readText().trim()
                         }
                 } catch (e: java.io.IOException) {
@@ -107,8 +107,9 @@ class RegisterActivity : AppCompatActivity() {
                 val authProvider = TESTAuthenticationProvider(
                     "testRegisterAudience",
                     privateKey,
-                    publicKey,
-                    app.keyManager
+                    null,
+                    app.keyManager,
+                    keyId
                 )
                 // register with auth provider
                 app.sudoUserClient.registerWithAuthenticationProvider(

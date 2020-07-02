@@ -7,7 +7,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId 'com.sudoplatform.telephonyexample'
-        minSdkVersion 26
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -47,8 +47,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation 'com.google.android.material:material:1.1.0-alpha07'
 
-    api 'com.sudoplatform:sudouser:7.4.0'
-    api 'com.sudoplatform:sudotelephony:2.2.0'
+    api 'com.sudoplatform:sudouser:7.7.0'
+    api 'com.sudoplatform:sudotelephony:3.0.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.0.0'

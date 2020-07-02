@@ -59,7 +59,7 @@ class ConversationListFragment : Fragment(), PhoneMessageSubscriber {
     override fun onResume() {
         super.onResume()
         listConversations()
-        app.sudoTelephonyClient.subscribeToPhoneMessages(this, null)
+        app.sudoTelephonyClient.subscribeToMessages(this, null)
     }
 
     private fun listConversations() {

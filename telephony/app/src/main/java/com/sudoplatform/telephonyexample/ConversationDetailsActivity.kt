@@ -47,7 +47,7 @@ class ConversationDetailsActivity : AppCompatActivity(), PhoneMessageSubscriber 
 
     override fun onResume() {
         super.onResume()
-        app.sudoTelephonyClient.subscribeToPhoneMessages(this, "subId")
+        app.sudoTelephonyClient.subscribeToMessages(this, "subId")
         getMessages()
     }
 
