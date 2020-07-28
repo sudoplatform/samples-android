@@ -13,21 +13,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
 import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread
 import com.sudoplatform.sudotelephony.*
-import kotlinx.android.synthetic.main.fragment_phone_call_list.*
+import kotlinx.android.synthetic.main.fragment_voicemail_list.*
 
-class PhoneCallListFragment : Fragment(), CallRecordSubscriber {
+class VoicemailListFragment : Fragment(), VoicemailSubscriber {
     private lateinit var app: App
     private lateinit var number: PhoneNumber
 
-    private var callRecordList: ArrayList<CallRecord> = ArrayList()
-    private val adapter = CallRecordAdapter(callRecordList) { call ->
-        val intent = Intent(app, CallRecordDetailsActivity::class.java)
-        intent.putExtra("callRecord", call)
-        intent.putExtra("number", number)
+    private var voicemailList: ArrayList<Voicemail> = ArrayList()
+    private val adapter = VoicemailAdapter(voicemailList) { voicemail ->
+        val intent = Intent(app, VoicemailActivity::class.java)
+        intent.putExtra("voicemail", voicemail)
         startActivity(intent)
     }
 
-    private lateinit var startCallButton: Button
     private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
@@ -35,16 +33,9 @@ class PhoneCallListFragment : Fragment(), CallRecordSubscriber {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_phone_call_list, container, false)
-        startCallButton = rootView.findViewById(R.id.button_startCall)
+        val rootView = inflater.inflate(R.layout.fragment_voicemail_list, container, false)
 
-        startCallButton.setOnClickListener {
-            val intent = Intent(app, StartCallActivity::class.java)
-            intent.putExtra("number", number)
-            startActivity(intent)
-        }
-
-        recyclerView = rootView.findViewById(R.id.recyclerView_calls)
+        recyclerView = rootView.findViewById(R.id.recyclerView_voicemails)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(app.applicationContext)
 
@@ -53,20 +44,20 @@ class PhoneCallListFragment : Fragment(), CallRecordSubscriber {
 
     override fun onResume() {
         super.onResume()
-        listCallRecords()
-        app.sudoTelephonyClient.calling.subscribeToCallRecords(this, "callRecordSubscriberId")
+        listVoicemails()
+        app.sudoTelephonyClient.calling.subscribeToVoicemails(this, "voicemailSubscriberId")
     }
 
-    private fun listCallRecords() {
+    private fun listVoicemails() {
         fun fetchPageOfRecords(listToken: String?) {
-            app.sudoTelephonyClient.calling.getCallRecords(number, null, listToken) { result ->
+            app.sudoTelephonyClient.calling.getVoicemails(number, null, listToken) { result ->
                 runOnUiThread {
                     when (result) {
                         is Result.Success -> {
                             if (listToken == null) {
-                                callRecordList.clear()
+                                voicemailList.clear()
                             }
-                            callRecordList.addAll(result.value.items)
+                            voicemailList.addAll(result.value.items)
                             if (result.value.nextToken != null) {
                                 fetchPageOfRecords(result.value.nextToken)
                             } else {
@@ -75,16 +66,16 @@ class PhoneCallListFragment : Fragment(), CallRecordSubscriber {
                             }
                         }
                         is Result.Absent -> {
-                            callRecordList.clear()
+                            voicemailList.clear()
                             adapter.notifyDataSetChanged()
                             hideLoading()
                         }
                         is Result.Error -> {
                             hideLoading()
                             AlertDialog.Builder(app.applicationContext)
-                                .setTitle("Failed to list call records")
+                                .setTitle("Failed to list voicemails")
                                 .setMessage(result.throwable.toString())
-                                .setPositiveButton("Try Again") { _, _ -> listCallRecords() }
+                                .setPositiveButton("Try Again") { _, _ -> listVoicemails() }
                                 .setNegativeButton("Cancel") { _, _ -> }
                                 .show()
                         }
@@ -108,21 +99,21 @@ class PhoneCallListFragment : Fragment(), CallRecordSubscriber {
 
     override fun connectionStatusChanged(state: TelephonySubscriber.ConnectionState) {}
 
-    override fun callRecordReceived(callRecord: CallRecord) {
-        if (callRecord.phoneNumberId == number.id) {
-            listCallRecords()
+    override fun voicemailUpdated(voicemail: Voicemail) {
+        if (voicemail.phoneNumberId == number.id) {
+            listVoicemails()
         }
     }
 
     companion object {
         /**
          * @param mainApp The application
-         * @param phoneNumber The phone number that will be making calls
-         * @return A new instance of fragment PhoneCallListFragment.
+         * @param phoneNumber The phone number that the voicemails belong to
+         * @return A new instance of fragment VoicemailListFragment.
          */
         @JvmStatic
         fun newInstance(mainApp: App, phoneNumber: PhoneNumber) =
-            PhoneCallListFragment().apply {
+            VoicemailListFragment().apply {
                 arguments = Bundle().apply {
                     app = mainApp
                     number = phoneNumber

@@ -11,13 +11,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.navigation.NavigationView
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.iid.FirebaseInstanceId
 import com.sudoplatform.sudoprofiles.ListOption
 import com.sudoplatform.sudoprofiles.ListSudosResult
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudouser.ApiResult
+import com.sudoplatform.sudotelephony.Result
 import kotlinx.android.synthetic.main.activity_sudos.*
-import java.io.Serializable
 import java.util.*
 
 /**
@@ -48,6 +51,33 @@ class SudosActivity : AppCompatActivity() {
         sudo_recyclerView.adapter = adapter
         sudo_recyclerView.layoutManager = LinearLayoutManager(this)
         listSudos(ListOption.CACHE_ONLY)
+
+        // now that the user is signed in, register for incoming calls if google play services is available
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
+            FirebaseInstanceId.getInstance().instanceId
+                .addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        // failed to get instance id
+                        return@OnCompleteListener
+                    }
+
+                    val fcmToken = task.result!!.token
+                    (application as App).sudoTelephonyClient.calling.registerForIncomingCalls(fcmToken) { result ->
+                        when (result) {
+                            is Result.Success -> {
+                                // successfully registered
+                            }
+                            is Result.Error -> {
+                                runOnUiThread {
+                                    Toast.makeText(this, "Unable to register for incoming calls: ${result.throwable}", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }
+                    }
+                })
+        } else {
+            GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this)
+        }
     }
 
     override fun onResume() {

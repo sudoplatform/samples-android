@@ -7,28 +7,6 @@
     android:background="#EDEDED"
     tools:context=".ConversationListFragment">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:minWidth="40dp"
-        android:minHeight="40dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <TextView
-        android:id="@+id/progressText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/progressBar"
-        />
-
     <Button
         android:id="@+id/button_composeMessage"
         android:layout_width="0dp"
@@ -57,4 +35,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_composeMessage" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/progressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/progressBar" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudotelephony.PhoneMessage
-import com.sudoplatform.sudotelephony.type.MessageDirection
+import com.sudoplatform.sudotelephony.type.Direction
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,7 +30,7 @@ class PhoneMessageViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val formatter = SimpleDateFormat("MM/dd/yyyy H:mm:aa")
         val formattedDate = formatter.format(date)
         messageDateText.text = formattedDate
-        if (message.direction == MessageDirection.OUTBOUND) {
+        if (message.direction == Direction.OUTBOUND) {
             sendReceiveImageView.setImageResource(R.drawable.ic_call_made_24px)
         } else {
             sendReceiveImageView.setImageResource(R.drawable.ic_call_received_24px)

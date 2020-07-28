@@ -132,6 +132,9 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun signIn() {
         if (app.sudoUserClient.isSignedIn()) {
+            // Refresh SudoUser CredentialsProvider tokens.
+            app.sudoUserClient.getCredentialsProvider().logins = app.sudoUserClient.getLogins()
+
             val intent = Intent(this, SudosActivity::class.java)
             startActivity(intent)
             return

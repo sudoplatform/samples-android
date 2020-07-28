@@ -1,5 +1,6 @@
 package com.sudoplatform.telephonyexample
 
+import com.google.firebase.FirebaseApp
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudokeymanager.KeyManagerInterface
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
@@ -21,6 +22,8 @@ class App : android.app.Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        FirebaseApp.initializeApp(this)
 
         val logger = Logger("telephonyExample", AndroidUtilsLogDriver(LogLevel.DEBUG))
         // create sudo user client (for registration and sign in)

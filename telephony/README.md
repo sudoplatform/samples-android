@@ -8,7 +8,7 @@ This project provides examples of how to use the Sudo Telephony Android SDK.
 
 This app supports Android version 23 or newer, built with Kotlin version 1.3.
 
-If using Android Studio, version 3.6 or newer is required.
+If using Android Studio, version 4.0 or newer is required.
 
 ## Getting Started
 
@@ -24,7 +24,9 @@ To build this app you first need to obtain an SDK configuration file and a TEST 
 
    If the application does not already have an assets folder, create one under `TelephonyExample/src/main/assets/` or in Android Studio, right click on the application module and select `New > Folder > Assets Folder`. Then drag the files to that folder.
 
-3. Build the app
+3. Configure app for receiving voice calls by following the steps in the [Sudo Telephony Voice Calling guide](https://docs.sudoplatform.com/guides/telephony)
+
+4. Build the app
 
 ### Using the App
 

@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import com.sudoplatform.sudotelephony.MediaObject
 import com.sudoplatform.sudotelephony.PhoneMessage
 import com.sudoplatform.sudotelephony.Result
-import com.sudoplatform.sudotelephony.type.MessageDirection
+import com.sudoplatform.sudotelephony.type.Direction
 import kotlinx.android.synthetic.main.activity_message_details.*
 import kotlinx.android.synthetic.main.activity_message_details.progressBar
 import java.text.SimpleDateFormat
@@ -40,7 +40,7 @@ class MessageDetailsActivity : AppCompatActivity() {
 
     private fun displayMessage() {
         if (message != null) {
-            val direction = if (message!!.direction == MessageDirection.INBOUND) "Incoming" else "Outgoing"
+            val direction = if (message!!.direction == Direction.INBOUND) "Incoming" else "Outgoing"
             val type = if (message!!.media.isEmpty()) "SMS" else "MMS"
             val typeText =  "$direction $type"
             textView_messageType.text = typeText

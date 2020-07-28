@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
         android:name=".App"
@@ -17,17 +18,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".StartCallActivity" />
-        <activity android:name=".MessageDetailsActivity" />
-        <activity android:name=".ConversationDetailsActivity" />
-        <activity android:name=".ComposeMessageActivity" />
-        <activity android:name=".PhoneNumberActionsActivity" />
-        <activity android:name=".CreateSudoActivity" />
-        <activity android:name=".ProvisionNumberActivity" />
-        <activity android:name=".SudoDetailActivity" />
-        <activity android:name=".VoiceCallActivity" />
+        <activity android:name=".StartCallActivity" android:screenOrientation="portrait" />
+        <activity android:name=".CallRecordDetailsActivity" android:screenOrientation="portrait" />
+        <activity android:name=".MessageDetailsActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ConversationDetailsActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ComposeMessageActivity" android:screenOrientation="portrait" />
+        <activity android:name=".PhoneNumberActionsActivity" android:screenOrientation="portrait" />
+        <activity android:name=".CreateSudoActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ProvisionNumberActivity" android:screenOrientation="portrait" />
+        <activity android:name=".SudoDetailActivity" android:screenOrientation="portrait" />
+        <activity android:name=".VoiceCallActivity" android:screenOrientation="portrait" />
+        <activity android:name=".VoicemailActivity" android:screenOrientation="portrait" />
         <activity
             android:name=".RegisterActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,15 +40,24 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.sudoplatform.telephonyexample"/>
+
+                <data android:scheme="com.sudoplatform.telephonyexample" />
             </intent-filter>
         </activity>
         <activity
             android:name=".SudosActivity"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+        <service android:name=".TelephonyExampleFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

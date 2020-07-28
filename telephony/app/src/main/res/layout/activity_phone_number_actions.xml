@@ -37,6 +37,38 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <com.google.android.material.tabs.TabLayout
+       android:id="@+id/tabLayout"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       app:layout_constraintTop_toBottomOf="@id/constraintLayout">
+
+        <com.google.android.material.tabs.TabItem
+           android:layout_width="wrap_content"
+           android:layout_height="match_parent"
+           android:text="@string/messages"/>
+
+        <com.google.android.material.tabs.TabItem
+           android:layout_width="wrap_content"
+           android:layout_height="match_parent"
+           android:text="@string/textCalls"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/voicemail"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="80dp"
@@ -58,29 +90,5 @@
         android:textColor="@color/colorAccent"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar" />
-
-    <com.google.android.material.tabs.TabLayout
-       android:id="@+id/tabLayout"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       app:layout_constraintTop_toBottomOf="@id/constraintLayout">
-
-        <com.google.android.material.tabs.TabItem
-           android:layout_width="wrap_content"
-           android:layout_height="match_parent"
-           android:text="@string/textConversations"/>
-
-        <com.google.android.material.tabs.TabItem
-           android:layout_width="wrap_content"
-           android:layout_height="match_parent"
-           android:text="@string/textCalls"/>
-
-    </com.google.android.material.tabs.TabLayout>
-
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

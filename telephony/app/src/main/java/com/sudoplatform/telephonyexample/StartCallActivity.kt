@@ -1,15 +1,11 @@
 package com.sudoplatform.telephonyexample
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import com.amazonaws.mobile.auth.core.internal.util.ThreadUtils
 import com.sudoplatform.sudotelephony.*
 import kotlinx.android.synthetic.main.activity_start_call.*
 
@@ -17,7 +13,6 @@ class StartCallActivity : AppCompatActivity() {
     private lateinit var app: App
     private lateinit var localNumber: PhoneNumber
     private var sendMenu: Menu? = null
-    private val MIC_PERMISSION_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,11 +41,6 @@ class StartCallActivity : AppCompatActivity() {
 
         recipientField.requestFocus()
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.RECORD_AUDIO),
-            MIC_PERMISSION_REQUEST_CODE
-        )
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -58,20 +48,6 @@ class StartCallActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        // Handle permission result
-        if (requestCode == MIC_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                // permission not granted
-            } else {
-                // permission granted
-            }
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater

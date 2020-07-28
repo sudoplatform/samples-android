@@ -14,6 +14,7 @@ class PhoneNumberActionsFragmentAdapter(private var app: App,
         return when (position) {
             0 -> ConversationListFragment.newInstance(app, number)
             1 -> PhoneCallListFragment.newInstance(app, number)
+            2 -> VoicemailListFragment.newInstance(app, number)
             else -> Fragment()
         }
     }

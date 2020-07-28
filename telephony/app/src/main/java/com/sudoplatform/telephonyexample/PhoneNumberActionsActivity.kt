@@ -44,7 +44,13 @@ class PhoneNumberActionsActivity : AppCompatActivity() {
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(tab: TabLayout.Tab) {}
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+                when (tab.position) {
+                    0 -> app.sudoTelephonyClient.unsubscribeFromPhoneMessages("messagesSubscriberId")
+                    1 -> app.sudoTelephonyClient.calling.unsubscribeFromCallRecords("callRecordSubscriberId")
+                    2 -> app.sudoTelephonyClient.calling.unsubscribeFromVoicemails("voicemailSubscriberId")
+                }
+            }
             override fun onTabSelected(tab: TabLayout.Tab) {
                 if (viewPager.currentItem != tab.position) {
                     viewPager.currentItem = tab.position
@@ -54,6 +60,8 @@ class PhoneNumberActionsActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        app.sudoTelephonyClient.calling.unsubscribeFromCallRecords("callRecordSubscriberId")
+        app.sudoTelephonyClient.calling.unsubscribeFromVoicemails("voicemailSubscriberId")
         onBackPressed()
         return true
     }

@@ -1,6 +1,8 @@
 package com.sudoplatform.telephonyexample
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -14,12 +16,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudotelephony.Result
 import kotlinx.android.synthetic.main.activity_provision_number.*
 import java.util.*
-
 
 class ProvisionNumberActivity : AppCompatActivity() {
 
@@ -33,7 +35,7 @@ class ProvisionNumberActivity : AppCompatActivity() {
     private var sudo: Sudo? = null
     private var countryCode = ""
     private var toolbarMenu: Menu? = null
-
+    private val MIC_PERMISSION_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +100,27 @@ class ProvisionNumberActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             }
         })
+
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.RECORD_AUDIO),
+            MIC_PERMISSION_REQUEST_CODE
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        // Handle permission result
+        if (requestCode == MIC_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                // permission not granted
+            } else {
+                // permission granted
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
