@@ -1,0 +1,2 @@
+rootProject.name='Sudo Virtual Cards Example'
+include ':exampleapp'

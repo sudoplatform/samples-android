@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="identity_verification_labels">
+        <item>First Name</item>
+        <item>Last Name</item>
+        <item>Address Line 1</item>
+        <item>Address Line 2</item>
+        <item>Postal Code</item>
+        <item>Country</item>
+        <item>Date of Birth</item>
+    </string-array>
+
+    <string-array name="create_funding_source_labels">
+        <item>Card Number</item>
+        <item>Month</item>
+        <item>Year</item>
+        <item>Security Code</item>
+        <item>Address Line 1</item>
+        <item>Address Line 2</item>
+        <item>City</item>
+        <item>State</item>
+        <item>Postal Code</item>
+        <item>Country</item>
+    </string-array>
+
+    <string-array name="create_card_labels">
+        <item>Card Holder</item>
+        <item>Card Label</item>
+        <item>Address Line 1</item>
+        <item>Address Line 2</item>
+        <item>City</item>
+        <item>State</item>
+        <item>Postal Code</item>
+        <item>Country</item>
+    </string-array>
+
+</resources>

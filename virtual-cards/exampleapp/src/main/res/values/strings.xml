@@ -1,0 +1,172 @@
+<resources>
+
+    <!-- App -->
+    <string name="app_name">Virtual Cards Example</string>
+
+    <!-- Common -->
+    <string name="virtual_cards">Virtual Cards</string>
+    <string name="secure_id_verification">Secure ID Verification</string>
+    <string name="funding_sources">Funding Sources</string>
+    <string name="sudos">Sudos</string>
+    <string name="orphan_cards">Orphan Cards</string>
+    <string name="learn_more">Learn More</string>
+    <string name="validate_fields">Please ensure all required fields are filled out.</string>
+    <string name="address_line_2">Address Line 2</string>
+    <string name="enter_optional_input">Enter %1$s (Optional)</string>
+    <string name="enter_non_optional_input">Enter %1$s</string>
+    <string name="sudo_label">sudoLabel</string>
+    <string name="sudo_id">sudoId</string>
+    <string name="card">card</string>
+    <string name="transaction">transaction</string>
+
+    <!-- RegisterFragment -->
+    <string name="example_app">Example App</string>
+    <string name="register_login">Register / Login</string>
+    <string name="register_failure">Failed to register: %1$s</string>
+    <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+
+    <!-- MainMenuFragment -->
+    <string name="virtual_card_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards</string>
+    <string name="deregister">Deregister</string>
+    <string name="deregister_confirmation">Are you sure you want to deregister? All Sudos, funding sources, virtual cards and associated data will be deleted.</string>
+    <string name="deregistering">Deregistering&#8230;</string>
+    <string name="deregister_failure">Unable to deregister: %1$s</string>
+    <string name="what_is_a_virtual_card">What is a Virtual Card?</string>
+    <string name="virtual_card_explanation">Virtual Cards must belong to a Sudo. Before a virtual card can be created, a user\'s identity needs to be verified and a funding source needs to be created.</string>
+
+    <!-- SudosFragment -->
+    <string name="loading_sudos">Loading Sudos</string>
+    <string name="deleting_sudos">Deleting Sudos&#8230;</string>
+    <string name="activity_sudos">Sudos</string>
+    <string name="list_sudos_failure">Failed to list Sudos</string>
+    <string name="delete_sudo_failure">Failed to delete Sudo</string>
+    <string name="what_is_a_sudo">What is a Sudo?</string>
+    <string name="sudo_explanation">Virtual Cards must belong to a Sudo. A Sudo is a digital identity created and owned by a real person</string>
+    <string name="sudo_doc_url" translatable="false">https://docs.sudoplatform.com/concepts/sudo-digital-identities</string>
+    <string name="try_again">Try Again</string>
+
+    <!-- CreateSudoFragment -->
+    <string name="create_sudo_button">+ Create Sudo</string>
+    <string name="create_sudo">Create Sudo</string>
+    <string name="enter_sudo_name">Enter a name for your Sudo</string>
+    <string name="success">Success</string>
+    <string name="something_wrong">Something went wrong</string>
+    <string name="enter_sudo_label">Enter Sudo Label</string>
+    <string name="choose_label_detail">Choose any label you would like for your Sudo: Shopping, Dating, etc.</string>
+    <string name="creating_sudo">Creating Sudo&#8230;</string>
+    <string name="create_sudo_learn_more">Virtual cards must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
+    <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
+
+    <!-- IdentityVerificationFragment -->
+    <string name="verifying_identity">Verifying identity&#8230;</string>
+    <string name="verification_complete">Verification complete!</string>
+    <string name="verification_failed">Failed to verify identity</string>
+    <string name="identity_verified">Identity verified</string>
+    <string name="identity_not_verified">Identity not verified</string>
+    <string name="status">Status</string>
+    <string name="checking_status">Checking status&#8230;</string>
+    <string name="identity_verification_doc_url" translatable="false">https://docs.sudoplatform.com/guides/identity-verification</string>
+    <string name="identity_verification_learn_more">Secure identity verification is required in order to ensure legitimate use of the Sudo Platform virtual cards service. \n\n Identity verification must be performed successfully once for each user. \n\n The default identity information in this form will verify successfully in the sandbox environment.</string>
+    <string name="verified">Verified</string>
+    <string name="not_verified">Not verified</string>
+    <string name="unknown">Unknown</string>
+
+    <!-- FundingSourcesFragment -->
+    <string name="loading_funding_sources">Loading Funding Sources</string>
+    <string name="create_funding_source_button">+ Create Funding Source</string>
+    <string name="cancelling_funding_source">Cancelling funding source&#8230;</string>
+    <string name="list_funding_sources_failure">Failed to list funding sources</string>
+    <string name="cancel_funding_source_failure">Failed to cancel funding source</string>
+    <string name="what_is_a_funding_source">What is a Funding Source?</string>
+    <string name="funding_source_label">%1$s &#8226;&#8226;&#8226;&#8226;%2$s</string>
+    <string name="funding_source_cancelled_label">%1$s &#8226;&#8226;&#8226;&#8226;%2$s - Cancelled</string>
+    <string name="funding_source_explanation">A Funding source is required to link a real credit or debit card to a virtual card. This funding source is used to fund a transaction performed on the virtual card.</string>
+    <string name="funding_source_doc_url" translatable="false">"https://docs.sudoplatform.com/guides/virtual-cards/manage-funding-sources"</string>
+
+    <!-- CreateFundingSourceFragment -->
+    <string name="create_funding_source">Create Funding Source</string>
+    <string name="creating_funding_source">Creating funding source&#8230;</string>
+    <string name="create_funding_source_failure">Failed to create funding source</string>
+    <string name="create_funding_source_learn_more">A Funding source is required to link a real credit or debit card to a virtual card. This funding source is used to fund a transaction performed on the virtual card.</string>
+    <string name="create_funding_source_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-funding-sources#creating-a-funding-source</string>
+
+    <!-- CardsFragment -->
+    <string name="loading_cards">Loading Cards</string>
+    <string name="create_virtual_card_button">+ Create Virtual Card</string>
+    <string name="cancelling_card">Cancelling card&#8230;</string>
+    <string name="creating_card">Creating virtual card&#8230;</string>
+    <string name="list_cards_failure">Failed to list cards</string>
+    <string name="cancel_card_failure">Failed to cancel card</string>
+    <string name="card_label">%1$s</string>
+    <string name="card_cancelled_label">%1$s - Cancelled</string>
+
+    <!-- CreateCardFragment -->
+    <string name="create_virtual_card">Create Virtual Card</string>
+    <string name="create_card_failure">Failed to create virtual card</string>
+    <string name="sudo">Sudo</string>
+    <string name="funding_source">Funding Source</string>
+    <string name="load_funding_source_error">Funding source cannot be found</string>
+    <string name="sudo_id_error">Sudo id cannot be found</string>
+    <string name="missing_funding_source">Funding Source is required to add a card</string>
+    <string name="create_card_learn_more">Virtual cards are the cornerstone of the Virtual Cards SDK. Virtual cards can be used as a proxy between a user\'s personal funding source and online merchants.</string>
+    <string name="create_card_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-virtual-cards#creating-a-virtual-card</string>
+
+    <!-- CardDetailFragment -->
+    <string name="trademark_label">Mastercard&#9415; Virtual Card</string>
+    <string name="card_name">Card Name</string>
+    <string name="account_number">ACCOUNT NUMBER</string>
+    <string name="security_code">Security Code</string>
+    <string name="valid_thru">Valid Thru</string>
+    <string name="card_holder_name">Cardholder name</string>
+    <string name="powered_sudo_platform">Powered by Sudo Platform</string>
+    <string name="transactions">Transactions</string>
+    <string name="card_detail">Card Detail</string>
+    <string name="security_code_placeholder">123</string>
+    <string name="expiry_date_placeholder">10/20</string>
+    <string name="account_number_placeholder">1234 1234 1234 1234</string>
+    <string name="expiry_date_field">%1$s/%2$s</string>
+    <string name="list_transactions_failure">Failed to list transactions</string>
+    <string name="description_placeholder">Description</string>
+    <string name="date_placeholder">Date</string>
+    <string name="amount_placeholder">Amount</string>
+    <string name="fee_placeholder">Fee</string>
+    <string name="loading_transactions">Loading Transactions</string>
+    <string name="declined_transaction_desc">%1$s (Declined)</string>
+    <string name="refunded_transaction_desc">%1$s (Refunded)</string>
+    <string name="subscribe_transactions_failure">Failed to subscribe to transaction updates</string>
+    <string name="subscribe_lost_connection">The subscription for transaction updates has disconnected</string>
+
+    <!-- TransactionDetailFragment -->
+    <string name="transaction_detail">Transaction Detail</string>
+    <string name="no_txns">There are no transactions to view</string>
+    <string name="virtual_card">Virtual card</string>
+    <string name="funded_by">Funded by</string>
+    <string name="get_funding_source_failure">Failed to retrieve funding source</string>
+    <string name="merchant">Merchant</string>
+    <string name="amount">Amount</string>
+    <string name="service_fee">Service fee</string>
+    <string name="total">Total</string>
+    <string name="date_charged">Date charged</string>
+    <string name="date_settled">Date settled</string>
+    <string name="date_refunded">Date refunded</string>
+    <string name="date_declined">Date declined</string>
+
+    <!-- OrphanCardsFragment -->
+    <string name="loading_orphan_cards">Loading Orphan Cards</string>
+    <string name="list_orphan_cards_failure">Failed to list orphan cards</string>
+    <string name="no_orphan_cards">There are no orphan cards to view</string>
+
+    <!-- Layout -->
+    <string name="item_name">Item Name</string>
+    <string name="funding_source_name">Funding Source Name</string>
+    <string name="verify">Verify</string>
+    <string name="field_title">Field Title</string>
+    <string name="field_subtitle">Field Subtitle</string>
+    <string name="field_value">Field Value</string>
+    <string name="field_input">Field Input</string>
+    <string name="placeholder">-</string>
+    <string name="create">Create</string>
+    <string name="delete">Delete</string>
+
+</resources>

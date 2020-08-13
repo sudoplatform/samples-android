@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/registerFragment">
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.sudoplatform.virtualcardsexample.register.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" >
+        <action
+            android:id="@+id/action_registerFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@id/registerFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment"
+        android:label="fragment_main_menu"
+        tools:layout="@layout/fragment_main_menu" >
+        <action
+            android:id="@+id/action_mainMenuFragment_to_identityVerificationFragment"
+            app:destination="@id/identityVerificationFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_fundingSourcesFragment"
+            app:destination="@id/fundingSourcesFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_sudosFragment"
+            app:destination="@id/sudosFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_orphanCardsFragment"
+            app:destination="@id/orphanCardsFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_registerFragment"
+            app:destination="@id/registerFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/mainMenuFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/fundingSourcesFragment"
+        android:name="com.sudoplatform.virtualcardsexample.fundingsources.FundingSourcesFragment"
+        android:label="fragment_funding_sources"
+        tools:layout="@layout/fragment_funding_sources" >
+        <action
+            android:id="@+id/action_fundingSourcesFragment_to_createFundingSourceFragment"
+            app:destination="@id/createFundingSourceFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/orphanCardsFragment"
+        android:name="com.sudoplatform.virtualcardsexample.cards.OrphanCardsFragment"
+        android:label="fragment_orphan_cards"
+        tools:layout="@layout/fragment_orphan_cards" >
+        <action
+            android:id="@+id/action_orphanCardsFragment_to_cardDetailFragment"
+            app:destination="@id/cardDetailFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/identityVerificationFragment"
+        android:name="com.sudoplatform.virtualcardsexample.identityverification.IdentityVerificationFragment"
+        android:label="fragment_identity_verification"
+        tools:layout="@layout/fragment_identity_verification" />
+    <fragment
+        android:id="@+id/createSudoFragment"
+        android:name="com.sudoplatform.virtualcardsexample.sudos.CreateSudoFragment"
+        android:label="fragment_create_sudo"
+        tools:layout="@layout/fragment_create_sudo" >
+        <action
+            android:id="@+id/action_createSudoFragment_to_cardsFragment"
+            app:destination="@id/cardsFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@id/createSudoFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+    <fragment
+        android:id="@+id/sudosFragment"
+        android:name="com.sudoplatform.virtualcardsexample.sudos.SudosFragment"
+        android:label="fragment_sudos"
+        tools:layout="@layout/fragment_sudos" >
+        <action
+            android:id="@+id/action_sudosFragment_to_createSudoFragment"
+            app:destination="@id/createSudoFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_sudosFragment_to_cardsFragment"
+            app:destination="@id/cardsFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/createFundingSourceFragment"
+        android:name="com.sudoplatform.virtualcardsexample.fundingsources.CreateFundingSourceFragment"
+        android:label="fragment_create_funding_source"
+        tools:layout="@layout/fragment_create_funding_source" >
+        <action
+            android:id="@+id/action_createFundingSourceFragment_to_fundingSourcesFragment"
+            app:destination="@id/fundingSourcesFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@id/fundingSourcesFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/cardsFragment"
+        android:name="com.sudoplatform.virtualcardsexample.cards.CardsFragment"
+        android:label="fragment_cards"
+        tools:layout="@layout/fragment_cards" >
+        <argument
+            android:name="sudoId"
+            app:argType="string"
+            android:defaultValue="None"/>
+        <argument
+            android:name="sudoLabel"
+            app:argType="string"
+            android:defaultValue="None"/>
+        <action
+            android:id="@+id/action_cardsFragment_to_createCardFragment"
+            app:destination="@id/createCardFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_cardsFragment_to_cardDetailFragment"
+            app:destination="@id/cardDetailFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/createCardFragment"
+        android:name="com.sudoplatform.virtualcardsexample.cards.CreateCardFragment"
+        android:label="fragment_create_card"
+        tools:layout="@layout/fragment_create_card" >
+        <argument
+            android:name="sudoId"
+            app:argType="string"
+            android:defaultValue="None"/>
+        <argument
+            android:name="sudoLabel"
+            app:argType="string"
+            android:defaultValue="None"/>
+        <action
+            android:id="@+id/action_createCardFragment_to_cardDetailFragment"
+            app:destination="@id/cardDetailFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@id/createCardFragment"
+            app:popUpToInclusive="true" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/cardDetailFragment"
+        android:name="com.sudoplatform.virtualcardsexample.cards.CardDetailFragment"
+        android:label="fragment_card_detail"
+        tools:layout="@layout/fragment_card_detail" >
+        <argument
+            android:name="card"
+            app:argType="com.sudoplatform.sudovirtualcards.types.Card"
+            android:defaultValue="@null"/>
+        <action
+            android:id="@+id/action_cardDetailFragment_to_transactionDetailFragment"
+            app:destination="@id/transactionDetailFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionDetailFragment"
+        android:name="com.sudoplatform.virtualcardsexample.transactions.transactiondetail.TransactionDetailFragment"
+        android:label="fragment_transaction_detail"
+        tools:layout="@layout/fragment_transaction_detail">
+        <argument
+            android:name="card"
+            app:argType="com.sudoplatform.sudovirtualcards.types.Card"
+            android:defaultValue="@null"/>
+        <argument
+            android:name="transaction"
+            app:argType="com.sudoplatform.sudovirtualcards.types.Transaction"
+            android:defaultValue="@null"/>
+    </fragment>
+</navigation>
