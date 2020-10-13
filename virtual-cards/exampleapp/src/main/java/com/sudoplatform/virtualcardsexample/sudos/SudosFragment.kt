@@ -7,9 +7,6 @@
 package com.sudoplatform.virtualcardsexample.sudos
 
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,7 +16,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -37,6 +33,7 @@ import com.sudoplatform.virtualcardsexample.cards.CardsFragment
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
+import com.sudoplatform.virtualcardsexample.swipe.SwipeLeftActionHelper
 import kotlin.coroutines.CoroutineContext
 import kotlinx.android.synthetic.main.fragment_sudos.*
 import kotlinx.android.synthetic.main.fragment_sudos.view.*
@@ -160,7 +157,7 @@ class SudosFragment : Fragment(), CoroutineScope {
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.list_sudos_failure,
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listSudos(ListOption.REMOTE_ONLY) },
                     negativeButtonResId = android.R.string.cancel
@@ -191,7 +188,7 @@ class SudosFragment : Fragment(), CoroutineScope {
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.delete_sudo_failure,
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: e.toString(),
                     negativeButtonResId = android.R.string.cancel
                 )
             } finally {
@@ -274,65 +271,14 @@ class SudosFragment : Fragment(), CoroutineScope {
      * Swiping in from the left will perform a delete operation and remove the item from the view.
      */
     private fun configureSwipeToDelete() {
-        val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val sudo = sudoList[viewHolder.adapterPosition]
-
-                deleteSudo(sudo)
-
-                sudoList.removeAt(viewHolder.adapterPosition)
-                adapter.notifyItemRemoved(viewHolder.adapterPosition)
-            }
-
-            override fun onChildDraw(
-                c: Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float,
-                dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean
-            ) {
-                super.onChildDraw(
-                    c,
-                    recyclerView,
-                    viewHolder,
-                    dX,
-                    dY,
-                    actionState,
-                    isCurrentlyActive
-                )
-
-                val itemView = viewHolder.itemView
-                val deleteIcon =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_delete_black_36dp)!!
-                val background = ColorDrawable(Color.RED)
-
-                background.setBounds(
-                    itemView.right + dX.toInt(),
-                    itemView.top,
-                    itemView.right,
-                    itemView.bottom
-                )
-                background.draw(c)
-
-                val iconMargin = (itemView.height - deleteIcon.intrinsicHeight) / 2
-                val iconLeft = itemView.right - iconMargin - deleteIcon.intrinsicWidth
-                val iconRight = itemView.right - iconMargin
-                val iconTop = itemView.top + iconMargin
-                val iconBottom = itemView.bottom - iconMargin
-                deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
-                deleteIcon.draw(c)
-            }
-        }
+        val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(sudoRecyclerView)
+    }
+
+    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        val sudo = sudoList[viewHolder.adapterPosition]
+        deleteSudo(sudo)
+        sudoList.removeAt(viewHolder.adapterPosition)
+        adapter.notifyItemRemoved(viewHolder.adapterPosition)
     }
 }

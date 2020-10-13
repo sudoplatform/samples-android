@@ -6,9 +6,6 @@
 
 package com.sudoplatform.virtualcardsexample.fundingsources
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +13,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -31,8 +27,11 @@ import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
+import com.sudoplatform.virtualcardsexample.swipe.SwipeLeftActionHelper
 import kotlin.coroutines.CoroutineContext
 import kotlinx.android.synthetic.main.fragment_funding_sources.*
+import kotlinx.android.synthetic.main.fragment_funding_sources.progressBar
+import kotlinx.android.synthetic.main.fragment_funding_sources.progressText
 import kotlinx.android.synthetic.main.fragment_funding_sources.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -217,53 +216,18 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      * the view. Instead the item is amended with a "Cancelled" label.
      */
     private fun configureSwipeToCancel() {
-        val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val fundingSource = fundingSourceList[viewHolder.adapterPosition]
-                cancelFundingSource(fundingSource.id) { cancelledFundingSource ->
-                    val position = viewHolder.adapterPosition
-                    fundingSourceList.removeAt(position)
-                    adapter.notifyItemRemoved(position)
-                    fundingSourceList.add(position, cancelledFundingSource)
-                    adapter.notifyItemInserted(position)
-                }
-            }
-
-            override fun onChildDraw(
-                c: Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float,
-                dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean
-            ) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-
-                val itemView = viewHolder.itemView
-                val cancelIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_delete_black_36dp)!!
-                val background = ColorDrawable(Color.RED)
-
-                background.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
-                background.draw(c)
-
-                val iconMargin = (itemView.height - cancelIcon.intrinsicHeight) / 2
-                val iconLeft = itemView.right - iconMargin - cancelIcon.intrinsicWidth
-                val iconRight = itemView.right - iconMargin
-                val iconTop = itemView.top + iconMargin
-                val iconBottom = itemView.bottom - iconMargin
-                cancelIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
-                cancelIcon.draw(c)
-            }
-        }
+        val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(fundingSourceRecyclerView)
+    }
+
+    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        val fundingSource = fundingSourceList[viewHolder.adapterPosition]
+        cancelFundingSource(fundingSource.id) { cancelledFundingSource ->
+            val position = viewHolder.adapterPosition
+            fundingSourceList.removeAt(position)
+            adapter.notifyItemRemoved(position)
+            fundingSourceList.add(position, cancelledFundingSource)
+            adapter.notifyItemInserted(position)
+        }
     }
 }

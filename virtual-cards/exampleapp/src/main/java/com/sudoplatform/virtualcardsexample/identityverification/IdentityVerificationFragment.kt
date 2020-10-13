@@ -175,7 +175,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
             } catch (e: SudoIdentityVerificationException) {
                 showAlertDialog(
                     titleResId = R.string.verification_failed,
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { verifyUser() },
                     negativeButtonResId = android.R.string.ok

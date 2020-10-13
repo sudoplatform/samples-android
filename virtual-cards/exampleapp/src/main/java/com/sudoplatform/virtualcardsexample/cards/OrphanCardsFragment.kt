@@ -144,7 +144,7 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.list_sudos_failure,
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listSudos(ListOption.REMOTE_ONLY) },
                     negativeButtonResId = android.R.string.cancel

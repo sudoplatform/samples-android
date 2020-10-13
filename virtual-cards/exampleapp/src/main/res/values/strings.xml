@@ -151,6 +151,7 @@
     <string name="date_settled">Date settled</string>
     <string name="date_refunded">Date refunded</string>
     <string name="date_declined">Date declined</string>
+    <string name="decline_reason">Decline reason</string>
 
     <!-- OrphanCardsFragment -->
     <string name="loading_orphan_cards">Loading Orphan Cards</string>
@@ -169,4 +170,19 @@
     <string name="create">Create</string>
     <string name="delete">Delete</string>
 
+    <!-- DeclineReasonExtensions -->
+    <string name="dr_avs_check_failed">Address check failed</string>
+    <string name="dr_card_expired">Card expired</string>
+    <string name="dr_card_stopped">Card cancelled</string>
+    <string name="dr_csc_check_failed">Security code check failed</string>
+    <string name="dr_currency_blocked">Merchant currency blocked</string>
+    <string name="dr_declined">Declined</string>
+    <string name="dr_funding_error">Funding error</string>
+    <string name="dr_insufficient_funds">Insufficient funds</string>
+    <string name="dr_merchant_blocked">Merchant blocked</string>
+    <string name="dr_merchant_code_blocked">Merchant category blocked</string>
+    <string name="dr_merchant_country_blocked">Merchant country blocked</string>
+    <string name="dr_processing_error">Processing error</string>
+    <string name="dr_suspcious">Suspicious</string>
+    <string name="dr_velocity_exceeded">Velocity exceeded</string>
 </resources>

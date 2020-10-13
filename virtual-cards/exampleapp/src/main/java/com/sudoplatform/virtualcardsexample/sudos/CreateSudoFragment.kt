@@ -126,7 +126,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.something_wrong,
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { createSudo() },
                     negativeButtonResId = android.R.string.cancel

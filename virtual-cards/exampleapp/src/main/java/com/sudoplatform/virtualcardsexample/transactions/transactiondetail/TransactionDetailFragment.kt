@@ -94,7 +94,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.list_sudos_failure,
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: e.toString(),
                     negativeButtonResId = android.R.string.cancel
                 )
             }
@@ -141,6 +141,10 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     private fun configureTransactionDetailCells(transaction: Transaction) {
         val merchantCell = TransactionDetailCell(getString(R.string.merchant), "", transaction.description)
         val statusCell = TransactionDetailCell(getString(R.string.status), "", transaction.type.name)
+        if (transaction.type == Transaction.Type.DECLINE) {
+            val declineReasonCell = TransactionDetailCell(getString(R.string.decline_reason), "", transaction.declineReason?.description(requireContext()) ?: getString(R.string.dr_declined))
+            transactionDetailCells.add(declineReasonCell)
+        }
         transactionDetailCells.addAll(arrayListOf(merchantCell, statusCell))
         configureTransactionDateCells(transaction)
         val transactionDetail = transaction.details.first()
