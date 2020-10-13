@@ -1,0 +1,113 @@
+<resources>
+
+    <!-- App -->
+    <string name="app_name">Email Example</string>
+
+    <!-- Common -->
+    <string name="email">Email</string>
+    <string name="sudos">Sudos</string>
+    <string name="learn_more">Learn More</string>
+    <string name="sudo_label">sudoLabel</string>
+    <string name="sudo_id">sudoId</string>
+    <string name="success">Success</string>
+
+    <!-- RegisterFragment -->
+    <string name="example_app">Example App</string>
+    <string name="register_login">Register / Login</string>
+    <string name="register_failure">Failed to register: %1$s</string>
+    <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+
+    <!-- MainMenuFragment -->
+    <string name="deregister">Deregister</string>
+    <string name="deregister_confirmation">Are you sure you want to deregister? All Sudos, email addresses and associated data will be deleted.</string>
+    <string name="deregistering">Deregistering&#8230;</string>
+    <string name="deregister_failure">Unable to deregister: %1$s</string>
+
+    <!-- SudosFragment -->
+    <string name="loading_sudos">Loading Sudos</string>
+    <string name="deleting_sudos">Deleting Sudos&#8230;</string>
+    <string name="list_sudos_failure">Failed to list Sudos</string>
+    <string name="delete_sudo_failure">Failed to delete Sudo</string>
+    <string name="try_again">Try Again</string>
+
+    <!-- CreateSudoFragment -->
+    <string name="create_sudo_button">+ Create Sudo</string>
+    <string name="create_sudo">Create Sudo</string>
+    <string name="enter_sudo_name">Enter a name for your Sudo</string>
+    <string name="enter_sudo_label">Enter Sudo Label</string>
+    <string name="something_wrong">Something went wrong</string>
+    <string name="choose_label_detail">Choose any label you would like for your Sudo: Shopping, Dating, etc.</string>
+    <string name="creating_sudo">Creating Sudo&#8230;</string>
+    <string name="create_sudo_learn_more">Email addresses must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
+    <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
+
+    <!-- EmailAddressesFragment.kt -->
+    <string name="email_addresses">Email Addresses</string>
+    <string name="create_email_address_button">+ Create Email Address</string>
+    <string name="loading_email_addresses">Loading Email Addresses</string>
+    <string name="list_email_addresses_failure">Failed to list email addresses</string>
+    <string name="deleting_email_address">Deleting email address&#8230;</string>
+    <string name="deleting_email_address_failure">Failed to delete email address</string>
+
+    <!-- ProvisionEmailAddressFragment -->
+    <string name="provision_email_address">Create Email Address</string>
+    <string name="enter_address_label">Enter local part of the email address</string>
+    <string name="email_address_unavailable">This email address is not available</string>
+    <string name="email_address_available">This email address is available</string>
+    <string name="enter_local_part">Enter the local part for your email address</string>
+    <string name="provisioning_email_address">Provisioning email address&#8230;</string>
+    <string name="provision_email_address_failure">Failed to provision an email address</string>
+    <string name="check_address_availability_failure">Failed to retrieve available addresses</string>
+    <string name="sudo">Sudo</string>
+    <string name="provision_email_address_learn_more">Addresses from different configured domains can be provisioned and used to communicate with other recipients. Entering the local part of the email address above will perform an address availability check based on the currently configured domains.</string>
+    <string name="provision_email_address_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email/manage-email-addresses</string>
+
+    <!-- EmailMessagesFragment.kt -->
+    <string name="email_messages">Email Messages</string>
+    <string name="email_message">Email Message</string>
+    <string name="email_address">Email Address</string>
+    <string name="email_address_id">Email Address Id</string>
+    <string name="loading_email_messages">Loading Email Messages</string>
+    <string name="list_email_messages_failure">Failed to list email messages</string>
+    <string name="from_recipient">From: %1$s</string>
+    <string name="to_recipient">To: %1$s</string>
+    <string name="no_subject">No Subject</string>
+    <string name="deleting_email_message">Deleting email message&#8230;</string>
+    <string name="deleting_email_message_failure">Failed to delete email message</string>
+    <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
+    <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
+
+    <!-- SendEmailMessageFragment.kt -->
+    <string name="to">To:&#xA0;&#xA0;</string>
+    <string name="cc">Cc:&#xA0;&#xA0;</string>
+    <string name="bcc">Bcc:&#xA0;&#xA0;</string>
+    <string name="subject">Subject:&#xA0;&#xA0;</string>
+    <string name="email_footer">\n\nSent from Sudo Platform Email Example App</string>
+    <string name="compose_email_message">Compose Email Message</string>
+    <string name="sending">Sending&#8230;</string>
+    <string name="sent">Sent</string>
+    <string name="send_email_message_failure">Failed to send email message</string>
+    <string name="get_email_address_failure">Failed to retrieve email address</string>
+    <string name="validate_to_address">Please ensure the to address field is filled out.</string>
+    <string name="simplified_email_message">Simplified Email Message</string>
+    <string name="reply_message">Re: %1$s</string>
+    <string name="reply_body">\n\n---------------\n\n%1$s</string>
+
+    <!-- ReadEmailMessageFragment.kt -->
+    <string name="read_email_message">Read Email Message</string>
+    <string name="from">From:&#xA0;&#xA0;</string>
+    <string name="email_placeholder">test@example.com</string>
+    <string name="content_placeholder">Email text body goes here</string>
+    <string name="reading">Reading&#8230;</string>
+    <string name="read_email_message_failure">Failed to read email message</string>
+
+    <!-- Layout -->
+    <string name="item_name">Item Name</string>
+    <string name="placeholder">-</string>
+    <string name="create">Create</string>
+    <string name="recipient_placeholder">Recipient/s</string>
+    <string name="subject_placeholder">Subject</string>
+    <string name="date_placeholder">Date</string>
+
+</resources>

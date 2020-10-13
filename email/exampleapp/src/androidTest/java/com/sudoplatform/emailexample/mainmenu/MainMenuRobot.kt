@@ -1,0 +1,85 @@
+/*
+ * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.sudoplatform.emailexample.mainmenu
+
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.NoMatchingViewException
+import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.sudoplatform.emailexample.BaseRobot
+import com.sudoplatform.emailexample.R
+import com.sudoplatform.emailexample.register.login
+import com.sudoplatform.emailexample.sudos.sudos
+
+fun mainMenu(func: MainMenuRobot.() -> Unit) = MainMenuRobot().apply { func() }
+
+/**
+ * Testing robot that manages the Main Menu screen.
+ *
+ * @since 2020-08-03
+ */
+class MainMenuRobot : BaseRobot() {
+
+    private val toolbar = withId(R.id.toolbar)
+    private val toolbarDeregisterButton = withId(R.id.deregister)
+    private val loadingDialog = withId(R.id.progressBar)
+    private val sudosButton = withId(R.id.sudosButton)
+    private val positiveAlertButton = withId(android.R.id.button1)
+    private val negativeAlertButton = withId(android.R.id.button2)
+
+    fun waitForLoading() {
+        waitForViewToDisplay(loadingDialog, 5_000L)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
+    }
+
+    fun checkMainMenuItemsDisplayed(timeout: Long = 1000L) {
+        waitForViewToDisplay(toolbar, timeout)
+        waitForViewToDisplay(sudosButton, timeout)
+    }
+
+    fun navigateToSudosScreen() {
+        clickOnView(sudosButton)
+        sudos {
+            checkSudosItemsDisplayed()
+        }
+    }
+
+    fun navigateFromLaunchToMainMenu() {
+        login {
+            try {
+                clickOnRegister()
+            } catch (e: NoMatchingViewException) {
+                // Login screen was skipped because already logged in
+            }
+        }
+        checkMainMenuItemsDisplayed(15_000L)
+    }
+
+    fun clickOnDeregister() {
+        clickOnView(toolbarDeregisterButton)
+    }
+
+    fun clickOnPositiveDeregisterAlertDialogButton() {
+        checkDeregisterAlertDialog()
+        clickOnView(positiveAlertButton)
+    }
+
+    fun clickOnNegativeDeregisterAlertDialogButton() {
+        checkDeregisterAlertDialog()
+        clickOnView(negativeAlertButton)
+    }
+
+    private fun checkDeregisterAlertDialog() {
+        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(negativeAlertButton, 15_000L)
+        onView(positiveAlertButton)
+            .check(ViewAssertions.matches(ViewMatchers.withText(R.string.deregister)))
+        onView(negativeAlertButton)
+            .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.cancel)))
+    }
+}

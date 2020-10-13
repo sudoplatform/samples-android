@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".emailmessages.SendEmailMessageFragment">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/layout_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="2dp"
+            android:background="@android:color/white"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/toLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="15dp"
+                android:textSize="18sp"
+                android:text="@string/to" />
+
+            <EditText
+                android:id="@+id/toTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="10dp"
+                android:inputType="textEmailAddress"
+                android:autofillHints=""
+                android:background="@android:color/white"
+                android:layout_toEndOf="@+id/toLabel" />
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorBackground"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="2dp"
+            android:background="@android:color/white"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/ccLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="15dp"
+                android:textSize="18sp"
+                android:text="@string/cc" />
+
+            <EditText
+                android:id="@+id/ccTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="10dp"
+                android:inputType="textEmailAddress"
+                android:autofillHints=""
+                android:background="@android:color/white"
+                android:layout_toEndOf="@+id/ccLabel" />
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorBackground"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="2dp"
+            android:background="@android:color/white"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/bccLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="15dp"
+                android:textSize="18sp"
+                android:text="@string/bcc" />
+
+            <EditText
+                android:id="@+id/bccTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="10dp"
+                android:inputType="textEmailAddress"
+                android:autofillHints=""
+                android:background="@android:color/white"
+                android:layout_toEndOf="@+id/bccLabel" />
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorBackground"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="2dp"
+            android:background="@android:color/white"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/subjectLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="15dp"
+                android:textSize="18sp"
+                android:text="@string/subject" />
+
+            <EditText
+                android:id="@+id/subjectTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="10dp"
+                android:inputType="textCapSentences"
+                android:autofillHints=""
+                android:background="@android:color/white"
+                android:layout_toEndOf="@+id/subjectLabel" />
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorBackground"/>
+
+        <EditText
+            android:id="@+id/contentBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:inputType="textCapSentences|textMultiLine"
+            android:background="@android:color/white"
+            android:text="@string/email_footer">
+
+        </EditText>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

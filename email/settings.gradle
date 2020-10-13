@@ -1,0 +1,2 @@
+rootProject.name='Sudo Email Example'
+include ':exampleapp'
