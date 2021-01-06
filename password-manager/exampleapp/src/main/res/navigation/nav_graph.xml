@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/registerFragment">
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.register.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" >
+        <action
+            android:id="@+id/action_registerFragment_to_unlockVaultsFragment"
+            app:destination="@id/unlockVaultsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/registerFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_registerFragment_to_sudosFragment"
+            app:destination="@id/sudosFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/registerFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/sudosFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.sudos.SudosFragment"
+        android:label="fragment_sudos"
+        tools:layout="@layout/fragment_sudos" >
+        <action
+            android:id="@+id/action_sudosFragment_to_vaultsFragment"
+            app:destination="@id/vaultsFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_sudosFragment_to_unlockVaultsFragment"
+            app:destination="@id/unlockVaultsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/sudosFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_sudosFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/vaultsFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.vaults.VaultsFragment"
+        android:label="fragment_vaults"
+        tools:layout="@layout/fragment_vaults" >
+        <action
+            android:id="@+id/action_vaultsFragment_to_unlockVaultsFragment"
+            app:destination="@id/unlockVaultsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/sudosFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_vaultsFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_vaultsFragment_to_loginsFragment"
+            app:destination="@id/loginsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/unlockVaultsFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.unlock.UnlockVaultsFragment"
+        android:label="UnlockVaultsFragment"
+        tools:layout="@layout/fragment_unlock_vaults">
+        <action
+            android:id="@+id/action_unlockVaultsFragment_to_sudosFragment"
+            app:destination="@id/sudosFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@id/unlockVaultsFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_unlockVaultsFragment_to_registerFragment"
+            app:destination="@id/registerFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/unlockVaultsFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.settings.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_changeMasterPasswordFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/changeMasterPasswordFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_secretCodeFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/secretCodeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_unlockVaultsFragment"
+            app:destination="@id/unlockVaultsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/sudosFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_settingsFragment_to_registerFragment"
+            app:destination="@id/registerFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/sudosFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_settingsFragment_to_passwordGeneratorDialogFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/passwordGeneratorDialog" />
+        <action
+            android:id="@+id/action_settingsFragment_to_viewEntitlementsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/viewEntitlementsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/changeMasterPasswordFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.settings.ChangeMasterPasswordFragment"
+        android:label="fragment_change_master_password"
+        tools:layout="@layout/fragment_change_master_password" />
+    <fragment
+        android:id="@+id/secretCodeFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.settings.SecretCodeFragment"
+        android:label="fragment_secret_code"
+        tools:layout="@layout/fragment_secret_code" />
+    <fragment
+        android:id="@+id/viewEntitlementsFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.settings.ViewEntitlementsFragment"
+        android:label="fragment_view_entitlements"
+        tools:layout="@layout/fragment_view_entitlements" />
+    <fragment
+        android:id="@+id/createLoginFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.logins.CreateLoginFragment"
+        android:label="fragment_create_login"
+        tools:layout="@layout/fragment_create_edit_login">
+        <action
+            android:id="@+id/action_createLoginFragment_to_passwordGeneratorDialogFragment"
+            app:destination="@id/passwordGeneratorDialog" />
+        <argument
+            android:name="vault"
+            app:nullable="true"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vault_login"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/editLoginFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.logins.EditLoginFragment"
+        android:label="fragment_edit_login"
+        tools:layout="@layout/fragment_create_edit_login">
+        <action
+            android:id="@+id/action_editLoginFragment_to_passwordGeneratorDialogFragment"
+            app:destination="@id/passwordGeneratorDialog" />
+        <argument
+            android:name="vault"
+            app:nullable="true"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vault_login"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginsFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.logins.LoginsFragment"
+        android:label="fragment_logins"
+        tools:layout="@layout/fragment_logins" >
+        <action
+            android:id="@+id/action_loginsFragment_to_createLoginFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/createLoginFragment" />
+        <action
+            android:id="@+id/action_loginsFragment_to_editLoginFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/editLoginFragment" />
+        <action
+            android:id="@+id/action_loginsFragment_to_unlockVaultsFragment"
+            app:destination="@id/unlockVaultsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/sudosFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginsFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/passwordGeneratorDialog"
+        android:name="com.sudoplatform.passwordmanagerexample.passwordgenerator.PasswordGeneratorDialog"
+        android:label="PasswordGeneratorDialogFragment"
+        tools:layout="@layout/fragment_password_generator_dialog">
+        <action
+            android:id="@+id/action_passwordGeneratorDialogFragment_to_createLoginFragment"
+            app:destination="@id/createLoginFragment"
+            app:popUpTo="@id/createLoginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_passwordGeneratorDialogFragment_to_editLoginFragment"
+            app:destination="@id/editLoginFragment"
+            app:popUpTo="@id/editLoginFragment"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="vault"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vault_login"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin"
+            app:nullable="true" />
+        <argument
+            android:name="return_action"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </dialog>
+</navigation>

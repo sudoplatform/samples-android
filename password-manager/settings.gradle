@@ -1,0 +1,2 @@
+include ':exampleapp'
+rootProject.name = "Sudo Password Manager Sample"
