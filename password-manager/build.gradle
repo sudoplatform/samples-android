@@ -26,14 +26,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        maven {
-            name = "android-snapshots"
-            url = "https://repo.tools.anonyome.com/repository/android-snapshots/"
-            credentials {
-                username = nexusUsername
-                password = nexusPassword
-            }
-        }
         mavenCentral()
         jcenter()
     }
