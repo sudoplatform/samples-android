@@ -59,9 +59,10 @@ class UnlockVaultsRobot : BaseRobot() {
         clickOnView(neutralAlertButton)
     }
 
-    fun createMasterPassword() {
+    fun createMasterPassword() = runBlocking {
         replaceText(topText, MASTER_PASSWORD)
         replaceText(bottomText, MASTER_PASSWORD)
+        delay(500L)
         clickOnNotNow()
         waitForLoading()
     }
@@ -71,8 +72,8 @@ class UnlockVaultsRobot : BaseRobot() {
         waitForViewToNotDisplay(loadingDialog, 2_500L)
     }
 
-    fun waitForPasswordView() {
-        waitForViewToDisplay(topText, 5_000L)
+    fun waitForPasswordView(timeout: Long = 5_000L) {
+        waitForViewToDisplay(topText, timeout)
     }
 
     fun enterMasterPassword() {

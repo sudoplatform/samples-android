@@ -253,13 +253,16 @@ class RegisterFragment : Fragment(), CoroutineScope {
 
     /** Displays a Toast with a registration failure. */
     private val showRegistrationFailure = { e: Throwable ->
-        hideLoading()
-        setItemsEnabled(true)
-        Toast.makeText(
-            requireContext(),
-            getString(R.string.register_failure, e.localizedMessage),
-            Toast.LENGTH_LONG
-        ).show()
+        // Don't attempt to show an error the fragment is no longer displayed
+        if (isVisible) {
+            hideLoading()
+            setItemsEnabled(true)
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.register_failure, e.localizedMessage),
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     /**

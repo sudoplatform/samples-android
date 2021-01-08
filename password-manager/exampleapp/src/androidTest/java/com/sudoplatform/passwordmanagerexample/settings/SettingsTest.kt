@@ -97,6 +97,7 @@ class SettingsTest {
             checkSudosItemsDisplayed()
             clickCreateSudo()
             waitForLoading()
+            waitForRecyclerView()
             clickOnSettings()
         }
         settings {

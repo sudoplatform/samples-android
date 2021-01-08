@@ -63,7 +63,7 @@ class UnlockVaultsTest {
         }
 
         unlock {
-            waitForPasswordView()
+            waitForPasswordView(10_000L)
             checkCreateMasterPasswordItemsDisplayed(timeout = 5_000L)
 
             // Test password set and no confirmation

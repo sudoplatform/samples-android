@@ -32,7 +32,7 @@ To build this app you first need to obtain an SDK configuration file. If you are
 
 Refer to the following documents for more information:
 
-- [Sudo Password Manager Docs](https://docs.sudoplatform.com/guides/passwordmanager)
+- [Sudo Password Manager Docs](https://docs.sudoplatform.com/guides/password-manager)
 - [Getting Started on Sudo Platform](https://docs.sudoplatform.com/guides/getting-started)
 - [Understanding Sudo Digital Identities](https://docs.sudoplatform.com/concepts/sudo-digital-identities)
 

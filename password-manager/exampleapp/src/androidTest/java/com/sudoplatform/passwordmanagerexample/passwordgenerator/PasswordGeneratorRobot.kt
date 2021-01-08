@@ -49,6 +49,8 @@ class PasswordGeneratorRobot : BaseRobot() {
     fun navigateFromLaunchToPasswordGenerator() {
         sudos {
             navigateFromLaunchToSudos()
+            waitForLoading()
+            waitForRecyclerView()
             clickOnSettings()
         }
         settings {
