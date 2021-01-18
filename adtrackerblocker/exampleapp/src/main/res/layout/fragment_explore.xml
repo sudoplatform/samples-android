@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    tools:context=".exceptions.ExceptionsListFragment">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/layout_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/checkedUrlText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:hint="@string/checked_url_hint"
+        android:inputType="textUri"
+        android:singleLine="true"
+        app:layout_constraintEnd_toStartOf="@+id/checkedUrlSpinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        android:importantForAutofill="no" />
+
+    <EditText
+        android:id="@+id/sourceUrlText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:hint="@string/source_url_hint"
+        android:importantForAutofill="no"
+        android:inputType="textUri"
+        android:singleLine="true"
+        android:text="@string/source_url_default"
+        app:layout_constraintEnd_toEndOf="@+id/checkedUrlText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/checkedUrlText" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/rulesetAdsSwitch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/ads_ruleset_label"
+        app:layout_constraintEnd_toEndOf="@+id/rulesetSocialSwitch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sourceUrlText" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/rulesetPrivacySwitch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/privacy_ruleset_label"
+        app:layout_constraintEnd_toEndOf="@+id/rulesetSocialSwitch"
+        app:layout_constraintStart_toStartOf="@+id/rulesetAdsSwitch"
+        app:layout_constraintTop_toBottomOf="@+id/rulesetAdsSwitch"/>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/rulesetSocialSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/social_ruleset_label"
+        app:layout_constraintStart_toStartOf="@+id/rulesetAdsSwitch"
+        app:layout_constraintTop_toBottomOf="@+id/rulesetPrivacySwitch"
+        app:switchPadding="8dp" />
+
+    <Button
+        android:id="@+id/checkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/check_label"
+        app:layout_constraintBottom_toBottomOf="@+id/rulesetSocialSwitch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/rulesetAdsSwitch" />
+
+    <TextView
+        android:id="@+id/exceptionsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rulesetSocialSwitch"
+        tools:text="Exceptions: 2 present" />
+
+    <TextView
+        android:id="@+id/resultLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:labelFor="@id/resultText"
+        android:text="@string/result_label"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exceptionsLabel" />
+
+    <TextView
+        android:id="@+id/resultText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@+id/resultLabel"
+        app:layout_constraintTop_toBottomOf="@+id/exceptionsLabel"
+        tools:text="Allowed" />
+
+    <Spinner
+        android:id="@+id/checkedUrlSpinner"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        app:layout_constraintBottom_toBottomOf="@+id/checkedUrlText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/checkedUrlText" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resultText"
+        app:layout_constraintVertical_bias="0.26" />
+
+    <TextView
+        android:id="@+id/progressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/activating_rulesets"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

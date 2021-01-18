@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="url_suggestions">
+        <item>example.com/ads?name=shiny</item>
+        <item>google-analytics.com/collect</item>
+        <item>gamestar.de/_misc/tracking/foo.js</item>>
+        <item>gadsabz.com?ad=shinything</item>>
+        <item>nzpages.co.nz/allbacks/banners/image.png</item>
+        <item>widget.shopstyle.com.au</item>
+        <item>docs.sudoplatform.com/guides/getting-started</item>
+    </string-array>
+</resources>

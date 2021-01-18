@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">Ad Tracker Blocker Sample</string>
+
+    <!-- Common -->
+    <string name="try_again">Try Again</string>
+
+    <!-- RegisterFragment -->
+    <string name="sign_out">Sign Out</string>
+    <string name="register_login">Register / Login</string>
+    <string name="ad_tracker_blocker">Ad Tracker Blocker</string>
+    <string name="sample_app">Sample App</string>
+    <string name="registration_method">Registration Method</string>
+    <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+    <string name="register_failure">Failed to register: %1$s</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
+    <string name="settings">Settings</string>
+
+    <!-- RulesetsFragment -->
+    <string name="rulesets">Rulesets</string>
+    <string name="loading_rulesets">Loading Rulesets</string>
+    <string name="list_rulesets_failure">Failed to list Rulesets</string>
+    <string name="updated_at_format">yyyy-MM-dd HH:mm:ss z</string>
+
+    <!-- SettingsFragment -->
+    <string name="clear_storage">Clear Storage</string>
+    <string name="clear_storage_title">Clear Stored Data?</string>
+    <string name="clearing_storage">Clearing Storage&#8230;</string>
+    <string name="clear_storage_confirmation">This will clear all stored data</string>
+    <string name="clear_storage_failure">Unable to clear storage: %1$s</string>
+    <string name="clear_storage_success">Storage cleared</string>
+    <string name="deregistering">Deregistering&#8230;</string>
+    <string name="deregister_failure">Unable to deregister: %1$s</string>
+
+    <!-- Exceptions List Fragment -->
+    <string name="exceptions_list">Exceptions List</string>
+    <string name="loading_exceptions">Loading Exceptions&#8230;</string>
+    <string name="remove_all">Remove All</string>
+    <string name="removing_exception">Removing Exceptions&#8230;</string>
+    <string name="list_exceptions_failure">Failed to list exceptions</string>
+    <string name="remove_exceptions_failure">Failed to remove exception</string>
+    <string name="exception_url">Exception URL</string>
+
+    <!-- Explore Fragment -->
+    <string name="explore">Explore</string>
+    <string name="checked_url_hint">URL to check</string>
+    <string name="source_url_hint">URL of the page</string>
+    <string name="source_url_default">https://anonyome.com</string>
+    <string name="ads_ruleset_label">Advertising Ruleset</string>
+    <string name="privacy_ruleset_label">Privacy Ruleset</string>
+    <string name="social_ruleset_label">Social Media Ruleset</string>
+    <string name="exceptions_label">Exceptions</string>
+    <string name="check_label">Check</string>
+    <string name="result_label">Result:</string>
+    <string name="empty_checked_url">Please enter the URL to be checked</string>
+    <string name="ruleset_activation_end">Rulesets are active</string>
+    <string name="explore_welcome">Exceptions: %1$d present</string>
+    <string name="checking_url_start">Checking URL&#8230;</string>
+    <string name="url_blocked">Blocked</string>
+    <string name="url_not_blocked">Allowed</string>
+    <string name="updating_rulesets">Updating Rulesets&#8230;</string>
+    <string name="activating_rulesets">Activating selected Rulesets&#8230;</string>
+
+</resources>

@@ -1,0 +1,2 @@
+include ':exampleapp'
+rootProject.name = "Ad Tracker Blocker Example Android"
