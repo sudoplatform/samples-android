@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="url_suggestions">
+        <item>aboveandbelow.com.au</item>
+        <item>wildnights.co.uk</item>
+        <item>endurotanzania.co.tz</item>
+        <item>tadoo.ca</item>
+        <item>tandenblekenhoofddorp.nl</item>
+        <item>tentandoserfitness.000webhostapp.com</item>
+        <item>anonyome.com/about.js</item>
+        <item>mysudo.com/support/foo.js</item>
+        <item>brisbanetimes.com.au</item>
+    </string-array>
+</resources>

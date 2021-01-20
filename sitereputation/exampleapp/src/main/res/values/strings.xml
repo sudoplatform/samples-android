@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">Site Reputation Sample</string>
+
+    <!-- Common -->
+    <string name="try_again">Try Again</string>
+
+    <!-- RegisterFragment -->
+    <string name="sign_out">Sign Out</string>
+    <string name="register_login">Register / Login</string>
+    <string name="site_reputation">Site Reputation</string>
+    <string name="sample_app">Sample App</string>
+    <string name="registration_method">Registration Method</string>
+    <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+    <string name="register_failure">Failed to register: %1$s</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
+    <string name="settings">Settings</string>
+    <string name="reset">Reset</string>
+
+    <!-- SettingsFragment -->
+    <string name="clear_storage">Clear Storage</string>
+    <string name="clear_storage_title">Clear Stored Data?</string>
+    <string name="clearing_storage">Clearing Storage&#8230;</string>
+    <string name="clear_storage_confirmation">This will clear all stored data</string>
+    <string name="clear_storage_failure">Unable to clear storage: %1$s</string>
+    <string name="clear_storage_success">Storage cleared</string>
+    <string name="deregistering">Deregistering&#8230;</string>
+    <string name="deregister_failure">Unable to deregister: %1$s</string>
+
+    <!-- Explore Fragment -->
+    <string name="explore">Explore</string>
+    <string name="checked_url_hint">URL to check</string>
+    <string name="source_url_default">https://anonyome.com</string>
+    <string name="check_label">Check</string>
+    <string name="result_label">Result:</string>
+    <string name="empty_checked_url">Please enter the URL to be checked</string>
+    <string name="checking_url_start">Checking URL&#8230;</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="update_label">Update</string>
+    <string name="initializing">Initializing</string>
+    <string name="updating">Updating</string>
+    <string name="ready">Ready</string>
+    <string name="checking">Checking</string>
+    <string name="malicious">Malicious</string>
+    <string name="safe">Safe</string>
+    <string name="update_required">Update Required</string>
+    <string name="last_updated_at">Last updated at: %1$s</string>
+    <string name="updated_at_format">yyyy-MM-dd HH:mm:ss z</string>
+    <string name="check_failed">Check Failed</string>
+    <string name="check_failed_message">Unable to get site reputation: %1$s</string>
+
+</resources>

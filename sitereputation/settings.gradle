@@ -1,0 +1,2 @@
+include ':exampleapp'
+rootProject.name = "Site Reputation Example Android"
