@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package com.sudoplatform.passwordmanagerexample.logins
+package com.sudoplatform.passwordmanagerexample.creditcards
 
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.pressBack
@@ -13,7 +13,6 @@ import androidx.test.filters.LargeTest
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.AppHolder
 import com.sudoplatform.passwordmanagerexample.MainActivity
-import com.sudoplatform.passwordmanagerexample.passwordgenerator.passwordGenerator
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
 import com.sudoplatform.passwordmanagerexample.vaultItems.vaultItems
 import com.sudoplatform.passwordmanagerexample.vaults.vaults
@@ -27,13 +26,13 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the creating, deleting and editing of logins flow.
+ * Test the creating, deleting and editing of credit cards flow.
  *
- * @since 2020-11-06
+ * @since 2021-01-19
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class LoginsTest {
+class CreditCardTests {
 
     @get:Rule
     val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
@@ -54,79 +53,73 @@ class LoginsTest {
     }
 
     @Test
-    fun testCreateDeleteLogin() {
+    fun testCreateDeleteCreditCard() {
 
-        // Create a login and enter the password manually
+        // Create a creditCard
         vaultItems {
             navigateFromLaunchToVaultItems()
             waitForLoading()
             waitForRecyclerView()
             checkVaultItemsDisplayed()
-            clickOnCreateLoginButton()
+            clickOnCreateCreditCardButton()
         }
-        createLogin {
-            checkCreateLoginItemsDisplayed()
-            enterWebAddress("http://abc.net.au/news")
-            enterUsername("slartibartfast")
+        createCreditCard {
+            checkCreateCreditCardItemsDisplayed()
+            enterCardName("My First Card")
+            enterCardHolder("Bugs Bunny")
+            enterCardType("VISA")
+            enterCardNumber("4111 1111 1111 1111")
+            enterCardExpiration("01/22")
+            enterSecurityCode("123")
             closeSoftKeyboard()
-            pause()
-            enterPassword("SuperSecret0!")
-            closeSoftKeyboard()
-            pause()
-            // This is done last to get the view to scroll up and make the Save button clickable
-            enterLoginName("ABC News")
+            scrollToTop()
             clickOnSave()
+            waitForLoading()
         }
 
-        // Delete the login just created
+        // Delete the credit card just created
         vaultItems {
-            waitForLoading()
             waitForRecyclerView()
             swipeLeftToDelete(0)
             waitForLoading()
             clickOnPositiveAlertDialogButton()
         }
 
-        // Create a login and generate the password
+        // Create a card
         vaultItems {
             waitForLoading()
             waitForRecyclerView()
-            checkVaultItemsDisplayed()
-            clickOnCreateLoginButton()
+            clickOnCreateCreditCardButton()
         }
-        createLogin {
-            checkCreateLoginItemsDisplayed()
-            enterWebAddress("http://abc.net.au/news")
-            enterUsername("slartibartfast")
-            clickOnGeneratePassword()
-            passwordGenerator {
-                clickOnOkButton()
-            }
-            checkPasswordIsNotBlank()
-            // This is done last to get the view to scroll up and make the Save button clickable
-            enterLoginName("ABC News")
+        createCreditCard {
+            checkCreateCreditCardItemsDisplayed()
+            enterCardName("My First Card")
+            enterCardHolder("Bugs Bunny")
+            enterCardType("VISA")
+            enterCardNumber("4111 1111 1111 1111")
+            enterCardExpiration("01/22")
+            enterSecurityCode("123")
+            closeSoftKeyboard()
+            scrollToTop()
             clickOnSave()
             waitForLoading()
         }
 
-        // Edit the login
+        // Edit the card
         vaultItems {
             waitForLoading()
             waitForRecyclerView()
             clickOn(0)
         }
-        editLogin {
-            checkEditLoginItemsDisplayed()
+        editCreditCard {
+            checkEditCreditCardItemsDisplayed()
             checkDatesAreDisplayed()
-            enterWebAddress("http://sbs.com.au/news")
-            enterUsername("zaphodbeeblebrox")
-            clickOnGeneratePassword()
-            passwordGenerator {
-                clickOnOkButton()
-            }
-            checkPasswordIsNotBlank()
-            // This is done last to get the view to scroll up and make the Save button clickable
-            enterLoginName("SBS News")
+            enterCardName("Not My First Card")
+            enterCardHolder("Babs Bunny")
+            enterCardType("Mastercard")
+            enterCardNumber("2111 1111 1111 1111")
+            enterCardExpiration("01/24")
+            scrollToTop()
             clickOnSave()
             waitForLoading()
         }

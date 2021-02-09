@@ -74,6 +74,9 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
     /** The App that contains the [SudoUserClient] and [SudoPasswordManagerClient] */
     private lateinit var app: App
 
+    /** The latest registration status, set after calling getRegistrationStatus() on the [SudoPasswordManagerClient] */
+    private var latestRegistrationStatus: PasswordManagerRegistrationStatus? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -91,6 +94,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                 app.sudoPasswordManager.getRegistrationStatus()
             }
             hideLoading()
+            latestRegistrationStatus = status
             return status
         } catch (e: Exception) {
             hideLoading()
@@ -111,6 +115,23 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
         val usedFSSO = sharedPreferences?.getBoolean("usedFSSO", false)
 
         if (usedFSSO == true) { toolbar.menu?.getItem(0)?.title = getString(R.string.sign_out) }
+
+        // change the action item and hide deregister menu item based on registration status
+        when (latestRegistrationStatus) {
+            PasswordManagerRegistrationStatus.NOT_REGISTERED -> {
+                toolbar.menu?.getItem(0)?.isVisible = false
+                toolbar.menu?.getItem(1)?.title = getString(R.string.save)
+            }
+            PasswordManagerRegistrationStatus.REGISTERED -> {
+                toolbar.menu?.getItem(0)?.isVisible = true
+                toolbar.menu?.getItem(1)?.title = getString(R.string.unlock)
+            }
+            PasswordManagerRegistrationStatus.MISSING_SECRET_CODE -> {
+                toolbar.menu?.getItem(0)?.isVisible = false
+                toolbar.menu?.getItem(1)?.title = getString(R.string.unlock)
+            }
+        }
+
         toolbar.setOnMenuItemClickListener {
             when (it?.itemId) {
                 R.id.deregister -> {
@@ -126,6 +147,19 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                             onPositive = { deregister() },
                             negativeButtonResId = android.R.string.cancel
                         )
+                    }
+                }
+                R.id.save -> {
+                    when (latestRegistrationStatus) {
+                        PasswordManagerRegistrationStatus.NOT_REGISTERED -> {
+                            register(EditorInfo.IME_ACTION_DONE)
+                        }
+                        PasswordManagerRegistrationStatus.REGISTERED -> {
+                            unlockWithPassword(EditorInfo.IME_ACTION_DONE)
+                        }
+                        PasswordManagerRegistrationStatus.MISSING_SECRET_CODE -> {
+                            unlockWithSecretCode(EditorInfo.IME_ACTION_DONE)
+                        }
                     }
                 }
             }
@@ -158,7 +192,6 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                     view.topText.setOnEditorActionListener { _, actionId, _ ->
                         unlockWithPassword(actionId)
                     }
-                    setupMenu(toolbar)
                 }
                 PasswordManagerRegistrationStatus.MISSING_SECRET_CODE -> {
                     toolbar.title = getString(R.string.unlock_vaults_title)
@@ -171,6 +204,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                 }
                 else -> { /* Error getting status */ }
             }
+            setupMenu(toolbar)
             view.topText.requestFocus()
         }
     }
@@ -233,7 +267,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
     }
 
     private fun navigateToSudosFragment() {
-        navController.navigate(R.id.action_unlockVaultsFragment_to_sudosFragment)
+        navController.navigate(UnlockVaultsFragmentDirections.actionUnlockVaultsFragmentToSudosFragment())
     }
 
     private fun unlockWithPassword(actionId: Int): Boolean {
@@ -327,7 +361,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                     app.sudoPasswordManager.reset()
                 }
                 hideLoading()
-                navController.navigate(R.id.action_unlockVaultsFragment_to_registerFragment)
+                navController.navigate(UnlockVaultsFragmentDirections.actionUnlockVaultsFragmentToRegisterFragment())
             } catch (error: Exception) {
                 app.logger.error("Failed to deregister: $error")
                 Toast.makeText(

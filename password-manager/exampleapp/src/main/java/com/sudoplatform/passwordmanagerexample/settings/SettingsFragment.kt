@@ -68,13 +68,13 @@ class SettingsFragment : Fragment(), CoroutineScope {
         navController = Navigation.findNavController(view)
 
         view.changeMasterPasswordButton.setOnClickListener {
-            navController.navigate(R.id.action_settingsFragment_to_changeMasterPasswordFragment)
+            navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToChangeMasterPasswordFragment())
         }
         view.secretCodeButton.setOnClickListener {
-            navController.navigate(R.id.action_settingsFragment_to_secretCodeFragment)
+            navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToSecretCodeFragment())
         }
         view.passwordGeneratorButton.setOnClickListener {
-            navController.navigate(R.id.action_settingsFragment_to_passwordGeneratorDialogFragment)
+            navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToPasswordGeneratorDialogFragment())
         }
         view.lockVaultsButton.setOnClickListener {
             launch {
@@ -82,7 +82,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
                     app.sudoPasswordManager.lock()
                 }
             }
-            navController.navigate(R.id.action_settingsFragment_to_unlockVaultsFragment)
+            navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToUnlockVaultsFragment())
         }
         view.deregisterButton.setOnClickListener {
             val sharedPreferences = context?.getSharedPreferences("SignIn", Context.MODE_PRIVATE)
@@ -96,13 +96,22 @@ class SettingsFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.deregister_title,
                     messageResId = R.string.deregister_confirmation,
                     positiveButtonResId = R.string.deregister,
-                    onPositive = { deregister() },
+                    onPositive = { deregisterUser() },
                     negativeButtonResId = android.R.string.cancel
                 )
             }
         }
         view.viewEntitlementsButton.setOnClickListener {
-            navController.navigate(R.id.action_settingsFragment_to_viewEntitlementsFragment)
+            navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToViewEntitlementsFragment())
+        }
+        view.resetVaultsButton.setOnClickListener {
+            showAlertDialog(
+                titleResId = R.string.reset_vaults_alert_title,
+                messageResId = R.string.reset_vaults_alert_message,
+                positiveButtonResId = R.string.reset_vaults,
+                onPositive = { deregisterPasswordManager() },
+                negativeButtonResId = android.R.string.cancel
+            )
         }
     }
 
@@ -123,8 +132,30 @@ class SettingsFragment : Fragment(), CoroutineScope {
         super.onDestroy()
     }
 
+    /** Perform deregistration of the [SudoUserClient] and clear local data (for TEST registration only) **/
+    private fun deregisterUser() {
+        launch {
+            try {
+                showLoading(R.string.deregistering)
+                withContext(Dispatchers.IO) {
+                    app.sudoUserClient.deregister()
+                    app.sudoPasswordManager.reset()
+                }
+                hideLoading()
+                navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToRegisterFragment())
+            } catch (error: Exception) {
+                app.logger.error("Failed to deregister: $error")
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.deregister_failure, error.localizedMessage),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
     /** Perform deregistration of the [SudoPasswordManagerClient] */
-    private fun deregister() {
+    private fun deregisterPasswordManager() {
         launch {
             try {
                 showLoading(R.string.deregistering)
@@ -138,7 +169,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
                 }
 
                 hideLoading()
-                navController.navigate(R.id.action_settingsFragment_to_registerFragment)
+                navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToRegisterFragment())
             } catch (e: RegisterException) {
                 Toast.makeText(
                     requireContext(),

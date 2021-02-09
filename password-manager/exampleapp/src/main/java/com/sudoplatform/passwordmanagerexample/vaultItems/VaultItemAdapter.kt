@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.passwordmanagerexample.logins
+package com.sudoplatform.passwordmanagerexample.vaultItems
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.sudopasswordmanager.models.VaultLogin
+import com.sudoplatform.sudopasswordmanager.models.VaultItem
 
 /**
  * A [RecyclerView.Adapter] used to feed [VaultLogin] data to the list view and handle creation and
@@ -17,13 +17,13 @@ import com.sudoplatform.sudopasswordmanager.models.VaultLogin
  * @property items List of [VaultLogin] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
-class LoginAdapter(
-    private val items: List<VaultLogin>,
-    private val itemSelectedListener: (VaultLogin) -> Unit
-) : RecyclerView.Adapter<LoginViewHolder>() {
+class VaultItemAdapter(
+    private val items: List<VaultItem>,
+    private val itemSelectedListener: (VaultItem) -> Unit
+) : RecyclerView.Adapter<VaultItemViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LoginViewHolder {
-        return LoginViewHolder.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VaultItemViewHolder {
+        return VaultItemViewHolder.inflate(
             parent
         )
     }
@@ -32,12 +32,12 @@ class LoginAdapter(
         return items.count()
     }
 
-    override fun onBindViewHolder(holder: LoginViewHolder, position: Int) {
-        val login = items[position]
+    override fun onBindViewHolder(holder: VaultItemViewHolder, position: Int) {
+        val item = items[position]
 
-        holder.bind(login)
+        holder.bind(item)
         holder.itemView.setOnClickListener {
-            itemSelectedListener(login)
+            itemSelectedListener(item)
         }
     }
 }

@@ -15,6 +15,7 @@
 
     <!-- RegisterFragment -->
     <string name="sample_app">Sample App</string>
+    <string name="registration_method">Registration Method</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
     <string name="sign_out">Sign Out</string>
@@ -24,6 +25,8 @@
     <string name="save_secret_code_title">Your Secret Code &amp; Rescue Kit</string>
     <string name="save_secret_code_message">Your secret code is used to sign in on new devices. It is unique to you and it is very important that you store it safely, as we cannot recover it for you. To save a copy of your secret code, download your Rescue Kit and save it somewhere safe.</string>
     <string name="not_now">Not now</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
 
     <!-- SudosFragment -->
     <string name="create_sudo_button">+ Create Sudo</string>
@@ -38,6 +41,7 @@
     <string name="create_sudo_learn_more">A Sudo is a digital identity created and owned by a real person. Vaults must belong to a Sudo.</string>
     <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
     <string name="sudo_name_format">Sudo %1$d</string>
+    <string name="no_sudos_present">No Sudos present</string>
 
     <!-- VaultsFragment -->
     <string name="create_vault_button">+ Create Vault</string>
@@ -85,6 +89,9 @@
     <string name="deregister_title">Are you sure?</string>
     <string name="password_generator">Password Generator</string>
     <string name="view_entitlements">View Entitlements</string>
+    <string name="reset_vaults">Reset Vaults</string>
+    <string name="reset_vaults_alert_title">All vaults will be lost</string>
+    <string name="reset_vaults_alert_message">This will reset your account with the vault service and all vaults will be lost.  Your secret code/rescue kit will be reset and you will be asked to create a new master password.</string>
 
     <!-- Secret Code Fragment -->
     <string name="show_secret_code">Show Secret Code</string>
@@ -124,24 +131,27 @@
     <string name="create">Create</string>
 
     <!-- Logins Fragment -->
-    <string name="logins">Logins</string>
-    <string name="create_login_button">+ Create Login</string>
-    <string name="loading_logins">Loading Logins</string>
-    <string name="deleting_logins">Deleting Login&#8230;</string>
-    <string name="list_logins_failure">Failed to list Logins</string>
+    <string name="items">Vault Items</string>
+    <string name="create_item_button">+ Create Vault Item</string>
+    <string name="loading_items">Loading Vault Items</string>
+    <string name="deleting_items">Deleting Vault Item&#8230;</string>
+    <string name="list_items_failure">Failed to list Vault Items</string>
+    <string name="create_vault_item">Create Vault Item</string>
+    <string name="login">Login</string>
+    <string name="credit_card">Credit Card</string>
+    <string name="bank_account">Bank Account</string>
 
     <!-- Create Login Fragment -->
     <string name="create_login">Create Login</string>
     <string name="web_address">Web Address</string>
     <string name="enter_name_or_title_of_the_website">Enter name or title of the website</string>
-    <string name="login_title">Login Title</string>
     <string name="enter_the_url_of_the_website_login">Enter the URL of the website</string>
     <string name="username">Username</string>
     <string name="enter_the_username_you_use_to_sign_in">Enter the username you use to sign in</string>
     <string name="enter_or_create_a_password">Enter or create a password</string>
     <string name="notes">Notes</string>
     <string name="create_login_failure">Failed to create Login</string>
-    <string name="enter_login_name">Enter a name for this login</string>
+    <string name="enter_login_name">Enter a name for this Login</string>
     <string name="creating_login">Creating Login&#8230;</string>
 
     <!-- Edit Login Fragment -->
@@ -160,4 +170,42 @@
     <string name="loading_entitlements">Loading Entitlements</string>
     <string name="entitlement_max_vaults">maxVaultPerSudo</string>
 
+    <!-- Create Credit Card Fragment -->
+    <string name="name">Name</string>
+    <string name="create_credit_card">Create Credit Card</string>
+    <string name="creating_credit_card">Creating Credit Card&#8230;</string>
+    <string name="create_credit_card_failure">Failed to create Credit Card</string>
+    <string name="enter_card_name">Enter a name for this Credit Card</string>
+    <string name="enter_a_name_for_the_credit_card">Enter a name for the credit card</string>
+    <string name="card_holder">Card Holder</string>
+    <string name="card_type">Card Type</string>
+    <string name="visa_mastercard_etc">VISA, Mastercard, etc.</string>
+    <string name="card_number">Card Number</string>
+    <string name="expiry">Expiry</string>
+    <string name="mm_yy">MM/YY</string>
+    <string name="security_code">Security Code</string>
+
+    <!-- Edit Credit Card Fragment -->
+    <string name="edit_credit_card">Edit Credit Card</string>
+    <string name="saving_credit_card">Saving Credit Card&#8230;</string>
+    <string name="saving_credit_card_failure">Failed to save Credit Card</string>
+
+    <!-- Create Bank Account Fragment -->
+    <string name="name_of_the_bank_this_account_belongs_to">Name of the bank this account belongs to</string>
+    <string name="enter_a_name_for_the_bank_account">Enter a name for the Bank Account</string>
+    <string name="bank_name">Bank Name</string>
+    <string name="checking_savings_etc">Checking, Savings, etc.</string>
+    <string name="account_type">Account Type</string>
+    <string name="routing_number_for_holding_bank">Routing Number for holding bank</string>
+    <string name="routing_number">Routing Number</string>
+    <string name="bank_account_number">Bank account number</string>
+    <string name="account_number">Account Number</string>
+    <string name="create_bank_account">Create Bank Account</string>
+    <string name="creating_bank_account">Creating Bank Account</string>
+    <string name="create_bank_account_failure">Failed to create Bank Account</string>
+    <string name="enter_bank_account_name">Enter a name for this Bank Account</string>
+
+    <string name="edit_bank_account">Edit Bank Account</string>
+    <string name="saving_bank_account">Saving Bank Account&#8230;</string>
+    <string name="saving_bank_account_failure">Failed to save Bank Account</string>
 </resources>

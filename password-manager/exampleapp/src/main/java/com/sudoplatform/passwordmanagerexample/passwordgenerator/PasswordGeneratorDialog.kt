@@ -17,18 +17,13 @@ import android.widget.SeekBar
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import com.sudoplatform.passwordmanagerexample.R
-import com.sudoplatform.passwordmanagerexample.RETURN_ACTION_ARGUMENT
-import com.sudoplatform.passwordmanagerexample.VAULT_ARGUMENT
-import com.sudoplatform.passwordmanagerexample.VAULT_LOGIN_ARGUMENT
+import com.sudoplatform.passwordmanagerexample.logins.CreateLoginFragment
 import com.sudoplatform.sudopasswordmanager.PasswordStrength
 import com.sudoplatform.sudopasswordmanager.calculateStrengthOfPassword
 import com.sudoplatform.sudopasswordmanager.generatePassword
-import com.sudoplatform.sudopasswordmanager.models.SecureFieldValue
-import com.sudoplatform.sudopasswordmanager.models.Vault
-import com.sudoplatform.sudopasswordmanager.models.VaultItemPassword
-import com.sudoplatform.sudopasswordmanager.models.VaultLogin
 import kotlin.coroutines.CoroutineContext
 import kotlinx.android.synthetic.main.fragment_password_generator_dialog.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -51,25 +46,20 @@ internal const val MAX_PASSWORD_LENGTH = 50
  */
 class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
 
+    companion object {
+        internal const val GENERATED_PASSWORD = "generatedPassword"
+    }
+
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     private var length = DEFAULT_PASSWORD_LENGTH
     private var shouldMonitorLengthTextChange = true
-
-    private var vault: Vault? = null
-    private var vaultLogin: VaultLogin? = null
-    private var returnAction: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // vault and vaultLogin are optional arguments, they are provided by the CreateLoginFragment
-        // to preserve the information in the login being created when this dialogue is invoked.
-        vault = requireArguments().getParcelable(VAULT_ARGUMENT)
-        vaultLogin = requireArguments().getParcelable(VAULT_LOGIN_ARGUMENT)
-        returnAction = requireArguments().getInt(RETURN_ACTION_ARGUMENT, -1)
         return inflater.inflate(R.layout.fragment_password_generator_dialog, container, false)
     }
 
@@ -155,18 +145,14 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
         }
 
         view.button_ok.setOnClickListener {
-            if (vaultLogin != null && vault != null && returnAction != null) {
-                val newVaultLogin = vaultLogin!!.copy(
-                    password = VaultItemPassword(SecureFieldValue(view.editText_generated_password.text.toString()))
+            // Send the generated password back to the fragment that invoked this dialogue
+            setFragmentResult(
+                GENERATED_PASSWORD,
+                bundleOf(
+                    GENERATED_PASSWORD to view.editText_generated_password.text.toString()
                 )
-                val args = bundleOf(
-                    VAULT_ARGUMENT to vault,
-                    VAULT_LOGIN_ARGUMENT to newVaultLogin
-                )
-                findNavController().navigate(returnAction!!, args)
-            } else {
-                findNavController().popBackStack()
-            }
+            )
+            findNavController().popBackStack()
         }
     }
 

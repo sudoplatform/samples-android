@@ -26,6 +26,13 @@ import kotlinx.coroutines.launch
 
 class App : Application(), CoroutineScope {
 
+    companion object {
+        /** Name of the preference set that holds sign in inforation */
+        const val SIGN_IN_PREFERENCES = "SignIn"
+        /** True if Federated Single Sign On was used */
+        const val FSSO_USED_PREFERENCE = "usedFSSO"
+    }
+
     override val coroutineContext: CoroutineContext = Dispatchers.Main
     lateinit var keyManager: KeyManager
     lateinit var sudoUserClient: SudoUserClient

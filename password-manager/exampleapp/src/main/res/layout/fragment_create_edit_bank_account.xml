@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".logins.CreateLoginFragment">
+    tools:context=".bankaccounts.CreateBankAccountFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/label_loginName"
+            android:id="@+id/label_accountName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -28,18 +28,18 @@
             app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
         <EditText
-            android:id="@+id/editText_loginName"
+            android:id="@+id/editText_accountName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:ems="10"
-            android:hint="@string/enter_name_or_title_of_the_website"
-            android:inputType="textPersonName"
+            android:hint="@string/enter_a_name_for_the_bank_account"
+            android:inputType="textPersonName|textCapWords"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_loginName" />
+            app:layout_constraintTop_toBottomOf="@id/label_accountName" />
 
         <TextView
             android:id="@+id/textView4"
@@ -47,21 +47,21 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/web_address"
+            android:text="@string/bank_name"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_loginName" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_accountName" />
 
         <EditText
-            android:id="@+id/editText_webAddress"
+            android:id="@+id/editText_bankName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:ems="10"
-            android:hint="@string/enter_the_url_of_the_website_login"
-            android:inputType="textPersonName"
+            android:hint="@string/name_of_the_bank_this_account_belongs_to"
+            android:inputType="textPersonName|textCapWords"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -72,21 +72,21 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/username"
+            android:text="@string/account_number"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_webAddress" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_bankName" />
 
         <EditText
-            android:id="@+id/editText_username"
+            android:id="@+id/editText_accountNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:ems="10"
-            android:hint="@string/enter_the_username_you_use_to_sign_in"
-            android:inputType="textPersonName"
+            android:hint="@string/bank_account_number"
+            android:inputType="number"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView5" />
@@ -97,24 +97,48 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/password"
+            android:text="@string/routing_number"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_username" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_accountNumber" />
 
         <EditText
-            android:id="@+id/editText_password"
+            android:id="@+id/editText_routingNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:ems="10"
-            android:hint="@string/enter_or_create_a_password"
-            android:inputType="textVisiblePassword"
+            android:hint="@string/routing_number_for_holding_bank"
+            android:inputType="number"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/account_type"
+            android:textColor="@android:color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_routingNumber" />
+
+        <EditText
+            android:id="@+id/editText_accountType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:ems="10"
+            android:hint="@string/checking_savings_etc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
         <TextView
             android:id="@+id/textView7"
@@ -125,7 +149,7 @@
             android:text="@string/notes"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_password" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_accountType" />
 
         <EditText
             android:id="@+id/editText_notes"
@@ -141,15 +165,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView7" />
-
-        <Button
-            android:id="@+id/button_passwordGenerator"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/ic_password_generator"
-            app:layout_constraintEnd_toEndOf="@+id/editText_password"
-            app:layout_constraintTop_toTopOf="@+id/editText_password" />
 
         <TextView
             android:id="@+id/label_createdAt"

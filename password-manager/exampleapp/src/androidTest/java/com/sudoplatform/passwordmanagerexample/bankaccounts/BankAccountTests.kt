@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package com.sudoplatform.passwordmanagerexample.logins
+package com.sudoplatform.passwordmanagerexample.bankaccounts
 
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.pressBack
@@ -13,7 +13,6 @@ import androidx.test.filters.LargeTest
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.AppHolder
 import com.sudoplatform.passwordmanagerexample.MainActivity
-import com.sudoplatform.passwordmanagerexample.passwordgenerator.passwordGenerator
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
 import com.sudoplatform.passwordmanagerexample.vaultItems.vaultItems
 import com.sudoplatform.passwordmanagerexample.vaults.vaults
@@ -27,13 +26,13 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the creating, deleting and editing of logins flow.
+ * Test the creating, deleting and editing of bank accounts flow.
  *
- * @since 2020-11-06
+ * @since 2021-01-21
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class LoginsTest {
+class BankAccountTests {
 
     @get:Rule
     val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
@@ -54,79 +53,71 @@ class LoginsTest {
     }
 
     @Test
-    fun testCreateDeleteLogin() {
+    fun testCreateDeleteBankAccount() {
 
-        // Create a login and enter the password manually
+        // Create a bankAccount
         vaultItems {
             navigateFromLaunchToVaultItems()
             waitForLoading()
             waitForRecyclerView()
             checkVaultItemsDisplayed()
-            clickOnCreateLoginButton()
+            clickOnCreateBankAccountButton()
         }
-        createLogin {
-            checkCreateLoginItemsDisplayed()
-            enterWebAddress("http://abc.net.au/news")
-            enterUsername("slartibartfast")
+        createBankAccount {
+            checkCreateBankAccountItemsDisplayed()
+            enterAccountName("My First Bank Account")
+            enterBankName("My Bank")
+            enterAccountNumber("12345")
+            enterRoutingNumber("54321")
+            enterAccountType("Checking")
             closeSoftKeyboard()
-            pause()
-            enterPassword("SuperSecret0!")
-            closeSoftKeyboard()
-            pause()
-            // This is done last to get the view to scroll up and make the Save button clickable
-            enterLoginName("ABC News")
+            scrollToTop()
             clickOnSave()
+            waitForLoading()
         }
 
-        // Delete the login just created
+        // Delete the bank account just created
         vaultItems {
-            waitForLoading()
             waitForRecyclerView()
             swipeLeftToDelete(0)
             waitForLoading()
             clickOnPositiveAlertDialogButton()
         }
 
-        // Create a login and generate the password
+        // Create a bank account
         vaultItems {
             waitForLoading()
             waitForRecyclerView()
-            checkVaultItemsDisplayed()
-            clickOnCreateLoginButton()
+            clickOnCreateBankAccountButton()
         }
-        createLogin {
-            checkCreateLoginItemsDisplayed()
-            enterWebAddress("http://abc.net.au/news")
-            enterUsername("slartibartfast")
-            clickOnGeneratePassword()
-            passwordGenerator {
-                clickOnOkButton()
-            }
-            checkPasswordIsNotBlank()
-            // This is done last to get the view to scroll up and make the Save button clickable
-            enterLoginName("ABC News")
+        createBankAccount {
+            checkCreateBankAccountItemsDisplayed()
+            enterAccountName("My First Bank Account")
+            enterBankName("My Bank")
+            enterAccountNumber("12345")
+            enterRoutingNumber("54321")
+            enterAccountType("Checking")
+            closeSoftKeyboard()
+            scrollToTop()
             clickOnSave()
             waitForLoading()
         }
 
-        // Edit the login
+        // Edit the bank account
         vaultItems {
             waitForLoading()
             waitForRecyclerView()
             clickOn(0)
         }
-        editLogin {
-            checkEditLoginItemsDisplayed()
-            checkDatesAreDisplayed()
-            enterWebAddress("http://sbs.com.au/news")
-            enterUsername("zaphodbeeblebrox")
-            clickOnGeneratePassword()
-            passwordGenerator {
-                clickOnOkButton()
-            }
-            checkPasswordIsNotBlank()
-            // This is done last to get the view to scroll up and make the Save button clickable
-            enterLoginName("SBS News")
+        editBankAccount {
+            checkEditBankAccountItemsDisplayed()
+            enterAccountName("My Second Bank Account")
+            enterBankName("My 2nd Bank")
+            enterAccountNumber("54321")
+            enterRoutingNumber("12345")
+            enterAccountType("Savings")
+            closeSoftKeyboard()
+            scrollToTop()
             clickOnSave()
             waitForLoading()
         }

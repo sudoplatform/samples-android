@@ -3,30 +3,37 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package com.sudoplatform.passwordmanagerexample.logins
+package com.sudoplatform.passwordmanagerexample.vaultItems
 
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.vaults.VaultViewHolder
 import com.sudoplatform.passwordmanagerexample.vaults.vaults
 
-fun logins(func: LoginsRobot.() -> Unit) = LoginsRobot().apply { func() }
+fun vaultItems(func: VaultItemsRobot.() -> Unit) = VaultItemsRobot().apply { func() }
+
+const val LOGIN_BUTTON = "Login"
+const val CREDIT_CARD_BUTTON = "Credit Card"
+const val BANK_ACCOUNT_BUTTON = "Bank Account"
 
 /**
- * Testing robot that manages the logins screen.
+ * Testing robot that manages the Vault Items screen.
  *
  * @since 2020-11-06
  */
-class LoginsRobot : BaseRobot() {
+class VaultItemsRobot : BaseRobot() {
 
     private val toolbar = ViewMatchers.withId(R.id.toolbar)
-    private val createLoginButton = ViewMatchers.withId(R.id.createLoginButton)
-    private val loginRecyclerView = ViewMatchers.withId(R.id.loginRecyclerView)
+    private val createItemButton = ViewMatchers.withId(R.id.createItemButton)
+    private val itemRecyclerView = ViewMatchers.withId(R.id.itemRecyclerView)
     private val loadingDialog = ViewMatchers.withId(R.id.progressBar)
     private val positiveAlertButton = ViewMatchers.withId(android.R.id.button1)
 
@@ -36,20 +43,31 @@ class LoginsRobot : BaseRobot() {
     }
 
     fun waitForRecyclerView() {
-        waitForViewToDisplay(loginRecyclerView, 5_000L)
+        waitForViewToDisplay(itemRecyclerView, 10_000L)
     }
 
-    fun checkLoginsItemsDisplayed(timeout: Long = 1000L) {
+    fun checkVaultItemsDisplayed(timeout: Long = 1000L) {
         waitForViewToDisplay(toolbar, timeout)
-        waitForViewToDisplay(createLoginButton)
+        waitForViewToDisplay(createItemButton)
     }
 
     fun clickOnCreateLoginButton() {
-        clickOnView(createLoginButton)
+        clickOnView(createItemButton)
+        onView(withText(LOGIN_BUTTON)).perform(click())
+    }
+
+    fun clickOnCreateCreditCardButton() {
+        clickOnView(createItemButton)
+        onView(withText(CREDIT_CARD_BUTTON)).perform(click())
+    }
+
+    fun clickOnCreateBankAccountButton() {
+        clickOnView(createItemButton)
+        onView(withText(BANK_ACCOUNT_BUTTON)).perform(click())
     }
 
     fun swipeLeftToDelete(position: Int) {
-        Espresso.onView(loginRecyclerView).perform(
+        Espresso.onView(itemRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(position,
                 ViewActions.swipeLeft()
             )
@@ -57,7 +75,7 @@ class LoginsRobot : BaseRobot() {
     }
 
     fun clickOn(position: Int) {
-        Espresso.onView(loginRecyclerView).perform(
+        Espresso.onView(itemRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(position,
                 ViewActions.click()
             )
@@ -75,7 +93,7 @@ class LoginsRobot : BaseRobot() {
             .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.ok)))
     }
 
-    fun navigateFromLaunchToLogins() {
+    fun navigateFromLaunchToVaultItems() {
         vaults {
             navigateFromLaunchToVaults()
 

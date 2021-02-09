@@ -10,25 +10,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import com.sudoplatform.passwordmanagerexample.App
-import com.sudoplatform.passwordmanagerexample.MissingFragmentArgumentException
 import com.sudoplatform.passwordmanagerexample.R
-import com.sudoplatform.passwordmanagerexample.RETURN_ACTION_ARGUMENT
-import com.sudoplatform.passwordmanagerexample.VAULT_ARGUMENT
-import com.sudoplatform.passwordmanagerexample.VAULT_LOGIN_ARGUMENT
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.passwordgenerator.PasswordGeneratorDialog
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
+import com.sudoplatform.passwordmanagerexample.toSecureField
 import com.sudoplatform.sudopasswordmanager.SudoPasswordManagerException
-import com.sudoplatform.sudopasswordmanager.models.SecureFieldValue
 import com.sudoplatform.sudopasswordmanager.models.Vault
 import com.sudoplatform.sudopasswordmanager.models.VaultItemNote
 import com.sudoplatform.sudopasswordmanager.models.VaultItemPassword
@@ -49,7 +46,7 @@ import kotlinx.coroutines.withContext
  * This [EditLoginFragment] presents a screen that shows the values of login credentials
  * and allows the user to edit and save them.
  *
- * - Links From: [LoginsFragment] when the user clicks the a row containing some login credentials.
+ * - Links From: [VaultItemsFragment] when the user clicks the a row containing some login credentials.
  * - Links To: [PasswordGeneratorDialog] when the user clicks the generate password button
  */
 class EditLoginFragment : Fragment(), CoroutineScope {
@@ -64,6 +61,9 @@ class EditLoginFragment : Fragment(), CoroutineScope {
 
     /** The [Application] that holds references to the APIs this fragment needs. */
     private lateinit var app: App
+
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: EditLoginFragmentArgs by navArgs()
 
     /** The [Vault] containing the [VaultLogin]. */
     private lateinit var vault: Vault
@@ -89,6 +89,19 @@ class EditLoginFragment : Fragment(), CoroutineScope {
             true
         }
         app = requireActivity().application as App
+
+        vault = args.vault
+        vaultLogin = args.vaultLogin
+
+        // Handle the result coming back from the password generator fragment
+        setFragmentResultListener(PasswordGeneratorDialog.GENERATED_PASSWORD) { resultKey, result ->
+            if (resultKey == PasswordGeneratorDialog.GENERATED_PASSWORD) {
+                result.getString(PasswordGeneratorDialog.GENERATED_PASSWORD)?.let {
+                    editText_password.setText(it)
+                }
+            }
+        }
+
         return view
     }
 
@@ -96,22 +109,10 @@ class EditLoginFragment : Fragment(), CoroutineScope {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        with(requireArguments()) {
-            vault = getParcelable(VAULT_ARGUMENT)
-                ?: throw MissingFragmentArgumentException("Vault argument is missing")
-            vaultLogin = getParcelable<VaultLogin>(VAULT_LOGIN_ARGUMENT)
-                ?: throw MissingFragmentArgumentException("VaultLogin argument is missing")
-        }
-
         loadFromVaultLogin(vaultLogin)
 
         button_passwordGenerator.setOnClickListener {
-            val args = bundleOf(
-                VAULT_ARGUMENT to vault,
-                VAULT_LOGIN_ARGUMENT to toVaultLogin(),
-                RETURN_ACTION_ARGUMENT to R.id.action_passwordGeneratorDialogFragment_to_editLoginFragment
-            )
-            navController.navigate(R.id.action_editLoginFragment_to_passwordGeneratorDialogFragment, args)
+            navController.navigate(EditLoginFragmentDirections.actionEditLoginFragmentToPasswordGeneratorDialogFragment())
         }
     }
 
@@ -180,18 +181,6 @@ class EditLoginFragment : Fragment(), CoroutineScope {
                     onNegative = { navController.popBackStack() }
                 )
             }
-        }
-    }
-
-    /**
-     * If a [TextView] has a non blank value then wrap it in a [SecureFieldValue] otherwise return null
-     */
-    private fun TextView.toSecureField(): SecureFieldValue? {
-        val text = this.text.toString().trim()
-        if (text.isNotEmpty()) {
-            return SecureFieldValue(text)
-        } else {
-            return null
         }
     }
 

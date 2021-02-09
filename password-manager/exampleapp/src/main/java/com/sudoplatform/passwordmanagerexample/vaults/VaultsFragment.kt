@@ -14,18 +14,15 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.passwordmanagerexample.App
-import com.sudoplatform.passwordmanagerexample.MissingFragmentArgumentException
 import com.sudoplatform.passwordmanagerexample.R
-import com.sudoplatform.passwordmanagerexample.SUDO_ID_ARGUMENT
-import com.sudoplatform.passwordmanagerexample.VAULT_ARGUMENT
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.swipe.SwipeLeftActionHelper
@@ -68,6 +65,9 @@ class VaultsFragment : Fragment(), CoroutineScope {
     /** An [AlertDialog] used to indicate that an operation is occurring. */
     private var loading: AlertDialog? = null
 
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: VaultsFragmentArgs by navArgs()
+
     /** The identifier of the Sudo that is the owner of the vaults listed here */
     private lateinit var sudoId: String
 
@@ -84,9 +84,7 @@ class VaultsFragment : Fragment(), CoroutineScope {
         val view = inflater.inflate(R.layout.fragment_vaults, container, false)
 
         app = requireActivity().application as App
-
-        sudoId = requireArguments().getString(SUDO_ID_ARGUMENT)
-            ?: throw MissingFragmentArgumentException("Sudo identifier missing")
+        sudoId = args.sudoId
 
         val toolbar = (view.toolbar as Toolbar)
         toolbar.title = getString(R.string.vaults)
@@ -99,10 +97,10 @@ class VaultsFragment : Fragment(), CoroutineScope {
                             app.sudoPasswordManager.lock()
                         }
                     }
-                    navController.navigate(R.id.action_vaultsFragment_to_unlockVaultsFragment)
+                    navController.navigate(VaultsFragmentDirections.actionVaultsFragmentToUnlockVaultsFragment())
                 }
                 R.id.settings -> {
-                    navController.navigate(R.id.action_vaultsFragment_to_settingsFragment)
+                    navController.navigate(VaultsFragmentDirections.actionVaultsFragmentToSettingsFragment())
                 }
             }
             true
@@ -222,15 +220,12 @@ class VaultsFragment : Fragment(), CoroutineScope {
 
     /**
      * Configures the [RecyclerView] used to display the listed [Vault] items and listens to item
-     * select events to navigate to the [LoginsFragment].
+     * select events to navigate to the [VaultItemsFragment].
      */
     private fun configureRecyclerView(view: View) {
         adapter =
             VaultAdapter(requireContext(), vaultList) { vault ->
-                val bundle = bundleOf(
-                    VAULT_ARGUMENT to vault
-                )
-                navController.navigate(R.id.action_vaultsFragment_to_loginsFragment, bundle)
+                navController.navigate(VaultsFragmentDirections.actionVaultsFragmentToVaultItemsFragment(vault))
             }
 
         view.vaultRecyclerView.adapter = adapter

@@ -10,13 +10,6 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 
-// Arguments passed to and from fragments
-const val SUDO_ID_ARGUMENT = "sudo_id"
-const val SUDO_LABEL_ARGUMENT = "sudo_label"
-const val VAULT_ARGUMENT = "vault"
-const val VAULT_LOGIN_ARGUMENT = "vault_login"
-const val RETURN_ACTION_ARGUMENT = "return_action"
-
 /**
  * Extensions of the Android Fragment.
  */

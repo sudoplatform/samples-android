@@ -36,7 +36,12 @@
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:popExitAnim="@anim/fragment_close_exit">
+            <argument
+                android:name="sudoId"
+                app:argType="string"
+                app:nullable="false"/>
+        </action>
         <action
             android:id="@+id/action_sudosFragment_to_unlockVaultsFragment"
             app:destination="@id/unlockVaultsFragment"
@@ -55,6 +60,10 @@
         android:name="com.sudoplatform.passwordmanagerexample.vaults.VaultsFragment"
         android:label="fragment_vaults"
         tools:layout="@layout/fragment_vaults" >
+        <argument
+            android:name="sudoId"
+            app:argType="string"
+            app:nullable="false"/>
         <action
             android:id="@+id/action_vaultsFragment_to_unlockVaultsFragment"
             app:destination="@id/unlockVaultsFragment"
@@ -68,8 +77,13 @@
             android:id="@+id/action_vaultsFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
         <action
-            android:id="@+id/action_vaultsFragment_to_loginsFragment"
-            app:destination="@id/loginsFragment" />
+            android:id="@+id/action_vaultsFragment_to_vaultItemsFragment"
+            app:destination="@id/vaultItemsFragment">
+            <argument
+                android:name="vault"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault"
+                app:nullable="false"/>
+        </action>
     </fragment>
     <fragment
         android:id="@+id/unlockVaultsFragment"
@@ -153,52 +167,66 @@
         android:name="com.sudoplatform.passwordmanagerexample.logins.CreateLoginFragment"
         android:label="fragment_create_login"
         tools:layout="@layout/fragment_create_edit_login">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
         <action
             android:id="@+id/action_createLoginFragment_to_passwordGeneratorDialogFragment"
             app:destination="@id/passwordGeneratorDialog" />
-        <argument
-            android:name="vault"
-            app:nullable="true"
-            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
-        <argument
-            android:name="vault_login"
-            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin"
-            app:nullable="true" />
     </fragment>
     <fragment
         android:id="@+id/editLoginFragment"
         android:name="com.sudoplatform.passwordmanagerexample.logins.EditLoginFragment"
         android:label="fragment_edit_login"
         tools:layout="@layout/fragment_create_edit_login">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultLogin"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin" />
         <action
             android:id="@+id/action_editLoginFragment_to_passwordGeneratorDialogFragment"
             app:destination="@id/passwordGeneratorDialog" />
-        <argument
-            android:name="vault"
-            app:nullable="true"
-            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
-        <argument
-            android:name="vault_login"
-            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin"
-            app:nullable="true" />
     </fragment>
     <fragment
-        android:id="@+id/loginsFragment"
-        android:name="com.sudoplatform.passwordmanagerexample.logins.LoginsFragment"
-        android:label="fragment_logins"
-        tools:layout="@layout/fragment_logins" >
+        android:id="@+id/vaultItemsFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.vaultItems.VaultItemsFragment"
+        android:label="fragment_vault_items"
+        tools:layout="@layout/fragment_vault_items" >
+        <argument
+            android:name="vault"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault"
+            app:nullable="false"/>
         <action
-            android:id="@+id/action_loginsFragment_to_createLoginFragment"
+            android:id="@+id/action_vaultItemsFragment_to_createLoginFragment"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
-            app:destination="@id/createLoginFragment" />
+            app:destination="@id/createLoginFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
         <action
-            android:id="@+id/action_loginsFragment_to_editLoginFragment"
+            android:id="@+id/action_vaultItemsFragment_to_editLoginFragment"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
-            app:destination="@id/editLoginFragment" />
+            app:destination="@id/editLoginFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultLogin"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin" />
+        </action>
         <action
-            android:id="@+id/action_loginsFragment_to_unlockVaultsFragment"
+            android:id="@+id/action_vaultItemsFragment_to_unlockVaultsFragment"
             app:destination="@id/unlockVaultsFragment"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
@@ -207,34 +235,106 @@
             app:popUpTo="@id/sudosFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_loginsFragment_to_settingsFragment"
+            android:id="@+id/action_vaultItemsFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createCreditCardFragment"
+            app:destination="@id/createCreditCardFragment"
+            app:enterAnim="@anim/fragment_fade_enter">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editCreditCardFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/editCreditCardFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultCreditCard"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultCreditCard"
+                app:nullable="false" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createBankAccountFragment"
+            app:destination="@id/createBankAccountFragment"
+            app:enterAnim="@anim/fragment_fade_enter">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editBankAccountFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:destination="@id/editBankAccountFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultBankAccount"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultBankAccount" />
+        </action>
     </fragment>
     <dialog
         android:id="@+id/passwordGeneratorDialog"
         android:name="com.sudoplatform.passwordmanagerexample.passwordgenerator.PasswordGeneratorDialog"
         android:label="PasswordGeneratorDialogFragment"
-        tools:layout="@layout/fragment_password_generator_dialog">
-        <action
-            android:id="@+id/action_passwordGeneratorDialogFragment_to_createLoginFragment"
-            app:destination="@id/createLoginFragment"
-            app:popUpTo="@id/createLoginFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_passwordGeneratorDialogFragment_to_editLoginFragment"
-            app:destination="@id/editLoginFragment"
-            app:popUpTo="@id/editLoginFragment"
-            app:popUpToInclusive="true" />
+        tools:layout="@layout/fragment_password_generator_dialog"/>
+    <fragment
+        android:id="@+id/createCreditCardFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.creditcards.CreateCreditCardFragment"
+        android:label="fragment_create_edit_credit_card"
+        tools:layout="@layout/fragment_create_edit_credit_card">
         <argument
             android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editCreditCardFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.creditcards.EditCreditCardFragment"
+        android:label="fragment_edit_credit_card"
+        tools:layout="@layout/fragment_create_edit_credit_card">
+        <argument
+            android:name="vault"
+            app:nullable="false"
             app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
         <argument
-            android:name="vault_login"
-            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultLogin"
-            app:nullable="true" />
+            android:name="vaultCreditCard"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultCreditCard"
+            app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/createBankAccountFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.bankaccounts.CreateBankAccountFragment"
+        android:label="fragment_create_edit_bank_account"
+        tools:layout="@layout/fragment_create_edit_bank_account">
         <argument
-            android:name="return_action"
-            app:argType="integer"
-            android:defaultValue="-1" />
-    </dialog>
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editBankAccountFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.bankaccounts.EditBankAccountFragment"
+        android:label="fragment_edit_bank_account"
+        tools:layout="@layout/fragment_create_edit_bank_account">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultBankAccount"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultBankAccount"
+            app:nullable="false" />
+    </fragment>
 </navigation>

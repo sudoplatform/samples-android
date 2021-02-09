@@ -48,7 +48,7 @@ class ViewEntitlementsFragment : Fragment(), CoroutineScope {
     private lateinit var adapter: ViewEntitlementsAdapter
 
     /** A mutable list of [EntitlementState]s. */
-    private val entitlementsList = mutableListOf<EntitlementState>()
+    private val entitlementsList = mutableListOf<ViewEntitlementsHolder>()
 
     /** The [Application] that holds references to the APIs this fragment needs */
     private lateinit var app: App
@@ -85,21 +85,29 @@ class ViewEntitlementsFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val (sudos, entitlements) = withContext(Dispatchers.IO) {
-                    Pair(
+                val (sudos, entitlement, entitlementState) = withContext(Dispatchers.IO) {
+                    Triple(
                         app.sudoProfilesClient.listSudos(ListOption.REMOTE_ONLY).toMutableList(),
+                        app.sudoPasswordManager.getEntitlement(),
                         app.sudoPasswordManager.getEntitlementState()
                     )
                 }
-                // Sort the Sudos so they appear in the same order as they do on the SudosFragment
-                sudos.sortWith(SudosFragment.sudosComparator)
 
-                // Order the entitlements so they match the order of Sudos
                 entitlementsList.clear()
-                for (sudo in sudos) {
-                    val entitlementForThisSudo = entitlements.find { it.sudoId == sudo.id }
-                        ?: continue
-                    entitlementsList.add(entitlementForThisSudo)
+                if (sudos.isNotEmpty()) {
+                    // Sort the Sudos so they appear in the same order as they do on the SudosFragment
+                    sudos.sortWith(SudosFragment.sudosComparator)
+
+                    // Order the entitlements so they match the order of Sudos
+                    for (sudo in sudos) {
+                        val entitlementForThisSudo = entitlementState.find { it.sudoId == sudo.id }
+                            ?: continue
+                        entitlementsList.add(ViewEntitlementsHolder.WithSudos(entitlementForThisSudo))
+                    }
+                } else {
+                    entitlement.forEach {
+                        entitlementsList.add(ViewEntitlementsHolder.NoSudos(it))
+                    }
                 }
                 adapter.notifyDataSetChanged()
             } catch (e: SudoProfileException) {

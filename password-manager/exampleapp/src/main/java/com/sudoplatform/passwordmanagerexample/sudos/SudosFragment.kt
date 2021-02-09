@@ -14,7 +14,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -23,8 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
-import com.sudoplatform.passwordmanagerexample.SUDO_ID_ARGUMENT
-import com.sudoplatform.passwordmanagerexample.SUDO_LABEL_ARGUMENT
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.swipe.SwipeLeftActionHelper
@@ -34,8 +31,6 @@ import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import kotlin.coroutines.CoroutineContext
 import kotlinx.android.synthetic.main.fragment_sudos.*
-import kotlinx.android.synthetic.main.fragment_sudos.progressBar
-import kotlinx.android.synthetic.main.fragment_sudos.progressText
 import kotlinx.android.synthetic.main.fragment_sudos.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -107,13 +102,13 @@ class SudosFragment : Fragment(), CoroutineScope {
                             app.sudoPasswordManager.lock()
                         }
                     }
-                    navController.navigate(R.id.action_sudosFragment_to_unlockVaultsFragment)
+                    navController.navigate(SudosFragmentDirections.actionSudosFragmentToUnlockVaultsFragment())
                 }
                 R.id.info -> {
                     showInfo()
                 }
                 R.id.settings -> {
-                    navController.navigate(R.id.action_sudosFragment_to_settingsFragment)
+                    navController.navigate(SudosFragmentDirections.actionSudosFragmentToSettingsFragment())
                 }
             }
             true
@@ -236,11 +231,7 @@ class SudosFragment : Fragment(), CoroutineScope {
     private fun configureRecyclerView(view: View) {
         adapter =
             SudoAdapter(sudoList) { sudo ->
-                val bundle = bundleOf(
-                    SUDO_ID_ARGUMENT to sudo.id,
-                    SUDO_LABEL_ARGUMENT to sudo.label
-                )
-                navController.navigate(R.id.action_sudosFragment_to_vaultsFragment, bundle)
+                navController.navigate(SudosFragmentDirections.actionSudosFragmentToVaultsFragment(sudo.id!!))
             }
 
         view.sudoRecyclerView.adapter = adapter
