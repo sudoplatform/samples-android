@@ -38,7 +38,7 @@ class ProvisionEmailAddressRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun waitForRootFocus() {
@@ -75,11 +75,13 @@ class ProvisionEmailAddressRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1_000L)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnNegativeErrorAlertDialogButton() {
         checkErrorAlertDialog()
+        Thread.sleep(1_000L)
         clickOnView(negativeAlertButton)
     }
 
@@ -112,7 +114,8 @@ class ProvisionEmailAddressRobot : BaseRobot() {
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(positiveAlertButton, 60_000L)
+        Thread.sleep(1_000L)
         onView(positiveAlertButton)
             .check(matches(withText(android.R.string.ok)))
     }

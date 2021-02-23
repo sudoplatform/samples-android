@@ -30,7 +30,7 @@ class EmailAddressesRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingProgress, 5_000L)
-        waitForViewToNotDisplay(loadingProgress, 10_000L)
+        waitForViewToNotDisplay(loadingProgress, 60_000L)
     }
 
     fun checkEmailAddressesItemsDisplayed() {
@@ -51,6 +51,7 @@ class EmailAddressesRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         waitForViewToDisplay(positiveAlertButton, 15_000L)
+        Thread.sleep(1_000L)
         clickOnView(positiveAlertButton)
     }
 
@@ -64,7 +65,8 @@ class EmailAddressesRobot : BaseRobot() {
 
     fun swipeLeftToDelete(position: Int) {
         Espresso.onView(emailAddressRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -72,7 +74,8 @@ class EmailAddressesRobot : BaseRobot() {
 
     private fun clickRecyclerViewItem(position: Int) {
         Espresso.onView(emailAddressRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
+                position,
                 ViewActions.click()
             )
         )

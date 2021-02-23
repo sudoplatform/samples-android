@@ -1,18 +1,16 @@
 <resources>
 
     <!-- App -->
-    <string name="app_name">Email Example</string>
+    <string name="app_name">Email Sample</string>
 
     <!-- Common -->
     <string name="email">Email</string>
     <string name="sudos">Sudos</string>
     <string name="learn_more">Learn More</string>
-    <string name="sudo_label">sudoLabel</string>
-    <string name="sudo_id">sudoId</string>
     <string name="success">Success</string>
 
     <!-- RegisterFragment -->
-    <string name="example_app">Example App</string>
+    <string name="sample_app">Sample App</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
     <string name="signin_failure">Failed to Sign In: %1$s</string>
@@ -65,9 +63,6 @@
 
     <!-- EmailMessagesFragment.kt -->
     <string name="email_messages">Email Messages</string>
-    <string name="email_message">Email Message</string>
-    <string name="email_address">Email Address</string>
-    <string name="email_address_id">Email Address Id</string>
     <string name="loading_email_messages">Loading Email Messages</string>
     <string name="list_email_messages_failure">Failed to list email messages</string>
     <string name="from_recipient">From: %1$s</string>
@@ -83,14 +78,13 @@
     <string name="cc">Cc:&#xA0;&#xA0;</string>
     <string name="bcc">Bcc:&#xA0;&#xA0;</string>
     <string name="subject">Subject:&#xA0;&#xA0;</string>
-    <string name="email_footer">\n\nSent from Sudo Platform Email Example App</string>
+    <string name="email_footer">\n\nSent from Sudo Platform Email Sample App</string>
     <string name="compose_email_message">Compose Email Message</string>
     <string name="sending">Sending&#8230;</string>
     <string name="sent">Sent</string>
     <string name="send_email_message_failure">Failed to send email message</string>
     <string name="get_email_address_failure">Failed to retrieve email address</string>
     <string name="validate_to_address">Please ensure the to address field is filled out.</string>
-    <string name="simplified_email_message">Simplified Email Message</string>
     <string name="reply_message">Re: %1$s</string>
     <string name="reply_body">\n\n---------------\n\n%1$s</string>
 

@@ -14,13 +14,13 @@ import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
-import java.util.UUID
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import timber.log.Timber
+import java.util.UUID
 
 /**
  * Test the provision email address flow.
@@ -41,6 +41,12 @@ class ProvisionEmailAddressTest {
 
     @After
     fun fini() {
+        mainMenu {
+            pressBackUntilDeregisterToolbarButtonIsDisplayed()
+            clickOnDeregister()
+            clickOnPositiveDeregisterAlertDialogButton()
+            waitForLoading()
+        }
         Timber.uprootAll()
     }
 
@@ -63,12 +69,6 @@ class ProvisionEmailAddressTest {
             waitForRecyclerView()
             checkSudosItemsDisplayed()
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 
@@ -111,12 +111,6 @@ class ProvisionEmailAddressTest {
         sudos {
             pressBack()
         }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
-        }
     }
 
     @Test
@@ -138,12 +132,6 @@ class ProvisionEmailAddressTest {
             waitForLoading()
             clickOnPositiveAlertDialogButton()
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 
@@ -173,12 +161,6 @@ class ProvisionEmailAddressTest {
         sudos {
             pressBack()
         }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
-        }
     }
 
     @Test
@@ -202,12 +184,6 @@ class ProvisionEmailAddressTest {
         }
         sudos {
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 }

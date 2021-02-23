@@ -36,6 +36,12 @@ class SendEmailMessageTest {
 
     @After
     fun fini() {
+        mainMenu {
+            pressBackUntilDeregisterToolbarButtonIsDisplayed()
+            clickOnDeregister()
+            clickOnPositiveDeregisterAlertDialogButton()
+            waitForLoading()
+        }
         Timber.uprootAll()
     }
 
@@ -102,12 +108,6 @@ class SendEmailMessageTest {
             checkSudosItemsDisplayed()
             pressBack()
         }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
-        }
     }
 
     @Test
@@ -148,12 +148,6 @@ class SendEmailMessageTest {
             waitForRecyclerView()
             checkSudosItemsDisplayed()
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 
@@ -236,12 +230,6 @@ class SendEmailMessageTest {
             waitForRecyclerView()
             checkSudosItemsDisplayed()
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 }

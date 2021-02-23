@@ -31,7 +31,7 @@ class EmailMessagesRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingProgress, 5_000L)
-        waitForViewToNotDisplay(loadingProgress, 10_000L)
+        waitForViewToNotDisplay(loadingProgress, 60_000L)
     }
 
     fun checkEmailMessagesItemsDisplayed() {
@@ -59,25 +59,29 @@ class EmailMessagesRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1_000L)
         clickOnView(positiveAlertButton)
     }
 
     fun swipeLeftToDelete(position: Int) {
         onView(emailMessagesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(positiveAlertButton, 60_000L)
+        Thread.sleep(1_000L)
         onView(positiveAlertButton).check(matches(withText(android.R.string.ok)))
     }
 
     private fun clickRecyclerViewItem(position: Int) {
         onView(emailMessagesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
+                position,
                 ViewActions.click()
             )
         )

@@ -13,10 +13,6 @@
         <action
             android:id="@+id/action_registerFragment_to_mainMenuFragment"
             app:destination="@id/mainMenuFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/registerFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -28,19 +24,11 @@
         <action
             android:id="@+id/action_mainMenuFragment_to_registerFragment"
             app:destination="@id/registerFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/mainMenuFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_mainMenuFragment_to_sudosFragment"
-            app:destination="@id/sudosFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/sudosFragment" />
     </fragment>
     <fragment
         android:id="@+id/sudosFragment"
@@ -49,18 +37,10 @@
         tools:layout="@layout/fragment_sudos" >
         <action
             android:id="@+id/action_sudosFragment_to_createSudoFragment"
-            app:destination="@id/createSudoFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/createSudoFragment" />
         <action
             android:id="@+id/action_sudosFragment_to_emailAddressesFragment"
-            app:destination="@id/emailAddressesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/emailAddressesFragment" />
     </fragment>
     <fragment
         android:id="@+id/createSudoFragment"
@@ -70,12 +50,8 @@
         <action
             android:id="@+id/action_createSudoFragment_to_emailAddressesFragment"
             app:destination="@id/emailAddressesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/createSudoFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/emailAddressesFragment"
@@ -85,25 +61,27 @@
         <argument
             android:name="sudoId"
             app:argType="string"
-            android:defaultValue="None"/>
+            app:nullable="false" />
         <argument
             android:name="sudoLabel"
             app:argType="string"
-            android:defaultValue="None"/>
+            android:defaultValue="None" />
+        <argument
+            android:name="emailAddress"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue="None" />
+        <argument
+            android:name="emailAddressId"
+            app:argType="string"
+            app:nullable="false"
+            android:defaultValue="None" />
         <action
             android:id="@+id/action_emailAddressesFragment_to_provisionEmailAddressFragment"
-            app:destination="@id/provisionEmailAddressFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/provisionEmailAddressFragment" />
         <action
             android:id="@+id/action_emailAddressesFragment_to_emailMessagesFragment"
-            app:destination="@id/emailMessagesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"/>
+            app:destination="@id/emailMessagesFragment" />
     </fragment>
     <fragment
         android:id="@+id/provisionEmailAddressFragment"
@@ -112,19 +90,14 @@
         tools:layout="@layout/fragment_provision_email_address" >
         <argument
             android:name="sudoId"
-            app:argType="string"
-            android:defaultValue="None"/>
+            app:argType="string" />
         <argument
             android:name="sudoLabel"
             app:argType="string"
-            android:defaultValue="None"/>
+            android:defaultValue="None" />
         <action
             android:id="@+id/action_provisionEmailAddressFragment_to_emailAddressesFragment"
             app:destination="@id/emailAddressesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/emailAddressesFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -136,25 +109,17 @@
         <argument
             android:name="emailAddress"
             app:argType="string"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <argument
             android:name="emailAddressId"
             app:argType="string"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <action
             android:id="@+id/action_emailMessagesFragment_to_sendEmailMessageFragment"
-            app:destination="@id/sendEmailMessageFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"/>
+            app:destination="@id/sendEmailMessageFragment" />
         <action
             android:id="@+id/action_emailMessagesFragment_to_readEmailMessageFragment"
-            app:destination="@id/readEmailMessageFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"/>
+            app:destination="@id/readEmailMessageFragment" />
     </fragment>
     <fragment
         android:id="@+id/sendEmailMessageFragment"
@@ -164,24 +129,26 @@
         <argument
             android:name="emailAddress"
             app:argType="string"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <argument
             android:name="emailAddressId"
             app:argType="string"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <argument
             android:name="emailMessage"
             app:argType="com.sudoplatform.sudoemail.types.EmailMessage"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+        <argument
+            android:name="emailMessageWithBody"
+            app:argType="com.sudoplatform.emailexample.util.SimplifiedEmailMessage"
+            app:nullable="true"
             android:defaultValue="@null"/>
         <action
             android:id="@+id/action_sendEmailMessageFragment_to_emailMessagesFragment"
             app:destination="@id/emailMessagesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/emailMessagesFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/readEmailMessageFragment"
@@ -191,21 +158,17 @@
         <argument
             android:name="emailAddress"
             app:argType="string"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <argument
             android:name="emailAddressId"
             app:argType="string"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <argument
             android:name="emailMessage"
             app:argType="com.sudoplatform.sudoemail.types.EmailMessage"
-            android:defaultValue="@null"/>
+            app:nullable="false" />
         <action
             android:id="@+id/action_readEmailMessageFragment_to_sendEmailMessageFragment"
-            app:destination="@id/sendEmailMessageFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"/>
+            app:destination="@id/sendEmailMessageFragment" />
     </fragment>
 </navigation>

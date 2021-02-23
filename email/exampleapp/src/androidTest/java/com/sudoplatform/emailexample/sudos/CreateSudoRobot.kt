@@ -6,7 +6,7 @@
 
 package com.sudoplatform.emailexample.sudos
 
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -39,22 +39,9 @@ class CreateSudoRobot : BaseRobot() {
         waitForViewToDisplay(learnMoreButton)
     }
 
-    fun clickOnCreateButton() {
-        clickOnView(toolbarCreateButton)
-    }
-
-    fun clickPositiveAlertDialogButton() {
-        checkAlertDialog()
-        clickOnView(positiveAlertButton)
-    }
-
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
-    }
-
-    fun setSudoName(name: String) {
-        setTextFieldValue(name)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun registerAndCreateSudoFlow() {
@@ -73,13 +60,28 @@ class CreateSudoRobot : BaseRobot() {
         }
     }
 
+    private fun setSudoName(name: String) {
+        setTextFieldValue(name)
+    }
+
+    private fun clickOnCreateButton() {
+        clickOnView(toolbarCreateButton)
+    }
+
+    private fun clickPositiveAlertDialogButton() {
+        checkAlertDialog()
+        Thread.sleep(1_000L)
+        clickOnView(positiveAlertButton)
+    }
+
     private fun setTextFieldValue(inputText: String) {
         replaceText(sudoLabelEditText, inputText)
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
-        Espresso.onView(positiveAlertButton)
+        waitForViewToDisplay(positiveAlertButton, 60_000L)
+        Thread.sleep(1_000L)
+        onView(positiveAlertButton)
             .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.ok)))
     }
 }

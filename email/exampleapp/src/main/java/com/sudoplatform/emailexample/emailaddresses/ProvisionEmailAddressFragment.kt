@@ -19,34 +19,31 @@ import android.widget.EditText
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import com.sudoplatform.emailexample.App
-import com.sudoplatform.emailexample.MissingFragmentArgumentException
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
+import com.sudoplatform.emailexample.databinding.FragmentProvisionEmailAddressBinding
 import com.sudoplatform.emailexample.showAlertDialog
+import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
 import com.sudoplatform.sudoprofiles.Sudo
-import java.util.Timer
-import java.util.TimerTask
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_provision_email_address.*
-import kotlinx.android.synthetic.main.fragment_provision_email_address.view.*
-import kotlinx.android.synthetic.main.fragment_provision_email_address.view.toolbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Timer
+import java.util.TimerTask
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [ProvisionEmailAddressFragment] presents a form so that a user can provision an [EmailAddress].
@@ -74,14 +71,24 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentProvisionEmailAddressBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and create button. */
     private lateinit var toolbarMenu: Menu
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A mutable list of available email addresses. */
     private var availableAddresses = mutableListOf<String>()
+
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: ProvisionEmailAddressFragmentArgs by navArgs()
 
     /** A [Sudo] identifier used to provision an [EmailAddress]. */
     private lateinit var sudoId: String
@@ -93,22 +100,25 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_provision_email_address, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.provision_email_address)
-
-        toolbar.inflateMenu(R.menu.nav_menu_with_create_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.create -> {
-                    provisionEmailAddress()
+    ): View {
+        bindingDelegate.attach(FragmentProvisionEmailAddressBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.provision_email_address)
+            inflateMenu(R.menu.nav_menu_with_create_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.create -> {
+                        provisionEmailAddress()
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        sudoId = args.sudoId
+        sudoLabel = args.sudoLabel
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -117,20 +127,22 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         setSudoLabelText()
         navController = Navigation.findNavController(view)
 
-        view.learnMoreButton.setOnClickListener {
+        binding.learnMoreButton.setOnClickListener {
             learnMore()
         }
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
     /** Provisions an [EmailAddress] from the [SudoEmailClient] based on the selected address. */
     private fun provisionEmailAddress() {
-        val localPart = addressField.text.toString().trim()
+        val localPart = binding.addressField.text.toString().trim()
         if (localPart.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_local_part,
@@ -138,9 +150,6 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val app = requireActivity().application as App
-        sudoId = requireArguments().getString(getString(R.string.sudo_id))
-            ?: throw MissingFragmentArgumentException("Sudo identifier missing")
         launch {
             try {
                 showLoading(R.string.provisioning_email_address)
@@ -153,11 +162,13 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                         titleResId = R.string.success,
                         positiveButtonResId = android.R.string.ok,
                         onPositive = {
-                            val bundle = bundleOf(
-                                getString(R.string.sudo_id) to sudoId,
-                                getString(R.string.sudo_label) to sudoLabel
+                            navController.navigate(
+                                ProvisionEmailAddressFragmentDirections
+                                    .actionProvisionEmailAddressFragmentToEmailAddressesFragment(
+                                        sudoId,
+                                        sudoLabel
+                                    )
                             )
-                            navController.navigate(R.id.action_provisionEmailAddressFragment_to_emailAddressesFragment, bundle)
                         }
                     )
                 }
@@ -181,7 +192,6 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
      * @param localParts A list of local parts to check for address availability.
      */
     private fun checkEmailAddressAvailability(localParts: List<String>) {
-        val app = requireActivity().application as App
         launch {
             try {
                 val supportedDomains = app.sudoEmailClient.getSupportedEmailDomains(
@@ -199,7 +209,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                         colorResId = R.color.colorNegativeMsg
                     )
                 } else {
-                    addressHolder?.text = availableAddresses.first()
+                    binding.addressHolder.text = availableAddresses.first()
                     setAvailabilityLabel(
                         textResId = R.string.email_address_available,
                         colorResId = R.color.colorPositiveMsg
@@ -226,13 +236,13 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
      * email address availability checks.
      */
     private fun configureAddressFieldListener() {
-        availabilityLabel?.isVisible = false
-        addressField.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        binding.availabilityLabel.isVisible = false
+        binding.addressField.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) { /* no-op */ }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { /* no-op */ }
             var timer = Timer()
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                availabilityLabel?.isVisible = false
+                binding.availabilityLabel.isVisible = false
                 toolbarMenu.getItem(0)?.isEnabled = false
                 timer.cancel()
                 timer = Timer()
@@ -258,16 +268,14 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         @ColorRes colorResId: Int
     ) {
         toolbarMenu.getItem(0)?.isEnabled = true
-        availabilityLabel?.isVisible = true
-        availabilityLabel?.text = if (textResId != null) getString(textResId) else text
-        availabilityLabel?.setTextColor(ContextCompat.getColor(requireContext(), colorResId))
+        binding.availabilityLabel.isVisible = true
+        binding.availabilityLabel.text = if (textResId != null) getString(textResId) else text
+        binding.availabilityLabel.setTextColor(ContextCompat.getColor(requireContext(), colorResId))
     }
 
     /** Set the [Sudo] label text containing the [Sudo] alias. */
     private fun setSudoLabelText() {
-        sudoLabel = requireArguments().getString(getString(R.string.sudo_label))
-            ?: throw MissingFragmentArgumentException("Sudo identifier missing")
-        sudoLabelText?.text = sudoLabel
+        binding.sudoLabelText.text = sudoLabel
     }
 
     /**
@@ -277,20 +285,22 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
-        addressField?.isEnabled = isEnabled
-        learnMoreButton?.isEnabled = isEnabled
+        binding.addressField.isEnabled = isEnabled
+        binding.learnMoreButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
         setItemsEnabled(false)
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
-        setItemsEnabled(true)
+        loading?.dismiss()
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

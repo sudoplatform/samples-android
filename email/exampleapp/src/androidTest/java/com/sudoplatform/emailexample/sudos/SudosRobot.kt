@@ -32,14 +32,14 @@ class SudosRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun waitForRecyclerView() {
         waitForViewToDisplay(sudoRecyclerView, 5_000L)
     }
 
-    fun checkSudosItemsDisplayed(timeout: Long = 1000L) {
+    fun checkSudosItemsDisplayed(timeout: Long = 1_000L) {
         waitForViewToDisplay(toolbar, timeout)
         waitForViewToDisplay(createSudoButton)
     }
@@ -53,12 +53,14 @@ class SudosRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1_000L)
         clickOnView(positiveAlertButton)
     }
 
     fun swipeLeftToDelete(position: Int) {
         onView(sudoRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )

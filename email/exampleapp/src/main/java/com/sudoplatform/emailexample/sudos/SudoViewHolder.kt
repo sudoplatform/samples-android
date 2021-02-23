@@ -7,11 +7,10 @@
 package com.sudoplatform.emailexample.sudos
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.emailexample.R
+import com.sudoplatform.emailexample.databinding.LayoutItemCellBinding
 import com.sudoplatform.sudoprofiles.Sudo
 
 /**
@@ -20,26 +19,24 @@ import com.sudoplatform.sudoprofiles.Sudo
  *
  * The item view contains a label [TextView] of the [Sudo] name.
  *
- * @param view The [Sudo] item view component.
+ * @property binding The [Sudo] item view binding component.
  */
-class SudoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-    private val nameTextView: TextView = view.findViewById(R.id.name)
+class SudoViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         fun inflate(parent: ViewGroup): SudoViewHolder {
-            val inflater = LayoutInflater.from(parent.context)
-            return SudoViewHolder(
-                inflater.inflate(
-                    R.layout.layout_item_cell,
-                    parent,
-                    false
-                )
+            val binding = LayoutItemCellBinding.inflate(
+                LayoutInflater.from(
+                    parent.context
+                ),
+                parent,
+                false
             )
+            return SudoViewHolder(binding)
         }
     }
 
     fun bind(sudoName: String) {
-        nameTextView.text = sudoName
+        binding.name.text = sudoName
     }
 }

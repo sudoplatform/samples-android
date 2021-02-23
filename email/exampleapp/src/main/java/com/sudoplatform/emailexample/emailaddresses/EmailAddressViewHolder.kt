@@ -7,40 +7,35 @@
 package com.sudoplatform.emailexample.emailaddresses
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.emailexample.R
+import com.sudoplatform.emailexample.databinding.LayoutItemCellBinding
 import com.sudoplatform.sudoemail.types.EmailAddress
-import kotlinx.android.synthetic.main.layout_item_cell.view.*
 
 /**
  * A [RecyclerView.ViewHolder] used to describe the [EmailAddress] item view and metadata about its
  * place within the [RecyclerView].
  *
- * The item view contains a label [nameTextView] of the address.
+ * The item view contains a name label of the address.
  *
- * @property view The [EmailAddress] item view component.
+ * @property binding The [EmailAddress] item view binding component.
  */
-class EmailAddressViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
-
-    private val nameTextView: TextView = view.name
+class EmailAddressViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         fun inflate(parent: ViewGroup): EmailAddressViewHolder {
-            val inflater = LayoutInflater.from(parent.context)
-            return EmailAddressViewHolder(
-                inflater.inflate(
-                    R.layout.layout_item_cell,
-                    parent,
-                    false
-                )
+            val binding = LayoutItemCellBinding.inflate(
+                LayoutInflater.from(
+                    parent.context
+                ),
+                parent,
+                false
             )
+            return EmailAddressViewHolder(binding)
         }
     }
 
     fun bind(emailAddress: EmailAddress) {
-        nameTextView.text = emailAddress.emailAddress
+        binding.name.text = emailAddress.emailAddress
     }
 }

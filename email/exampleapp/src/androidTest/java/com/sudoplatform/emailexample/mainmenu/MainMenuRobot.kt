@@ -34,12 +34,7 @@ class MainMenuRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
-    }
-
-    fun checkMainMenuItemsDisplayed(timeout: Long = 1000L) {
-        waitForViewToDisplay(toolbar, timeout)
-        waitForViewToDisplay(sudosButton, timeout)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun navigateToSudosScreen() {
@@ -57,7 +52,7 @@ class MainMenuRobot : BaseRobot() {
                 // Login screen was skipped because already logged in
             }
         }
-        checkMainMenuItemsDisplayed(15_000L)
+        checkMainMenuItemsDisplayed(60_000L)
     }
 
     fun clickOnDeregister() {
@@ -66,12 +61,23 @@ class MainMenuRobot : BaseRobot() {
 
     fun clickOnPositiveDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
+        Thread.sleep(1_000L)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnNegativeDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
+        Thread.sleep(1_000L)
         clickOnView(negativeAlertButton)
+    }
+
+    fun pressBackUntilDeregisterToolbarButtonIsDisplayed() {
+        pressBackUntilViewIsDisplayed(toolbarDeregisterButton)
+    }
+
+    private fun checkMainMenuItemsDisplayed(timeout: Long = 1_000L) {
+        waitForViewToDisplay(toolbar, timeout)
+        waitForViewToDisplay(sudosButton, timeout)
     }
 
     private fun checkDeregisterAlertDialog() {

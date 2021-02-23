@@ -13,39 +13,34 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.App
-import com.sudoplatform.emailexample.MissingFragmentArgumentException
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
+import com.sudoplatform.emailexample.databinding.FragmentEmailMessagesBinding
 import com.sudoplatform.emailexample.emailaddresses.EmailAddressesFragment
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.swipe.SwipeLeftActionHelper
+import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.subscription.EmailMessageSubscriber
 import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
 import com.sudoplatform.sudoemail.types.EmailMessage
-import java.util.UUID
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_email_messages.*
-import kotlinx.android.synthetic.main.fragment_email_messages.progressBar
-import kotlinx.android.synthetic.main.fragment_email_messages.progressText
-import kotlinx.android.synthetic.main.fragment_email_messages.view.*
-import kotlinx.android.synthetic.main.fragment_sudos.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [EmailMessagesFragment] presents a list of [EmailMessage]s associated with an [EmailAddress].
@@ -67,6 +62,13 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentEmailMessagesBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and compose button. */
     private lateinit var toolbarMenu: Menu
 
@@ -74,10 +76,13 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
     private lateinit var adapter: EmailMessageAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A mutable list of [EmailMessage]s. */
     private var emailMessageList = mutableListOf<EmailMessage>()
+
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: EmailMessagesFragmentArgs by navArgs()
 
     /** The selected Email address used to filter email messages. */
     private lateinit var emailAddress: String
@@ -92,43 +97,46 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_email_messages, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        emailAddress = requireArguments().getString(getString(R.string.email_address))
-            ?: throw MissingFragmentArgumentException("Email address missing")
-        emailAddressId = requireArguments().getString(getString(R.string.email_address_id))
-            ?: throw MissingFragmentArgumentException("Email address id missing")
-        toolbar.title = getString(R.string.email_messages)
-
-        toolbar.inflateMenu(R.menu.nav_menu_with_compose_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.compose -> {
-                    val bundle = bundleOf(
-                        getString(R.string.email_address) to emailAddress,
-                        getString(R.string.email_address_id) to emailAddressId
-                    )
-                    navController.navigate(R.id.action_emailMessagesFragment_to_sendEmailMessageFragment, bundle)
+    ): View {
+        bindingDelegate.attach(FragmentEmailMessagesBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.email_messages)
+            inflateMenu(R.menu.nav_menu_with_compose_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.compose -> {
+                        navController.navigate(
+                            EmailMessagesFragmentDirections
+                                .actionEmailMessagesFragmentToSendEmailMessageFragment(
+                                    emailAddress,
+                                    emailAddressId
+                                )
+                        )
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        emailAddress = args.emailAddress
+        emailAddressId = args.emailAddressId
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
         navController = Navigation.findNavController(view)
 
         listEmailMessages(CachePolicy.REMOTE_ONLY)
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -148,7 +156,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
      * @param cachePolicy Option of either retrieving [EmailMessage] data from the cache or network.
      */
     private fun listEmailMessages(cachePolicy: CachePolicy) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showLoading()
@@ -161,19 +168,18 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
                     if (emailMessage.emailAddressId == emailAddressId ||
                         emailMessage.to.contains(address) ||
                         emailMessage.cc.contains(address) ||
-                        emailMessage.bcc.contains(address)) {
+                        emailMessage.bcc.contains(address)
+                    ) {
                         emailMessageList.add(emailMessage)
                     }
                 }
-                emailMessageList.sortWith(
-                    Comparator { lhs, rhs ->
-                        when {
-                            lhs.createdAt.before(rhs.createdAt) -> 1
-                            lhs.createdAt.after(rhs.createdAt) -> -1
-                            else -> 0
-                        }
+                emailMessageList.sortWith { lhs, rhs ->
+                    when {
+                        lhs.createdAt.before(rhs.createdAt) -> 1
+                        lhs.createdAt.after(rhs.createdAt) -> -1
+                        else -> 0
                     }
-                )
+                }
                 adapter.notifyDataSetChanged()
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
@@ -194,7 +200,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
      * @param id The identifier of the [EmailMessage] to delete.
      */
     private fun deleteEmailMessage(id: String) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showDeleteAlert(R.string.deleting_email_message)
@@ -218,7 +223,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
 
     /** Subscribe to receive live updates as [EmailMessage]s are created and deleted. */
     private fun subscribeToEmailMessages() {
-        val app = requireActivity().application as App
         launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -267,7 +271,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
 
     /** Unsubscribe from live [EmailMessage] updates. */
     private fun unsubscribeFromEmailMessages() {
-        val app = requireActivity().application as App
         launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -283,17 +286,18 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the listed [EmailMessage] items and listens to
      * item select events to navigate to the [ReadEmailMessageFragment].
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = EmailMessageAdapter(emailMessageList) { emailMessage ->
-            val bundle = bundleOf(
-                getString(R.string.email_address) to emailAddress,
-                getString(R.string.email_address_id) to emailAddressId,
-                getString(R.string.email_message) to emailMessage
+            navController.navigate(
+                EmailMessagesFragmentDirections.actionEmailMessagesFragmentToReadEmailMessageFragment(
+                    emailAddress,
+                    emailAddressId,
+                    emailMessage
+                )
             )
-            navController.navigate(R.id.action_emailMessagesFragment_to_readEmailMessageFragment, bundle)
         }
-        view.emailMessageRecyclerView.adapter = adapter
-        view.emailMessageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.emailMessageRecyclerView.adapter = adapter
+        binding.emailMessageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToDelete()
     }
 
@@ -304,37 +308,39 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
-        emailMessageRecyclerView?.isEnabled = isEnabled
+        binding.emailMessageRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
         if (textResId != 0) {
-            progressText.text = getString(textResId)
+            binding.progressText.text = getString(textResId)
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
-        emailMessageRecyclerView?.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
+        binding.emailMessageRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
-        emailMessageRecyclerView?.visibility = View.VISIBLE
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            binding.progressBar.visibility = View.GONE
+            binding.progressText.visibility = View.GONE
+            binding.emailMessageRecyclerView.visibility = View.VISIBLE
+            setItemsEnabled(true)
+        }
     }
 
     /** Displays the loading [AlertDialog] indicating that a deletion operation is occurring. */
     private fun showDeleteAlert(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
     }
 
     /** Dismisses the loading [AlertDialog] indicating that a deletion operation has finished. */
     private fun hideDeleteAlert() {
-        loading.dismiss()
+        loading?.dismiss()
     }
 
     /**
@@ -345,7 +351,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
      */
     private fun configureSwipeToDelete() {
         val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
-        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(emailMessageRecyclerView)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.emailMessageRecyclerView)
     }
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {

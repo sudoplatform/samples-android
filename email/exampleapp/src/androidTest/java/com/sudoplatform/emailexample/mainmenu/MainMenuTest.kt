@@ -6,7 +6,7 @@
 
 package com.sudoplatform.emailexample.mainmenu
 
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -48,7 +48,7 @@ class MainMenuTest {
             navigateToSudosScreen()
         }
         sudos {
-            Espresso.pressBack()
+            pressBack()
         }
     }
 

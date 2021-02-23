@@ -14,26 +14,27 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
+import com.sudoplatform.emailexample.databinding.FragmentMainMenuBinding
 import com.sudoplatform.emailexample.register.RegisterFragment
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.sudos.SudosFragment
+import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.RegisterException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_main_menu.*
-import kotlinx.android.synthetic.main.fragment_main_menu.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [MainMenuFragment] presents a menu screen so that the user can navigate through each of the
@@ -53,47 +54,65 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentMainMenuBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and toolbar items. */
     private lateinit var toolbarMenu: Menu
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_main_menu, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.app_name)
-
-        toolbar.inflateMenu(R.menu.nav_menu_main_menu)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.deregister -> {
-                    showAlertDialog(
-                        titleResId = R.string.deregister,
-                        messageResId = R.string.deregister_confirmation,
-                        positiveButtonResId = R.string.deregister,
-                        onPositive = { deregister() },
-                        negativeButtonResId = android.R.string.cancel
-                    )
+    ): View {
+        bindingDelegate.attach(FragmentMainMenuBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.app_name)
+            inflateMenu(R.menu.nav_menu_main_menu)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.deregister -> {
+                        showAlertDialog(
+                            titleResId = R.string.deregister,
+                            messageResId = R.string.deregister_confirmation,
+                            positiveButtonResId = R.string.deregister,
+                            onPositive = { deregister() },
+                            negativeButtonResId = android.R.string.cancel
+                        )
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        view.sudosButton.setOnClickListener {
-            navController.navigate(R.id.action_mainMenuFragment_to_sudosFragment)
+        binding.sudosButton.setOnClickListener {
+            navController.navigate(
+                MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment()
+            )
         }
+    }
+
+    override fun onDestroy() {
+        loading?.dismiss()
+        coroutineContext.cancelChildren()
+        coroutineContext.cancel()
+        bindingDelegate.detach()
+        super.onDestroy()
     }
 
     /** Perform de-registration from the [SudoUserClient] and clear all local data. */
@@ -101,12 +120,16 @@ class MainMenuFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading(R.string.deregistering)
-                val app = requireActivity().application as App
                 withContext(Dispatchers.IO) {
                     app.sudoUserClient.deregister()
+                    app.sudoEmailClient.reset()
+                    app.sudoProfilesClient.reset()
+                    app.sudoUserClient.reset()
                 }
                 hideLoading()
-                navController.navigate(R.id.action_mainMenuFragment_to_registerFragment)
+                navController.navigate(
+                    MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment()
+                )
             } catch (e: RegisterException) {
                 Toast.makeText(
                     requireContext(),
@@ -124,19 +147,21 @@ class MainMenuFragment : Fragment(), CoroutineScope {
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
-        sudosButton.isEnabled = isEnabled
+        binding.sudosButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
         setItemsEnabled(false)
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
-        setItemsEnabled(true)
+        loading?.dismiss()
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

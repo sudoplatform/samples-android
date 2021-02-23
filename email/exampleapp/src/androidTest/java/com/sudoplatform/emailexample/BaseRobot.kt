@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
@@ -125,8 +126,8 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 1000) {
-        val retryInterval = 100L // 100 ms between retries var attempts = 1
+    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+        val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
                 onView(matcher)
@@ -144,19 +145,24 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToNotDisplay(matcher: Matcher<View>, timeout: Long = 1000) {
-        val retryInterval = 100L // 100 ms between retries var attempts = 1
+    fun waitForViewToNotDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+        val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
                 onView(matcher)
                     .check(matches(not(isDisplayed())))
-                break
+                return
             } catch (e: NoMatchingViewException) {
-                break
+                return
             } catch (e: AssertionFailedError) {
                 println("AssertionFailedError Exception")
                 Thread.sleep(retryInterval)
             }
+        }
+        try {
+            onView(matcher)
+                .check(matches(not(isDisplayed())))
+        } catch (e: NoMatchingViewException) {
         }
     }
 
@@ -173,6 +179,21 @@ open class BaseRobot {
                 uiController?.loopMainThreadForAtLeast(delay)
             }
         }
+    }
+
+    fun pressBackUntilViewIsDisplayed(matcher: Matcher<View>, timeout: Long = 5_000L) {
+        val retryInterval = 250L // 250 ms between retries var attempts = 1
+        Thread.sleep(1_000L)
+        for (x in 0..timeout step retryInterval) {
+            try {
+                onView(matcher).check(matches(isDisplayed()))
+                return
+            } catch (e: NoMatchingViewException) {
+                Thread.sleep(retryInterval)
+                pressBack()
+            }
+        }
+        onView(matcher).check(matches(isDisplayed()))
     }
 
     // Matcher used to retrieve the text from a TextView.

@@ -13,29 +13,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import com.sudoplatform.emailexample.App
-import com.sudoplatform.emailexample.MissingFragmentArgumentException
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
+import com.sudoplatform.emailexample.databinding.FragmentSendEmailMessageBinding
 import com.sudoplatform.emailexample.showAlertDialog
+import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageFactory
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.EmailMessage
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_provision_email_address.view.*
-import kotlinx.android.synthetic.main.fragment_send_email_message.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [SendEmailMessageFragment] presents a view to allow a user to compose and send an email
@@ -56,11 +54,21 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentSendEmailMessageBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and send button. */
     private lateinit var toolbarMenu: Menu
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
+
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: SendEmailMessageFragmentArgs by navArgs()
 
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
@@ -72,43 +80,43 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_send_email_message, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.compose_email_message)
-
-        toolbar.inflateMenu(R.menu.nav_menu_with_send_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.send -> {
-                    sendEmailMessage()
+    ): View {
+        bindingDelegate.attach(FragmentSendEmailMessageBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.compose_email_message)
+            inflateMenu(R.menu.nav_menu_with_send_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.send -> {
+                        sendEmailMessage()
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        emailAddress = args.emailAddress
+        emailAddressId = args.emailAddressId
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        emailAddress = requireArguments().getString(getString(R.string.email_address))
-            ?: throw MissingFragmentArgumentException("Email address missing")
-        emailAddressId = requireArguments().getString(getString(R.string.email_address_id))
-            ?: throw MissingFragmentArgumentException("Email address id missing")
-
-        val emailMessageWithBody = requireArguments().getParcelable<SimplifiedEmailMessage>(getString(R.string.simplified_email_message))
-        val emailMessage = requireArguments().getParcelable<EmailMessage>(getString(R.string.email_message))
+        val emailMessageWithBody = args.emailMessageWithBody
+        val emailMessage = args.emailMessage
         if (emailMessageWithBody != null && emailMessage != null) {
             configureReplyContents(emailMessage, emailMessageWithBody)
         }
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -121,18 +129,17 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val app = requireActivity().application as App
         launch {
             try {
                 showLoading(R.string.sending)
                 withContext(Dispatchers.IO) {
                     val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
                         from = emailAddress,
-                        to = toTextView.text.split(",").toList(),
-                        cc = ccTextView.text.split(",").toList(),
-                        bcc = bccTextView.text.split(",").toList(),
-                        subject = subjectTextView.text.toString(),
-                        body = contentBody.text.toString()
+                        to = binding.toTextView.text.split(",").toList(),
+                        cc = binding.ccTextView.text.split(",").toList(),
+                        bcc = binding.bccTextView.text.split(",").toList(),
+                        subject = binding.subjectTextView.text.toString(),
+                        body = binding.contentBody.text.toString()
                     )
                     app.sudoEmailClient.sendEmailMessage(rfc822Data, emailAddressId)
                 }
@@ -140,11 +147,13 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.sent,
                     positiveButtonResId = android.R.string.ok,
                     onPositive = {
-                        val bundle = bundleOf(
-                            getString(R.string.email_address) to emailAddress,
-                            getString(R.string.email_address_id) to emailAddressId
+                        navController.navigate(
+                            SendEmailMessageFragmentDirections
+                                .actionSendEmailMessageFragmentToEmailMessagesFragment(
+                                    emailAddress,
+                                    emailAddressId
+                                )
                         )
-                        navController.navigate(R.id.action_sendEmailMessageFragment_to_emailMessagesFragment, bundle)
                     }
                 )
             } catch (e: SudoEmailClient.EmailMessageException) {
@@ -162,7 +171,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
 
     /** Validates submitted input form data. */
     private fun validateFormData(): Boolean {
-        return toTextView.text.isBlank()
+        return binding.toTextView.text.isBlank()
     }
 
     /**
@@ -175,14 +184,14 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         emailMessage: EmailMessage,
         emailMessageWithBody: SimplifiedEmailMessage
     ) {
-        toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString() else "")
-        ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString() else "")
+        binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString() else "")
+        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString() else "")
         if (emailMessageWithBody.subject.startsWith("Re:")) {
-            subjectTextView.setText(emailMessage.subject)
+            binding.subjectTextView.setText(emailMessage.subject)
         } else {
-            subjectTextView.setText(getString(R.string.reply_message, emailMessage.subject))
+            binding.subjectTextView.setText(getString(R.string.reply_message, emailMessage.subject))
         }
-        contentBody.setText(getString(R.string.reply_body, emailMessageWithBody.body))
+        binding.contentBody.setText(getString(R.string.reply_body, emailMessageWithBody.body))
     }
 
     /**
@@ -192,23 +201,25 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
-        toTextView.isEnabled = isEnabled
-        ccTextView.isEnabled = isEnabled
-        bccTextView.isEnabled = isEnabled
-        subjectTextView.isEnabled = isEnabled
-        contentBody.isEnabled = isEnabled
+        binding.toTextView.isEnabled = isEnabled
+        binding.ccTextView.isEnabled = isEnabled
+        binding.bccTextView.isEnabled = isEnabled
+        binding.subjectTextView.isEnabled = isEnabled
+        binding.contentBody.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
         setItemsEnabled(false)
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
-        setItemsEnabled(true)
+        loading?.dismiss()
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

@@ -33,7 +33,7 @@ class ReadEmailMessageRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun checkReadEmailMessageItemsDisplayed() {

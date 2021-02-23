@@ -12,13 +12,13 @@ import jakarta.mail.MessagingException
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
+import kotlinx.parcelize.Parcelize
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
-import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-internal data class SimplifiedEmailMessage(
+data class SimplifiedEmailMessage(
     val from: List<String>,
     val to: List<String>,
     val cc: List<String>,
@@ -45,33 +45,33 @@ internal object Rfc822MessageParser {
 
             return buildString {
                 if (dataHandler.dataSource.contentType.contains("text/plain")) {
-                    appendln(dataHandler.content)
+                    appendLine(dataHandler.content)
                 } else {
-                    appendln("MimeMessage [")
-                    appendln("  From: $sender")
-                    appendln("  To: $toRecipients")
-                    appendln("  Cc: $ccRecipients")
-                    appendln("  Bcc: $bccRecipients")
-                    appendln("  Subject: $subject")
-                    appendln("  Received: $receivedDate")
-                    appendln("  ContentType: $contentType")
-                    appendln("  Description: $description")
-                    appendln("  Encoding: $encoding")
-                    appendln("  Size: $size")
+                    appendLine("MimeMessage [")
+                    appendLine("  From: $sender")
+                    appendLine("  To: $toRecipients")
+                    appendLine("  Cc: $ccRecipients")
+                    appendLine("  Bcc: $bccRecipients")
+                    appendLine("  Subject: $subject")
+                    appendLine("  Received: $receivedDate")
+                    appendLine("  ContentType: $contentType")
+                    appendLine("  Description: $description")
+                    appendLine("  Encoding: $encoding")
+                    appendLine("  Size: $size")
                     val multipart = MimeMultipart(dataHandler.dataSource)
-                    appendln("  Preamble: ${multipart.preamble}")
+                    appendLine("  Preamble: ${multipart.preamble}")
                     for (i in 0 until multipart.count) {
                         val bodyPart = multipart.getBodyPart(i)
-                        appendln("  Body Part $i [")
-                        appendln("    ContentType: ${bodyPart.contentType}")
-                        appendln("    Description: ${bodyPart.description}")
-                        appendln("    Size: ${bodyPart.size}")
+                        appendLine("  Body Part $i [")
+                        appendLine("    ContentType: ${bodyPart.contentType}")
+                        appendLine("    Description: ${bodyPart.description}")
+                        appendLine("    Size: ${bodyPart.size}")
                         if (bodyPart.contentType.contains("text/plain")) {
-                            appendln("    Content: ${bodyPart.content}")
+                            appendLine("    Content: ${bodyPart.content}")
                         }
-                        appendln("  ]")
+                        appendLine("  ]")
                     }
-                    appendln("]")
+                    appendLine("]")
                 }
             }
         }
