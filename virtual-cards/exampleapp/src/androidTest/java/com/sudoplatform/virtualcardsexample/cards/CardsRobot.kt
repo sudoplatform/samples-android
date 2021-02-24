@@ -28,15 +28,15 @@ class CardsRobot : BaseRobot() {
     private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, true)
+        waitForViewToNotDisplay(loadingDialog, 30_000L)
     }
 
     fun waitForRecyclerView() {
         waitForViewToDisplay(cardRecyclerView, 30_000L)
     }
 
-    fun checkCardsItemsDisplayed(timeout: Long = 1000L) {
+    fun checkCardsItemsDisplayed(timeout: Long = 60_000L) {
         waitForViewToDisplay(createCardButton, timeout)
     }
 
@@ -56,12 +56,14 @@ class CardsRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         waitForViewToDisplay(positiveAlertButton, 15_000L)
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun swipeLeftToCancel(position: Int) {
         onView(cardRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -69,7 +71,8 @@ class CardsRobot : BaseRobot() {
 
     private fun clickRecyclerViewItem(position: Int) {
         onView(cardRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(
+                position,
                 ViewActions.click()
             )
         )

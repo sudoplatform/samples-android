@@ -17,6 +17,7 @@ import androidx.navigation.Navigation
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
+import com.sudoplatform.sudouser.FederatedSignInResult
 import com.sudoplatform.sudouser.RegistrationChallengeType
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.SudoUserClient
@@ -25,17 +26,19 @@ import com.sudoplatform.sudouser.exceptions.AuthenticationException
 import com.sudoplatform.sudouser.exceptions.RegisterException
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
+import com.sudoplatform.virtualcardsexample.databinding.FragmentRegisterBinding
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
-import java.io.IOException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_register.*
-import kotlinx.android.synthetic.main.fragment_register.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * This [RegisterFragment] presents a screen to allow the user to register or login.
@@ -53,24 +56,31 @@ class RegisterFragment : Fragment(), CoroutineScope {
     private lateinit var navController: NavController
 
     /** [Logger] used to log errors during registration. */
-    private val errorLogger = Logger("virtualCardsExample", AndroidUtilsLogDriver(LogLevel.ERROR))
+    private val errorLogger = Logger("virtualCardsSample", AndroidUtilsLogDriver(LogLevel.ERROR))
 
+    /** The [App] that holds references to the APIs this fragment needs. */
     lateinit var app: App
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentRegisterBinding>()
+    private val binding by bindingDelegate
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_register, container, false)
+    ): View {
+        bindingDelegate.attach(FragmentRegisterBinding.inflate(inflater, container, false))
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        view.buttonRegister.setOnClickListener {
+        binding.buttonRegister.setOnClickListener {
             registerAndSignIn()
+            app.sudoProfilesClient.getSymmetricKeyId() ?: app.sudoProfilesClient.generateEncryptionKey()
         }
 
         // proceed to signIn operation if already registered
@@ -83,6 +93,7 @@ class RegisterFragment : Fragment(), CoroutineScope {
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -94,10 +105,23 @@ class RegisterFragment : Fragment(), CoroutineScope {
         val data = this@RegisterFragment.requireActivity().intent.data
         if (data != null) {
             launch {
-                withContext(Dispatchers.IO) {
-                    app.sudoUserClient.processFederatedSignInTokens(data)
+                val result = withContext(Dispatchers.IO) {
+                    suspendCoroutine<FederatedSignInResult> { cont ->
+                        app.sudoUserClient.processFederatedSignInTokens(data) { result ->
+                            cont.resume(result)
+                        }
+                    }
                 }
-                navController.navigate(R.id.action_registerFragment_to_mainMenuFragment)
+                when (result) {
+                    is FederatedSignInResult.Success -> {
+                        navController.navigate(
+                            RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                        )
+                    }
+                    is FederatedSignInResult.Failure -> {
+                        showRegistrationFailure(result.error)
+                    }
+                }
             }
         }
     }
@@ -109,10 +133,20 @@ class RegisterFragment : Fragment(), CoroutineScope {
         app = requireActivity().application as App
         val challengeTypes = app.sudoUserClient.getSupportedRegistrationChallengeType()
         if (challengeTypes.contains(RegistrationChallengeType.FSSO)) {
-            app.sudoUserClient.presentFederatedSignInUI { result ->
+            launch {
+                val result = withContext(Dispatchers.IO) {
+                    suspendCoroutine<SignInResult> { cont ->
+                        app.sudoUserClient.presentFederatedSignInUI { result ->
+                            cont.resume(result)
+                        }
+                    }
+                }
+
                 when (result) {
                     is SignInResult.Success -> {
-                        navController.navigate(R.id.action_registerFragment_to_mainMenuFragment)
+                        navController.navigate(
+                            RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                        )
                     }
                     is SignInResult.Failure -> {
                         showRegistrationFailure(result.error)
@@ -132,13 +166,19 @@ class RegisterFragment : Fragment(), CoroutineScope {
     /** Performs sign in if the user is already registered. */
     private fun signIn() {
         if (app.sudoUserClient.isSignedIn()) {
-            navController.navigate(R.id.action_registerFragment_to_mainMenuFragment)
+            navController.navigate(
+                RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+            )
             return
         }
         launch {
             try {
-                withContext(Dispatchers.IO) { app.sudoUserClient.signInWithKey() }
-                navController.navigate(R.id.action_registerFragment_to_mainMenuFragment)
+                withContext(Dispatchers.IO) {
+                    app.sudoUserClient.signInWithKey()
+                }
+                navController.navigate(
+                    RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                )
             } catch (e: AuthenticationException) {
                 hideLoading()
                 setItemsEnabled(true)
@@ -206,20 +246,20 @@ class RegisterFragment : Fragment(), CoroutineScope {
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         if (isEnabled) {
-            buttonRegister?.text = getString(R.string.register_login)
+            binding.buttonRegister.text = getString(R.string.register_login)
         } else {
-            buttonRegister?.text = ""
+            binding.buttonRegister.text = ""
         }
-        buttonRegister?.isEnabled = isEnabled
+        binding.buttonRegister.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading() {
-        progressBar?.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
     }
 }

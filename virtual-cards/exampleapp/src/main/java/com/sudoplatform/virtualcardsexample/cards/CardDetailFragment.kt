@@ -12,11 +12,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
@@ -26,22 +25,20 @@ import com.sudoplatform.sudovirtualcards.types.Card
 import com.sudoplatform.sudovirtualcards.types.Transaction
 import com.sudoplatform.sudovirtualcards.types.inputs.filters.filterTransactionsBy
 import com.sudoplatform.virtualcardsexample.App
-import com.sudoplatform.virtualcardsexample.MissingFragmentArgumentException
 import com.sudoplatform.virtualcardsexample.R
+import com.sudoplatform.virtualcardsexample.databinding.FragmentCardDetailBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.transactions.TransactionAdapter
 import com.sudoplatform.virtualcardsexample.transactions.transactiondetail.TransactionDetailFragment
-import java.util.UUID
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_card_detail.*
-import kotlinx.android.synthetic.main.fragment_card_detail.view.*
-import kotlinx.android.synthetic.main.fragment_card_detail.view.toolbar
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 /**
  * The [CardDetailFragment] presents a view containing [Card] details and a list of [Transaction]
@@ -64,11 +61,21 @@ class CardDetailFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentCardDetailBinding>()
+    private val binding by bindingDelegate
+
     /** A reference to the [RecyclerView.Adapter] handling [Transaction] data. */
     private lateinit var adapter: TransactionAdapter
 
     /** A mutable list of [Transaction]s. */
     private var transactionList = mutableListOf<Transaction>()
+
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: CardDetailFragmentArgs by navArgs()
 
     /** The selected [Card] used for display. */
     private lateinit var card: Card
@@ -80,19 +87,20 @@ class CardDetailFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_card_detail, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.card_detail)
-        card = requireArguments().getParcelable(getString(R.string.card))
-            ?: throw MissingFragmentArgumentException("Card to display missing")
-        return view
+    ): View {
+        bindingDelegate.attach(FragmentCardDetailBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.card_detail)
+        }
+        app = requireActivity().application as App
+        card = args.card!!
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configureCardView()
-        configureRecyclerView(view)
+        configureRecyclerView()
         navController = Navigation.findNavController(view)
 
         listTransactions(CachePolicy.REMOTE_ONLY)
@@ -101,6 +109,7 @@ class CardDetailFragment : Fragment(), CoroutineScope {
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -120,7 +129,6 @@ class CardDetailFragment : Fragment(), CoroutineScope {
      * @param cachePolicy Option of either retrieving [Transaction] data from the cache or network.
      */
     private fun listTransactions(cachePolicy: CachePolicy) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showLoading()
@@ -151,7 +159,6 @@ class CardDetailFragment : Fragment(), CoroutineScope {
 
     /** Subscribe to receive live updates as [Transaction]s are created and updated. */
     private fun subscribeToTransactions() = launch {
-        val app = requireActivity().application as App
         try {
             withContext(Dispatchers.IO) {
                 app.sudoVirtualCardsClient.subscribeToTransactions(
@@ -204,7 +211,6 @@ class CardDetailFragment : Fragment(), CoroutineScope {
 
     /** Unsubscribe from live [Transaction] updates. */
     private fun unsubscribeFromTransactions() = launch {
-        val app = requireActivity().application as App
         try {
             withContext(Dispatchers.IO) {
                 app.sudoVirtualCardsClient.unsubscribeFromTransactions(subscriptionId)
@@ -223,15 +229,15 @@ class CardDetailFragment : Fragment(), CoroutineScope {
         val expirationYearStr = (card.expirationYear % 100).toString()
 
         if (card.state == Card.State.CLOSED) {
-            stateView.visibility = View.VISIBLE
+            binding.stateView.visibility = View.VISIBLE
         } else {
-            stateView.visibility = View.GONE
+            binding.stateView.visibility = View.GONE
         }
-        cardNameField.text = card.alias
-        accountNumberField.text = formatAccountNumber(card.cardNumber)
-        securityCodeField.text = card.securityCode
-        expiryDateField.text = getString(R.string.expiry_date_field, expirationMonthStr, expirationYearStr)
-        cardHolderNameField.text = card.cardHolder
+        binding.cardNameField.text = card.alias
+        binding.accountNumberField.text = formatAccountNumber(card.cardNumber)
+        binding.securityCodeField.text = card.securityCode
+        binding.expiryDateField.text = getString(R.string.expiry_date_field, expirationMonthStr, expirationYearStr)
+        binding.cardHolderNameField.text = card.cardHolder
     }
 
     /**
@@ -249,26 +255,28 @@ class CardDetailFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the listed [Transaction] items and listens
      * to item select events to navigate to the [TransactionDetailFragment].
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter =
             TransactionAdapter(transactionList) { transaction ->
-                val bundle = bundleOf(
-                    getString(R.string.transaction) to transaction,
-                    getString(R.string.card) to card
+                navController.navigate(
+                    CardDetailFragmentDirections.actionCardDetailFragmentToTransactionDetailFragment(
+                        card,
+                        transaction
+                    )
                 )
-                navController.navigate(R.id.action_cardDetailFragment_to_transactionDetailFragment, bundle)
             }
-
-        view.transactionRecyclerView.adapter = adapter
-        view.transactionRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.transactionRecyclerView.adapter = adapter
+        binding.transactionRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /** Set the visibility of the [emptyTxnsLabel] in the view. */
     private fun setEmptyTransactionsLabel() {
-        if (transactionList.isEmpty()) {
-            emptyTxnsLabel?.visibility = View.VISIBLE
-        } else {
-            emptyTxnsLabel?.visibility = View.GONE
+        if (bindingDelegate.isAttached()) {
+            if (transactionList.isEmpty()) {
+                binding.emptyTxnsLabel.visibility = View.VISIBLE
+            } else {
+                binding.emptyTxnsLabel.visibility = View.GONE
+            }
         }
     }
 
@@ -278,25 +286,27 @@ class CardDetailFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        transactionRecyclerView?.isEnabled = isEnabled
+        binding.transactionRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
         if (textResId != 0) {
-            progressText.text = getString(textResId)
+            binding.progressText.text = getString(textResId)
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
-        transactionRecyclerView?.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
+        binding.transactionRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
-        transactionRecyclerView?.visibility = View.VISIBLE
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            binding.progressBar.visibility = View.GONE
+            binding.progressText.visibility = View.GONE
+            binding.transactionRecyclerView.visibility = View.VISIBLE
+            setItemsEnabled(true)
+        }
     }
 }

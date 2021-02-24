@@ -37,7 +37,8 @@ class OrphanCardsRobot : BaseRobot() {
 
     private fun clickRecyclerViewItem(position: Int) {
         onView(orphanCardRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(
+                position,
                 click()
             )
         )

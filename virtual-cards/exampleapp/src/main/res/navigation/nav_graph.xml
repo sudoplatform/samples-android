@@ -12,10 +12,6 @@
         <action
             android:id="@+id/action_registerFragment_to_mainMenuFragment"
             app:destination="@id/mainMenuFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/registerFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -26,39 +22,19 @@
         tools:layout="@layout/fragment_main_menu" >
         <action
             android:id="@+id/action_mainMenuFragment_to_identityVerificationFragment"
-            app:destination="@id/identityVerificationFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/identityVerificationFragment" />
         <action
             android:id="@+id/action_mainMenuFragment_to_fundingSourcesFragment"
-            app:destination="@id/fundingSourcesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/fundingSourcesFragment" />
         <action
             android:id="@+id/action_mainMenuFragment_to_sudosFragment"
-            app:destination="@id/sudosFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/sudosFragment" />
         <action
             android:id="@+id/action_mainMenuFragment_to_orphanCardsFragment"
-            app:destination="@id/orphanCardsFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/orphanCardsFragment" />
         <action
             android:id="@+id/action_mainMenuFragment_to_registerFragment"
             app:destination="@id/registerFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/mainMenuFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -69,11 +45,7 @@
         tools:layout="@layout/fragment_funding_sources" >
         <action
             android:id="@+id/action_fundingSourcesFragment_to_createFundingSourceFragment"
-            app:destination="@id/createFundingSourceFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/createFundingSourceFragment" />
     </fragment>
     <fragment
         android:id="@+id/orphanCardsFragment"
@@ -82,11 +54,7 @@
         tools:layout="@layout/fragment_orphan_cards" >
         <action
             android:id="@+id/action_orphanCardsFragment_to_cardDetailFragment"
-            app:destination="@id/cardDetailFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/cardDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/identityVerificationFragment"
@@ -101,12 +69,8 @@
         <action
             android:id="@+id/action_createSudoFragment_to_cardsFragment"
             app:destination="@id/cardsFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/createSudoFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/sudosFragment"
@@ -115,18 +79,10 @@
         tools:layout="@layout/fragment_sudos" >
         <action
             android:id="@+id/action_sudosFragment_to_createSudoFragment"
-            app:destination="@id/createSudoFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/createSudoFragment" />
         <action
             android:id="@+id/action_sudosFragment_to_cardsFragment"
-            app:destination="@id/cardsFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/cardsFragment" />
     </fragment>
     <fragment
         android:id="@+id/createFundingSourceFragment"
@@ -136,10 +92,6 @@
         <action
             android:id="@+id/action_createFundingSourceFragment_to_fundingSourcesFragment"
             app:destination="@id/fundingSourcesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/fundingSourcesFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -151,25 +103,17 @@
         <argument
             android:name="sudoId"
             app:argType="string"
-            android:defaultValue="None"/>
+            app:nullable="false" />
         <argument
             android:name="sudoLabel"
             app:argType="string"
-            android:defaultValue="None"/>
+            android:defaultValue="None" />
         <action
             android:id="@+id/action_cardsFragment_to_createCardFragment"
-            app:destination="@id/createCardFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/createCardFragment" />
         <action
             android:id="@+id/action_cardsFragment_to_cardDetailFragment"
-            app:destination="@id/cardDetailFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/cardDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/createCardFragment"
@@ -179,18 +123,14 @@
         <argument
             android:name="sudoId"
             app:argType="string"
-            android:defaultValue="None"/>
+            android:defaultValue="None" />
         <argument
             android:name="sudoLabel"
             app:argType="string"
-            android:defaultValue="None"/>
+            android:defaultValue="None" />
         <action
             android:id="@+id/action_createCardFragment_to_cardDetailFragment"
             app:destination="@id/cardDetailFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/createCardFragment"
             app:popUpToInclusive="true" />
 
@@ -203,27 +143,26 @@
         <argument
             android:name="card"
             app:argType="com.sudoplatform.sudovirtualcards.types.Card"
-            android:defaultValue="@null"/>
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_cardDetailFragment_to_transactionDetailFragment"
-            app:destination="@id/transactionDetailFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_close_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            app:destination="@id/transactionDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/transactionDetailFragment"
         android:name="com.sudoplatform.virtualcardsexample.transactions.transactiondetail.TransactionDetailFragment"
         android:label="fragment_transaction_detail"
-        tools:layout="@layout/fragment_transaction_detail">
+        tools:layout="@layout/fragment_transaction_detail" >
         <argument
             android:name="card"
             app:argType="com.sudoplatform.sudovirtualcards.types.Card"
-            android:defaultValue="@null"/>
+            app:nullable="true"
+            android:defaultValue="@null" />
         <argument
             android:name="transaction"
             app:argType="com.sudoplatform.sudovirtualcards.types.Transaction"
-            android:defaultValue="@null"/>
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 </navigation>

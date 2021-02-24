@@ -1,7 +1,7 @@
 <resources>
 
     <!-- App -->
-    <string name="app_name">Virtual Cards Example</string>
+    <string name="app_name">Virtual Cards Sample</string>
 
     <!-- Common -->
     <string name="virtual_cards">Virtual Cards</string>
@@ -14,13 +14,9 @@
     <string name="address_line_2">Address Line 2</string>
     <string name="enter_optional_input">Enter %1$s (Optional)</string>
     <string name="enter_non_optional_input">Enter %1$s</string>
-    <string name="sudo_label">sudoLabel</string>
-    <string name="sudo_id">sudoId</string>
-    <string name="card">card</string>
-    <string name="transaction">transaction</string>
 
     <!-- RegisterFragment -->
-    <string name="example_app">Example App</string>
+    <string name="sample_app">Sample App</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
     <string name="signin_failure">Failed to Sign In: %1$s</string>
@@ -175,6 +171,7 @@
     <string name="dr_card_expired">Card expired</string>
     <string name="dr_card_stopped">Card cancelled</string>
     <string name="dr_csc_check_failed">Security code check failed</string>
+    <string name="dr_expiry_check_failed">Card expiry check failed</string>
     <string name="dr_currency_blocked">Merchant currency blocked</string>
     <string name="dr_declined">Declined</string>
     <string name="dr_funding_error">Funding error</string>

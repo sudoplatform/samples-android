@@ -33,7 +33,7 @@ class SudosRobot : BaseRobot() {
     private val negativeAlertButton = withId(android.R.id.button2)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, true)
         waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 
@@ -66,17 +66,20 @@ class SudosRobot : BaseRobot() {
 
     fun clickOnPositiveInfoAlertDialogButton() {
         checkInfoAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     private fun clickRecyclerViewItem(position: Int) {
         onView(sudoRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
+                position,
                 ViewActions.click()
             )
         )
@@ -84,7 +87,8 @@ class SudosRobot : BaseRobot() {
 
     fun swipeLeftToDelete(position: Int) {
         onView(sudoRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -98,7 +102,7 @@ class SudosRobot : BaseRobot() {
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(positiveAlertButton, 60_000L)
         onView(positiveAlertButton).check(matches(withText(android.R.string.ok)))
     }
 }

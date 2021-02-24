@@ -1,4 +1,4 @@
-# Sudo Virtual Cards Example App for Android
+# Sudo Virtual Cards Sample App for Android
 
 ## Overview
 
@@ -8,11 +8,11 @@ This project provides examples of how to use the Sudo Virtual Cards Android SDK.
 
 This app supports Android 6 (API level 23) or newer, built with Kotlin version 1.3.
 
-If using Android Studio, version 4.0 or newer is required.
+If you are using Android Studio, version 4.0 or newer is required.
 
 ## Getting Started
 
-To build this app you first need to obtain an SDK configuration file and a TEST registration private key and key identifier and add them to the project.
+To build this app you first need to obtain an SDK configuration file. If you are not using Federated Single Sign On (FSSO) you will also need a TEST registration private key and key identifier and add them to the project.
 
 1. Follow the steps in the [Getting Started guide](https://docs.sudoplatform.com/guides/getting-started) and in [User Registration](https://docs.sudoplatform.com/guides/users/registration) to obtain an SDK configuration file (sudoplatformconfig.json), TEST registration private key and TEST registration key identifier.
 

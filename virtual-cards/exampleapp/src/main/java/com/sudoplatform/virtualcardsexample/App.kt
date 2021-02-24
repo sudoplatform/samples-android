@@ -7,6 +7,7 @@
 package com.sudoplatform.virtualcardsexample
 
 import android.app.Application
+import android.net.Uri
 import com.sudoplatform.sudoidentityverification.SudoIdentityVerificationClient
 import com.sudoplatform.sudokeymanager.KeyManager
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
@@ -16,7 +17,6 @@ import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
-import java.net.URI
 
 class App : Application() {
 
@@ -40,7 +40,7 @@ class App : Application() {
 
         // Create an instance of SudoProfilesClient to perform creation, deletion and modification
         // of Sudos.
-        val blobURI = URI(cacheDir.path)
+        val blobURI = Uri.fromFile(cacheDir)
 
         sudoProfilesClient = SudoProfilesClient
             .builder(this, sudoUserClient, blobURI)

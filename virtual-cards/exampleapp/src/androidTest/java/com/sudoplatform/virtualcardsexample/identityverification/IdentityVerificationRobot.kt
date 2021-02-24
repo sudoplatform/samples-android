@@ -23,7 +23,6 @@ fun identityVerification(func: IdentityVerificationRobot.() -> Unit) = IdentityV
  * @since 2020-07-29
  */
 class IdentityVerificationRobot : BaseRobot() {
-
     private val loadingDialog = withId(R.id.progressBar)
     private val toolBarVerifyButton = withId(R.id.verify)
     private val inputFormRecyclerView = withId(R.id.formRecyclerView)
@@ -33,16 +32,16 @@ class IdentityVerificationRobot : BaseRobot() {
     private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, true)
+        waitForViewToNotDisplay(loadingDialog, 20_000L)
     }
 
     fun checkIdentityVerificationItemsDisplayed() {
         waitForViewToDisplay(toolBarVerifyButton)
         waitForViewToDisplay(inputFormRecyclerView)
         waitForViewToDisplay(learnMoreTextView)
-        waitForViewToDisplay(learnMoreButton)
         waitForViewToDisplay(statusLabel)
+        scrollToView(learnMoreButton)
         waitForViewToDisplay(learnMoreButton)
     }
 
@@ -52,6 +51,7 @@ class IdentityVerificationRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 

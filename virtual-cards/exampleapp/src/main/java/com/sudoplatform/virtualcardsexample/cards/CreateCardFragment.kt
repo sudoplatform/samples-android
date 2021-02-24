@@ -15,11 +15,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
@@ -30,21 +29,20 @@ import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.ProvisionalCard
 import com.sudoplatform.sudovirtualcards.types.inputs.ProvisionCardInput
 import com.sudoplatform.virtualcardsexample.App
-import com.sudoplatform.virtualcardsexample.MissingFragmentArgumentException
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
+import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateCardBinding
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_create_card.*
-import kotlinx.android.synthetic.main.fragment_create_card.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [CreateCardFragment] presents a form so that a user can create a [Card].
@@ -63,6 +61,13 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentCreateCardBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and create button. */
     private lateinit var toolbarMenu: Menu
 
@@ -70,7 +75,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     private lateinit var adapter: InputFormAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A list of [InputFormCell]s that corresponds to the cells of the input form. */
     private val inputFormCells = mutableListOf<InputFormCell>()
@@ -84,6 +89,9 @@ class CreateCardFragment : Fragment(), CoroutineScope {
         "Salt Lake City", "UT", "84044", "US"
     )
 
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: CreateCardFragmentArgs by navArgs()
+
     /** A [FundingSource] used to create a [Card]. */
     private lateinit var fundingSource: FundingSource
 
@@ -91,34 +99,35 @@ class CreateCardFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_create_card, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.create_virtual_card)
-
-        toolbar.inflateMenu(R.menu.nav_menu_with_create_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.create -> {
-                    createCard()
+    ): View {
+        bindingDelegate.attach(FragmentCreateCardBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.create_virtual_card)
+            inflateMenu(R.menu.nav_menu_with_create_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.create -> {
+                        createCard()
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
         configureFormCells()
         setSudoLabelText()
         setErrorLabelHidden(true)
         setItemsEnabled(false)
         navController = Navigation.findNavController(view)
 
-        view.learnMoreButton.setOnClickListener {
+        binding.learnMoreButton.setOnClickListener {
             learnMore()
         }
 
@@ -126,8 +135,10 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -143,9 +154,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val app = requireActivity().application as App
-        val sudoId = requireArguments().getString(getString(R.string.sudo_id))
-            ?: throw MissingFragmentArgumentException("Sudo identifier missing")
+        val sudoId = args.sudoId
         val billingAddress = BillingAddress(
             addressLine1 = enteredInput[2] ?: "",
             addressLine2 = enteredInput[3],
@@ -178,10 +187,12 @@ class CreateCardFragment : Fragment(), CoroutineScope {
                             titleResId = R.string.success,
                             positiveButtonResId = android.R.string.ok,
                             onPositive = {
-                                val bundle = bundleOf(
-                                    getString(R.string.card) to provisionalCard.card
+                                navController.navigate(
+                                    CreateCardFragmentDirections
+                                        .actionCreateCardFragmentToCardDetailFragment(
+                                            provisionalCard.card
+                                        )
                                 )
-                                navController.navigate(R.id.action_createCardFragment_to_cardDetailFragment, bundle)
                             }
                         )
                         break
@@ -203,14 +214,13 @@ class CreateCardFragment : Fragment(), CoroutineScope {
 
     /** Load the first active [FundingSource] from the [SudoVirtualCardsClient] associated with the user's account. */
     private fun loadFirstActiveFundingSource() {
-        val app = requireActivity().application as App
         launch {
             try {
                 val fundingSources = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.listFundingSources(cachePolicy = CachePolicy.REMOTE_ONLY)
                 }
                 fundingSource = fundingSources.items.first { it.state == FundingSource.State.ACTIVE }
-                fundingSourceLabel?.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
+                binding.fundingSourceLabel.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
                 setItemsEnabled(true)
             } catch (e: Exception) {
                 when (e) {
@@ -232,14 +242,14 @@ class CreateCardFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the [InputFormCell]s and listens to input
      * change events to capture user input.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = InputFormAdapter(inputFormCells) { position, charSeq ->
             enteredInput[position] = charSeq
         }
 
-        view.formRecyclerView.setHasFixedSize(true)
-        view.formRecyclerView.adapter = adapter
-        view.formRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.formRecyclerView.setHasFixedSize(true)
+        binding.formRecyclerView.adapter = adapter
+        binding.formRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /** Configures [InputFormCell] labels, text field hints and placeholder text. */
@@ -267,16 +277,16 @@ class CreateCardFragment : Fragment(), CoroutineScope {
 
     /** Set the [Sudo] label text containing the [Sudo] alias. */
     private fun setSudoLabelText() {
-        val sudoLabelText = requireArguments().getString(getString(R.string.sudo_label))
-        sudoLabel?.text = sudoLabelText
+        val sudoLabelText = args.sudoLabel
+        binding.sudoLabel.text = sudoLabelText
     }
 
     /** Hide the [errorLabel] from the view. */
     private fun setErrorLabelHidden(isHidden: Boolean) {
         if (isHidden) {
-            errorLabel?.visibility = View.GONE
+            binding.errorLabel.visibility = View.GONE
         } else {
-            errorLabel?.visibility = View.VISIBLE
+            binding.errorLabel.visibility = View.VISIBLE
         }
     }
 
@@ -292,13 +302,15 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
         setItemsEnabled(false)
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
-        setItemsEnabled(true)
+        loading?.dismiss()
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

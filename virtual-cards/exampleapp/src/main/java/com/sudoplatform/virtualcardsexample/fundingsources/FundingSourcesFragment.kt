@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -25,20 +24,18 @@ import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
+import com.sudoplatform.virtualcardsexample.databinding.FragmentFundingSourcesBinding
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.swipe.SwipeLeftActionHelper
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_funding_sources.*
-import kotlinx.android.synthetic.main.fragment_funding_sources.progressBar
-import kotlinx.android.synthetic.main.fragment_funding_sources.progressText
-import kotlinx.android.synthetic.main.fragment_funding_sources.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [FundingSourcesFragment] presents a list of [FundingSource]s.
@@ -59,11 +56,18 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentFundingSourcesBinding>()
+    private val binding by bindingDelegate
+
     /** A reference to the [RecyclerView.Adapter] handling [FundingSource] data. */
     private lateinit var adapter: FundingSourceAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A mutable list of [FundingSource]s. */
     private var fundingSourceList = mutableListOf<FundingSource>()
@@ -72,28 +76,35 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_funding_sources, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.funding_sources)
-        return view
+    ): View {
+        bindingDelegate.attach(FragmentFundingSourcesBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.funding_sources)
+        }
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
         navController = Navigation.findNavController(view)
 
-        view.createFundingSourceButton.setOnClickListener {
-            navController.navigate(R.id.action_fundingSourcesFragment_to_createFundingSourceFragment)
+        binding.createFundingSourceButton.setOnClickListener {
+            navController.navigate(
+                FundingSourcesFragmentDirections
+                    .actionFundingSourcesFragmentToCreateFundingSourceFragment()
+            )
         }
 
         listFundingSources(CachePolicy.REMOTE_ONLY)
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -103,7 +114,6 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      * @param cachePolicy Option of either retrieving [FundingSource] data from the cache or network.
      */
     private fun listFundingSources(cachePolicy: CachePolicy) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showLoading()
@@ -135,36 +145,36 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      * @param completion Callback which executes when the operation is completed.
      */
     private fun cancelFundingSource(id: String, completion: (FundingSource) -> Unit) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showCancelAlert(R.string.cancelling_funding_source)
                 val fundingSource = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.cancelFundingSource(id)
                 }
+                hideCancelAlert()
                 completion(fundingSource)
                 showAlertDialog(
                     titleResId = R.string.success,
                     positiveButtonResId = android.R.string.ok
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
+                hideCancelAlert()
                 showAlertDialog(
                     titleResId = R.string.cancel_funding_source_failure,
                     message = e.localizedMessage ?: "$e",
                     negativeButtonResId = android.R.string.cancel
                 )
             }
-            hideCancelAlert()
         }
     }
 
     /**
      * Configures the [RecyclerView] used to display the listed [FundingSource] items.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = FundingSourceAdapter(fundingSourceList)
-        view.fundingSourceRecyclerView.adapter = adapter
-        view.fundingSourceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.fundingSourceRecyclerView.adapter = adapter
+        binding.fundingSourceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToCancel()
     }
 
@@ -174,38 +184,40 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        createFundingSourceButton?.isEnabled = isEnabled
-        fundingSourceRecyclerView?.isEnabled = isEnabled
+        binding.createFundingSourceButton.isEnabled = isEnabled
+        binding.fundingSourceRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
         if (textResId != 0) {
-            progressText.text = getString(textResId)
+            binding.progressText.text = getString(textResId)
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
-        fundingSourceRecyclerView?.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
+        binding.fundingSourceRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
-        fundingSourceRecyclerView?.visibility = View.VISIBLE
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            binding.progressBar.visibility = View.GONE
+            binding.progressText.visibility = View.GONE
+            binding.fundingSourceRecyclerView.visibility = View.VISIBLE
+            setItemsEnabled(true)
+        }
     }
 
     /** Displays the loading [AlertDialog] indicating that a cancel operation is occurring. */
     private fun showCancelAlert(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
     }
 
     /** Dismisses the loading [AlertDialog] indicating that a cancel operation has finished. */
     private fun hideCancelAlert() {
-        loading.dismiss()
+        loading?.dismiss()
     }
 
     /**
@@ -217,7 +229,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      */
     private fun configureSwipeToCancel() {
         val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
-        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(fundingSourceRecyclerView)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.fundingSourceRecyclerView)
     }
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {

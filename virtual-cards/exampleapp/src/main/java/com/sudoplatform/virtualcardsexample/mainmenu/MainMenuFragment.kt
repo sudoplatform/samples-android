@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -29,20 +28,20 @@ import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.cards.OrphanCardsFragment
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
+import com.sudoplatform.virtualcardsexample.databinding.FragmentMainMenuBinding
 import com.sudoplatform.virtualcardsexample.fundingsources.FundingSourcesFragment
 import com.sudoplatform.virtualcardsexample.identityverification.IdentityVerificationFragment
 import com.sudoplatform.virtualcardsexample.register.RegisterFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.sudos.SudosFragment
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_main_menu.*
-import kotlinx.android.synthetic.main.fragment_main_menu.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [MainMenuFragment] presents a menu screen so that the user can navigate through each of the
@@ -70,70 +69,88 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentMainMenuBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and toolbar items. */
     private lateinit var toolbarMenu: Menu
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_main_menu, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.virtual_cards)
-
-        toolbar.inflateMenu(R.menu.nav_menu_main_menu)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.deregister -> {
-                    showAlertDialog(
-                        titleResId = R.string.deregister,
-                        messageResId = R.string.deregister_confirmation,
-                        positiveButtonResId = R.string.deregister,
-                        onPositive = { deregister() },
-                        negativeButtonResId = android.R.string.cancel
-                    )
+    ): View {
+        bindingDelegate.attach(FragmentMainMenuBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.virtual_cards)
+            inflateMenu(R.menu.nav_menu_main_menu)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.deregister -> {
+                        showAlertDialog(
+                            titleResId = R.string.deregister,
+                            messageResId = R.string.deregister_confirmation,
+                            positiveButtonResId = R.string.deregister,
+                            onPositive = { deregister() },
+                            negativeButtonResId = android.R.string.cancel
+                        )
+                    }
+                    R.id.info -> {
+                        showAlertDialog(
+                            titleResId = R.string.what_is_a_virtual_card,
+                            messageResId = R.string.virtual_card_explanation,
+                            positiveButtonResId = android.R.string.ok,
+                            negativeButtonResId = R.string.learn_more,
+                            onNegative = { learnMore() }
+                        )
+                    }
                 }
-                R.id.info -> {
-                    showAlertDialog(
-                        titleResId = R.string.what_is_a_virtual_card,
-                        messageResId = R.string.virtual_card_explanation,
-                        positiveButtonResId = android.R.string.ok,
-                        negativeButtonResId = R.string.learn_more,
-                        onNegative = { learnMore() }
-                    )
-                }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        view.secureIdVerificationButton.setOnClickListener {
-            navController.navigate(R.id.action_mainMenuFragment_to_identityVerificationFragment)
+        binding.secureIdVerificationButton.setOnClickListener {
+            navController.navigate(
+                MainMenuFragmentDirections.actionMainMenuFragmentToIdentityVerificationFragment()
+            )
         }
-        view.fundingSourcesButton.setOnClickListener {
-            navController.navigate(R.id.action_mainMenuFragment_to_fundingSourcesFragment)
+        binding.fundingSourcesButton.setOnClickListener {
+            navController.navigate(
+                MainMenuFragmentDirections.actionMainMenuFragmentToFundingSourcesFragment()
+            )
         }
-        view.sudosButton.setOnClickListener {
-            navController.navigate(R.id.action_mainMenuFragment_to_sudosFragment)
+        binding.sudosButton.setOnClickListener {
+            navController.navigate(
+                MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment()
+            )
         }
-        view.orphanCardsButton.setOnClickListener {
-            navController.navigate(R.id.action_mainMenuFragment_to_orphanCardsFragment)
+        binding.orphanCardsButton.setOnClickListener {
+            navController.navigate(
+                MainMenuFragmentDirections.actionMainMenuFragmentToOrphanCardsFragment()
+            )
         }
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -142,12 +159,16 @@ class MainMenuFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading(R.string.deregistering)
-                val app = requireActivity().application as App
                 withContext(Dispatchers.IO) {
                     app.sudoUserClient.deregister()
+                    app.sudoVirtualCardsClient.reset()
+                    app.sudoProfilesClient.reset()
+                    app.sudoUserClient.reset()
                 }
                 hideLoading()
-                navController.navigate(R.id.action_mainMenuFragment_to_registerFragment)
+                navController.navigate(
+                    MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment()
+                )
             } catch (e: RegisterException) {
                 Toast.makeText(requireContext(), getString(R.string.deregister_failure, e.localizedMessage), Toast.LENGTH_LONG).show()
             }
@@ -169,22 +190,24 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
         toolbarMenu.getItem(1)?.isEnabled = isEnabled
-        secureIdVerificationButton.isEnabled = isEnabled
-        fundingSourcesButton.isEnabled = isEnabled
-        sudosButton.isEnabled = isEnabled
-        orphanCardsButton.isEnabled = isEnabled
+        binding.secureIdVerificationButton.isEnabled = isEnabled
+        binding.fundingSourcesButton.isEnabled = isEnabled
+        binding.sudosButton.isEnabled = isEnabled
+        binding.orphanCardsButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
         setItemsEnabled(false)
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
-        setItemsEnabled(true)
+        loading?.dismiss()
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

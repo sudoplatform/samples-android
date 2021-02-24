@@ -7,43 +7,37 @@
 package com.sudoplatform.virtualcardsexample.transactions.transactiondetail
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.virtualcardsexample.R
-import kotlinx.android.synthetic.main.layout_transaction_detail_cell.view.*
+import com.sudoplatform.virtualcardsexample.databinding.LayoutTransactionDetailCellBinding
 
 /**
  * A [RecyclerView.ViewHolder] used to describe the transaction detail item view and metadata about
  * its place within the [RecyclerView].
  *
- * The item view contains a [titleLabel], [subtitleLabel] and a [valueLabel].
+ * The item view contains a label [TextView]s of the title, subtitle and value.
  *
- * @param view The transaction detail item view component.
+ * @property binding The transaction detail item view binding component.
  */
-class TransactionDetailViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-    private val title: TextView = view.titleLabel
-    private val subtitle: TextView = view.subtitleLabel
-    private val value: TextView = view.valueLabel
+class TransactionDetailViewHolder(private val binding: LayoutTransactionDetailCellBinding) : RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         fun inflate(parent: ViewGroup): TransactionDetailViewHolder {
-            val inflater = LayoutInflater.from(parent.context)
-            return TransactionDetailViewHolder(
-                inflater.inflate(
-                    R.layout.layout_transaction_detail_cell,
-                    parent,
-                    false
-                )
+            val binding = LayoutTransactionDetailCellBinding.inflate(
+                LayoutInflater.from(
+                    parent.context
+                ),
+                parent,
+                false
             )
+            return TransactionDetailViewHolder(binding)
         }
     }
 
     fun bind(transactionDetailCell: TransactionDetailCell) {
-        title.text = transactionDetailCell.titleLabel
-        subtitle.text = transactionDetailCell.subtitleLabel
-        value.text = transactionDetailCell.valueLabel
+        binding.titleLabel.text = transactionDetailCell.titleLabel
+        binding.subtitleLabel.text = transactionDetailCell.subtitleLabel
+        binding.valueLabel.text = transactionDetailCell.valueLabel
     }
 }

@@ -7,9 +7,9 @@
 package com.sudoplatform.virtualcardsexample.cards
 
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.rule.ActivityTestRule
 import com.sudoplatform.virtualcardsexample.MainActivity
 import com.sudoplatform.virtualcardsexample.fundingsources.createFundingSource
 import com.sudoplatform.virtualcardsexample.fundingsources.fundingSources
@@ -34,7 +34,7 @@ import timber.log.Timber
 class CreateCardTest {
 
     @get:Rule
-    val activityRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
+    val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
 
     @Before
     fun setup() {
@@ -43,6 +43,12 @@ class CreateCardTest {
 
     @After
     fun fini() {
+        mainMenu {
+            pressBackUntilDeregisterToolbarButtonIsDisplayed()
+            clickOnDeregister()
+            clickOnPositiveDeregisterAlertDialogButton()
+            waitForLoading()
+        }
         Timber.uprootAll()
     }
 
@@ -104,7 +110,6 @@ class CreateCardTest {
         }
         cardDetail {
             checkCardDetailItemsDisplayed()
-            waitForRecyclerView()
             pressBack()
         }
         cards {
@@ -114,6 +119,7 @@ class CreateCardTest {
         }
         sudos {
             waitForLoading()
+            waitForRecyclerView()
             checkSudosItemsDisplayed()
             navigateToCardsScreen(0)
         }
@@ -123,7 +129,6 @@ class CreateCardTest {
         }
         cardDetail {
             checkCardDetailItemsDisplayed()
-            waitForRecyclerView()
             pressBack()
         }
         cards {
@@ -136,15 +141,8 @@ class CreateCardTest {
         }
         sudos {
             waitForLoading()
-            waitForRecyclerView()
             checkSudosItemsDisplayed()
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 
@@ -161,6 +159,7 @@ class CreateCardTest {
                 clickOnVerifyButton()
                 waitForLoading()
                 clickOnPositiveAlertDialogButton()
+                checkIdentityVerificationItemsDisplayed()
             }
             pressBack()
         }
@@ -206,7 +205,6 @@ class CreateCardTest {
         }
         cardDetail {
             checkCardDetailItemsDisplayed()
-            waitForRecyclerView()
             pressBack()
         }
         cards {
@@ -231,17 +229,11 @@ class CreateCardTest {
             navigateToCardDetailScreen(0)
         }
         cardDetail {
-            waitForRecyclerView()
+            checkCardDetailItemsDisplayed()
             pressBack()
         }
         orphanCards {
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 }

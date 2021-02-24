@@ -21,6 +21,7 @@ fun DeclineReason.description(context: Context): String {
         DeclineReason.MERCHANT_COUNTRY_BLOCKED -> context.getString(R.string.dr_merchant_country_blocked)
         DeclineReason.AVS_CHECK_FAILED -> context.getString(R.string.dr_avs_check_failed)
         DeclineReason.CSC_CHECK_FAILED -> context.getString(R.string.dr_csc_check_failed)
+        DeclineReason.EXPIRY_CHECK_FAILED -> context.getString(R.string.dr_expiry_check_failed)
         DeclineReason.PROCESSING_ERROR -> context.getString(R.string.dr_processing_error)
         DeclineReason.DECLINED -> context.getString(R.string.dr_declined)
         DeclineReason.VELOCITY_EXCEEDED -> context.getString(R.string.dr_velocity_exceeded)

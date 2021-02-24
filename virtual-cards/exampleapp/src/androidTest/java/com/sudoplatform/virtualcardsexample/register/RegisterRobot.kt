@@ -22,6 +22,7 @@ class RegisterRobot : BaseRobot() {
     private val registerButton = withId(R.id.buttonRegister)
 
     fun clickOnRegister() {
+        waitForViewToDisplay(registerButton)
         clickOnView(registerButton)
     }
 }

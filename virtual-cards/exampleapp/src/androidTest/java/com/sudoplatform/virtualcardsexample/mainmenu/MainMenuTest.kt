@@ -7,9 +7,9 @@
 package com.sudoplatform.virtualcardsexample.mainmenu
 
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.rule.ActivityTestRule
 import com.sudoplatform.virtualcardsexample.MainActivity
 import com.sudoplatform.virtualcardsexample.cards.orphanCards
 import com.sudoplatform.virtualcardsexample.fundingsources.fundingSources
@@ -32,7 +32,7 @@ import timber.log.Timber
 class MainMenuTest {
 
     @get:Rule
-    val activityRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
+    val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
 
     @Before
     fun setup() {
@@ -81,6 +81,12 @@ class MainMenuTest {
         }
         orphanCards {
             pressBack()
+        }
+        mainMenu {
+            pressBackUntilDeregisterToolbarButtonIsDisplayed()
+            clickOnDeregister()
+            clickOnPositiveDeregisterAlertDialogButton()
+            waitForLoading()
         }
     }
 

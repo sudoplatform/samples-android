@@ -15,10 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudoidentityverification.QueryOption
@@ -27,19 +24,19 @@ import com.sudoplatform.sudoidentityverification.SudoIdentityVerificationExcepti
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
+import com.sudoplatform.virtualcardsexample.databinding.FragmentIdentityVerificationBinding
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_identity_verification.*
-import kotlinx.android.synthetic.main.fragment_identity_verification.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [IdentityVerificationFragment] presents a form so that a user can perform Secure
@@ -53,8 +50,12 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
-    /** Navigation controller used to manage app navigation. */
-    private lateinit var navController: NavController
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentIdentityVerificationBinding>()
+    private val binding by bindingDelegate
 
     /** Toolbar [Menu] displaying title and verify button. */
     private lateinit var toolbarMenu: Menu
@@ -63,7 +64,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     private lateinit var adapter: InputFormAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A list of [InputFormCell]s that corresponds to the cells of the input form. */
     private val inputFormCells = mutableListOf<InputFormCell>()
@@ -86,31 +87,31 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_identity_verification, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.secure_id_verification)
-
-        toolbar.inflateMenu(R.menu.nav_menu_with_verify_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.verify -> {
-                    verifyUser()
+    ): View {
+        bindingDelegate.attach(FragmentIdentityVerificationBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.secure_id_verification)
+            inflateMenu(R.menu.nav_menu_with_verify_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.verify -> {
+                        verifyUser()
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
         configureFormCells()
-        navController = Navigation.findNavController(view)
 
-        view.learnMoreButton.setOnClickListener {
+        binding.learnMoreButton.setOnClickListener {
             learnMore()
         }
 
@@ -118,8 +119,10 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -136,7 +139,6 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
             return
         }
         showLoading(R.string.verifying_identity)
-        val app = requireActivity().application as App
         var addressLine1 = enteredInput[2]
         val addressLine2 = enteredInput[3]
         if (!addressLine2.isNullOrEmpty()) {
@@ -162,7 +164,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
                         messageResId = R.string.identity_verified,
                         positiveButtonResId = android.R.string.ok
                     )
-                    statusLabel?.text = getString(VerificationStatus.VERIFIED.status)
+                    binding.statusLabel.text = getString(VerificationStatus.VERIFIED.status)
                     toolbarMenu.getItem(0)?.isEnabled = false
                 } else {
                     showAlertDialog(
@@ -170,7 +172,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
                         messageResId = R.string.identity_not_verified,
                         positiveButtonResId = android.R.string.ok
                     )
-                    statusLabel?.text = getString(VerificationStatus.UNVERIFIED.status)
+                    binding.statusLabel.text = getString(VerificationStatus.UNVERIFIED.status)
                 }
             } catch (e: SudoIdentityVerificationException) {
                 showAlertDialog(
@@ -188,7 +190,6 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     /** Lookup the verification status from the [SudoIdentityVerificationClient] of the registered user. */
     private fun fetchVerificationStatus() {
         showLoading(R.string.checking_status)
-        val app = requireActivity().application as App
         launch {
             try {
                 val verifiedIdentity = withContext(Dispatchers.IO) {
@@ -196,13 +197,13 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
                 }
 
                 if (verifiedIdentity.verified) {
-                    statusLabel?.text = getString(VerificationStatus.VERIFIED.status)
+                    binding.statusLabel.text = getString(VerificationStatus.VERIFIED.status)
                     toolbarMenu.getItem(0)?.isEnabled = false
                 } else {
-                    statusLabel?.text = getString(VerificationStatus.UNVERIFIED.status)
+                    binding.statusLabel.text = getString(VerificationStatus.UNVERIFIED.status)
                 }
             } catch (e: SudoIdentityVerificationException) {
-                statusLabel?.text = getString(VerificationStatus.UNKNOWN.status)
+                binding.statusLabel.text = getString(VerificationStatus.UNKNOWN.status)
             }
             hideLoading()
         }
@@ -212,14 +213,14 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the [InputFormCell]s and listens to input
      * change events to capture user input.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = InputFormAdapter(inputFormCells) { position, charSeq ->
             enteredInput[position] = charSeq
         }
 
-        view.formRecyclerView.setHasFixedSize(true)
-        view.formRecyclerView.adapter = adapter
-        view.formRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.formRecyclerView.setHasFixedSize(true)
+        binding.formRecyclerView.adapter = adapter
+        binding.formRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /** Configures [InputFormCell] labels, text field hints and placeholder text. */
@@ -251,11 +252,11 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
+        loading?.dismiss()
     }
 }

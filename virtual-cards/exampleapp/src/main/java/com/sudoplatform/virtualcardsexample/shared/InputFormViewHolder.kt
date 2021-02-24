@@ -7,13 +7,10 @@
 package com.sudoplatform.virtualcardsexample.shared
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.virtualcardsexample.R
-import kotlinx.android.synthetic.main.layout_form_cell.view.*
+import com.sudoplatform.virtualcardsexample.databinding.LayoutFormCellBinding
 
 /**
  * A [RecyclerView.ViewHolder] used to describe the input form item view and metadata about its
@@ -21,29 +18,28 @@ import kotlinx.android.synthetic.main.layout_form_cell.view.*
  *
  * The item view contains a [title] and an [inputField].
  *
- * @param view The input form item view component.
+ * @property binding The input form item view binding component.
  */
-class InputFormViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class InputFormViewHolder(private val binding: LayoutFormCellBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    val title: TextView = view.title
-    val inputField: EditText = view.inputField
+    val inputField: EditText = binding.inputField
 
     companion object {
         fun inflate(parent: ViewGroup): InputFormViewHolder {
-            val inflater = LayoutInflater.from(parent.context)
-            return InputFormViewHolder(
-                inflater.inflate(
-                    R.layout.layout_form_cell,
-                    parent,
-                    false
-                )
+            val binding = LayoutFormCellBinding.inflate(
+                LayoutInflater.from(
+                    parent.context
+                ),
+                parent,
+                false
             )
+            return InputFormViewHolder(binding)
         }
     }
 
     fun bind(inputFormCell: InputFormCell) {
-        title.text = inputFormCell.label
-        inputField.setText(inputFormCell.inputFieldText)
-        inputField.hint = inputFormCell.inputFieldHint
+        binding.title.text = inputFormCell.label
+        binding.inputField.setText(inputFormCell.inputFieldText)
+        binding.inputField.hint = inputFormCell.inputFieldHint
     }
 }

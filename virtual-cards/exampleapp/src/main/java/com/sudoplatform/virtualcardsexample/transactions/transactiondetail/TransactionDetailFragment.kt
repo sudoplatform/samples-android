@@ -11,8 +11,8 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudoprofiles.ListOption
@@ -28,15 +28,15 @@ import com.sudoplatform.sudovirtualcards.types.Transaction
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.cards.CardDetailFragment
+import com.sudoplatform.virtualcardsexample.databinding.FragmentTransactionDetailBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
-import java.util.Date
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_transaction_detail.*
-import kotlinx.android.synthetic.main.fragment_transaction_detail.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [TransactionDetailFragment] presents a list of transaction details.
@@ -49,28 +49,40 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentTransactionDetailBinding>()
+    private val binding by bindingDelegate
+
     /** A reference to the [RecyclerView.Adapter] handling transaction detail data. */
     private lateinit var adapter: TransactionDetailAdapter
 
     /** A mutable list of [TransactionDetailCell]s which hold [Transaction] detail information. */
     private val transactionDetailCells = mutableListOf<TransactionDetailCell>()
 
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: TransactionDetailFragmentArgs by navArgs()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_transaction_detail, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.transaction_detail)
-        return view
+    ): View {
+        bindingDelegate.attach(FragmentTransactionDetailBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.transaction_detail)
+        }
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val transaction: Transaction = requireArguments().getParcelable(getString(R.string.transaction))!!
-        val card: Card = requireArguments().getParcelable(getString(R.string.card))!!
-        configureRecyclerView(view)
+        val transaction = args.transaction!!
+        val card = args.card!!
+        configureRecyclerView()
         configureTransactionDetailCells(transaction)
         configureAccountDetails(card)
     }
@@ -81,7 +93,6 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
      * @param card The selected [Card].
      */
     private fun retrieveAssociatedSudo(card: Card) {
-        val app = requireActivity().application as App
         launch {
             try {
                 val sudoList = withContext(Dispatchers.IO) {
@@ -89,7 +100,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
                 }.toMutableList()
                 val sudo = sudoList.firstOrNull { sudo -> card.owners.all { it.id == sudo.id } }
                 if (sudo != null) {
-                    sudoLabel?.text = sudo.label
+                    binding.sudoLabel.text = sudo.label
                 }
             } catch (e: SudoProfileException) {
                 showAlertDialog(
@@ -107,14 +118,13 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
      * @param card The selected [Card].
      */
     private fun retrieveAssociatedFundingSource(card: Card) {
-        val app = requireActivity().application as App
         launch {
             try {
                 val fundingSource = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.getFundingSource(card.fundingSourceId, cachePolicy = CachePolicy.REMOTE_ONLY)
                 }
                 if (fundingSource != null) {
-                    fundingSourceLabel?.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
+                    binding.fundingSourceLabel.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
                 }
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(
@@ -127,10 +137,10 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     }
 
     /** Configures the [RecyclerView] used to display the [TransactionDetailCell]s. */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = TransactionDetailAdapter(transactionDetailCells)
-        view.transactionDetail_recyclerView.adapter = adapter
-        view.transactionDetail_recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.transactionDetailRecyclerView.adapter = adapter
+        binding.transactionDetailRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /**
@@ -196,7 +206,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
      * @param card The selected [Card] to display its associated account details.
      */
     private fun configureAccountDetails(card: Card) {
-        cardLabel?.text = card.alias
+        binding.cardLabel.text = card.alias
         retrieveAssociatedFundingSource(card)
         retrieveAssociatedSudo(card)
     }

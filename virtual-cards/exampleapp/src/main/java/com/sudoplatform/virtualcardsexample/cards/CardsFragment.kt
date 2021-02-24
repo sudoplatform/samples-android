@@ -12,11 +12,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,22 +24,21 @@ import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.Card
 import com.sudoplatform.virtualcardsexample.App
-import com.sudoplatform.virtualcardsexample.MissingFragmentArgumentException
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
+import com.sudoplatform.virtualcardsexample.databinding.FragmentCardsBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.sudos.CreateSudoFragment
 import com.sudoplatform.virtualcardsexample.sudos.SudosFragment
 import com.sudoplatform.virtualcardsexample.swipe.SwipeLeftActionHelper
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_cards.*
-import kotlinx.android.synthetic.main.fragment_cards.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [CardsFragment] presents a list of [Card]s.
@@ -63,14 +61,24 @@ class CardsFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentCardsBinding>()
+    private val binding by bindingDelegate
+
     /** A reference to the [RecyclerView.Adapter] handling [Card] data. */
     private lateinit var adapter: CardAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A mutable list of [Card]s. */
     private var cardList = mutableListOf<Card>()
+
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: CardsFragmentArgs by navArgs()
 
     /** A [Sudo] identifier used to filter [Card]s. */
     private lateinit var sudoId: String
@@ -79,36 +87,36 @@ class CardsFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_cards, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.virtual_cards)
-        return view
+    ): View {
+        bindingDelegate.attach(FragmentCardsBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.virtual_cards)
+        }
+        app = requireActivity().application as App
+        sudoId = args.sudoId
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
         navController = Navigation.findNavController(view)
-        sudoId = requireArguments().getString(getString(R.string.sudo_id))
-            ?: throw MissingFragmentArgumentException("Sudo identifier missing")
-        val sudoLabel = requireArguments().getString(getString(R.string.sudo_label))
-            ?: throw MissingFragmentArgumentException("Sudo label missing")
+        val sudoLabel = args.sudoLabel
 
-        view.createCardButton.setOnClickListener {
-            val bundle = bundleOf(
-                getString(R.string.sudo_id) to sudoId,
-                getString(R.string.sudo_label) to sudoLabel
+        binding.createCardButton.setOnClickListener {
+            navController.navigate(
+                CardsFragmentDirections.actionCardsFragmentToCreateCardFragment(sudoId, sudoLabel)
             )
-            navController.navigate(R.id.action_cardsFragment_to_createCardFragment, bundle)
         }
 
         listCards(CachePolicy.REMOTE_ONLY)
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -118,7 +126,6 @@ class CardsFragment : Fragment(), CoroutineScope {
      * @param cachePolicy Option of either retrieving [Card] data from the cache or network.
      */
     private fun listCards(cachePolicy: CachePolicy) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showLoading()
@@ -152,7 +159,6 @@ class CardsFragment : Fragment(), CoroutineScope {
      * @param completion Callback which executes when the operation is completed.
      */
     private fun cancelCard(id: String, completion: (Card) -> Unit) {
-        val app = requireActivity().application as App
         launch {
             try {
                 showCancelAlert(R.string.cancelling_card)
@@ -160,18 +166,19 @@ class CardsFragment : Fragment(), CoroutineScope {
                     app.sudoVirtualCardsClient.cancelCard(id)
                 }
                 completion(card)
+                hideCancelAlert()
                 showAlertDialog(
                     titleResId = R.string.success,
                     positiveButtonResId = android.R.string.ok
                 )
             } catch (e: SudoVirtualCardsClient.CardException) {
+                hideCancelAlert()
                 showAlertDialog(
                     titleResId = R.string.cancel_card_failure,
                     message = e.localizedMessage ?: "$e",
                     negativeButtonResId = android.R.string.cancel
                 )
             }
-            hideCancelAlert()
         }
     }
 
@@ -179,17 +186,15 @@ class CardsFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the listed [Card] items and listens to item
      * select events to navigate to the [CardDetailFragment].
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter =
             CardAdapter(cardList) { card ->
-                val bundle = bundleOf(
-                    getString(R.string.card) to card
+                navController.navigate(
+                    CardsFragmentDirections.actionCardsFragmentToCardDetailFragment(card)
                 )
-                navController.navigate(R.id.action_cardsFragment_to_cardDetailFragment, bundle)
             }
-
-        view.cardRecyclerView.adapter = adapter
-        view.cardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.cardRecyclerView.adapter = adapter
+        binding.cardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToCancel()
     }
 
@@ -199,38 +204,40 @@ class CardsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        createCardButton?.isEnabled = isEnabled
-        cardRecyclerView?.isEnabled = isEnabled
+        binding.createCardButton.isEnabled = isEnabled
+        binding.cardRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
         if (textResId != 0) {
-            progressText.text = getString(textResId)
+            binding.progressText.text = getString(textResId)
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
-        cardRecyclerView?.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
+        binding.cardRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
-        cardRecyclerView?.visibility = View.VISIBLE
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            binding.progressBar.visibility = View.GONE
+            binding.progressText.visibility = View.GONE
+            binding.cardRecyclerView.visibility = View.VISIBLE
+            setItemsEnabled(true)
+        }
     }
 
     /** Displays the loading [AlertDialog] indicating that a cancel operation is occurring. */
     private fun showCancelAlert(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
     }
 
     /** Dismisses the loading [AlertDialog] indicating that a cancel operation has finished. */
     private fun hideCancelAlert() {
-        loading.dismiss()
+        loading?.dismiss()
     }
 
     /**
@@ -242,7 +249,7 @@ class CardsFragment : Fragment(), CoroutineScope {
      */
     private fun configureSwipeToCancel() {
         val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
-        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(cardRecyclerView)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.cardRecyclerView)
     }
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {

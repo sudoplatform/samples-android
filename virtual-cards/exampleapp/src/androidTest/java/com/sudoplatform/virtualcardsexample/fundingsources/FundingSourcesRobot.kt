@@ -21,14 +21,13 @@ fun fundingSources(func: FundingSourcesRobot.() -> Unit) = FundingSourcesRobot()
  * @since 2020-07-07
  */
 class FundingSourcesRobot : BaseRobot() {
-
     private val createFundingSourceButton = withId(R.id.createFundingSourceButton)
     private val fundingSourceRecyclerView = withId(R.id.fundingSourceRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingProgress, 5_000L)
+        waitForViewToDisplay(loadingProgress, 5_000L, true)
         waitForViewToNotDisplay(loadingProgress, 10_000L)
     }
 
@@ -49,12 +48,14 @@ class FundingSourcesRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         waitForViewToDisplay(positiveAlertButton, 15_000L)
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun swipeLeftToCancel(position: Int) {
         onView(fundingSourceRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<FundingSourceViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<FundingSourceViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )

@@ -7,9 +7,9 @@
 package com.sudoplatform.virtualcardsexample.fundingsources
 
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.rule.ActivityTestRule
 import com.sudoplatform.virtualcardsexample.MainActivity
 import com.sudoplatform.virtualcardsexample.identityverification.identityVerification
 import com.sudoplatform.virtualcardsexample.mainmenu.mainMenu
@@ -30,7 +30,7 @@ import timber.log.Timber
 class CreateFundingSourceTest {
 
     @get:Rule
-    val activityRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
+    val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
 
     @Before
     fun setup() {
@@ -39,6 +39,12 @@ class CreateFundingSourceTest {
 
     @After
     fun fini() {
+        mainMenu {
+            pressBackUntilDeregisterToolbarButtonIsDisplayed()
+            clickOnDeregister()
+            clickOnPositiveDeregisterAlertDialogButton()
+            waitForLoading()
+        }
         Timber.uprootAll()
     }
 
@@ -67,12 +73,6 @@ class CreateFundingSourceTest {
             checkFundingSourcesItemsDisplayed()
             cancelFundingSource()
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 
@@ -105,12 +105,6 @@ class CreateFundingSourceTest {
         fundingSources {
             pressBack()
         }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
-        }
     }
 
     @Test
@@ -125,12 +119,6 @@ class CreateFundingSourceTest {
         }
         fundingSources {
             pressBack()
-        }
-        mainMenu {
-            checkMainMenuItemsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
         }
     }
 

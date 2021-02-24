@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -27,18 +26,19 @@ import com.sudoplatform.sudovirtualcards.types.inputs.CreditCardFundingSourceInp
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
+import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateFundingSourceBinding
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
-import java.util.Calendar
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_create_funding_source.view.*
+import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [CreateFundingSourceFragment] presents a form so that a user can create a [FundingSource].
@@ -58,6 +58,13 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
+    /** The [App] that holds references to the APIs this fragment needs. */
+    private lateinit var app: App
+
+    /** View binding to the views defined in the layout. */
+    private val bindingDelegate = ObjectDelegate<FragmentCreateFundingSourceBinding>()
+    private val binding by bindingDelegate
+
     /** Toolbar [Menu] displaying title and create button. */
     private lateinit var toolbarMenu: Menu
 
@@ -65,7 +72,7 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
     private lateinit var adapter: InputFormAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
-    private lateinit var loading: AlertDialog
+    private var loading: AlertDialog? = null
 
     /** A list of [InputFormCell]s that corresponds to the cells of the input form. */
     private val inputFormCells = mutableListOf<InputFormCell>()
@@ -74,45 +81,50 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
     private var labels = emptyArray<String>()
 
     /** An array of the default text populated for each [InputFormCell]. */
-    private val enteredInput = arrayOf("4242424242424242", "10", expirationYear(),
-        "123", "222333 Peachtree Place", null, "Atlanta", "GA", "30318", "US")
+    private val enteredInput = arrayOf(
+        "4242424242424242", "10", expirationYear(),
+        "123", "222333 Peachtree Place", null, "Atlanta", "GA", "30318", "US"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_create_funding_source, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.create_funding_source)
-
-        toolbar.inflateMenu(R.menu.nav_menu_with_create_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.create -> {
-                    createFundingSource()
+    ): View {
+        bindingDelegate.attach(FragmentCreateFundingSourceBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.create_funding_source)
+            inflateMenu(R.menu.nav_menu_with_create_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.create -> {
+                        createFundingSource()
+                    }
                 }
+                true
             }
-            true
+            toolbarMenu = menu
         }
-        toolbarMenu = toolbar.menu
-        return view
+        app = requireActivity().application as App
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
         configureFormCells()
         navController = Navigation.findNavController(view)
 
-        view.learnMoreButton.setOnClickListener {
+        binding.learnMoreButton.setOnClickListener {
             learnMore()
         }
     }
 
     override fun onDestroy() {
+        loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -128,7 +140,6 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val app = requireActivity().application as App
         val expMonth = (enteredInput[1] ?: "0")
         val expYear = (enteredInput[2] ?: "0")
         val input = CreditCardFundingSourceInput(
@@ -152,7 +163,12 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.success,
                     positiveButtonResId = android.R.string.ok,
-                    onPositive = { navController.navigate(R.id.action_createFundingSourceFragment_to_fundingSourcesFragment) }
+                    onPositive = {
+                        navController.navigate(
+                            CreateFundingSourceFragmentDirections
+                                .actionCreateFundingSourceFragmentToFundingSourcesFragment()
+                        )
+                    }
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(
@@ -171,14 +187,14 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the [InputFormCell]s and listens to input
      * change events to capture user input.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = InputFormAdapter(inputFormCells) { position, charSeq ->
             enteredInput[position] = charSeq
         }
 
-        view.formRecyclerView.setHasFixedSize(true)
-        view.formRecyclerView.adapter = adapter
-        view.formRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.formRecyclerView.setHasFixedSize(true)
+        binding.formRecyclerView.adapter = adapter
+        binding.formRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /** Configures [InputFormCell] labels, text field hints and placeholder text. */
@@ -223,13 +239,15 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
-        loading.show()
+        loading?.show()
         setItemsEnabled(false)
     }
 
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
-        loading.dismiss()
-        setItemsEnabled(true)
+        loading?.dismiss()
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

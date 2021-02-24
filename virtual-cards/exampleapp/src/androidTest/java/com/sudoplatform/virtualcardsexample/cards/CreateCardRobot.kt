@@ -32,25 +32,30 @@ class CreateCardRobot : BaseRobot() {
     private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, true)
+        waitForViewToNotDisplay(loadingDialog, 30_000L)
     }
 
     fun checkCreateCardItemsDisplayed() {
         waitForViewToDisplay(withId(inputForm))
         waitForViewToDisplay(toolbarCreateButton)
+        scrollToView(sudoTextView)
         waitForViewToDisplay(sudoTextView)
+        scrollToView(fundingSourceTextView)
         waitForViewToDisplay(fundingSourceTextView)
+        scrollToView(learnMoreButton)
         waitForViewToDisplay(learnMoreTextView)
         waitForViewToDisplay(learnMoreButton)
     }
 
     fun clickCreateButton() {
+        Thread.sleep(1000)
         clickOnView(toolbarCreateButton)
     }
 
     fun clickPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 

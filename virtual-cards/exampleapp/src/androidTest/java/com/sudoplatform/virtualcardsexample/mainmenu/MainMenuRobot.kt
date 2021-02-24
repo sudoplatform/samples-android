@@ -80,7 +80,7 @@ class MainMenuRobot : BaseRobot() {
                 // Login screen was skipped because already logged in
             }
         }
-        checkMainMenuItemsDisplayed(15_000L)
+        checkMainMenuItemsDisplayed(60_000L)
     }
 
     fun clickOnDeregister() {
@@ -93,17 +93,24 @@ class MainMenuRobot : BaseRobot() {
 
     fun clickOnPositiveInfoAlertDialogButton() {
         checkInfoAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnPositiveDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnNegativeDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
+        Thread.sleep(1000)
         clickOnView(negativeAlertButton)
+    }
+
+    fun pressBackUntilDeregisterToolbarButtonIsDisplayed() {
+        pressBackUntilViewIsDisplayed(toolbarDeregisterButton)
     }
 
     private fun checkInfoAlertDialog() {

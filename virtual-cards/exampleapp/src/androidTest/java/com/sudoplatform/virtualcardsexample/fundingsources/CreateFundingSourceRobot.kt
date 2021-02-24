@@ -34,13 +34,14 @@ class CreateFundingSourceRobot : BaseRobot() {
     private val negativeAlertButton = withId(android.R.id.button2)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, true)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun checkCreateFundingSourceItemsDisplayed() {
         waitForViewToDisplay(withId(inputForm))
         waitForViewToDisplay(toolbarCreateButton)
+        scrollToView(learnMoreButton)
         waitForViewToDisplay(learnMoreTextView)
         waitForViewToDisplay(learnMoreButton)
     }
@@ -51,11 +52,13 @@ class CreateFundingSourceRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnNegativeErrorAlertDialogButton() {
         checkErrorAlertDialog()
+        Thread.sleep(1000)
         clickOnView(negativeAlertButton)
     }
 
@@ -107,7 +110,8 @@ class CreateFundingSourceRobot : BaseRobot() {
     }
 
     private fun scrollToCellWithTitle(title: String) {
-        scrollToViewInRecyclerView(inputForm,
+        scrollToViewInRecyclerView(
+            inputForm,
             hasDescendant(
                 CoreMatchers.allOf(
                     withId(R.id.title),
@@ -118,7 +122,8 @@ class CreateFundingSourceRobot : BaseRobot() {
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(positiveAlertButton, 60_000L)
+        Thread.sleep(1000)
         onView(positiveAlertButton)
             .check(matches(withText(android.R.string.ok)))
     }

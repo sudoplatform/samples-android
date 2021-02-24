@@ -44,12 +44,13 @@ class CreateSudoRobot : BaseRobot() {
 
     fun clickPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 10_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, true)
+        waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun setSudoName(name: String) {
@@ -61,7 +62,7 @@ class CreateSudoRobot : BaseRobot() {
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(positiveAlertButton, 60_000L)
         onView(positiveAlertButton)
             .check(matches(withText(android.R.string.ok)))
     }

@@ -6,11 +6,17 @@
             ]]></notes>
         <cve>CVE-2018-20200</cve>
     </suppress>
-    <suppress until="2020-10-12">
+    <suppress until="2021-03-31">
         <notes><![CDATA[
             Kotlin script is not used in the Sudo Platform Virtual Cards Example App. Set suppression to expire in
             2 months. We can re-evaluate and possible move to Kotlin 1.4.0 if it's out of RC by then.
             ]]></notes>
         <cve>CVE-2020-15824</cve>
+    </suppress>
+    <suppress until="2021-03-31">
+        <notes><![CDATA[
+            False positive due to coroutines libraries being less than 1.4.21
+            ]]></notes>
+        <cve>CVE-2020-29582</cve>
     </suppress>
 </suppressions>
