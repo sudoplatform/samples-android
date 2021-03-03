@@ -38,7 +38,7 @@ android {
 
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:8.2.1'
+    implementation 'com.sudoplatform:sudouser:9.2.0'
     implementation 'com.sudoplatform:sudoadtrackerblocker:1.1.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
