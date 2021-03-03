@@ -14,6 +14,7 @@ import com.sudoplatform.sitereputationexample.MainActivity
 import com.sudoplatform.sitereputationexample.settings.settings
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,6 +46,7 @@ class ExploreTest {
         Timber.uprootAll()
     }
 
+    @Ignore
     @Test
     fun testUpdate() {
 
@@ -71,6 +73,7 @@ class ExploreTest {
         }
     }
 
+    @Ignore
     @Test
     fun testCheckingOfUrls() {
 

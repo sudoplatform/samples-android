@@ -38,8 +38,8 @@ android {
 
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:8.2.3'
-    implementation 'com.sudoplatform:sudositereputation:1.0.0'
+    implementation 'com.sudoplatform:sudouser:9.2.0'
+    implementation 'com.sudoplatform:sudositereputation:1.1.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
