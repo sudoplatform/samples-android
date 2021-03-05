@@ -49,8 +49,7 @@ class PasswordGeneratorRobot : BaseRobot() {
     fun navigateFromLaunchToPasswordGenerator() {
         sudos {
             navigateFromLaunchToSudos()
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             clickOnSettings()
         }
         settings {
@@ -63,18 +62,22 @@ class PasswordGeneratorRobot : BaseRobot() {
     }
 
     fun toggleLowercase() {
+        Thread.sleep(1000)
         clickOnView(lowercaseSwitch)
     }
 
     fun toggleUppercase() {
+        Thread.sleep(1000)
         clickOnView(uppercaseSwitch)
     }
 
     fun toggleNumbers() {
+        Thread.sleep(1000)
         clickOnView(numbersSwitch)
     }
 
     fun toggleSymbols() {
+        Thread.sleep(1000)
         clickOnView(symbolsSwitch)
     }
 
@@ -95,10 +98,12 @@ class PasswordGeneratorRobot : BaseRobot() {
     }
 
     fun clickOnOkButton() {
+        Thread.sleep(1000)
         clickOnView(okButton)
     }
 
     fun clickOnCancelButton() {
+        Thread.sleep(1000)
         clickOnView(cancelButton)
     }
 }

@@ -16,10 +16,9 @@ import com.sudoplatform.passwordmanagerexample.MainActivity
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
 import com.sudoplatform.passwordmanagerexample.vaultItems.vaultItems
 import com.sudoplatform.passwordmanagerexample.vaults.vaults
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +31,7 @@ import timber.log.Timber
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
+@Ignore
 class BankAccountTests {
 
     @get:Rule
@@ -41,15 +41,12 @@ class BankAccountTests {
     fun setup() {
         Timber.plant(Timber.DebugTree())
         activityRule.scenario.onActivity { AppHolder.holdApp(it.application as App) }
+        Thread.sleep(1000)
     }
 
     @After
     fun fini() {
         Timber.uprootAll()
-    }
-
-    private fun pause() = runBlocking {
-        delay(250)
     }
 
     @Test
@@ -58,8 +55,7 @@ class BankAccountTests {
         // Create a bankAccount
         vaultItems {
             navigateFromLaunchToVaultItems()
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             checkVaultItemsDisplayed()
             clickOnCreateBankAccountButton()
         }
@@ -86,8 +82,7 @@ class BankAccountTests {
 
         // Create a bank account
         vaultItems {
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             clickOnCreateBankAccountButton()
         }
         createBankAccount {
@@ -105,7 +100,7 @@ class BankAccountTests {
 
         // Edit the bank account
         vaultItems {
-            waitForLoading()
+            waitForLoading(true)
             waitForRecyclerView()
             clickOn(0)
         }
@@ -122,7 +117,7 @@ class BankAccountTests {
             waitForLoading()
         }
         vaultItems {
-            waitForLoading()
+            waitForLoading(true)
             waitForRecyclerView()
             pressBack()
         }

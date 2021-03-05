@@ -42,4 +42,10 @@ object AppHolder {
             reset()
         }
     }
+
+    fun isLocked() = runBlocking<Boolean> {
+        val app = app
+            ?: throw AssertionError("AppHolder does not have a reference to the App under test")
+        app.sudoPasswordManager.isLocked()
+    }
 }

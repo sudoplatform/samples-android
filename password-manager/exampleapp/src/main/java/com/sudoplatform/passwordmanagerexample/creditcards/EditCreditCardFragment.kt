@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -23,24 +22,26 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentCreateEditCreditCardBinding
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.toSecureField
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.passwordmanagerexample.vaultItems.VaultItemsFragment
 import com.sudoplatform.sudopasswordmanager.SudoPasswordManagerException
 import com.sudoplatform.sudopasswordmanager.models.Vault
 import com.sudoplatform.sudopasswordmanager.models.VaultCreditCard
 import com.sudoplatform.sudopasswordmanager.models.VaultItemNote
 import com.sudoplatform.sudopasswordmanager.models.VaultItemValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_create_edit_credit_card.*
-import kotlinx.android.synthetic.main.fragment_create_edit_credit_card.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * This [EditCreditCardFragment] presents a screen that accepts the values of a set of credit card credentials.
@@ -50,6 +51,10 @@ import kotlinx.coroutines.withContext
 class EditCreditCardFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentCreateEditCreditCardBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -75,23 +80,24 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_create_edit_credit_card, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.edit_credit_card)
-        toolbar.inflateMenu(R.menu.nav_menu_with_save_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.save -> {
-                    saveCreditCard()
+        bindingDelegate.attach(FragmentCreateEditCreditCardBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.edit_credit_card)
+            inflateMenu(R.menu.nav_menu_with_save_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.save -> {
+                        saveCreditCard()
+                    }
                 }
+                true
             }
-            true
         }
         app = requireActivity().application as App
         vault = args.vault
         vaultCreditCard = args.vaultCreditCard
 
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -104,8 +110,16 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
         handleExpiryFormatting()
     }
 
+    override fun onDestroy() {
+        loading?.dismiss()
+        coroutineContext.cancelChildren()
+        coroutineContext.cancel()
+        bindingDelegate.detach()
+        super.onDestroy()
+    }
+
     private fun saveCreditCard() {
-        val name = editText_cardName.text.toString().trim()
+        val name = binding.editTextCardName.text.toString().trim()
         if (name.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_card_name,
@@ -140,10 +154,10 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
     }
 
     private fun toVaultCreditCard(): VaultCreditCard {
-        val cardNumber = editText_cardNumber.toSecureField()?.let { VaultItemValue(it) }
-        val securityCode = editText_securityCode.toSecureField()?.let { VaultItemValue(it) }
-        val notes = editText_notes.toSecureField()?.let { VaultItemNote(it) }
-        val expiryString = editText_expiry.text.toString().trim()
+        val cardNumber = binding.editTextCardNumber.toSecureField()?.let { VaultItemValue(it) }
+        val securityCode = binding.editTextSecurityCode.toSecureField()?.let { VaultItemValue(it) }
+        val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
+        val expiryString = binding.editTextExpiry.text.toString().trim()
 
         // default to null if date parsing fails
         var expiryDate: Date? = null
@@ -154,9 +168,9 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
             // failed to parse expiry date string
         }
         return vaultCreditCard.copy(
-            name = editText_cardName.text.toString().trim(),
-            cardName = editText_cardHolder.text.toString().trim(),
-            cardType = editText_cardType.text.toString().trim(),
+            name = binding.editTextCardName.text.toString().trim(),
+            cardName = binding.editTextCardHolder.text.toString().trim(),
+            cardType = binding.editTextCardType.text.toString().trim(),
             cardNumber = cardNumber,
             expiresAt = expiryDate,
             securityCode = securityCode,
@@ -166,24 +180,24 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
 
     private fun loadFromVaultCreditCard(vaultCard: VaultCreditCard) {
         val dateFormat = SimpleDateFormat(getString(R.string.login_date_format), Locale.getDefault())
-        label_createdAt.isVisible = true
-        label_updatedAt.isVisible = true
-        label_createdAt.setText(getString(R.string.created_at, dateFormat.format(vaultCard.createdAt)))
-        label_updatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultCard.updatedAt)))
+        binding.labelCreatedAt.isVisible = true
+        binding.labelUpdatedAt.isVisible = true
+        binding.labelCreatedAt.setText(getString(R.string.created_at, dateFormat.format(vaultCard.createdAt)))
+        binding.labelUpdatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultCard.updatedAt)))
 
-        editText_cardName.setText(vaultCard.name)
-        editText_cardHolder.setText(vaultCard.cardName)
-        vaultCard.cardType?.let { editText_cardType.setText(it) }
-        vaultCard.cardNumber?.let { editText_cardNumber.setText(it.getValue()) }
+        binding.editTextCardName.setText(vaultCard.name)
+        binding.editTextCardHolder.setText(vaultCard.cardName)
+        vaultCard.cardType?.let { binding.editTextCardType.setText(it) }
+        vaultCard.cardNumber?.let { binding.editTextCardNumber.setText(it.getValue()) }
         val expiryFormat = SimpleDateFormat("MM/yy", Locale.getDefault())
-        vaultCard.expiresAt?.let { editText_expiry.setText(expiryFormat.format(it)) }
-        vaultCard.securityCode?.let { editText_securityCode.setText(it.getValue()) }
-        vaultCard.notes?.let { editText_notes.setText(it.getValue()) }
+        vaultCard.expiresAt?.let { binding.editTextExpiry.setText(expiryFormat.format(it)) }
+        vaultCard.securityCode?.let { binding.editTextSecurityCode.setText(it.getValue()) }
+        vaultCard.notes?.let { binding.editTextNotes.setText(it.getValue()) }
     }
 
     private fun handleExpiryFormatting() {
         // format the text to be a date string
-        editText_expiry.addTextChangedListener(object : TextWatcher {
+        binding.editTextExpiry.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
 
@@ -209,8 +223,8 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
 
                 // set ignore to true so that onTextChanged doesn't get stuck in a recursive loop
                 ignoreTextChange = true
-                editText_expiry.setText(stringBuilder.toString())
-                editText_expiry.setSelection(stringBuilder.length)
+                binding.editTextExpiry.setText(stringBuilder.toString())
+                binding.editTextExpiry.setSelection(stringBuilder.length)
             }
         })
     }
@@ -221,13 +235,13 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        editText_cardName.isEnabled = isEnabled
-        editText_cardHolder.isEnabled = isEnabled
-        editText_cardType.isEnabled = isEnabled
-        editText_cardNumber.isEnabled = isEnabled
-        editText_expiry.isEnabled = isEnabled
-        editText_securityCode.isEnabled = isEnabled
-        editText_notes.isEnabled = isEnabled
+        binding.editTextCardName.isEnabled = isEnabled
+        binding.editTextCardHolder.isEnabled = isEnabled
+        binding.editTextCardType.isEnabled = isEnabled
+        binding.editTextCardNumber.isEnabled = isEnabled
+        binding.editTextExpiry.isEnabled = isEnabled
+        binding.editTextSecurityCode.isEnabled = isEnabled
+        binding.editTextNotes.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
@@ -240,6 +254,8 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
         loading?.dismiss()
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

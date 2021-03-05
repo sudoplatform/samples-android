@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
@@ -35,28 +34,33 @@ android {
         pickFirst("META-INF/atomicfu.kotlin_module")
         pickFirst("META-INF/kotlinx-coroutines-core.kotlin_module")
     }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    testOptions {
+        animationsDisabled = true
+    }
 }
 
-
 dependencies {
-    implementation 'com.sudoplatform:sudouser:8.2.1'
-    implementation 'com.sudoplatform:sudoprofiles:3.1.10'
-    implementation 'com.sudoplatform:sudopasswordmanager:1.5.0'
-    implementation 'com.sudoplatform:sudoentitlements:1.0.0'
+    implementation 'com.sudoplatform:sudouser:9.2.0'
+    implementation 'com.sudoplatform:sudoprofiles:6.0.0'
+    implementation 'com.sudoplatform:sudopasswordmanager:1.6.0'
+    implementation 'com.sudoplatform:sudoentitlements:2.0.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    def coroutine_version = "1.3.8"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutine_version"
+    def coroutine_version = "1.4.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 
-    def fragment_version = "1.3.0-alpha04"
+    def fragment_version = '1.3.0'
     implementation "androidx.fragment:fragment:$fragment_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
@@ -64,7 +68,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.android.material:material:1.3.0-rc01'
+    implementation 'com.google.android.material:material:1.3.0'
 
     def androidxTest = "1.3.0"
     def espresso = "3.3.0"
@@ -109,7 +113,6 @@ kotlinter {
     ignoreFailures = false
     reporters = ['checkstyle', 'plain']
     experimentalRules = false
-    fileBatchSize = 30
 }
 
 // Vulnerability scanning

@@ -7,6 +7,7 @@
 package com.sudoplatform.passwordmanagerexample
 
 import android.app.Application
+import android.net.Uri
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudokeymanager.KeyManager
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
@@ -18,11 +19,11 @@ import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.SignOutException
-import java.net.URI
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 class App : Application(), CoroutineScope {
 
@@ -54,9 +55,8 @@ class App : Application(), CoroutineScope {
 
         // Create an instance of SudoProfilesClient to perform creation, deletion and modification
         // of Sudos.
-        val blobURI = URI(cacheDir.path)
-        sudoProfilesClient = SudoProfilesClient
-            .builder(this, sudoUserClient, blobURI)
+        val blobURI = Uri.fromFile(cacheDir)
+        sudoProfilesClient = SudoProfilesClient.builder(this, sudoUserClient, blobURI)
             .setLogger(logger)
             .build()
 
@@ -95,11 +95,12 @@ class App : Application(), CoroutineScope {
                             launch {
                                 userClient.globalSignOut()
                             }
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
                             this.logger.debug("FSSO Signout failed: " + e.localizedMessage)
                             throw SignOutException.FailedException(e.message)
                         } finally {
-
                             userClient.clearAuthTokens()
                         }
                     }
@@ -112,6 +113,8 @@ class App : Application(), CoroutineScope {
                     }
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             this.logger.debug("FSSO Signout failed: " + e.localizedMessage)
             throw SignOutException.FailedException(e.message)

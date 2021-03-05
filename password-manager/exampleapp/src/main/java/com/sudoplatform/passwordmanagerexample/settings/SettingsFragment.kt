@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2021 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.sudoplatform.passwordmanagerexample.settings
 
 import android.content.Context
@@ -8,25 +14,23 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentSettingsBinding
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.sudouser.exceptions.RegisterException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_settings.*
-import kotlinx.android.synthetic.main.fragment_settings.view.*
-import kotlinx.android.synthetic.main.fragment_settings.view.toolbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [SettingsFragment] presents a settings screen so that the user can navigate to different settings and screens.
@@ -42,6 +46,10 @@ class SettingsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentSettingsBinding>()
+    private val binding by bindingDelegate
+
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
 
@@ -56,27 +64,26 @@ class SettingsFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        bindingDelegate.attach(FragmentSettingsBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.settings)
-        return view
+        binding.toolbar.root.title = getString(R.string.settings)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        view.changeMasterPasswordButton.setOnClickListener {
+        binding.changeMasterPasswordButton.setOnClickListener {
             navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToChangeMasterPasswordFragment())
         }
-        view.secretCodeButton.setOnClickListener {
+        binding.secretCodeButton.setOnClickListener {
             navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToSecretCodeFragment())
         }
-        view.passwordGeneratorButton.setOnClickListener {
+        binding.passwordGeneratorButton.setOnClickListener {
             navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToPasswordGeneratorDialogFragment())
         }
-        view.lockVaultsButton.setOnClickListener {
+        binding.lockVaultsButton.setOnClickListener {
             launch {
                 withContext(Dispatchers.IO) {
                     app.sudoPasswordManager.lock()
@@ -84,7 +91,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
             }
             navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToUnlockVaultsFragment())
         }
-        view.deregisterButton.setOnClickListener {
+        binding.deregisterButton.setOnClickListener {
             val sharedPreferences = context?.getSharedPreferences("SignIn", Context.MODE_PRIVATE)
             val usedFSSO = sharedPreferences?.getBoolean("usedFSSO", false)
             if (usedFSSO == true) {
@@ -101,10 +108,10 @@ class SettingsFragment : Fragment(), CoroutineScope {
                 )
             }
         }
-        view.viewEntitlementsButton.setOnClickListener {
+        binding.viewEntitlementsButton.setOnClickListener {
             navController.navigate(SettingsFragmentDirections.actionSettingsFragmentToViewEntitlementsFragment())
         }
-        view.resetVaultsButton.setOnClickListener {
+        binding.resetVaultsButton.setOnClickListener {
             showAlertDialog(
                 titleResId = R.string.reset_vaults_alert_title,
                 messageResId = R.string.reset_vaults_alert_message,
@@ -121,7 +128,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
         val sharedPreferences = context?.getSharedPreferences("SignIn", Context.MODE_PRIVATE)
         val usedFSSO = sharedPreferences?.getBoolean("usedFSSO", false)
         if (usedFSSO == true) {
-            this.deregisterButton.setText(R.string.sign_out)
+            binding.deregisterButton.setText(R.string.sign_out)
         }
     }
 
@@ -129,6 +136,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
         loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -186,10 +194,10 @@ class SettingsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        secretCodeButton.isEnabled = isEnabled
-        passwordGeneratorButton.isEnabled = isEnabled
-        lockVaultsButton.isEnabled = isEnabled
-        deregisterButton.isEnabled = isEnabled
+        binding.secretCodeButton.isEnabled = isEnabled
+        binding.passwordGeneratorButton.isEnabled = isEnabled
+        binding.lockVaultsButton.isEnabled = isEnabled
+        binding.deregisterButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
@@ -202,6 +210,8 @@ class SettingsFragment : Fragment(), CoroutineScope {
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
         loading?.dismiss()
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

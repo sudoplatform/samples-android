@@ -34,26 +34,32 @@ class SettingsRobot : BaseRobot() {
     private val loadingDialog = withId(R.id.progressBar)
 
     fun clickOnChangeMasterPassword() {
+        Thread.sleep(1000)
         clickOnView(changeMasterPasswordButton)
     }
 
     fun clickOnSecretCode() {
+        Thread.sleep(1000)
         clickOnView(secretCodeButton)
     }
 
     fun clickOnPasswordGenerator() {
+        Thread.sleep(1000)
         clickOnView(passwordGeneratorButton)
     }
 
     fun clickOnLockVaults() {
+        Thread.sleep(1000)
         clickOnView(lockVaultsButton)
     }
 
     fun clickOnDeregister() {
+        Thread.sleep(1000)
         clickOnView(deregisterButton)
     }
 
     fun clickOnViewEntitlements() {
+        Thread.sleep(1000)
         clickOnView(viewEntitlementsButton)
     }
 
@@ -66,11 +72,13 @@ class SettingsRobot : BaseRobot() {
 
     fun clickOnPositiveDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun clickOnNegativeDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
+        Thread.sleep(1000)
         clickOnView(negativeAlertButton)
     }
 
@@ -89,6 +97,6 @@ class SettingsRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 }

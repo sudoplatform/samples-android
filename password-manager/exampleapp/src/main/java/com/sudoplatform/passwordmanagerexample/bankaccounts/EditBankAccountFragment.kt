@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -21,30 +20,25 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentCreateEditBankAccountBinding
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.toSecureField
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.passwordmanagerexample.vaultItems.VaultItemsFragment
 import com.sudoplatform.sudopasswordmanager.SudoPasswordManagerException
 import com.sudoplatform.sudopasswordmanager.models.Vault
 import com.sudoplatform.sudopasswordmanager.models.VaultBankAccount
 import com.sudoplatform.sudopasswordmanager.models.VaultItemNote
 import com.sudoplatform.sudopasswordmanager.models.VaultItemValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.editText_accountName
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.editText_accountNumber
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.editText_accountType
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.editText_bankName
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.editText_notes
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.editText_routingNumber
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.label_createdAt
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.label_updatedAt
-import kotlinx.android.synthetic.main.fragment_create_edit_bank_account.view.toolbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * This [EditBankAccountFragment] presents a screen that accepts the values of a set of bank account credentials.
@@ -54,6 +48,10 @@ import kotlinx.coroutines.withContext
 class EditBankAccountFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentCreateEditBankAccountBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -79,24 +77,25 @@ class EditBankAccountFragment : Fragment(), CoroutineScope {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_create_edit_bank_account, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.edit_bank_account)
-        toolbar.inflateMenu(R.menu.nav_menu_with_save_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.save -> {
-                    saveBankAccount()
+        bindingDelegate.attach(FragmentCreateEditBankAccountBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.edit_bank_account)
+            inflateMenu(R.menu.nav_menu_with_save_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.save -> {
+                        saveBankAccount()
+                    }
                 }
+                true
             }
-            true
         }
         app = requireActivity().application as App
 
         vault = args.vault
         vaultBankAccount = args.vaultBankAccount
 
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -107,8 +106,16 @@ class EditBankAccountFragment : Fragment(), CoroutineScope {
         loadFromVaultBankAccount(vaultBankAccount)
     }
 
+    override fun onDestroy() {
+        loading?.dismiss()
+        coroutineContext.cancelChildren()
+        coroutineContext.cancel()
+        bindingDelegate.detach()
+        super.onDestroy()
+    }
+
     private fun saveBankAccount() {
-        val name = editText_accountName.text.toString().trim()
+        val name = binding.editTextAccountName.text.toString().trim()
         if (name.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_bank_account_name,
@@ -143,31 +150,31 @@ class EditBankAccountFragment : Fragment(), CoroutineScope {
     }
 
     private fun toVaultBankAccount(): VaultBankAccount {
-        val notes = editText_notes.toSecureField()?.let { VaultItemNote(it) }
-        val accountNumber = editText_accountNumber.toSecureField()?.let { VaultItemValue(it) }
+        val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
+        val accountNumber = binding.editTextAccountNumber.toSecureField()?.let { VaultItemValue(it) }
 
         return vaultBankAccount.copy(
-            name = editText_accountName.text.toString().trim(),
-            bankName = editText_bankName.text.toString().trim(),
+            name = binding.editTextAccountName.text.toString().trim(),
+            bankName = binding.editTextBankName.text.toString().trim(),
             accountNumber = accountNumber,
-            routingNumber = editText_routingNumber.text.toString().trim(),
-            accountType = editText_accountType.text.toString().trim(),
+            routingNumber = binding.editTextRoutingNumber.text.toString().trim(),
+            accountType = binding.editTextAccountType.text.toString().trim(),
             notes = notes
         )
     }
 
     private fun loadFromVaultBankAccount(vaultBankAccount: VaultBankAccount) {
         val dateFormat = SimpleDateFormat(getString(R.string.login_date_format), Locale.getDefault())
-        label_createdAt.isVisible = true
-        label_updatedAt.isVisible = true
-        label_createdAt.setText(getString(R.string.created_at, dateFormat.format(vaultBankAccount.createdAt)))
-        label_updatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultBankAccount.updatedAt)))
-        editText_accountName.setText(vaultBankAccount.name)
-        vaultBankAccount.bankName?.let { editText_bankName.setText(it) }
-        vaultBankAccount.accountNumber?.let { editText_accountNumber.setText(it.getValue()) }
-        vaultBankAccount.routingNumber?.let { editText_routingNumber.setText(it) }
-        vaultBankAccount.accountType?.let { editText_accountType.setText(it) }
-        vaultBankAccount.notes?.let { editText_notes.setText(it.getValue()) }
+        binding.labelCreatedAt.isVisible = true
+        binding.labelUpdatedAt.isVisible = true
+        binding.labelCreatedAt.setText(getString(R.string.created_at, dateFormat.format(vaultBankAccount.createdAt)))
+        binding.labelUpdatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultBankAccount.updatedAt)))
+        binding.editTextAccountName.setText(vaultBankAccount.name)
+        vaultBankAccount.bankName?.let { binding.editTextBankName.setText(it) }
+        vaultBankAccount.accountNumber?.let { binding.editTextAccountNumber.setText(it.getValue()) }
+        vaultBankAccount.routingNumber?.let { binding.editTextRoutingNumber.setText(it) }
+        vaultBankAccount.accountType?.let { binding.editTextAccountType.setText(it) }
+        vaultBankAccount.notes?.let { binding.editTextNotes.setText(it.getValue()) }
     }
 
     /**
@@ -176,12 +183,12 @@ class EditBankAccountFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        editText_accountName.isEnabled = isEnabled
-        editText_bankName.isEnabled = isEnabled
-        editText_accountNumber.isEnabled = isEnabled
-        editText_routingNumber.isEnabled = isEnabled
-        editText_accountType.isEnabled = isEnabled
-        editText_notes.isEnabled = isEnabled
+        binding.editTextAccountName.isEnabled = isEnabled
+        binding.editTextBankName.isEnabled = isEnabled
+        binding.editTextAccountNumber.isEnabled = isEnabled
+        binding.editTextRoutingNumber.isEnabled = isEnabled
+        binding.editTextAccountType.isEnabled = isEnabled
+        binding.editTextNotes.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
@@ -194,6 +201,8 @@ class EditBankAccountFragment : Fragment(), CoroutineScope {
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
         loading?.dismiss()
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

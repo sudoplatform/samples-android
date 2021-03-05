@@ -1,3 +1,15 @@
+## 1.6.0
+
+Released Mar 5, 2021.
+
+### New
+
+- Updated dependencies
+
+### Fixed
+
+- None
+
 ## 1.5.0
 
 Released Feb 8, 2021.
@@ -7,14 +19,18 @@ Released Feb 8, 2021.
 - Added support for Bank Accounts
 - Added support for Credit Cards
 
- ## 1.0.0
+### Fixed
 
- Released Dec 23, 2020.
+- None
 
- ### New
+## 1.0.0
 
- - Initial Release. 
+Released Dec 23, 2020.
 
- ### Fixed
+### New
 
- - None.
+- Initial Release.
+
+### Fixed
+
+- None

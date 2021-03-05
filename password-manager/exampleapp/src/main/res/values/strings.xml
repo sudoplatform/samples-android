@@ -165,8 +165,8 @@
     <!-- View Entitlements -->
     <string name="entitlements_title">Entitlements</string>
     <string name="entitlement_name">Entitlement:</string>
-    <string name="entitlement_limit">Limit - all Sudos:</string>
-    <string name="entitlement_value">Value - this Sudo:</string>
+    <string name="entitlement_limit">Limit:</string>
+    <string name="entitlement_value">Value:</string>
     <string name="loading_entitlements">Loading Entitlements</string>
     <string name="entitlement_max_vaults">maxVaultPerSudo</string>
 

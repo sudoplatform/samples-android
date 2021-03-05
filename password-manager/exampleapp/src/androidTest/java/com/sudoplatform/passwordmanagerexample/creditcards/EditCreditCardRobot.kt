@@ -57,6 +57,7 @@ class EditCreditCardRobot : BaseRobot() {
     }
 
     fun clickOnSave() {
+        Thread.sleep(1000)
         clickOnView(saveButton)
     }
 
@@ -94,6 +95,6 @@ class EditCreditCardRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 }

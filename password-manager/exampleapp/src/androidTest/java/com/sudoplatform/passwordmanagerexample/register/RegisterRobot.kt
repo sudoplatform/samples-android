@@ -26,6 +26,7 @@ class RegisterRobot : BaseRobot() {
     }
 
     fun clickOnRegister() {
+        Thread.sleep(1000)
         clickOnView(registerButton)
     }
 }

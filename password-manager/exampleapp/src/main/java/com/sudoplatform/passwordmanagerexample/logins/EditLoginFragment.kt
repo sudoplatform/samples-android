@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -22,25 +21,25 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentCreateEditLoginBinding
 import com.sudoplatform.passwordmanagerexample.passwordgenerator.PasswordGeneratorDialog
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.toSecureField
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.sudopasswordmanager.SudoPasswordManagerException
 import com.sudoplatform.sudopasswordmanager.models.Vault
 import com.sudoplatform.sudopasswordmanager.models.VaultItemNote
 import com.sudoplatform.sudopasswordmanager.models.VaultItemPassword
 import com.sudoplatform.sudopasswordmanager.models.VaultLogin
-import java.text.SimpleDateFormat
-import java.util.Locale
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_create_edit_login.*
-import kotlinx.android.synthetic.main.fragment_create_edit_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [EditLoginFragment] presents a screen that shows the values of login credentials
@@ -52,6 +51,10 @@ import kotlinx.coroutines.withContext
 class EditLoginFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentCreateEditLoginBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -76,17 +79,18 @@ class EditLoginFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_create_edit_login, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.edit_login)
-        toolbar.inflateMenu(R.menu.nav_menu_with_save_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.save -> {
-                    saveLogin()
+        bindingDelegate.attach(FragmentCreateEditLoginBinding.inflate(inflater, container, false))
+        with(binding.toolbar.root) {
+            title = getString(R.string.edit_login)
+            inflateMenu(R.menu.nav_menu_with_save_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.save -> {
+                        saveLogin()
+                    }
                 }
+                true
             }
-            true
         }
         app = requireActivity().application as App
 
@@ -97,12 +101,12 @@ class EditLoginFragment : Fragment(), CoroutineScope {
         setFragmentResultListener(PasswordGeneratorDialog.GENERATED_PASSWORD) { resultKey, result ->
             if (resultKey == PasswordGeneratorDialog.GENERATED_PASSWORD) {
                 result.getString(PasswordGeneratorDialog.GENERATED_PASSWORD)?.let {
-                    editText_password.setText(it)
+                    binding.editTextPassword.setText(it)
                 }
             }
         }
 
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -111,7 +115,7 @@ class EditLoginFragment : Fragment(), CoroutineScope {
 
         loadFromVaultLogin(vaultLogin)
 
-        button_passwordGenerator.setOnClickListener {
+        binding.buttonPasswordGenerator.setOnClickListener {
             navController.navigate(EditLoginFragmentDirections.actionEditLoginFragmentToPasswordGeneratorDialogFragment())
         }
     }
@@ -120,16 +124,17 @@ class EditLoginFragment : Fragment(), CoroutineScope {
         loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
     private fun toVaultLogin(): VaultLogin {
-        val notes = editText_notes.toSecureField()?.let { VaultItemNote(it) }
-        val password = editText_password.toSecureField()?.let { VaultItemPassword(it) }
+        val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
+        val password = binding.editTextPassword.toSecureField()?.let { VaultItemPassword(it) }
         return vaultLogin.copy(
-            name = editText_loginName.text.toString().trim(),
-            user = editText_username.text.toString().trim(),
-            url = editText_webAddress.text.toString().trim(),
+            name = binding.editTextLoginName.text.toString().trim(),
+            user = binding.editTextUsername.text.toString().trim(),
+            url = binding.editTextWebAddress.text.toString().trim(),
             notes = notes,
             password = password
         )
@@ -137,20 +142,20 @@ class EditLoginFragment : Fragment(), CoroutineScope {
 
     private fun loadFromVaultLogin(vaultLogin: VaultLogin) {
         val dateFormat = SimpleDateFormat(getString(R.string.login_date_format), Locale.getDefault())
-        label_createdAt.isVisible = true
-        label_updatedAt.isVisible = true
-        label_createdAt.setText(getString(R.string.created_at, dateFormat.format(vaultLogin.createdAt)))
-        label_updatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultLogin.updatedAt)))
-        editText_loginName.setText(vaultLogin.name)
-        vaultLogin.url?.let { editText_webAddress.setText(it) }
-        vaultLogin.user?.let { editText_username.setText(it) }
-        vaultLogin.password?.let { editText_password.setText(it.getValue()) }
-        vaultLogin.notes?.let { editText_notes.setText(it.getValue()) }
+        binding.labelCreatedAt.isVisible = true
+        binding.labelUpdatedAt.isVisible = true
+        binding.labelCreatedAt.setText(getString(R.string.created_at, dateFormat.format(vaultLogin.createdAt)))
+        binding.labelUpdatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultLogin.updatedAt)))
+        binding.editTextLoginName.setText(vaultLogin.name)
+        vaultLogin.url?.let { binding.editTextWebAddress.setText(it) }
+        vaultLogin.user?.let { binding.editTextUsername.setText(it) }
+        vaultLogin.password?.let { binding.editTextPassword.setText(it.getValue()) }
+        vaultLogin.notes?.let { binding.editTextNotes.setText(it.getValue()) }
     }
 
     private fun saveLogin() {
 
-        val name = editText_loginName.text.toString().trim()
+        val name = binding.editTextLoginName.text.toString().trim()
         if (name.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_login_name,
@@ -190,11 +195,11 @@ class EditLoginFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        editText_username.isEnabled = isEnabled
-        editText_webAddress.isEnabled = isEnabled
-        editText_loginName.isEnabled = isEnabled
-        editText_notes.isEnabled = isEnabled
-        editText_password.isEnabled = isEnabled
+        binding.editTextUsername.isEnabled = isEnabled
+        binding.editTextWebAddress.isEnabled = isEnabled
+        binding.editTextLoginName.isEnabled = isEnabled
+        binding.editTextNotes.isEnabled = isEnabled
+        binding.editTextPassword.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
@@ -207,6 +212,8 @@ class EditLoginFragment : Fragment(), CoroutineScope {
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
         loading?.dismiss()
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

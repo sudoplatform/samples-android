@@ -37,9 +37,9 @@ class VaultItemsRobot : BaseRobot() {
     private val loadingDialog = ViewMatchers.withId(R.id.progressBar)
     private val positiveAlertButton = ViewMatchers.withId(android.R.id.button1)
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+    fun waitForLoading(mayMissView: Boolean = false) {
+        waitForViewToDisplay(loadingDialog, 2_500L, mayMissView)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 
     fun waitForRecyclerView() {
@@ -68,7 +68,8 @@ class VaultItemsRobot : BaseRobot() {
 
     fun swipeLeftToDelete(position: Int) {
         Espresso.onView(itemRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -76,7 +77,8 @@ class VaultItemsRobot : BaseRobot() {
 
     fun clickOn(position: Int) {
         Espresso.onView(itemRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(
+                position,
                 ViewActions.click()
             )
         )
@@ -97,8 +99,7 @@ class VaultItemsRobot : BaseRobot() {
         vaults {
             navigateFromLaunchToVaults()
 
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             checkVaultsItemsDisplayed()
 
             clickOnCreateVaultButton()

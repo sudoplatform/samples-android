@@ -20,16 +20,17 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import com.sudoplatform.passwordmanagerexample.R
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentPasswordGeneratorDialogBinding
 import com.sudoplatform.passwordmanagerexample.logins.CreateLoginFragment
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.sudopasswordmanager.PasswordStrength
 import com.sudoplatform.sudopasswordmanager.calculateStrengthOfPassword
 import com.sudoplatform.sudopasswordmanager.generatePassword
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_password_generator_dialog.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlin.coroutines.CoroutineContext
 
 internal const val DEFAULT_PASSWORD_LENGTH = 20
 internal const val MIN_PASSWORD_LENGTH = 6
@@ -52,6 +53,10 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentPasswordGeneratorDialogBinding>()
+    private val binding by bindingDelegate
+
     private var length = DEFAULT_PASSWORD_LENGTH
     private var shouldMonitorLengthTextChange = true
 
@@ -60,7 +65,8 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_password_generator_dialog, container, false)
+        bindingDelegate.attach(FragmentPasswordGeneratorDialogBinding.inflate(inflater, container, false))
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -69,14 +75,15 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
         generatePassword()
 
         shouldMonitorLengthTextChange = false
-        view.editText_length.setText(length.toString())
 
-        view.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.editTextLength.setText(length.toString())
+
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, value: Int, b: Boolean) {
                 length = value
                 generatePassword()
                 shouldMonitorLengthTextChange = false
-                view.editText_length.setText(length.toString())
+                binding.editTextLength.setText(length.toString())
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -88,7 +95,7 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
             }
         })
 
-        view.editText_generated_password.addTextChangedListener(
+        binding.editTextGeneratedPassword.addTextChangedListener(
             AfterTextChangedWatcher { text ->
                 if (shouldMonitorLengthTextChange) {
                     calculateStrength(text.toString())
@@ -97,7 +104,7 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
             }
         )
 
-        view.editText_length.addTextChangedListener(
+        binding.editTextLength.addTextChangedListener(
             AfterTextChangedWatcher { text ->
                 text?.let { lengthText ->
                     val lengthTextAsInt = if (lengthText.isNotEmpty()) lengthText.toString().toInt() else 0
@@ -109,47 +116,45 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
                         length = lengthTextAsInt
                     }
                 }
-                view.seekBar.progress = length
+                binding.seekBar.progress = length
                 generatePassword()
             }
         )
 
-        view.editText_length.onFocusChangeListener = View.OnFocusChangeListener { v, _ ->
-            v?.let { editText ->
-                {
-                    if (!editText.hasFocus()) {
-                        view.editText_length.setText("$length")
-                    }
+        binding.editTextLength.onFocusChangeListener = View.OnFocusChangeListener { v, _ ->
+            v?.let {
+                if (!it.hasFocus()) {
+                    binding.editTextLength.setText("$length")
                 }
             }
         }
 
-        view.switch_lowercase.setOnCheckedChangeListener { _, _ ->
+        binding.switchLowercase.setOnCheckedChangeListener { _, _ ->
             generatePassword()
         }
 
-        view.switch_uppercase.setOnCheckedChangeListener { _, _ ->
+        binding.switchUppercase.setOnCheckedChangeListener { _, _ ->
             generatePassword()
         }
 
-        view.switch_numbers.setOnCheckedChangeListener { _, _ ->
+        binding.switchNumbers.setOnCheckedChangeListener { _, _ ->
             generatePassword()
         }
 
-        view.switch_symbols.setOnCheckedChangeListener { _, _ ->
+        binding.switchSymbols.setOnCheckedChangeListener { _, _ ->
             generatePassword()
         }
 
-        view.button_cancel.setOnClickListener {
+        binding.buttonCancel.setOnClickListener {
             findNavController().popBackStack()
         }
 
-        view.button_ok.setOnClickListener {
+        binding.buttonOk.setOnClickListener {
             // Send the generated password back to the fragment that invoked this dialogue
             setFragmentResult(
                 GENERATED_PASSWORD,
                 bundleOf(
-                    GENERATED_PASSWORD to view.editText_generated_password.text.toString()
+                    GENERATED_PASSWORD to binding.editTextGeneratedPassword.text.toString()
                 )
             )
             findNavController().popBackStack()
@@ -173,44 +178,43 @@ class PasswordGeneratorDialog : DialogFragment(), CoroutineScope {
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
     private fun generatePassword() {
-        val view = this.view ?: return
         val password = generatePassword(
             length,
-            view.switch_uppercase.isChecked,
-            view.switch_lowercase.isChecked,
-            view.switch_numbers.isChecked,
-            view.switch_symbols.isChecked
+            binding.switchUppercase.isChecked,
+            binding.switchLowercase.isChecked,
+            binding.switchNumbers.isChecked,
+            binding.switchSymbols.isChecked
         )
         calculateStrength(password)
-        view.editText_generated_password.setText(password)
+        binding.editTextGeneratedPassword.setText(password)
     }
 
     private fun calculateStrength(password: String) {
-        val view = this.view ?: return
         when (calculateStrengthOfPassword(password)) {
             PasswordStrength.VeryWeak -> {
-                view.editText_strength.text = view.context.getString(R.string.very_weak)
-                view.editText_strength.setTextColor(Color.RED)
+                binding.editTextStrength.text = requireContext().getString(R.string.very_weak)
+                binding.editTextStrength.setTextColor(Color.RED)
             }
             PasswordStrength.Weak -> {
-                view.editText_strength.text = view.context.getString(R.string.weak)
-                view.editText_strength.setTextColor(Color.RED)
+                binding.editTextStrength.text = requireContext().getString(R.string.weak)
+                binding.editTextStrength.setTextColor(Color.RED)
             }
             PasswordStrength.Moderate -> {
-                view.editText_strength.text = view.context.getString(R.string.moderate)
-                view.editText_strength.setTextColor(ContextCompat.getColor(view.context, R.color.colorOrange))
+                binding.editTextStrength.text = requireContext().getString(R.string.moderate)
+                binding.editTextStrength.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorOrange))
             }
             PasswordStrength.Strong -> {
-                view.editText_strength.text = view.context.getString(R.string.strong)
-                view.editText_strength.setTextColor(ContextCompat.getColor(view.context, R.color.colorGreen))
+                binding.editTextStrength.text = requireContext().getString(R.string.strong)
+                binding.editTextStrength.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorGreen))
             }
             PasswordStrength.VeryStrong -> {
-                view.editText_strength.text = view.context.getString(R.string.very_strong)
-                view.editText_strength.setTextColor(ContextCompat.getColor(view.context, R.color.colorGreen))
+                binding.editTextStrength.text = requireContext().getString(R.string.very_strong)
+                binding.editTextStrength.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorGreen))
             }
         }
     }

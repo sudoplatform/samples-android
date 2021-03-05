@@ -12,23 +12,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentChangeMasterPasswordBinding
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_change_master_password.*
-import kotlinx.android.synthetic.main.fragment_change_master_password.view.*
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [ChangeMasterPasswordFragment] presents a screen that prompts for the
@@ -41,6 +40,10 @@ import kotlinx.coroutines.withContext
 class ChangeMasterPasswordFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentChangeMasterPasswordBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -56,39 +59,41 @@ class ChangeMasterPasswordFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_change_master_password, container, false)
+        bindingDelegate.attach(FragmentChangeMasterPasswordBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.change_master_password)
-        toolbar.inflateMenu(R.menu.nav_menu_with_save_button)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.save -> {
-                    changeMasterPassword()
+        with(binding.toolbar.root) {
+            title = getString(R.string.change_master_password)
+            inflateMenu(R.menu.nav_menu_with_save_button)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.save -> {
+                        changeMasterPassword()
+                    }
                 }
+                true
             }
-            true
         }
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
-        view.currentPasswordText.requestFocus()
+        binding.currentPasswordText.requestFocus()
     }
 
     override fun onDestroy() {
         loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
     private fun changeMasterPassword() {
 
-        val currentPassword = currentPasswordText.text.toString().trim()
-        val newPassword = newPasswordText.text.toString().trim()
+        val currentPassword = binding.currentPasswordText.text.toString().trim()
+        val newPassword = binding.newPasswordText.text.toString().trim()
 
         if (currentPassword.isBlank()) {
             showAlertDialog(
@@ -149,8 +154,8 @@ class ChangeMasterPasswordFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        currentPasswordText.isEnabled = isEnabled
-        newPasswordText.isEnabled = isEnabled
+        binding.currentPasswordText.isEnabled = isEnabled
+        binding.newPasswordText.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
@@ -163,6 +168,8 @@ class ChangeMasterPasswordFragment : Fragment(), CoroutineScope {
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
         loading?.dismiss()
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

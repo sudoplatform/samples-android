@@ -14,10 +14,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.loadSecretCode
-import java.lang.AssertionError
-import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.lang.AssertionError
+import java.util.UUID
 
 fun unlock(func: UnlockVaultsRobot.() -> Unit) = UnlockVaultsRobot().apply { func() }
 
@@ -56,20 +56,22 @@ class UnlockVaultsRobot : BaseRobot() {
         waitForViewToDisplay(alertMessage, 5_000L)
         onView(neutralAlertButton)
             .check(matches(withText(R.string.not_now)))
+        Thread.sleep(1000)
         clickOnView(neutralAlertButton)
     }
 
-    fun createMasterPassword() = runBlocking {
+    fun createMasterPassword() {
         replaceText(topText, MASTER_PASSWORD)
         replaceText(bottomText, MASTER_PASSWORD)
-        delay(500L)
-        clickOnNotNow()
+        Thread.sleep(500)
         waitForLoading()
+        Thread.sleep(1000)
+        clickOnNotNow()
     }
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+        waitForViewToNotDisplay(loadingDialog, 15_000L)
     }
 
     fun waitForPasswordView(timeout: Long = 5_000L) {

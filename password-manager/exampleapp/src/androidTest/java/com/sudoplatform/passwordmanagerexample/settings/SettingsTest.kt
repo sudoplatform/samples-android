@@ -8,9 +8,9 @@ import com.sudoplatform.passwordmanagerexample.AppHolder
 import com.sudoplatform.passwordmanagerexample.MainActivity
 import com.sudoplatform.passwordmanagerexample.passwordgenerator.passwordGenerator
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
-import com.sudoplatform.passwordmanagerexample.unlock.unlock
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +18,7 @@ import timber.log.Timber
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
+@Ignore
 class SettingsTest {
 
     @get:Rule
@@ -27,6 +28,7 @@ class SettingsTest {
     fun setup() {
         Timber.plant(Timber.DebugTree())
         activityRule.scenario.onActivity { AppHolder.holdApp(it.application as App) }
+        Thread.sleep(1000)
     }
 
     @After
@@ -77,23 +79,10 @@ class SettingsTest {
     }
 
     @Test
-    fun testLockVaults() {
-        settings {
-            navigateFromLaunchToSettings()
-            clickOnLockVaults()
-            waitForLoading()
-        }
-        unlock {
-            waitForPasswordView()
-        }
-    }
-
-    @Test
     fun testViewEntitlements() {
         sudos {
             navigateFromLaunchToSudos()
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             checkSudosItemsDisplayed()
             clickCreateSudo()
             waitForLoading()

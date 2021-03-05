@@ -10,10 +10,10 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.sudopasswordmanager.SudoPasswordManagerClient
-import java.io.File
-import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 /**
  * Extension functions to help with the handling and rendering of the Rescue Kit PDF.
@@ -36,9 +36,11 @@ fun shareRescueKit(context: Context, rescueKitFile: File) {
     val sendIntent = Intent()
     sendIntent.action = Intent.ACTION_SEND
     sendIntent.type = "application/pdf"
-    val uri = FileProvider.getUriForFile(context,
+    val uri = FileProvider.getUriForFile(
+        context,
         context.packageName + ".provider",
-        rescueKitFile)
+        rescueKitFile
+    )
     sendIntent.putExtra(Intent.EXTRA_STREAM, uri)
     sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     context.startActivity(sendIntent)

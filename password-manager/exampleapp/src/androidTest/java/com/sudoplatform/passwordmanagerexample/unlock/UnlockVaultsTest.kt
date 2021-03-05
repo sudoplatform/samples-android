@@ -11,10 +11,11 @@ import androidx.test.filters.LargeTest
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.AppHolder
 import com.sudoplatform.passwordmanagerexample.MainActivity
-import com.sudoplatform.passwordmanagerexample.register.login
 import com.sudoplatform.passwordmanagerexample.settings.settings
+import com.sudoplatform.passwordmanagerexample.sudos.sudos
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,6 +28,7 @@ import timber.log.Timber
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
+@Ignore
 class UnlockVaultsTest {
 
     @get:Rule
@@ -36,6 +38,7 @@ class UnlockVaultsTest {
     fun setup() {
         Timber.plant(Timber.DebugTree())
         activityRule.scenario.onActivity { AppHolder.holdApp(it.application as App) }
+        Thread.sleep(1000)
     }
 
     @After
@@ -44,42 +47,22 @@ class UnlockVaultsTest {
     }
 
     @Test
-    fun testMasterPasswordEntryChecks() {
+    fun testLockVaults() {
 
         settings {
             navigateFromLaunchToSettings()
             clickOnDeregister()
             // Cancel prompt
             clickOnNegativeDeregisterAlertDialogButton()
-            clickOnDeregister()
-            // Perform reset
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+            clickOnLockVaults()
         }
-
-        login {
-            waitForRegisterButton()
-            clickOnRegister()
-        }
-
         unlock {
-            waitForPasswordView(10_000L)
-            checkCreateMasterPasswordItemsDisplayed(timeout = 5_000L)
-
-            // Test password set and no confirmation
-            enterMasterPasswordAndEmptyConfirmation()
-            checkMissingConfirmationAlertDialog()
-            clickPositiveAlertDialogButton()
-
-            // Test confirmation set and no password
-            enterEmptyMasterPasswordAndConfirmation()
-            checkMissingPasswordAlertDialog()
-            clickPositiveAlertDialogButton()
-
-            // Test password and confirmation do not match
-            enterMismatchingMasterPasswordAndConfirmation()
-            checkMismatchingConfirmationAlertDialog()
-            clickPositiveAlertDialogButton()
+            waitForPasswordView(20_000L)
+            checkEnterMasterPasswordItemsDisplayed(5_000L)
+            enterMasterPassword()
+        }
+        sudos {
+            checkSudosItemsDisplayed(20_000L)
         }
     }
 }

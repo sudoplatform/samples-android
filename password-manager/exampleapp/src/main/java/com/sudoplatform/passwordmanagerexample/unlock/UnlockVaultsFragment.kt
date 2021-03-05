@@ -9,7 +9,6 @@ package com.sudoplatform.passwordmanagerexample.unlock
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -24,26 +23,24 @@ import androidx.navigation.Navigation
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentUnlockVaultsBinding
 import com.sudoplatform.passwordmanagerexample.register.RegisterFragment
 import com.sudoplatform.passwordmanagerexample.settings.renderRescueKitToFile
 import com.sudoplatform.passwordmanagerexample.settings.saveSecretCodeToClipboard
 import com.sudoplatform.passwordmanagerexample.settings.shareRescueKit
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.sudopasswordmanager.PasswordManagerRegistrationStatus
 import com.sudoplatform.sudopasswordmanager.SudoPasswordManagerException
 import com.sudoplatform.sudouser.SudoUserClient
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_unlock_vaults.bottomText
-import kotlinx.android.synthetic.main.fragment_unlock_vaults.topText
-import kotlinx.android.synthetic.main.fragment_unlock_vaults.view.bottomText
-import kotlinx.android.synthetic.main.fragment_unlock_vaults.view.toolbar
-import kotlinx.android.synthetic.main.fragment_unlock_vaults.view.topText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [UnlockVaultsFragment] presents a screen that does one of the following:
@@ -62,11 +59,12 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentUnlockVaultsBinding>()
+    private val binding by bindingDelegate
+
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
-
-    /** Toolbar [Menu] displaying title and toolbar items. */
-    private var toolbarMenu: Menu? = null
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
     private var loading: AlertDialog? = null
@@ -82,9 +80,9 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_unlock_vaults, container, false)
+        bindingDelegate.attach(FragmentUnlockVaultsBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
-        return view
+        return binding.root
     }
 
     private suspend fun getRegistrationStatus(): PasswordManagerRegistrationStatus? {
@@ -96,6 +94,8 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
             hideLoading()
             latestRegistrationStatus = status
             return status
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             hideLoading()
             showAlertDialog(
@@ -165,47 +165,44 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
             }
             true
         }
-        toolbarMenu = toolbar.menu
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
-
-        val toolbar = (view.toolbar as Toolbar)
+        setupMenu(binding.toolbar.root)
 
         launch {
             when (getRegistrationStatus()) {
                 PasswordManagerRegistrationStatus.NOT_REGISTERED -> {
-                    toolbar.title = getString(R.string.master_password_title)
-                    view.bottomText.isVisible = true
-                    view.topText.hint = getString(R.string.enter_new_master_password_hint)
-                    view.bottomText.hint = getString(R.string.confirm_master_password_hint)
-                    view.bottomText.setOnEditorActionListener { _, actionId, _ ->
+                    binding.toolbar.root.title = getString(R.string.master_password_title)
+                    binding.bottomText.isVisible = true
+                    binding.topText.hint = getString(R.string.enter_new_master_password_hint)
+                    binding.bottomText.hint = getString(R.string.confirm_master_password_hint)
+                    binding.bottomText.setOnEditorActionListener { _, actionId, _ ->
                         register(actionId)
                     }
                 }
                 PasswordManagerRegistrationStatus.REGISTERED -> {
-                    toolbar.title = getString(R.string.unlock_vaults_title)
-                    view.bottomText.isVisible = false
-                    view.topText.hint = getString(R.string.enter_master_password_hint)
-                    view.topText.setOnEditorActionListener { _, actionId, _ ->
+                    binding.toolbar.root.title = getString(R.string.unlock_vaults_title)
+                    binding.bottomText.isVisible = false
+                    binding.topText.hint = getString(R.string.enter_master_password_hint)
+                    binding.topText.setOnEditorActionListener { _, actionId, _ ->
                         unlockWithPassword(actionId)
                     }
                 }
                 PasswordManagerRegistrationStatus.MISSING_SECRET_CODE -> {
-                    toolbar.title = getString(R.string.unlock_vaults_title)
-                    view.bottomText.isVisible = true
-                    view.topText.hint = getString(R.string.enter_secret_code)
-                    view.bottomText.hint = getString(R.string.enter_master_password_hint)
-                    view.bottomText.setOnEditorActionListener { _, actionId, _ ->
+                    binding.toolbar.root.title = getString(R.string.unlock_vaults_title)
+                    binding.bottomText.isVisible = true
+                    binding.topText.hint = getString(R.string.enter_secret_code)
+                    binding.bottomText.hint = getString(R.string.enter_master_password_hint)
+                    binding.bottomText.setOnEditorActionListener { _, actionId, _ ->
                         unlockWithSecretCode(actionId)
                     }
                 }
                 else -> { /* Error getting status */ }
             }
-            setupMenu(toolbar)
-            view.topText.requestFocus()
+            binding.topText.requestFocus()
         }
     }
 
@@ -213,6 +210,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
         loading?.dismiss()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -221,8 +219,8 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
             return false
         }
 
-        val password1 = topText.text.toString().trim()
-        val password2 = bottomText.text.toString().trim()
+        val password1 = binding.topText.text.toString().trim()
+        val password2 = binding.bottomText.text.toString().trim()
 
         if (password1.isBlank() || password2.isBlank()) {
             showAlertDialog(
@@ -275,14 +273,14 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
             return false
         }
 
-        val password = topText.text.toString().trim()
+        val password = binding.topText.text.toString().trim()
 
         if (password.isBlank()) {
             showAlertDialog(
                 titleResId = R.string.master_password_title,
                 messageResId = R.string.enter_master_password_error,
                 positiveButtonResId = android.R.string.ok,
-                onPositive = { topText.requestFocus() }
+                onPositive = { binding.topText.requestFocus() }
             )
             return true
         }
@@ -297,8 +295,8 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
             return false
         }
 
-        val secretCode = topText.text.toString().trim()
-        val password = bottomText.text.toString().trim()
+        val secretCode = binding.topText.text.toString().trim()
+        val password = binding.bottomText.text.toString().trim()
 
         if (password.isBlank() || secretCode.isBlank()) {
             showAlertDialog(
@@ -307,9 +305,9 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                 positiveButtonResId = android.R.string.ok,
                 onPositive = {
                     if (password.isBlank()) {
-                        bottomText.requestFocus()
+                        binding.bottomText.requestFocus()
                     } else {
-                        topText.requestFocus()
+                        binding.topText.requestFocus()
                     }
                 }
             )
@@ -343,8 +341,8 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                     messageResId = messageId,
                     positiveButtonResId = android.R.string.ok,
                     onPositive = {
-                        topText.requestFocus()
-                        topText.selectAll()
+                        binding.topText.requestFocus()
+                        binding.topText.selectAll()
                     }
                 )
             }
@@ -428,9 +426,9 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        toolbarMenu?.getItem(0)?.isEnabled = isEnabled
-        topText.isEnabled = isEnabled
-        bottomText.isEnabled = isEnabled
+        binding.toolbar.root.menu.getItem(0)?.isEnabled = isEnabled
+        binding.topText.isEnabled = isEnabled
+        binding.bottomText.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
@@ -443,6 +441,8 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
     /** Dismisses the loading [AlertDialog] indicating that an operation has finished. */
     private fun hideLoading() {
         loading?.dismiss()
-        setItemsEnabled(true)
+        if (bindingDelegate.isAttached()) {
+            setItemsEnabled(true)
+        }
     }
 }

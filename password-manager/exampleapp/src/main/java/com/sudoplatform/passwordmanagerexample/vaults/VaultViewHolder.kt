@@ -7,11 +7,10 @@
 package com.sudoplatform.passwordmanagerexample.vaults
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.passwordmanagerexample.R
+import com.sudoplatform.passwordmanagerexample.databinding.LayoutItemCellBinding
 
 /**
  * A [RecyclerView.ViewHolder] used to describe the [Vault] item view and metadata about its place
@@ -19,26 +18,24 @@ import com.sudoplatform.passwordmanagerexample.R
  *
  * The item view contains a label [TextView] of the [Vault] name.
  *
- * @param view The [Vault] item view component.
+ * @param binding The [Vault] item view binding.
  */
-class VaultViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-    private val nameTextView: TextView = view.findViewById(R.id.name)
+class VaultViewHolder(
+    private val binding: LayoutItemCellBinding
+) : RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         fun inflate(parent: ViewGroup): VaultViewHolder {
-            val inflater = LayoutInflater.from(parent.context)
-            return VaultViewHolder(
-                inflater.inflate(
-                    R.layout.layout_item_cell,
-                    parent,
-                    false
-                )
+            val binding = LayoutItemCellBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
             )
+            return VaultViewHolder(binding)
         }
     }
 
     fun bind(vaultName: String) {
-        nameTextView.text = vaultName
+        binding.name.text = vaultName
     }
 }

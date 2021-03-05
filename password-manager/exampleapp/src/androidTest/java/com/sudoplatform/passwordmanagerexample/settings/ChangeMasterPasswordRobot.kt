@@ -40,6 +40,7 @@ class ChangeMasterPasswordRobot : BaseRobot() {
     }
 
     fun clickOnSave() {
+        Thread.sleep(1000)
         clickOnView(saveButton)
     }
 
@@ -92,18 +93,18 @@ class ChangeMasterPasswordRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun checkAlertDialog() {
         waitForViewToDisplay(positiveAlertButton, 5_000L)
-        waitForViewToDisplay(alertMessage, 5_000L)
         onView(positiveAlertButton)
             .check(matches(withText(android.R.string.ok)))
     }
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+    fun waitForLoading(mayMissView: Boolean = false) {
+        waitForViewToDisplay(loadingDialog, 2_500L, mayMissView)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 }

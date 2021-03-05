@@ -37,9 +37,9 @@ class SudosRobot : BaseRobot() {
     private val loadingDialog = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+    fun waitForLoading(mayMissView: Boolean = false) {
+        waitForViewToDisplay(loadingDialog, 2_500L, mayMissView)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 
     fun waitForRecyclerView() {
@@ -53,12 +53,14 @@ class SudosRobot : BaseRobot() {
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
     fun swipeLeftToDelete(position: Int) {
         onView(sudoRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -66,7 +68,8 @@ class SudosRobot : BaseRobot() {
 
     fun clickOn(position: Int) {
         onView(sudoRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
+                position,
                 ViewActions.click()
             )
         )
@@ -86,18 +89,24 @@ class SudosRobot : BaseRobot() {
             }
         }
         unlock {
-            waitForPasswordView()
             try {
                 when (AppHolder.getRegistrationStatus()) {
                     PasswordManagerRegistrationStatus.REGISTERED -> {
-                        checkEnterMasterPasswordItemsDisplayed(5_000L)
-                        enterMasterPassword()
+                        if (AppHolder.isLocked()) {
+                            waitForPasswordView(30_000L)
+                            checkEnterMasterPasswordItemsDisplayed(5_000L)
+                            enterMasterPassword()
+                        } else {
+                            Thread.sleep(1000)
+                        }
                     }
                     PasswordManagerRegistrationStatus.MISSING_SECRET_CODE -> {
+                        waitForPasswordView(30_000L)
                         checkEnterMasterPasswordItemsDisplayed(5_000L)
                         enterMasterPasswordAndSecretCode()
                     }
                     else -> {
+                        waitForPasswordView(30_000L)
                         checkCreateMasterPasswordItemsDisplayed(5_000L)
                         createMasterPassword()
                     }

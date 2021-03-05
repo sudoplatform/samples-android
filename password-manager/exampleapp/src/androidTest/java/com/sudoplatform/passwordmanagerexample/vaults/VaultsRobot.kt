@@ -16,10 +16,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
-import java.text.SimpleDateFormat
-import java.util.Date
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.startsWith
+import java.text.SimpleDateFormat
+import java.util.Date
 
 fun vaults(func: VaultsRobot.() -> Unit) = VaultsRobot().apply { func() }
 
@@ -37,9 +37,9 @@ class VaultsRobot : BaseRobot() {
     private val positiveAlertButton = withId(android.R.id.button1)
     private val nameText = withId(R.id.name)
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+    fun waitForLoading(mayMissView: Boolean = false) {
+        waitForViewToDisplay(loadingDialog, 2_500L, mayMissView)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 
     fun waitForRecyclerView() {
@@ -52,11 +52,13 @@ class VaultsRobot : BaseRobot() {
     }
 
     fun clickOnCreateVaultButton() {
+        Thread.sleep(1000)
         clickOnView(createVaultButton)
     }
 
     fun clickOnPositiveAlertDialogButton() {
         checkAlertDialog()
+        Thread.sleep(1000)
         clickOnView(positiveAlertButton)
     }
 
@@ -71,7 +73,8 @@ class VaultsRobot : BaseRobot() {
 
     fun clickOnVault(position: Int) {
         onView(vaultRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(
+                position,
                 ViewActions.click()
             )
         )
@@ -79,7 +82,8 @@ class VaultsRobot : BaseRobot() {
 
     fun swipeLeftToDelete(position: Int) {
         onView(vaultRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<VaultViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -93,14 +97,12 @@ class VaultsRobot : BaseRobot() {
     fun navigateFromLaunchToVaults() {
         sudos {
             navigateFromLaunchToSudos()
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             checkSudosItemsDisplayed()
             clickCreateSudo()
             waitForLoading()
         }
         sudos {
-            waitForLoading()
             waitForRecyclerView()
             checkSudosItemsDisplayed()
             clickOn(0)

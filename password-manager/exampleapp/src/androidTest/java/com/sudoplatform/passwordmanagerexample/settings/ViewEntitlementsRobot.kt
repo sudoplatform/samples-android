@@ -24,7 +24,7 @@ class ViewEntitlementsRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 2_500L)
-        waitForViewToNotDisplay(loadingDialog, 2_500L)
+        waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
 
     fun waitForRecyclerView() {

@@ -9,17 +9,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_secret_code.view.*
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentSecretCodeBinding
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [SecretCodeFragment] presents the secret code and buttons that allow the user to download a
@@ -36,15 +36,18 @@ class SecretCodeFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentSecretCodeBinding>()
+    private val binding by bindingDelegate
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_secret_code, container, false)
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.secret_code)
-        return view
+        bindingDelegate.attach(FragmentSecretCodeBinding.inflate(inflater, container, false))
+        binding.toolbar.root.title = getString(R.string.secret_code)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,9 +55,9 @@ class SecretCodeFragment : Fragment(), CoroutineScope {
 
         val app = requireActivity().application as App
         val secretCode = app.sudoPasswordManager.getSecretCode()
-        view.textView_secretCode.text = secretCode
+        binding.textViewSecretCode.text = secretCode
 
-        view.button_copy.setOnClickListener {
+        binding.buttonCopy.setOnClickListener {
             saveSecretCodeToClipboard(secretCode, requireContext())
             Toast.makeText(
                 requireContext(),
@@ -63,7 +66,7 @@ class SecretCodeFragment : Fragment(), CoroutineScope {
             ).show()
         }
 
-        view.button_download.setOnClickListener {
+        binding.buttonDownload.setOnClickListener {
             launch {
                 try {
                     val rescueKitFile = renderRescueKitToFile(requireContext(), app.sudoPasswordManager)
@@ -84,6 +87,7 @@ class SecretCodeFragment : Fragment(), CoroutineScope {
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 }

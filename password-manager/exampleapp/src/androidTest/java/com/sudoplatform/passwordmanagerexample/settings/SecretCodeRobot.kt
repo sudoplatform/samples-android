@@ -38,6 +38,7 @@ class SecretCodeRobot : BaseRobot() {
     }
 
     fun clickOnCopy() {
+        Thread.sleep(1000)
         clickOnView(copyButton)
     }
 

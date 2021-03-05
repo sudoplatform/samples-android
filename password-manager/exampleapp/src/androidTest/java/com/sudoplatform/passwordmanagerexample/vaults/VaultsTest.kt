@@ -15,6 +15,7 @@ import com.sudoplatform.passwordmanagerexample.MainActivity
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,6 +28,7 @@ import timber.log.Timber
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
+@Ignore
 class VaultsTest {
 
     @get:Rule
@@ -36,6 +38,7 @@ class VaultsTest {
     fun setup() {
         Timber.plant(Timber.DebugTree())
         activityRule.scenario.onActivity { AppHolder.holdApp(it.application as App) }
+        Thread.sleep(1000)
     }
 
     @After
@@ -48,8 +51,7 @@ class VaultsTest {
         vaults {
             navigateFromLaunchToVaults()
 
-            waitForLoading()
-            waitForRecyclerView()
+            waitForLoading(true)
             checkVaultsItemsDisplayed()
 
             clickOnCreateVaultButton()

@@ -10,28 +10,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
+import com.sudoplatform.passwordmanagerexample.databinding.FragmentViewEntitlementsBinding
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.sudos.SudosFragment
+import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.sudopasswordmanager.entitlements.EntitlementState
 import com.sudoplatform.sudoprofiles.ListOption
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_sudos.view.*
-import kotlinx.android.synthetic.main.fragment_view_entitlements.*
-import kotlinx.android.synthetic.main.fragment_view_entitlements.view.*
-import kotlinx.android.synthetic.main.fragment_view_entitlements.view.toolbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [ViewEntitlementsFragment] lists the how many resources the user is entitled to use
@@ -43,6 +40,10 @@ import kotlinx.coroutines.withContext
 class ViewEntitlementsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentViewEntitlementsBinding>()
+    private val binding by bindingDelegate
 
     /** A reference to the [RecyclerView.Adapter] handling [EntitlementState] data. */
     private lateinit var adapter: ViewEntitlementsAdapter
@@ -58,16 +59,15 @@ class ViewEntitlementsFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_view_entitlements, container, false)
+        bindingDelegate.attach(FragmentViewEntitlementsBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.entitlements_title)
-        return view
+        binding.toolbar.root.title = getString(R.string.entitlements_title)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
     }
 
     override fun onResume() {
@@ -78,6 +78,7 @@ class ViewEntitlementsFragment : Fragment(), CoroutineScope {
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -126,21 +127,23 @@ class ViewEntitlementsFragment : Fragment(), CoroutineScope {
     /**
      * Configures the [RecyclerView] used to display the listed [EntitlementState] items.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = ViewEntitlementsAdapter(entitlementsList)
-        view.entitlementsRecyclerView.adapter = adapter
-        view.entitlementsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.entitlementsRecyclerView.adapter = adapter
+        binding.entitlementsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading() {
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
+        if (bindingDelegate.isAttached()) {
+            binding.progressBar.visibility = View.GONE
+            binding.progressText.visibility = View.GONE
+        }
     }
 }
