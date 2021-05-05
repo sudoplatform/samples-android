@@ -43,7 +43,7 @@ class SudosRobot : BaseRobot() {
     }
 
     fun waitForRecyclerView() {
-        waitForViewToDisplay(sudoRecyclerView, 5_000L)
+        waitForViewToDisplay(sudoRecyclerView, 10_000L)
     }
 
     fun checkSudosItemsDisplayed(timeout: Long = 1000L) {

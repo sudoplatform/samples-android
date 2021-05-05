@@ -377,17 +377,16 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
             .setMessage(R.string.save_secret_code_message)
             .setPositiveButton(R.string.copy_to_clipboard) { _, _ ->
                 copySecretCodeToClipboard()
-                navigateToSudosFragment()
             }
             .setNegativeButton(R.string.download_rescue_kit) { _, _ ->
                 downloadRescueKit()
-                navigateToSudosFragment()
             }
-            .setNeutralButton(R.string.not_now) { _, _ ->
-                navigateToSudosFragment()
-            }
+            .setNeutralButton(R.string.not_now) { _, _ -> }
             .setTitle(R.string.save_secret_code_title)
             .setMessage(R.string.save_secret_code_message)
+            .setOnDismissListener {
+                navigateToSudosFragment()
+            }
             .show()
     }
 

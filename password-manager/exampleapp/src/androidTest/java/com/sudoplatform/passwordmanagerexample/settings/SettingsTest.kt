@@ -10,7 +10,6 @@ import com.sudoplatform.passwordmanagerexample.passwordgenerator.passwordGenerat
 import com.sudoplatform.passwordmanagerexample.sudos.sudos
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +17,6 @@ import timber.log.Timber
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-@Ignore
 class SettingsTest {
 
     @get:Rule
@@ -33,6 +31,7 @@ class SettingsTest {
 
     @After
     fun fini() {
+        AppHolder.deleteSudos()
         Timber.uprootAll()
     }
 

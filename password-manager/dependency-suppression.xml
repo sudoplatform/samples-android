@@ -6,17 +6,25 @@
             ]]></notes>
         <cve>CVE-2018-20200</cve>
     </suppress>
-    <suppress until="2021-04-30">
+    <suppress until="2021-06-30">
         <notes><![CDATA[
             Kotlin script is not used in the Sudo Platform Password Manager Example App.
             ]]></notes>
         <cve>CVE-2020-15824</cve>
     </suppress>
-    <suppress until="2021-04-30">
+    <suppress until="2021-06-30">
         <notes><![CDATA[
                 False positive. We're at Kotlin 1.4.30 which is beyond 1.4.21 when fix was available. False positive
                 occurs because the kotlin coroutines libraries are at 1.4.2 and match the broad CPE pattern.
                 ]]></notes>
         <cve>CVE-2020-29582</cve>
+    </suppress>
+    <suppress until="2021-06-30">
+        <notes>
+            <![CDATA[
+            vulnerability is A comparison error in OpenBSDBCrypt.checkPassword(). checkPassword is not used.
+            ]]>
+        </notes>
+        <cve>CVE-2020-28052</cve>
     </suppress>
 </suppressions>

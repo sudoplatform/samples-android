@@ -7,6 +7,7 @@
 package com.sudoplatform.passwordmanagerexample
 
 import com.sudoplatform.sudopasswordmanager.PasswordManagerRegistrationStatus
+import com.sudoplatform.sudoprofiles.ListOption
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -47,5 +48,14 @@ object AppHolder {
         val app = app
             ?: throw AssertionError("AppHolder does not have a reference to the App under test")
         app.sudoPasswordManager.isLocked()
+    }
+
+    fun deleteSudos() = runBlocking {
+        val app = app
+            ?: throw AssertionError("AppHolder does not have a reference to the App under test")
+        app.sudoProfilesClient.listSudos(ListOption.REMOTE_ONLY)
+            .forEach { sudo ->
+                app.sudoProfilesClient.deleteSudo(sudo)
+            }
     }
 }

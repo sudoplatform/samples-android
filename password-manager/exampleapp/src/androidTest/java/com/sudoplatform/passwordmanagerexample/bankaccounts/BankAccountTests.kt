@@ -18,7 +18,6 @@ import com.sudoplatform.passwordmanagerexample.vaultItems.vaultItems
 import com.sudoplatform.passwordmanagerexample.vaults.vaults
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +30,6 @@ import timber.log.Timber
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-@Ignore
 class BankAccountTests {
 
     @get:Rule
@@ -46,6 +44,7 @@ class BankAccountTests {
 
     @After
     fun fini() {
+        AppHolder.deleteSudos()
         Timber.uprootAll()
     }
 
