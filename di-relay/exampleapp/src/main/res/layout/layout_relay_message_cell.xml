@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="64dp"
+    android:background="@drawable/message_rounded_corner_background"
+    android:backgroundTint="@color/outboundMessageCellColor"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/messageBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center|start"
+        tools:text="hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world" />
+
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/messageBody"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-32dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="center|start"
+        tools:text="3:33pm 16-03-21" />
+
+    <ProgressBar
+        android:id="@+id/sendingSpinner"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_below="@+id/messageBody"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="-24dp"
+        android:indeterminateTint="@color/onPrimary"
+        android:visibility="gone"
+        tools:visibility="visible" />
+</RelativeLayout>

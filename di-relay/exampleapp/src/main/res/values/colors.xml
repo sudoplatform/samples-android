@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#0B4B90</color>
+    <color name="colorPrimaryDark">#06407F</color>
+    <color name="onPrimary">@android:color/white</color>
+    <color name="colorAccent">#009688</color>
+    <color name="colorBackground">#EDEDED</color>
+    <color name="onBackground">@android:color/black</color>
+    <color name="surface">@android:color/white</color>
+    <color name="onSurface">@android:color/black</color>
+    <color name="onSurfaceDisabled">@color/ghost</color>
+    <color name="colorPositiveMsg">#ff669900</color>
+    <color name="colorNegativeMsg">#ffcc0000</color>
+
+    <color name="dodger">#3770F6</color>
+    <color name="ghost">#c7c9d0</color>
+
+    <color name="outboundMessageCellColor">#3770F6</color>
+</resources>

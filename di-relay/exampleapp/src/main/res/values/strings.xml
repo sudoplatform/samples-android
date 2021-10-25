@@ -1,0 +1,72 @@
+<resources>
+
+    <!-- App -->
+    <string name="app_name">DI Relay Sample</string>
+
+    <!-- Common -->
+    <string name="generic_failed_title">Failed</string>
+
+    <!-- Start Fragment -->
+    <string name="decentralized_identity_relay">Decentralized Identity Relay</string>
+    <string name="sample_app">Sample App</string>
+    <string name="start">Start</string>
+
+    <!-- Postboxes Fragment -->
+    <string name="postbox_title">Postboxes</string>
+    <string name="creating_postbox">Creating Postbox</string>
+    <string name="create_postbox_button">+ Create Postbox</string>
+    <string name="postbox_creation_failed">Failed to create postbox</string>
+    <string name="delete_postbox_pending">Deleting Postbox</string>
+    <string name="postbox_delete_failed">Failed to delete postbox</string>
+    <string name="postbox_delete_success">Successfully deleted postbox</string>
+
+    <!-- Connection Start Fragment -->
+    <string name="peer_connect_toolbar_title">Begin Peer Connection</string>
+    <string name="create_invitation">Create an Invitation</string>
+    <string name="accept_invitation">Scan an Invitation</string>
+    <string name="connect_to_peer_title">Connect this postbox with a peer to continue. Please choose one of the following options.</string>
+
+    <!-- Invite Fragment -->
+    <string name="invite_toolbar_title">Invite a Peer</string>
+    <string name="invite_title">Scan this invitation on another device sample app to initialize connection.</string>
+    <string name="copy_invitation_prompt">OR, manually send your invitation to a peer:</string>
+    <string name="invalid_response">Received Invalid Response</string>
+
+    <!-- Scan Invitation Fragment -->
+    <string name="scan_invitation_toolbar_title">Scan Invitation</string>
+    <string name="scan_invitation_title">Scan an invitation from another device sample app to initialize connection.</string>
+    <string name="enable_camera_prompt_title">Camera Permissions Denied</string>
+    <string name="enable_camera_prompt">Please grant camera permissions for this sample app in your phone\'s settings in order to use the QR Code Scanner. Alternatively, you can manually enter an invitation code.</string>
+    <string name="type_invitation_title">OR, manually enter the peer\'s invitation below:</string>
+    <string name="enter_invitation_prompt">Enter Invitation…</string>
+    <string name="invalid_invitation">Error Processing Invitation</string>
+    <string name="connect_btn">Connect</string>
+
+    <!-- Postbox Messages Fragment -->
+    <string name="loading_messages">Loading Messages</string>
+    <string name="postbox_messages_title">Relay Messages</string>
+    <string name="list_relay_message_failed">Failed to get relay messages</string>
+    <string name="try_again">Try Again</string>
+    <string name="subscription_failed">Failed to subscribe to relay events</string>
+    <string name="enter_new_message">Enter message…</string>
+    <string name="invalid_peer_connection_id_title">Invalid Input.</string>
+    <string name="invalid_peer_connection_id">Invalid peer connection ID. This ID should be UUIDv4 formatted. Please try again.</string>
+    <string name="post_message_failed">Message failed to send</string>
+
+    <!-- Details Fragment -->
+    <string name="details_toolbar_title">Connection Details</string>
+    <string name="my_connectionID">My Connection ID</string>
+    <string name="peer_connectionID">Peer Connection ID</string>
+    <string name="my_http_endpoint">My HTTP Endpoint</string>
+    <string name="peer_http_endpoint">Peer HTTP Endpoint</string>
+    <string name="my_public_key">My Public Key</string>
+    <string name="peer_public_key">Peer Public Key</string>
+    <string name="error_retrieving_details">Error Processing Connection Details</string>
+
+    <!-- Layout -->
+    <string name="item_name">Item Name</string>
+    <string name="placeholder">-</string>
+    <string name="details">Details</string>
+    <string name="date_placeholder">Date</string>
+
+</resources>

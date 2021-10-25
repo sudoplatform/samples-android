@@ -1,0 +1,50 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.kotlin_version = "1.4.30"
+    ext.nav_version = "2.3.5"
+    ext.room_version = "2.3.0"
+    ext.okhttp_version = "4.9.1"
+    repositories {
+        maven { url = "https://plugins.gradle.org/m2" }
+        google()
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.2.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jmailen.gradle:kotlinter-gradle:3.4.0"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+        if (project.file("${rootProject.projectDir}/util/vulnerability-scan.gradle").exists()) {
+            classpath "org.owasp:dependency-check-gradle:6.1.0"
+        }
+        if (project.file("${rootProject.projectDir}/util/sonarqube.gradle").exists()) {
+            classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.1.1"
+        }
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        mavenLocal()
+        maven {
+            name = "android-snapshots"
+            url = "https://repo.tools.anonyome.com/repository/android-snapshots/"
+            credentials {
+                username = nexusUsername
+                password = nexusPassword
+            }
+        }
+        google()
+        mavenCentral()
+        // remove jcenter after com.budiyev.android:code-scanner migrates: https://github.com/yuriy-budiyev/code-scanner/issues/110
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
