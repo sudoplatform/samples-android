@@ -22,7 +22,7 @@ import java.util.UUID
 class KeyManagement(context: Context) {
 
     /** instance of SudoKeyManager */
-    private val keyManager: KeyManagerInterface =
+    val keyManager: KeyManagerInterface =
         KeyManagerFactory(context).createAndroidKeyManager()
 
     /** GSON instance without html escaping characters */

@@ -24,13 +24,14 @@ class PostboxConnectionsStorage(context: Context) {
     ).build().connectionDao()
 
     /**
-     * Get all postbox connectionIds that are stored on this device.
+     * Get all postbox connectionIds that are stored on this device for the given [username].
      *
-     * @return List of string connectionIds that this device owns.
+     * @param username the username who owns the postboxes
+     * @return List of string connectionIds that this [username] owns.
      */
-    suspend fun getAllConnectionIds(): List<String> {
+    suspend fun getAllConnectionIds(username: String): List<String> {
         return withContext(Dispatchers.IO) {
-            dao.getAll().map { it.myConnectionID }
+            dao.getAll(username).map { it.myConnectionID }
         }
     }
 
@@ -70,10 +71,11 @@ class PostboxConnectionsStorage(context: Context) {
      * Stores a postbox [connectionId] without a mapped peer connectionId.
      *
      * @param connectionId the connectionId to store
+     * @param username the username of the owner of the connectionId
      */
-    suspend fun storeConnectionId(connectionId: String) {
+    suspend fun storeConnectionId(connectionId: String, username: String) {
         withContext(Dispatchers.IO) {
-            dao.insertOrReplace(PeerConnection(connectionId))
+            dao.insertOrReplace(PeerConnection(connectionId, username))
         }
     }
 
@@ -81,11 +83,12 @@ class PostboxConnectionsStorage(context: Context) {
      * Maps a [peerConnectionId] to [myConnectionId].
      *
      * @param myConnectionId the connectionId owned by this device.
+     * @param username the username of the owner of the connectionId
      * @param peerConnectionId the peers connectionId to map to [myConnectionId].
      */
-    suspend fun storePeersConnectionId(myConnectionId: String, peerConnectionId: String) {
+    suspend fun storePeersConnectionId(myConnectionId: String, username: String, peerConnectionId: String) {
         withContext(Dispatchers.IO) {
-            dao.insertOrReplace(PeerConnection(myConnectionId, peerConnectionId))
+            dao.insertOrReplace(PeerConnection(myConnectionId, username, peerConnectionId))
         }
     }
 
@@ -93,10 +96,11 @@ class PostboxConnectionsStorage(context: Context) {
      * Deletes all stored data related to [connectionId].
      *
      * @param connectionId the connectionId to delete.
+     * @param username the username of the owner of the connectionId
      */
-    suspend fun deleteConnection(connectionId: String) {
+    suspend fun deleteConnection(connectionId: String, username: String) {
         withContext(Dispatchers.IO) {
-            dao.delete(PeerConnection(connectionId))
+            dao.delete(PeerConnection(connectionId, username))
         }
     }
 }

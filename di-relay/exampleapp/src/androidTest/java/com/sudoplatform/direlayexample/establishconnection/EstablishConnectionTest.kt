@@ -15,7 +15,6 @@ import com.sudoplatform.direlayexample.MainActivity
 import com.sudoplatform.direlayexample.connection.connection
 import com.sudoplatform.direlayexample.keymanager.KeyManagement
 import com.sudoplatform.direlayexample.postboxes.postboxes
-import com.sudoplatform.direlayexample.start.start
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -50,11 +49,10 @@ class EstablishConnectionTest {
 
     @After
     fun fini() {
-        Timber.uprootAll()
-
-        start {
-            pressBackUntilAtStartIsDisplayed()
+        postboxes {
+            deregisterCleanUpFlow()
         }
+        Timber.uprootAll()
     }
 
     @Test
@@ -86,11 +84,6 @@ class EstablishConnectionTest {
             checkConnectionItemsDisplayed()
             pressBack()
         }
-        postboxes {
-            checkPostboxesItemsDisplayed()
-            deletePostboxes(2)
-            pressBack()
-        }
     }
 
     @Test
@@ -103,13 +96,6 @@ class EstablishConnectionTest {
             setInputInvitationField("invalidInvitation")
             clickConnectButton()
             clickOnNegativeErrorAlertDialogButton()
-        }
-        postboxes {
-            pressBackUntilPostboxesDisplayed()
-            deletePostbox(0)
-        }
-        start {
-            pressBackUntilAtStartIsDisplayed()
         }
     }
 }

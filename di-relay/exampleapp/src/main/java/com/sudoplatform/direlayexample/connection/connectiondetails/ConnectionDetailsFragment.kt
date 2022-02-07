@@ -97,7 +97,7 @@ class ConnectionDetailsFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 val myConnectionId = connectionId
-                val myEndpoint = "${app.basePostboxEndpoint}$myConnectionId"
+                val myEndpoint = app.diRelayClient.getPostboxEndpoint(myConnectionId)
                 val myPublicKey = withContext(Dispatchers.IO) {
                     app.keyManagement.getPublicKeyForConnection(myConnectionId)
                 }
@@ -109,7 +109,7 @@ class ConnectionDetailsFragment : Fragment(), CoroutineScope {
                 if (app.connectionsStorage.isPeerConnected(connectionId)) {
                     // this should be true at this point in flow
                     val peerConnectionId = app.connectionsStorage.getPeerConnectionIdForConnection(connectionId)!!
-                    val peerEndpoint = "${app.basePostboxEndpoint}$peerConnectionId"
+                    val peerEndpoint = app.diRelayClient.getPostboxEndpoint(peerConnectionId)
                     val peerPublicKey = withContext(Dispatchers.IO) {
                         app.keyManagement.getPublicKeyForConnection(peerConnectionId)
                     }

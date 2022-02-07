@@ -9,24 +9,40 @@ package com.sudoplatform.direlayexample
 import android.app.Application
 import com.sudoplatform.direlayexample.db.PostboxConnectionsStorage
 import com.sudoplatform.direlayexample.keymanager.KeyManagement
-import com.sudoplatform.sudoconfigmanager.DefaultSudoConfigManager
 import com.sudoplatform.sudodirelay.SudoDIRelayClient
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
+import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.exceptions.SignOutException
+import java.lang.Exception
 
 class App : Application() {
+
+    companion object {
+        /** Name of the preference set that holds sign in information. */
+        const val SIGN_IN_PREFERENCES = "SignIn"
+
+        /** True if Federated Single Sign On was used. */
+        const val FSSO_USED_PREFERENCE = "usedFSSO"
+    }
 
     lateinit var logger: Logger
     lateinit var diRelayClient: SudoDIRelayClient
     lateinit var connectionsStorage: PostboxConnectionsStorage
     lateinit var keyManagement: KeyManagement
-    lateinit var basePostboxEndpoint: String
+    lateinit var sudoUserClient: SudoUserClient
 
     override fun onCreate() {
         super.onCreate()
 
         logger = Logger("decentralizedIdentityExample", AndroidUtilsLogDriver(LogLevel.DEBUG))
+
+        // Create an instance of SudoUserClient to perform registration and sign in.
+        sudoUserClient = SudoUserClient.builder(this)
+            .setNamespace("sudo-test")
+            .setLogger(logger)
+            .build()
 
         // Create an instance of PostboxConnectionsStorage to manage storage of postboxes and connections.
         connectionsStorage = PostboxConnectionsStorage(this)
@@ -34,19 +50,24 @@ class App : Application() {
         // Create an instance of KeyManagement to handle key management of peer connections.
         keyManagement = KeyManagement(context = this)
 
-        // Extract base endpoint from the sudoplatformconfig
-        val endpoint = DefaultSudoConfigManager(this, logger)
-            .getConfigSet("relayService")
-            ?.get("httpEndpoint") as String?
-        requireNotNull(endpoint)
-        basePostboxEndpoint = "$endpoint/"
-
         // Create an instance of SudoDIRelayClient to perform relay postbox
         // lifecycle operations and sending/receiving of relay messages.
         diRelayClient =
             SudoDIRelayClient.builder()
                 .setContext(this)
                 .setLogger(logger)
+                .setSudoUserClient(sudoUserClient)
                 .build()
+    }
+
+    @Throws(SignOutException::class)
+    fun doFSSOSignout() {
+        val userClient = this.sudoUserClient
+        try {
+            userClient.presentFederatedSignOutUI { }
+        } catch (e: Exception) {
+            this.logger.debug("FSSO Signout failed: " + e.localizedMessage)
+            throw SignOutException.FailedException(e.message)
+        }
     }
 }

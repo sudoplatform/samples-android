@@ -242,7 +242,7 @@ class ConnectionFragment : Fragment(), CoroutineScope {
      * @param msg the message to be packed and sent to the peer.
      */
     private fun sendEncryptedMessageToPeer(msg: String) {
-        val peerPostboxURL = app.basePostboxEndpoint + peerConnectionId
+        val peerPostboxURL = app.diRelayClient.getPostboxEndpoint(peerConnectionId)
 
         launch {
             binding.composeMessageEditText.text?.clear()

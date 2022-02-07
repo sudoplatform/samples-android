@@ -254,6 +254,7 @@ class InviteFragment : Fragment(), CoroutineScope {
 
                 app.connectionsStorage.storePeersConnectionId(
                     connectionId,
+                    app.sudoUserClient.getUserName()!!,
                     peerConnectionData.connectionId
                 )
                 navController.navigate(

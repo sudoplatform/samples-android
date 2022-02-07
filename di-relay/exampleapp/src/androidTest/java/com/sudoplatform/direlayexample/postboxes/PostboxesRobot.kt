@@ -10,14 +10,17 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.direlayexample.BaseRobot
 import com.sudoplatform.direlayexample.R
-import com.sudoplatform.direlayexample.start.start
+import com.sudoplatform.direlayexample.register.login
 import org.hamcrest.Matcher
 
 fun postboxes(func: PostboxesRobot.() -> Unit) = PostboxesRobot().apply { func() }
@@ -29,11 +32,16 @@ fun postboxes(func: PostboxesRobot.() -> Unit) = PostboxesRobot().apply { func()
  */
 class PostboxesRobot : BaseRobot() {
 
+    private val toolbar = withId(R.id.toolbar)
+    private val toolbarDeregisterButton = withId(R.id.deregister)
+    private val positiveAlertButton = withId(android.R.id.button1)
+    private val negativeAlertButton = withId(android.R.id.button2)
+
     private val loadingDialog = withId(R.id.progressBar)
     private val createPostboxButton = withId(R.id.createPostboxButton)
     private val postboxList = withId(R.id.postboxRecyclerView)
 
-    private fun waitForLoading() {
+    fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
         waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
@@ -41,16 +49,27 @@ class PostboxesRobot : BaseRobot() {
     fun checkPostboxesItemsDisplayed() {
         waitForViewToDisplay(postboxList)
         waitForViewToDisplay(createPostboxButton)
+        waitForViewToDisplay(toolbar)
+        waitForViewToDisplay(toolbarDeregisterButton)
     }
 
     fun pressBackUntilPostboxesDisplayed() {
         pressBackUntilViewIsDisplayed(createPostboxButton)
     }
 
-    fun createPostboxFlow() {
-        start {
-            navigateToPostboxesScreen()
+    fun navigateFromLaunchToPostboxes() {
+        login {
+            try {
+                clickOnRegister()
+            } catch (e: NoMatchingViewException) {
+                // Login screen was skipped because already logged in
+            }
         }
+        checkPostboxesItemsDisplayed()
+    }
+
+    fun createPostboxFlow() {
+        navigateFromLaunchToPostboxes()
         createPostbox()
     }
 
@@ -115,5 +134,42 @@ class PostboxesRobot : BaseRobot() {
                 ViewActions.click()
             )
         )
+    }
+
+    fun clickOnDeregister() {
+        clickOnView(toolbarDeregisterButton)
+    }
+
+    fun clickOnPositiveDeregisterAlertDialogButton() {
+        checkDeregisterAlertDialog()
+        Thread.sleep(1_000L)
+        clickOnView(positiveAlertButton)
+    }
+
+    fun clickOnNegativeDeregisterAlertDialogButton() {
+        checkDeregisterAlertDialog()
+        Thread.sleep(1_000L)
+        clickOnView(negativeAlertButton)
+    }
+
+    private fun checkDeregisterAlertDialog() {
+        waitForViewToDisplay(positiveAlertButton, 15_000L)
+        waitForViewToDisplay(negativeAlertButton, 15_000L)
+        onView(positiveAlertButton)
+            .check(ViewAssertions.matches(ViewMatchers.withText(R.string.deregister)))
+        onView(negativeAlertButton)
+            .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.cancel)))
+    }
+
+    fun deregisterCleanUpFlow() {
+        pressBackUntilPostboxesDisplayed()
+        checkPostboxesItemsDisplayed()
+        clickOnDeregister()
+        clickOnPositiveDeregisterAlertDialogButton()
+        waitForLoading()
+
+        login {
+            checkRegisterItemsDisplayed()
+        }
     }
 }

@@ -11,7 +11,6 @@ import androidx.test.filters.LargeTest
 import androidx.test.rule.GrantPermissionRule
 import com.sudoplatform.direlayexample.MainActivity
 import com.sudoplatform.direlayexample.postboxes.postboxes
-import com.sudoplatform.direlayexample.start.start
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -41,6 +40,9 @@ class ConnectionTest {
 
     @After
     fun fini() {
+        postboxes {
+            deregisterCleanUpFlow()
+        }
         Timber.uprootAll()
     }
 
@@ -50,15 +52,6 @@ class ConnectionTest {
             createPostboxAndConnectFlow()
             sendMessage("hello world")
             checkMessageItemDisplayed()
-        }
-
-        postboxes {
-            pressBackUntilPostboxesDisplayed()
-            deletePostboxes(2)
-        }
-
-        start {
-            pressBackUntilAtStartIsDisplayed()
         }
     }
 }

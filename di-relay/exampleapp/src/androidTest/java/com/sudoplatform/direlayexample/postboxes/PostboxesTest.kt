@@ -10,7 +10,6 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.direlayexample.MainActivity
-import com.sudoplatform.direlayexample.start.start
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -37,10 +36,10 @@ class PostboxesTest {
 
     @After
     fun fini() {
-        Timber.uprootAll()
-        start {
-            pressBackUntilAtStartIsDisplayed()
+        postboxes {
+            deregisterCleanUpFlow()
         }
+        Timber.uprootAll()
     }
 
     @Test

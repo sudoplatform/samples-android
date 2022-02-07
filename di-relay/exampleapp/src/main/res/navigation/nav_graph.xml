@@ -3,14 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/startFragment">
+    app:startDestination="@id/registerFragment">
 
     <fragment
-        android:id="@+id/startFragment"
-        android:name="com.sudoplatform.direlayexample.start.StartFragment"
-        android:label="StartFragment" >
+        android:id="@+id/registerFragment"
+        android:name="com.sudoplatform.direlayexample.register.RegisterFragment"
+        android:label="RegisterFragment" >
         <action
-            android:id="@+id/action_startFragment_to_postboxesFragment"
+            android:id="@+id/action_registerFragment_to_postboxesFragment"
             app:destination="@id/postboxesFragment" />
     </fragment>
     <fragment
@@ -24,6 +24,9 @@
         <action
             android:id="@+id/action_postboxesFragment_to_connectionOptionsFragment"
             app:destination="@id/connectionOptionsFragment" />
+        <action
+            android:id="@+id/action_postboxesFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
     </fragment>
     <fragment
         android:id="@+id/connectionFragment"

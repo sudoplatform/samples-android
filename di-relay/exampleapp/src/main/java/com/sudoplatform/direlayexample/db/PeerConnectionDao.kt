@@ -17,13 +17,14 @@ import androidx.room.Query
 @Entity(tableName = "peer_connection")
 data class PeerConnection(
     @PrimaryKey @ColumnInfo(name = "my_connection_id") val myConnectionID: String,
+    @ColumnInfo(name = "sudo_user_owner") val sudoUsername: String,
     @ColumnInfo(name = "peer_connection_id") val peerConnectionID: String? = null
 )
 
 @Dao
 interface PeerConnectionDao {
-    @Query("SELECT * FROM peer_connection")
-    fun getAll(): List<PeerConnection>
+    @Query("SELECT * FROM peer_connection WHERE sudo_user_owner LIKE :username")
+    fun getAll(username: String): List<PeerConnection>
 
     @Query("SELECT * FROM peer_connection WHERE my_connection_id LIKE :connectionID LIMIT 1")
     fun findByConnectionID(connectionID: String): PeerConnection

@@ -33,7 +33,7 @@ class ScanInvitationRobot : BaseRobot() {
     }
 
     fun setInputInvitationField(invitationString: String) {
-        fillEditText(R.id.enterInvitationEditText, invitationString)
+        fillText(inputInvitation, invitationString)
     }
 
     fun clickConnectButton() {

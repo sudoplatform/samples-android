@@ -6,13 +6,16 @@
 
 package com.sudoplatform.direlayexample.postboxes
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -26,6 +29,8 @@ import com.sudoplatform.direlayexample.showAlertDialog
 import com.sudoplatform.direlayexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.direlayexample.util.ObjectDelegate
 import com.sudoplatform.sudodirelay.SudoDIRelayClient
+import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.exceptions.RegisterException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -40,7 +45,7 @@ import kotlin.coroutines.CoroutineContext
  * which they can navigate to, and an option to create a new relay postbox.
  *
  * Links From:
- *  - [StartFragment]: A user clicked start.
+ *  - [RegisterFragment]: A user clicked start.
  *
  * Links To:
  *  - [ConnectionOptionsFragment]: If a user clicks on a postbox which has not established a peer
@@ -82,11 +87,6 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         savedInstanceState: Bundle?
     ): View {
         bindingDelegate.attach(FragmentPostboxesBinding.inflate(inflater, container, false))
-        with(binding.toolbar.root) {
-            title = getString(R.string.postbox_title)
-            inflateMenu(R.menu.general_nav_menu)
-            toolbarMenu = menu
-        }
         app = requireActivity().application as App
         return binding.root
     }
@@ -95,6 +95,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
+        configureToolbar(binding.toolbar.root)
 
         binding.createPostboxButton.setOnClickListener {
             createPostbox()
@@ -155,6 +156,61 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         super.onDestroy()
     }
 
+    /** Perform de-registration from the [SudoUserClient] and clear all local data. */
+    private fun deregister() {
+        launch {
+            try {
+                showLoading(R.string.deregistering)
+                withContext(Dispatchers.IO) {
+                    // wipe postboxes
+                    app.sudoUserClient.deregister()
+                }
+                hideLoading()
+                navController.navigate(
+                    PostboxesFragmentDirections.actionPostboxesFragmentToRegisterFragment()
+                )
+            } catch (e: RegisterException) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.deregister_failure, e.localizedMessage),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /** Configures the toolbar menu. */
+    private fun configureToolbar(toolbar: Toolbar) {
+        toolbar.inflateMenu(R.menu.general_nav_menu)
+        val sharedPreferences = context?.getSharedPreferences("SignIn", Context.MODE_PRIVATE)
+        val usedFSSO = sharedPreferences?.getBoolean("usedFSSO", false)
+        if (usedFSSO == true) { toolbar.menu.getItem(0)?.title = getString(R.string.sign_out) }
+        with(toolbar) {
+            title = getString(R.string.app_name)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.deregister -> {
+                        if (usedFSSO == true) {
+                            launch {
+                                app.doFSSOSignout()
+                            }
+                        } else {
+                            showAlertDialog(
+                                titleResId = R.string.deregister,
+                                messageResId = R.string.deregister_confirmation,
+                                positiveButtonResId = R.string.deregister,
+                                onPositive = { deregister() },
+                                negativeButtonResId = android.R.string.cancel
+                            )
+                        }
+                    }
+                }
+                true
+            }
+            toolbarMenu = menu
+        }
+    }
+
     /**
      * Use the relay client to create a new postbox with a randomly generated UUIDv4 as the
      * connectionId. On successful creation, the postbox is added to the recycler view list, and
@@ -170,7 +226,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
                 postboxList.add(newConnectionID)
                 adapter.notifyDataSetChanged()
 
-                app.connectionsStorage.storeConnectionId(newConnectionID)
+                app.connectionsStorage.storeConnectionId(newConnectionID, app.sudoUserClient.getUserName()!!)
             } catch (e: SudoDIRelayClient.DIRelayException) {
                 showAlertDialog(
                     titleResId = R.string.postbox_creation_failed,
@@ -190,7 +246,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     private fun updatePostboxesFromStorage() {
         launch {
             postboxList.addAll(
-                app.connectionsStorage.getAllConnectionIds()
+                app.connectionsStorage.getAllConnectionIds(app.sudoUserClient.getUserName()!!)
                     .filter {
                         !postboxList.contains(it)
                     }.map { it }
@@ -235,7 +291,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
             withContext(Dispatchers.IO) {
                 val peerConnectionId =
                     app.connectionsStorage.getPeerConnectionIdForConnection(connectionId)
-                app.connectionsStorage.deleteConnection(connectionId)
+                app.connectionsStorage.deleteConnection(connectionId, app.sudoUserClient.getUserName()!!)
 
                 peerConnectionId?.let {
                     app.keyManagement.removeKeysForConnection(it)

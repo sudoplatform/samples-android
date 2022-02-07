@@ -221,6 +221,7 @@ class ScanInvitationFragment : Fragment(), CoroutineScope {
                 // store mapping from connectionId to peers connectionId
                 app.connectionsStorage.storePeersConnectionId(
                     connectionId,
+                    app.sudoUserClient.getUserName()!!,
                     peerConnectionData.connectionId
                 )
 
@@ -261,7 +262,7 @@ class ScanInvitationFragment : Fragment(), CoroutineScope {
             jsonData
         )
 
-        val peerPostboxURL = app.basePostboxEndpoint + peerConnection.connectionId
+        val peerPostboxURL = app.diRelayClient.getPostboxEndpoint(peerConnection.connectionId)
         val postRequest = Request.Builder()
             .url(peerPostboxURL)
             .post(encryptedJsonData.toRequestBody("text/plain".toMediaTypeOrNull()))

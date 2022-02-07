@@ -15,7 +15,6 @@ import com.sudoplatform.direlayexample.establishconnection.connectionOptions
 import com.sudoplatform.direlayexample.establishconnection.invite
 import com.sudoplatform.direlayexample.establishconnection.scanInvitation
 import com.sudoplatform.direlayexample.postboxes.postboxes
-import com.sudoplatform.direlayexample.start.start
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -45,6 +44,9 @@ class ConnectionDetailsTest {
 
     @After
     fun fini() {
+        postboxes {
+            deregisterCleanUpFlow()
+        }
         Timber.uprootAll()
     }
 
@@ -81,15 +83,6 @@ class ConnectionDetailsTest {
         }
         connectionDetails {
             assert(getMyConnectionIdField() == postboxId)
-        }
-
-        postboxes {
-            pressBackUntilPostboxesDisplayed()
-            deletePostboxes(2)
-        }
-
-        start {
-            pressBackUntilAtStartIsDisplayed()
         }
     }
 }

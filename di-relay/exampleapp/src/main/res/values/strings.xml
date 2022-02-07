@@ -6,10 +6,18 @@
     <!-- Common -->
     <string name="generic_failed_title">Failed</string>
 
-    <!-- Start Fragment -->
+    <!-- Register Fragment -->
     <string name="decentralized_identity_relay">Decentralized Identity Relay</string>
     <string name="sample_app">Sample App</string>
-    <string name="start">Start</string>
+    <string name="registration_method">Registration Method</string>
+    <string name="register_login">Register / Login</string>
+    <string name="register_failure">Failed to register: %1$s</string>
+    <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
+    <string name="safety_net_reg">SafetyNet Registration</string>
+    <string name="reset">Reset</string>
 
     <!-- Postboxes Fragment -->
     <string name="postbox_title">Postboxes</string>
@@ -19,6 +27,11 @@
     <string name="delete_postbox_pending">Deleting Postbox</string>
     <string name="postbox_delete_failed">Failed to delete postbox</string>
     <string name="postbox_delete_success">Successfully deleted postbox</string>
+    <string name="deregister">Deregister</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="deregistering">Deregistering&#8230;</string>
+    <string name="deregister_confirmation">Are you sure you want to deregister? All Postboxes and associated data will be deleted.</string>
+    <string name="deregister_failure">Unable to deregister: %1$s</string>
 
     <!-- Connection Start Fragment -->
     <string name="peer_connect_toolbar_title">Begin Peer Connection</string>

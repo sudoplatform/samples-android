@@ -28,6 +28,7 @@ class ConnectionRobot : BaseRobot() {
     private val loadingDialog = withId(R.id.progressBar3)
     private val messageItem = withId(R.id.messageBody)
     private val detailsButton = withId(R.id.details)
+    private val messageInput = withId(R.id.composeMessageEditText)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
@@ -37,6 +38,7 @@ class ConnectionRobot : BaseRobot() {
     fun checkConnectionItemsDisplayed() {
         waitForViewToDisplay(sendMessageButton, 20_000L)
         waitForViewToDisplay(detailsButton, 20_000L)
+        waitForViewToDisplay(messageInput)
     }
 
     fun checkMessageItemDisplayed() {
@@ -81,7 +83,7 @@ class ConnectionRobot : BaseRobot() {
     }
 
     fun sendMessage(message: String) {
-        fillEditText(R.id.composeMessageEditText, message)
+        fillText(messageInput, message)
         clickOnView(sendMessageButton)
     }
 }

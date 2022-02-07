@@ -53,15 +53,6 @@ open class BaseRobot {
     }
 
     // Assumes that the view is visible on screen.
-    fun fillEditText(resourceId: Int, text: String) {
-        onView(withId(resourceId))
-            .perform(click())
-            .perform(typeText(text))
-            .perform(pressImeActionButton())
-            .perform(closeSoftKeyboard())
-    }
-
-    // Assumes that the view is visible on screen.
     fun fillText(matcher: Matcher<View>, text: String) {
         onView(matcher)
             .perform(click())
