@@ -56,7 +56,7 @@ class ExploreTest {
             clickOnRuleset(Ruleset.Type.AD_BLOCKING)
             clickOnRuleset(Ruleset.Type.PRIVACY)
             clickOnRuleset(Ruleset.Type.SOCIAL)
-            enterCheckedUrl("google-analytics.com/collect")
+            enterCheckedUrl("example.com/ads?name=shiny")
             clickOnCheckButton()
             waitForLoading(timeout = 40_000L)
             checkResultHasText(BLOCKED)
@@ -73,7 +73,7 @@ class ExploreTest {
 
         // Check an advertising URL is blocked
         explore {
-            enterCheckedUrl("nzpages.co.nz/allbacks/banners/image.png")
+            enterCheckedUrl("gadsabz.com?ad=shinything")
             clickOnCheckButton()
             checkResultHasText(BLOCKED)
         }
@@ -81,7 +81,7 @@ class ExploreTest {
         // Disable the advertising ruleset and check that the same URL is allowed
         explore {
             clickOnRuleset(Ruleset.Type.AD_BLOCKING)
-            enterCheckedUrl("nzpages.co.nz/allbacks/banners/image.png")
+            enterCheckedUrl("gadsabz.com?ad=shinything")
             clickOnCheckButton()
             waitForLoading(timeout = 10_000L)
             checkResultHasText(ALLOWED)

@@ -6,7 +6,7 @@ This project provides examples of how to use the Sudo Ad/Tracker Blocker Android
 
 ## Supported Android Versions
 
-This app supports Android 6 (API level 23) or newer, built with Kotlin version 1.3.
+This app supports Android 6 (API level 23) or newer, built with Kotlin version 1.6.
 
 If you are using Android Studio, version 4.0 or newer is required.
 
@@ -32,7 +32,7 @@ To build this app you first need to obtain an SDK configuration file. If you are
 
 Refer to the following documents for more information:
 
-- [Sudo Password Manager Docs](https://docs.sudoplatform.com/guides/adtrackerblocker)
+- [Sudo Ad/Tracker Blocker Docs](https://docs.sudoplatform.com/guides/adtrackerblocker)
 - [Getting Started on Sudo Platform](https://docs.sudoplatform.com/guides/getting-started)
 - [Understanding Sudo Digital Identities](https://docs.sudoplatform.com/concepts/sudo-digital-identities)
 

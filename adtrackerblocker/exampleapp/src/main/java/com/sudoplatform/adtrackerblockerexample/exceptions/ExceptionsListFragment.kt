@@ -9,12 +9,10 @@ package com.sudoplatform.adtrackerblockerexample.exceptions
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,17 +20,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.adtrackerblockerexample.App
 import com.sudoplatform.adtrackerblockerexample.R
 import com.sudoplatform.adtrackerblockerexample.createLoadingAlertDialog
+import com.sudoplatform.adtrackerblockerexample.databinding.FragmentExceptionsListBinding
+import com.sudoplatform.adtrackerblockerexample.databinding.LayoutExceptionUrlDialogBinding
 import com.sudoplatform.adtrackerblockerexample.showAlertDialog
 import com.sudoplatform.adtrackerblockerexample.swipe.SwipeLeftActionHelper
+import com.sudoplatform.adtrackerblockerexample.util.ObjectDelegate
 import com.sudoplatform.sudoadtrackerblocker.SudoAdTrackerBlockerException
 import com.sudoplatform.sudoadtrackerblocker.types.BlockingException
 import com.sudoplatform.sudoadtrackerblocker.types.toHostException
 import com.sudoplatform.sudoadtrackerblocker.types.toPageException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_exceptions_list.*
-import kotlinx.android.synthetic.main.fragment_exceptions_list.view.*
-import kotlinx.android.synthetic.main.layout_exception_url_dialog.*
-import kotlinx.android.synthetic.main.layout_exception_url_dialog.view.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +36,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [ExceptionsListFragment] presents a list of exceptions to the blocking rules.
@@ -50,6 +47,10 @@ import kotlinx.coroutines.withContext
 class ExceptionsListFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentExceptionsListBinding>()
+    private val binding by bindingDelegate
 
     /** A reference to the [RecyclerView.Adapter] handling exceptions. */
     private lateinit var listAdapter: ExceptionsListAdapter
@@ -63,40 +64,36 @@ class ExceptionsListFragment : Fragment(), CoroutineScope {
     /** The [Application] that holds references to the APIs this fragment needs */
     private lateinit var app: App
 
-    /** Toolbar [Menu] displaying title and toolbar items. */
-    private lateinit var toolbarMenu: Menu
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_exceptions_list, container, false)
+        bindingDelegate.attach(FragmentExceptionsListBinding.inflate(inflater, container, false))
 
         app = requireActivity().application as App
 
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.exceptions_list)
+        with(binding.toolbar.root) {
+            title = getString(R.string.exceptions_list)
 
-        toolbar.inflateMenu(R.menu.nav_menu_exceptions_list_menu)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.removeAllExceptions -> {
-                    removeAllExceptions()
+            inflateMenu(R.menu.nav_menu_exceptions_list_menu)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.removeAllExceptions -> {
+                        removeAllExceptions()
+                    }
                 }
+                true
             }
-            true
         }
-        toolbarMenu = toolbar.menu
-
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureRecyclerView(view)
+        configureRecyclerView()
 
-        view.floatingActionButton.setOnClickListener {
+        binding.floatingActionButton.setOnClickListener {
             promptForException()
         }
     }
@@ -109,6 +106,7 @@ class ExceptionsListFragment : Fragment(), CoroutineScope {
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -166,11 +164,11 @@ class ExceptionsListFragment : Fragment(), CoroutineScope {
     /**
      * Configures the [RecyclerView] used to display the listed [BlockingException] items.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         listAdapter = ExceptionsListAdapter(exceptionList)
-        view.exceptionsRecyclerView.adapter = listAdapter
-        view.exceptionsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        view.exceptionsRecyclerView.requestFocus()
+        binding.exceptionsRecyclerView.adapter = listAdapter
+        binding.exceptionsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.exceptionsRecyclerView.requestFocus()
         configureSwipeToDelete()
     }
 
@@ -178,9 +176,9 @@ class ExceptionsListFragment : Fragment(), CoroutineScope {
      * Prompt for the URL of the exception with a simple alert dialog.
      */
     private fun promptForException() {
-        val exceptionUrlView = layoutInflater.inflate(R.layout.layout_exception_url_dialog, null)
+        val exceptionUrlView = LayoutExceptionUrlDialogBinding.inflate(layoutInflater)
         AlertDialog.Builder(requireContext())
-            .setView(exceptionUrlView)
+            .setView(exceptionUrlView.root)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 if (!exceptionUrlView.exceptionUrlInput.text.isNullOrBlank()) {
                     addException(exceptionUrlView.exceptionUrlInput.text.toString())
@@ -247,28 +245,28 @@ class ExceptionsListFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        exceptionsRecyclerView?.isEnabled = isEnabled
-        floatingActionButton?.isEnabled = isEnabled
+        binding.exceptionsRecyclerView.isEnabled = isEnabled
+        binding.floatingActionButton.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
         if (textResId != 0) {
-            progressText.text = getString(textResId)
+            binding.progressText.text = getString(textResId)
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
-        exceptionsRecyclerView?.visibility = View.GONE
-        floatingActionButton?.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
+        binding.exceptionsRecyclerView.visibility = View.GONE
+        binding.floatingActionButton.visibility = View.GONE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
-        exceptionsRecyclerView?.visibility = View.VISIBLE
-        floatingActionButton?.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.GONE
+        binding.progressText.visibility = View.GONE
+        binding.exceptionsRecyclerView.visibility = View.VISIBLE
+        binding.floatingActionButton.visibility = View.VISIBLE
         setItemsEnabled(true)
     }
 
@@ -291,7 +289,7 @@ class ExceptionsListFragment : Fragment(), CoroutineScope {
      */
     private fun configureSwipeToDelete() {
         val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
-        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(exceptionsRecyclerView)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.exceptionsRecyclerView)
     }
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder) {

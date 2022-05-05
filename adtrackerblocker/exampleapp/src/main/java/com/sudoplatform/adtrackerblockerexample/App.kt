@@ -16,15 +16,15 @@ import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.SignOutException
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 class App : Application(), CoroutineScope {
 
     companion object {
-        /** Name of the preference set that holds sign in inforation */
+        /** Name of the preference set that holds sign in information */
         const val SIGN_IN_PREFERENCES = "SignIn"
         /** True if Federated Single Sign On was used */
         const val FSSO_USED_PREFERENCE = "usedFSSO"

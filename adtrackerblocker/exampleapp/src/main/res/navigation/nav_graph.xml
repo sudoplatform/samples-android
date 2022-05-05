@@ -13,8 +13,6 @@
         <action
             android:id="@+id/action_registerFragment_to_rulesetsFragment"
             app:destination="@id/rulesetsFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
@@ -25,20 +23,14 @@
         <action
             android:id="@+id/action_rulesetsFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_rulesetsFragment_to_exceptionsListFragment"
             app:destination="@id/exceptionsListFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_rulesetsFragment_to_exploreFragment"
             app:destination="@id/exploreFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
             app:popUpToInclusive="true" />
     </fragment>
     <fragment

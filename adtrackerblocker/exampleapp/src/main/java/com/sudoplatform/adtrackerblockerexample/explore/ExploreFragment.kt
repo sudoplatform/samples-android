@@ -14,24 +14,21 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.annotation.StringRes
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.sudoplatform.adtrackerblockerexample.App
 import com.sudoplatform.adtrackerblockerexample.R
+import com.sudoplatform.adtrackerblockerexample.databinding.FragmentExploreBinding
 import com.sudoplatform.adtrackerblockerexample.showAlertDialog
+import com.sudoplatform.adtrackerblockerexample.util.ObjectDelegate
 import com.sudoplatform.sudoadtrackerblocker.SudoAdTrackerBlockerClient
 import com.sudoplatform.sudoadtrackerblocker.types.Ruleset
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_explore.*
-import kotlinx.android.synthetic.main.fragment_explore.view.*
-import kotlinx.android.synthetic.main.layout_exception_url_dialog.*
-import kotlinx.android.synthetic.main.layout_exception_url_dialog.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [ExploreFragment] allows the user to explore the working of the blocking
@@ -49,6 +46,10 @@ class ExploreFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentExploreBinding>()
+    private val binding by bindingDelegate
+
     /** The [Application] that holds references to the APIs this fragment needs */
     private lateinit var app: App
 
@@ -63,31 +64,30 @@ class ExploreFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_explore, container, false)
+        bindingDelegate.attach(FragmentExploreBinding.inflate(inflater, container, false))
 
         app = requireActivity().application as App
 
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.explore)
+        binding.toolbar.root.title = getString(R.string.explore)
 
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        checkButton.setOnClickListener {
+        binding.checkButton.setOnClickListener {
             checkButtonClicked()
         }
 
         // Setup the suggestions for the URL to check
         val suggestions = resources.getStringArray(R.array.url_suggestions)
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1, suggestions)
-        checkedUrlSpinner.setAdapter(adapter)
-        checkedUrlSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.checkedUrlSpinner.setAdapter(adapter)
+        binding.checkedUrlSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                checkedUrlText.setText(suggestions[position])
-                resultText.text = ""
+                binding.checkedUrlText.setText(suggestions[position])
+                binding.resultText.text = ""
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // Don't care
@@ -98,28 +98,29 @@ class ExploreFragment : Fragment(), CoroutineScope {
             val activeRulesets = withContext(Dispatchers.IO) {
                 app.adTrackerBlockerClient.getActiveRulesets()
             }
-            rulesetAdsSwitch.isChecked = Ruleset.Type.AD_BLOCKING in activeRulesets
-            rulesetPrivacySwitch.isChecked = Ruleset.Type.PRIVACY in activeRulesets
-            rulesetSocialSwitch.isChecked = Ruleset.Type.SOCIAL in activeRulesets
+            binding.rulesetAdsSwitch.isChecked = Ruleset.Type.AD_BLOCKING in activeRulesets
+            binding.rulesetPrivacySwitch.isChecked = Ruleset.Type.PRIVACY in activeRulesets
+            binding.rulesetSocialSwitch.isChecked = Ruleset.Type.SOCIAL in activeRulesets
             val exceptions = withContext(Dispatchers.IO) {
                 app.adTrackerBlockerClient.getExceptions()
             }
-            exceptionsLabel.text = getString(R.string.explore_welcome, exceptions.size)
+            binding.exceptionsLabel.text = getString(R.string.explore_welcome, exceptions.size)
         }
     }
 
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
     private fun checkButtonClicked() {
 
-        resultText.setTextColor(resources.getColor(android.R.color.black, null))
-        resultText.text = ""
+        binding.resultText.setTextColor(resources.getColor(android.R.color.black, null))
+        binding.resultText.text = ""
 
-        val checkedUrl = checkedUrlText.text.toString().trim()
+        val checkedUrl = binding.checkedUrlText.text.toString().trim()
         if (checkedUrl.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.explore,
@@ -130,7 +131,7 @@ class ExploreFragment : Fragment(), CoroutineScope {
             return
         }
 
-        val sourceUrl = sourceUrlText.text.toString().trim()
+        val sourceUrl = binding.sourceUrlText.text.toString().trim()
 
         launch {
             if (!haveRulesetsBeenUpdated) {
@@ -142,13 +143,13 @@ class ExploreFragment : Fragment(), CoroutineScope {
             showLoading(R.string.activating_rulesets)
             setActiveRulesets()
 
-            resultText.setText(R.string.checking_url_start)
+            binding.resultText.setText(R.string.checking_url_start)
             if (checkIsUrlBlocked(checkedUrl, sourceUrl)) {
-                resultText.setText(R.string.url_blocked)
-                resultText.setTextColor(resources.getColor(R.color.colorRed, null))
+                binding.resultText.setText(R.string.url_blocked)
+                binding.resultText.setTextColor(resources.getColor(R.color.colorRed, null))
             } else {
-                resultText.setText(R.string.url_not_blocked)
-                resultText.setTextColor(resources.getColor(R.color.colorGreen, null))
+                binding.resultText.setText(R.string.url_not_blocked)
+                binding.resultText.setTextColor(resources.getColor(R.color.colorGreen, null))
             }
             hideLoading()
         }
@@ -169,13 +170,13 @@ class ExploreFragment : Fragment(), CoroutineScope {
      */
     private suspend fun setActiveRulesets() {
         val selectedRulesets = mutableSetOf<Ruleset.Type>()
-        if (rulesetAdsSwitch.isChecked) {
+        if (binding.rulesetAdsSwitch.isChecked) {
             selectedRulesets.add(Ruleset.Type.AD_BLOCKING)
         }
-        if (rulesetPrivacySwitch.isChecked) {
+        if (binding.rulesetPrivacySwitch.isChecked) {
             selectedRulesets.add(Ruleset.Type.PRIVACY)
         }
-        if (rulesetSocialSwitch.isChecked) {
+        if (binding.rulesetSocialSwitch.isChecked) {
             selectedRulesets.add(Ruleset.Type.SOCIAL)
         }
         if (selectedRulesets != activeRulesets) {
@@ -212,31 +213,37 @@ class ExploreFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and switches will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        checkButton?.isEnabled = isEnabled
-        checkedUrlText?.isEnabled = isEnabled
-        checkedUrlSpinner?.isEnabled = isEnabled
-        sourceUrlText?.isEnabled = isEnabled
-        rulesetAdsSwitch?.isEnabled = isEnabled
-        rulesetPrivacySwitch?.isEnabled = isEnabled
-        rulesetSocialSwitch?.isEnabled = isEnabled
-        resultLabel?.isEnabled = isEnabled
-        resultText?.isEnabled = isEnabled
+        with(binding) {
+            checkButton.isEnabled = isEnabled
+            checkedUrlText.isEnabled = isEnabled
+            checkedUrlSpinner.isEnabled = isEnabled
+            sourceUrlText.isEnabled = isEnabled
+            rulesetAdsSwitch.isEnabled = isEnabled
+            rulesetPrivacySwitch.isEnabled = isEnabled
+            rulesetSocialSwitch.isEnabled = isEnabled
+            resultLabel.isEnabled = isEnabled
+            resultText.isEnabled = isEnabled
+        }
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
-        if (textResId != 0) {
-            progressText.text = getString(textResId)
+        with(binding) {
+            if (textResId != 0) {
+                progressText.text = getString(textResId)
+            }
+            progressBar.visibility = View.VISIBLE
+            progressText.visibility = View.VISIBLE
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
+        with(binding) {
+            progressBar.visibility = View.GONE
+            progressText.visibility = View.GONE
+        }
         setItemsEnabled(true)
     }
 }

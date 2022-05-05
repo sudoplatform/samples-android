@@ -1,14 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId 'com.sudoplatform.adtrackerblockerexample'
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,41 +33,45 @@ android {
         pickFirst("META-INF/atomicfu.kotlin_module")
         pickFirst("META-INF/kotlinx-coroutines-core.kotlin_module")
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:9.2.0'
-    implementation 'com.sudoplatform:sudoadtrackerblocker:1.1.0'
+    implementation 'com.sudoplatform:sudouser:11.1.1'
+    implementation 'com.sudoplatform:sudoadtrackerblocker:1.2.2'
+    implementation "com.sudoplatform:sudoentitlements:3.0.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    def coroutine_version = "1.3.8"
+    def coroutine_version = "1.6.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    def nav_version_ktx = "2.3.2"
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    def nav_version_ktx = '2.4.2'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version_ktx"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version_ktx"
 
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.android.material:material:1.3.0-beta01'
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.android.material:material:1.7.0-alpha01'
 
-    def androidxTest = "1.3.0"
-    def espresso = "3.3.0"
+    def androidxTest = "1.4.0"
+    def espresso = "3.4.0"
     androidTestImplementation "androidx.test:core:$androidxTest"
     androidTestImplementation "androidx.test:core-ktx:$androidxTest"
-    androidTestImplementation "androidx.test.ext:junit:1.1.2"
-    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.2"
+    androidTestImplementation "androidx.test.ext:junit:1.1.3"
+    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"
     androidTestImplementation "androidx.test:runner:$androidxTest"
     androidTestImplementation "androidx.test:rules:$androidxTest"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.3.0"
 }
 
 // Jacoco test coverage
@@ -102,7 +105,6 @@ kotlinter {
     ignoreFailures = false
     reporters = ['checkstyle', 'plain']
     experimentalRules = false
-    fileBatchSize = 30
 }
 
 // Vulnerability scanning

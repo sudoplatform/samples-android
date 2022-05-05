@@ -8,13 +8,11 @@ package com.sudoplatform.adtrackerblockerexample.rulesets
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -22,22 +20,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.adtrackerblockerexample.App
 import com.sudoplatform.adtrackerblockerexample.R
+import com.sudoplatform.adtrackerblockerexample.databinding.FragmentRulesetsBinding
 import com.sudoplatform.adtrackerblockerexample.showAlertDialog
 import com.sudoplatform.adtrackerblockerexample.sudos.RulesetAdapter
+import com.sudoplatform.adtrackerblockerexample.util.ObjectDelegate
 import com.sudoplatform.sudoadtrackerblocker.SudoAdTrackerBlockerException
 import com.sudoplatform.sudoadtrackerblocker.types.Ruleset
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_rulesets.progressBar
-import kotlinx.android.synthetic.main.fragment_rulesets.progressText
-import kotlinx.android.synthetic.main.fragment_rulesets.rulesetRecyclerView
-import kotlinx.android.synthetic.main.fragment_rulesets.view.rulesetRecyclerView
-import kotlinx.android.synthetic.main.fragment_rulesets.view.toolbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This [RulesetsFragment] presents a list of [Ruleset]s.
@@ -53,11 +48,12 @@ class RulesetsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentRulesetsBinding>()
+    private val binding by bindingDelegate
+
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
-
-    /** Toolbar [Menu] displaying title and toolbar items. */
-    private lateinit var toolbarMenu: Menu
 
     /** A reference to the [RecyclerView.Adapter] handling [Ruleset] data. */
     private lateinit var adapter: RulesetAdapter
@@ -83,42 +79,42 @@ class RulesetsFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_rulesets, container, false)
+        bindingDelegate.attach(FragmentRulesetsBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
 
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.rulesets)
-        toolbar.inflateMenu(R.menu.nav_menu_rulesets_menu)
-        toolbar.setOnMenuItemClickListener {
-            when (it?.itemId) {
-                R.id.settings -> {
-                    navController.navigate(R.id.action_rulesetsFragment_to_settingsFragment)
+        with(binding.toolbar.root) {
+            title = getString(R.string.rulesets)
+            inflateMenu(R.menu.nav_menu_rulesets_menu)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.settings -> {
+                        navController.navigate(R.id.action_rulesetsFragment_to_settingsFragment)
+                    }
+                    R.id.exceptionsList -> {
+                        navController.navigate(R.id.action_rulesetsFragment_to_exceptionsListFragment)
+                    }
+                    R.id.explore -> {
+                        navController.navigate(R.id.action_rulesetsFragment_to_exploreFragment)
+                    }
                 }
-                R.id.exceptionsList -> {
-                    navController.navigate(R.id.action_rulesetsFragment_to_exceptionsListFragment)
-                }
-                R.id.explore -> {
-                    navController.navigate(R.id.action_rulesetsFragment_to_exploreFragment)
-                }
+                true
             }
-            true
         }
-        toolbarMenu = toolbar.menu
 
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
-        configureRecyclerView(view)
+        configureRecyclerView()
         listRulesets()
     }
 
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -150,10 +146,10 @@ class RulesetsFragment : Fragment(), CoroutineScope {
     /**
      * Configures the [RecyclerView] used to display the listed [Ruleset] items.
      */
-    private fun configureRecyclerView(view: View) {
+    private fun configureRecyclerView() {
         adapter = RulesetAdapter(rulesetList)
-        view.rulesetRecyclerView.adapter = adapter
-        view.rulesetRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.rulesetRecyclerView.adapter = adapter
+        binding.rulesetRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /**
@@ -162,25 +158,25 @@ class RulesetsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        rulesetRecyclerView?.isEnabled = isEnabled
+        binding.rulesetRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading(@StringRes textResId: Int = 0) {
         if (textResId != 0) {
-            progressText.text = getString(textResId)
+            binding.progressText.text = getString(textResId)
         }
-        progressBar.visibility = View.VISIBLE
-        progressText.visibility = View.VISIBLE
-        rulesetRecyclerView?.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressText.visibility = View.VISIBLE
+        binding.rulesetRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
-        progressText?.visibility = View.GONE
-        rulesetRecyclerView?.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.GONE
+        binding.progressText.visibility = View.GONE
+        binding.rulesetRecyclerView.visibility = View.VISIBLE
         setItemsEnabled(true)
     }
 }

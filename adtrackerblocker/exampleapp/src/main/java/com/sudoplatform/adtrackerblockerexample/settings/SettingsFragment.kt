@@ -8,28 +8,32 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.adtrackerblockerexample.App
 import com.sudoplatform.adtrackerblockerexample.R
 import com.sudoplatform.adtrackerblockerexample.createLoadingAlertDialog
+import com.sudoplatform.adtrackerblockerexample.databinding.FragmentSettingsBinding
 import com.sudoplatform.adtrackerblockerexample.showAlertDialog
+import com.sudoplatform.adtrackerblockerexample.util.ObjectDelegate
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.RegisterException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_register.*
-import kotlinx.android.synthetic.main.fragment_settings.*
-import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 class SettingsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentSettingsBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -45,15 +49,13 @@ class SettingsFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        bindingDelegate.attach(FragmentSettingsBinding.inflate(inflater, container, false))
+
         app = requireActivity().application as App
 
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        binding.toolbar.root.title = getString(R.string.settings)
 
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.settings)
-
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(
@@ -64,7 +66,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
 
         navController = Navigation.findNavController(view)
 
-        view.signOutButton.setOnClickListener {
+        binding.signOutButton.setOnClickListener {
             val prefs = requireContext().getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
             val usedFSSO = prefs.getBoolean(App.FSSO_USED_PREFERENCE, false)
             if (usedFSSO == true) {
@@ -76,7 +78,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
             }
         }
 
-        view.resetButton.setOnClickListener {
+        binding.resetButton.setOnClickListener {
             showAlertDialog(
                 titleResId = R.string.clear_storage_title,
                 messageResId = R.string.clear_storage_confirmation,
@@ -85,6 +87,14 @@ class SettingsFragment : Fragment(), CoroutineScope {
                 negativeButtonResId = android.R.string.cancel
             )
         }
+    }
+
+    override fun onDestroy() {
+        loading?.dismiss()
+        coroutineContext.cancelChildren()
+        coroutineContext.cancel()
+        bindingDelegate.detach()
+        super.onDestroy()
     }
 
     /** Perform reset of the [AdTrackerBlockerClient] */
@@ -140,7 +150,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        resetButton.isEnabled = isEnabled
+        binding.resetButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

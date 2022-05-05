@@ -43,7 +43,7 @@ class ExceptionsListRobot : BaseRobot() {
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 2_000L)
-        waitForViewToNotDisplay(loadingDialog, 2_000L)
+        waitForViewToNotDisplay(loadingDialog, 4_000L)
     }
 
     fun waitForRecyclerView(timeout: Long = 10_000L) {
@@ -66,7 +66,8 @@ class ExceptionsListRobot : BaseRobot() {
 
     fun swipeLeftToDelete(position: Int) {
         onView(exceptionsRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<ExceptionViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<ExceptionViewHolder>(
+                position,
                 ViewActions.swipeLeft()
             )
         )
@@ -74,7 +75,8 @@ class ExceptionsListRobot : BaseRobot() {
 
     fun clickOn(position: Int) {
         onView(exceptionsRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<ExceptionViewHolder>(position,
+            RecyclerViewActions.actionOnItemAtPosition<ExceptionViewHolder>(
+                position,
                 ViewActions.click()
             )
         )
@@ -111,6 +113,7 @@ class ExceptionsListRobot : BaseRobot() {
     fun enterExceptionUrl(url: String) {
         waitForViewToDisplay(exceptionUrlInput, 5_000L)
         replaceText(exceptionUrlInput, url)
+        checkAlertDialog()
         clickOnView(positiveAlertButton)
     }
 
