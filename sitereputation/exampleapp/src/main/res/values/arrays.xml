@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="url_suggestions">
-        <item>aboveandbelow.com.au</item>
-        <item>wildnights.co.uk</item>
+        <item>evil-site.example</item>
+        <item>brightstarshop.com</item>
         <item>endurotanzania.co.tz</item>
         <item>tadoo.ca</item>
         <item>tandenblekenhoofddorp.nl</item>

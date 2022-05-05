@@ -108,7 +108,7 @@ class ExploreRobot : BaseRobot() {
         onView(withText(text)).perform(click())
     }
 
-    fun waitForLoading(timeout: Long = 2_000L) {
+    fun waitForLoading(timeout: Long = 20_000L) {
         waitForViewToDisplay(loadingDialog, timeout)
         waitForViewToNotDisplay(loadingDialog, timeout)
     }

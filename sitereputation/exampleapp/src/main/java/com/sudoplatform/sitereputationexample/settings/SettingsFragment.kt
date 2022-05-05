@@ -14,29 +14,30 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.sitereputationexample.App
 import com.sudoplatform.sitereputationexample.R
 import com.sudoplatform.sitereputationexample.createLoadingAlertDialog
+import com.sudoplatform.sitereputationexample.databinding.FragmentSettingsBinding
 import com.sudoplatform.sitereputationexample.showAlertDialog
+import com.sudoplatform.sitereputationexample.util.ObjectDelegate
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.RegisterException
-import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.fragment_settings.clearStorageButton
-import kotlinx.android.synthetic.main.fragment_settings.view.clearStorageButton
-import kotlinx.android.synthetic.main.fragment_settings.view.signOutButton
-import kotlinx.android.synthetic.main.fragment_settings.view.toolbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 class SettingsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentSettingsBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -54,13 +55,11 @@ class SettingsFragment : Fragment(), CoroutineScope {
     ): View? {
         app = requireActivity().application as App
 
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        bindingDelegate.attach(FragmentSettingsBinding.inflate(inflater, container, false))
 
-        val toolbar = (view.toolbar as Toolbar)
-        toolbar.title = getString(R.string.settings)
+        binding.toolbar.root.title = getString(R.string.settings)
 
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(
@@ -71,7 +70,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
 
         navController = Navigation.findNavController(view)
 
-        view.signOutButton.setOnClickListener {
+        binding.signOutButton.setOnClickListener {
             val prefs = requireContext().getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
             val usedFSSO = prefs.getBoolean(App.FSSO_USED_PREFERENCE, false)
             if (usedFSSO == true) {
@@ -86,7 +85,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
             }
         }
 
-        view.clearStorageButton.setOnClickListener {
+        binding.clearStorageButton.setOnClickListener {
             showAlertDialog(
                 titleResId = R.string.clear_storage_title,
                 messageResId = R.string.clear_storage_confirmation,
@@ -151,7 +150,7 @@ class SettingsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        clearStorageButton.isEnabled = isEnabled
+        binding.clearStorageButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

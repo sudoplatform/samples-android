@@ -20,25 +20,25 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.sitereputationexample.App
 import com.sudoplatform.sitereputationexample.R
+import com.sudoplatform.sitereputationexample.databinding.FragmentRegisterBinding
+import com.sudoplatform.sitereputationexample.util.ObjectDelegate
 import com.sudoplatform.sudouser.FederatedSignInResult
 import com.sudoplatform.sudouser.RegistrationChallengeType
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
 import com.sudoplatform.sudouser.exceptions.AuthenticationException
 import com.sudoplatform.sudouser.exceptions.RegisterException
-import java.io.IOException
-import java.util.ArrayList
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlinx.android.synthetic.main.fragment_register.*
-import kotlinx.android.synthetic.main.fragment_register.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.util.ArrayList
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 enum class RegistrationMethod { TEST, FSSO }
 /**
@@ -50,6 +50,10 @@ enum class RegistrationMethod { TEST, FSSO }
 class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedListener {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
+
+    /** View binding to the views defined in the layout */
+    private val bindingDelegate = ObjectDelegate<FragmentRegisterBinding>()
+    private val binding by bindingDelegate
 
     /** Navigation controller used to manage app navigation. */
     private lateinit var navController: NavController
@@ -65,14 +69,15 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         savedInstanceState: Bundle?
     ): View? {
         app = requireActivity().application as App
-        return inflater.inflate(R.layout.fragment_register, container, false)
+        bindingDelegate.attach(FragmentRegisterBinding.inflate(inflater, container, false))
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        registrationMethodSpinner.onItemSelectedListener = this
+        binding.registrationMethodSpinner.onItemSelectedListener = this
         val challengeTypes = app.sudoUserClient.getSupportedRegistrationChallengeType()
         registrationMethodList.clear()
         registrationMethodList.add(getString(R.string.test_registration))
@@ -81,8 +86,8 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         }
         registrationMethodAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, registrationMethodList)
         registrationMethodAdapter.notifyDataSetChanged()
-        registrationMethodSpinner.adapter = registrationMethodAdapter
-        view.buttonRegister.setOnClickListener {
+        binding.registrationMethodSpinner.adapter = registrationMethodAdapter
+        binding.buttonRegister.setOnClickListener {
             registerAndSignIn()
         }
     }
@@ -90,6 +95,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
+        bindingDelegate.detach()
         super.onDestroy()
     }
 
@@ -102,15 +108,15 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         val prefs = requireContext().getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
         val usedFSSO = prefs.getBoolean(App.FSSO_USED_PREFERENCE, false)
         if (usedFSSO == true) {
-            buttonSignOut.setText(getString(R.string.sign_out))
-            buttonSignOut.setOnClickListener {
+            binding.buttonSignOut.setText(getString(R.string.sign_out))
+            binding.buttonSignOut.setOnClickListener {
                 launch {
                     app.doFSSOSSignout()
                 }
             }
         } else {
-            buttonSignOut.setText(getString(R.string.reset))
-            buttonSignOut.setOnClickListener {
+            binding.buttonSignOut.setText(getString(R.string.reset))
+            binding.buttonSignOut.setOnClickListener {
                 launch {
                     withContext(Dispatchers.IO) {
                         if (app.sudoUserClient.isRegistered()) {
@@ -168,7 +174,8 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 loadRegistrationKeys()
             }
         } else {
-            app.sudoUserClient.presentFederatedSignInUI { result ->
+            val activity = this.activity ?: return
+            app.sudoUserClient.presentFederatedSignInUI(activity) { result ->
                 when (result) {
                     is SignInResult.Success -> {
                         setUsedFssoFlag(true)
@@ -222,13 +229,13 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
         try {
             privateKey =
-                    app.assets.open("register_key.private").bufferedReader().use {
-                        it.readText().trim()
-                    }
+                app.assets.open("register_key.private").bufferedReader().use {
+                    it.readText().trim()
+                }
             keyId =
-                    app.assets.open("register_key.id").bufferedReader().use {
-                        it.readText().trim()
-                    }
+                app.assets.open("register_key.id").bufferedReader().use {
+                    it.readText().trim()
+                }
         } catch (e: IOException) {
             app.logger.error(getString(R.string.registration_keys_failure))
             app.logger.outputError(Error(e))
@@ -237,19 +244,19 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         }
 
         val authProvider = TESTAuthenticationProvider(
-                "testRegisterAudience",
-                privateKey,
-                null,
-                app.keyManager,
-                keyId
+            "testRegisterAudience",
+            privateKey,
+            null,
+            app.keyManager,
+            keyId
         )
         // register with auth provider
         launch {
             try {
                 withContext(Dispatchers.IO) {
                     app.sudoUserClient.registerWithAuthenticationProvider(
-                            authProvider,
-                            "dummy_rid"
+                        authProvider,
+                        "dummy_rid"
                     )
                 }
                 signIn()
@@ -264,9 +271,9 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         hideLoading()
         setItemsEnabled(true)
         Toast.makeText(
-                requireContext(),
-                getString(R.string.register_failure, e.localizedMessage),
-                Toast.LENGTH_LONG
+            requireContext(),
+            getString(R.string.register_failure, e.localizedMessage),
+            Toast.LENGTH_LONG
         ).show()
     }
 
@@ -277,21 +284,21 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         if (isEnabled) {
-            buttonRegister?.text = getString(R.string.register_login)
+            binding.buttonRegister.text = getString(R.string.register_login)
         } else {
-            buttonRegister?.text = ""
+            binding.buttonRegister.text = ""
         }
-        buttonRegister?.isEnabled = isEnabled
+        binding.buttonRegister.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
     private fun showLoading() {
-        progressBar?.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
     }
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        progressBar?.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
     }
 
     /** Sets the registration method */

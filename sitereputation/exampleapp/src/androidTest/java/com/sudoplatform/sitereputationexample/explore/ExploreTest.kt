@@ -14,7 +14,6 @@ import com.sudoplatform.sitereputationexample.MainActivity
 import com.sudoplatform.sitereputationexample.settings.settings
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +45,6 @@ class ExploreTest {
         Timber.uprootAll()
     }
 
-    @Ignore
     @Test
     fun testUpdate() {
 
@@ -73,7 +71,6 @@ class ExploreTest {
         }
     }
 
-    @Ignore
     @Test
     fun testCheckingOfUrls() {
 
@@ -89,15 +86,7 @@ class ExploreTest {
         // Check top suggested URL is MALICIOUS
         explore {
             clickOnSpinner()
-            clickOnSpinnerItemWithText("aboveandbelow.com.au")
-            clickOnCheckButton()
-            waitForLoading()
-            checkResultHasText(MALICIOUS)
-        }
-
-        // Check an entered malicious URL is marked as MALICIOUS
-        explore {
-            enterCheckedUrl("wildnights.co.uk")
+            clickOnSpinnerItemWithText("evil-site.example")
             clickOnCheckButton()
             waitForLoading()
             checkResultHasText(MALICIOUS)

@@ -6,7 +6,7 @@ This project provides examples of how to use the Sudo Site Reputation Android SD
 
 ## Supported Android Versions
 
-This app supports Android 6 (API level 23) or newer, built with Kotlin version 1.3.
+This app supports Android 6 (API level 23) or newer, built with Kotlin version 1.6.
 
 If you are using Android Studio, version 4.0 or newer is required.
 

@@ -14,7 +14,8 @@
         tools:replace="android:allowBackup">
         <activity
             android:name="com.sudoplatform.sitereputationexample.MainActivity"
-            android:theme="@style/AppThemeNoActionBar">
+            android:theme="@style/AppThemeNoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -27,5 +28,17 @@
             </intent-filter>
         </activity>
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name=
+                "android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
 
 </manifest>
