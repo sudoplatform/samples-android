@@ -34,7 +34,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import junit.framework.AssertionFailedError
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.not
+import org.hamcrest.core.IsNot.not
 
 /**
  * Base class of the visual testing robots.
@@ -136,7 +136,7 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 10_000L, mayMissDisplay: Boolean = false) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -150,6 +150,11 @@ open class BaseRobot {
                 println("AssertionFailedError Exception")
                 Thread.sleep(retryInterval)
             }
+        }
+
+        if (!mayMissDisplay) {
+            onView(matcher)
+                .check(matches(isDisplayed()))
         }
     }
 

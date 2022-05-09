@@ -17,7 +17,8 @@
         tools:replace="android:allowBackup">
         <activity
             android:name="com.sudoplatform.direlayexample.MainActivity"
-            android:theme="@style/AppThemeNoActionBar">
+            android:theme="@style/AppThemeNoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

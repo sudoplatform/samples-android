@@ -26,8 +26,12 @@ import com.budiyev.android.codescanner.ScanMode
 import com.google.gson.Gson
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
+import com.sudoplatform.direlayexample.connection.ConnectionFragment
 import com.sudoplatform.direlayexample.databinding.FragmentScanInvitationBinding
 import com.sudoplatform.direlayexample.establishconnection.PeerConnectionExchangeInformation
+import com.sudoplatform.direlayexample.establishconnection.invite.InviteFragment
+import com.sudoplatform.direlayexample.establishconnection.options.ConnectionOptionsFragment
+import com.sudoplatform.direlayexample.keymanager.EncryptedPayload
 import com.sudoplatform.direlayexample.showAlertDialog
 import com.sudoplatform.direlayexample.util.ObjectDelegate
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver

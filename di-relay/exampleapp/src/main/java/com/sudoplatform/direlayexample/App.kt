@@ -7,12 +7,15 @@
 package com.sudoplatform.direlayexample
 
 import android.app.Application
+import android.net.Uri
 import com.sudoplatform.direlayexample.db.PostboxConnectionsStorage
 import com.sudoplatform.direlayexample.keymanager.KeyManagement
 import com.sudoplatform.sudodirelay.SudoDIRelayClient
+import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
+import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.SignOutException
 import java.lang.Exception
@@ -32,6 +35,8 @@ class App : Application() {
     lateinit var connectionsStorage: PostboxConnectionsStorage
     lateinit var keyManagement: KeyManagement
     lateinit var sudoUserClient: SudoUserClient
+    lateinit var sudoProfilesClient: SudoProfilesClient
+    lateinit var sudoEntitlementsClient: SudoEntitlementsClient
 
     override fun onCreate() {
         super.onCreate()
@@ -46,6 +51,23 @@ class App : Application() {
 
         // Create an instance of PostboxConnectionsStorage to manage storage of postboxes and connections.
         connectionsStorage = PostboxConnectionsStorage(this)
+
+        // Create an instance of SudoProfilesClient to perform creation, deletion and modification
+        // of Sudos.
+        val blobURI = Uri.fromFile(cacheDir)
+
+        sudoProfilesClient = SudoProfilesClient
+            .builder(this, sudoUserClient, blobURI)
+            .setLogger(logger)
+            .build()
+
+        // Create an instance of the SudoEntitlementsClient to redeem and check what resources the
+        // user is entitled to use.
+        sudoEntitlementsClient = SudoEntitlementsClient.builder()
+            .setContext(this)
+            .setSudoUserClient(sudoUserClient)
+            .setLogger(logger)
+            .build()
 
         // Create an instance of KeyManagement to handle key management of peer connections.
         keyManagement = KeyManagement(context = this)

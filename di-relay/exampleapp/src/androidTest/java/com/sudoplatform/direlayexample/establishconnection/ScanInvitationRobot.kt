@@ -33,7 +33,7 @@ class ScanInvitationRobot : BaseRobot() {
     }
 
     fun setInputInvitationField(invitationString: String) {
-        fillText(inputInvitation, invitationString)
+        replaceText(inputInvitation, invitationString)
     }
 
     fun clickConnectButton() {

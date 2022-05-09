@@ -43,7 +43,6 @@ class ConnectionRobot : BaseRobot() {
 
     fun checkMessageItemDisplayed() {
         waitForViewToDisplay(messageItem, 10_000L)
-        println("displayed message!")
     }
 
     fun createPostboxAndConnectFlow() {
@@ -83,7 +82,7 @@ class ConnectionRobot : BaseRobot() {
     }
 
     fun sendMessage(message: String) {
-        fillText(messageInput, message)
+        replaceText(messageInput, message)
         clickOnView(sendMessageButton)
     }
 }

@@ -27,7 +27,9 @@ import com.google.android.gms.safetynet.SafetyNet
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
 import com.sudoplatform.direlayexample.databinding.FragmentRegisterBinding
+import com.sudoplatform.direlayexample.postboxes.PostboxesFragment
 import com.sudoplatform.direlayexample.util.ObjectDelegate
+import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
@@ -177,9 +179,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                     setUsedFssoFlag(true)
                     launch {
                         resetIntentData()
-                        navController.navigate(
-                            RegisterFragmentDirections.actionRegisterFragmentToPostboxesFragment()
-                        )
+                        navigateToSudos()
                     }
                 }
                 is FederatedSignInResult.Failure -> {
@@ -210,43 +210,41 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
     override fun onResume() {
         super.onResume()
-        hideLoading()
-        setItemsEnabled(true)
+        launch {
+            showLoading()
+            setItemsEnabled(false)
 
-        // Show the sign-out button if FSSO is a supported registration type
-        val prefs =
-            requireContext().getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
-        val usedFSSO = prefs.getBoolean(App.FSSO_USED_PREFERENCE, false)
-        if (usedFSSO) {
-            binding.buttonSignOut.text = getString(R.string.sign_out)
-            binding.buttonSignOut.setOnClickListener {
-                launch {
+            // Show the sign-out button if FSSO is a supported registration type
+            val prefs =
+                requireContext().getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
+            val usedFSSO = prefs.getBoolean(App.FSSO_USED_PREFERENCE, false)
+            if (usedFSSO) {
+                binding.buttonSignOut.text = getString(R.string.sign_out)
+                binding.buttonSignOut.setOnClickListener {
                     app.doFSSOSignout()
                 }
+            } else {
+                setSignOutButtonToReset()
             }
-        } else {
-            setSignOutButtonToReset()
-        }
 
-        val federatedSignInUri = this.requireActivity().intent.data
-        when (federatedSignInUri?.path) {
-            "/signin" -> {
-                handleFSSOSignInRedirect(federatedSignInUri)
-            }
-            "/signout" -> {
-                handleFSSOSignOutRedirect()
-            }
-            else -> {
-                if (app.sudoUserClient.isSignedIn()) {
-                    launch {
-                        navController.navigate(
-                            RegisterFragmentDirections.actionRegisterFragmentToPostboxesFragment()
-                        )
+            val federatedSignInUri = requireActivity().intent.data
+            when (federatedSignInUri?.path) {
+                "/signin" -> {
+                    handleFSSOSignInRedirect(federatedSignInUri)
+                }
+                "/signout" -> {
+                    handleFSSOSignOutRedirect()
+                }
+                else -> {
+                    if (app.sudoUserClient.isSignedIn()) {
+                        navigateToSudos()
+                    } else if (app.sudoUserClient.isRegistered()) {
+                        registerAndSignIn()
                     }
-                } else if (app.sudoUserClient.isRegistered()) {
-                    registerAndSignIn()
                 }
             }
+            hideLoading()
+            setItemsEnabled(true)
         }
     }
 
@@ -281,6 +279,18 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         }
     }
 
+    /** Redeem entitlements from the [SudoEntitlementsClient]. */
+    private suspend fun redeemEntitlements() {
+        try {
+            withContext(Dispatchers.IO) {
+                app.sudoEntitlementsClient.redeemEntitlements()
+            }
+        } catch (e: SudoEntitlementsClient.EntitlementsException) {
+            app.logger.outputError(Error(e))
+            showRegistrationFailure(e)
+        }
+    }
+
     /** Perform registration and sign in from the [SudoUserClient]. */
     private fun registerAndSignIn() {
         setItemsEnabled(false)
@@ -289,14 +299,13 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
         if (selectedRegistrationMethod == RegistrationMethod.FSSO) {
             showProgressUpdateToast("Authenticating with FSSO")
-            app.sudoUserClient.presentFederatedSignInUI { result ->
+            val activity = this.activity ?: return
+            app.sudoUserClient.presentFederatedSignInUI(activity) { result ->
                 when (result) {
                     is SignInResult.Success -> {
                         setUsedFssoFlag(true)
                         launch {
-                            navController.navigate(
-                                RegisterFragmentDirections.actionRegisterFragmentToPostboxesFragment()
-                            )
+                            navigateToSudos()
                         }
                     }
                     is SignInResult.Failure -> {
@@ -324,7 +333,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                                     UUID.randomUUID().toString()
                                 )
                             } else {
-                                // DO SOMETHING
                                 errorLogger.error("safetyNet attestation result was null.")
                                 throw Exception("safetyNet attestation result was null.")
                             }
@@ -365,9 +373,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         setUsedFssoFlag(false)
         if (app.sudoUserClient.isSignedIn()) {
             launch {
-                navController.navigate(
-                    RegisterFragmentDirections.actionRegisterFragmentToPostboxesFragment()
-                )
+                navigateToSudos()
             }
             return
         }
@@ -376,12 +382,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 withContext(Dispatchers.IO) {
                     app.sudoUserClient.signInWithKey()
                 }
-                setUsedFssoFlag(false)
-                launch {
-                    navController.navigate(
-                        RegisterFragmentDirections.actionRegisterFragmentToPostboxesFragment()
-                    )
-                }
+                navigateToSudos()
             } catch (e: AuthenticationException) {
                 hideLoading()
                 setItemsEnabled(true)
@@ -458,6 +459,14 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             msg,
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    /** Navigate to sudos screen and redeem entitlements */
+    private suspend fun navigateToSudos() {
+        redeemEntitlements()
+        navController.navigate(
+            RegisterFragmentDirections.actionRegisterFragmentToSudosFragment()
+        )
     }
 
     /**

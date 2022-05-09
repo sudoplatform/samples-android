@@ -5,6 +5,9 @@
 
     <!-- Common -->
     <string name="generic_failed_title">Failed</string>
+    <string name="try_again">Try Again</string>
+    <string name="learn_more">Learn More</string>
+    <string name="sudos">Sudos</string>
 
     <!-- Register Fragment -->
     <string name="decentralized_identity_relay">Decentralized Identity Relay</string>
@@ -19,6 +22,31 @@
     <string name="safety_net_reg">SafetyNet Registration</string>
     <string name="reset">Reset</string>
 
+    <!-- MainMenuFragment -->
+    <string name="relay_doc_url" translatable="false">https://docs.sudoplatform.com/guides/decentralized-identity/relay-sdk</string>
+
+    <!-- SudosFragment -->
+    <string name="loading_sudos">Loading Sudos</string>
+    <string name="deleting_sudos">Deleting Sudos&#8230;</string>
+    <string name="activity_sudos">Sudos</string>
+    <string name="list_sudos_failure">Failed to list Sudos</string>
+    <string name="delete_sudo_failure">Failed to delete Sudo</string>
+    <string name="what_is_a_sudo">What is a Sudo?</string>
+    <string name="sudo_explanation">Relay Postboxes must belong to a Sudo. A Sudo is a digital identity created and owned by a real person</string>
+    <string name="sudo_doc_url" translatable="false">https://docs.sudoplatform.com/concepts/sudo-digital-identities</string>
+
+    <!-- CreateSudoFragment -->
+    <string name="create_sudo_button">+ Create Sudo</string>
+    <string name="create_sudo">Create Sudo</string>
+    <string name="enter_sudo_name">Enter a name for your Sudo</string>
+    <string name="success">Success</string>
+    <string name="something_wrong">Something went wrong</string>
+    <string name="enter_sudo_label">Enter Sudo Label</string>
+    <string name="choose_label_detail">Choose any label you would like for your Sudo: Shopping, Dating, etc.</string>
+    <string name="creating_sudo">Creating Sudo&#8230;</string>
+    <string name="create_sudo_learn_more">Relay Postboxes must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
+    <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
+
     <!-- Postboxes Fragment -->
     <string name="postbox_title">Postboxes</string>
     <string name="creating_postbox">Creating Postbox</string>
@@ -32,6 +60,9 @@
     <string name="deregistering">Deregistering&#8230;</string>
     <string name="deregister_confirmation">Are you sure you want to deregister? All Postboxes and associated data will be deleted.</string>
     <string name="deregister_failure">Unable to deregister: %1$s</string>
+    <string name="ownership_proof_error">Ownership proof cannot be found</string>
+    <string name="fetch_postboxes_failure">Failed to fetch Sudo Postboxes</string>
+    <string name="loading_postboxes">Loading Postboxes</string>
 
     <!-- Connection Start Fragment -->
     <string name="peer_connect_toolbar_title">Begin Peer Connection</string>
@@ -59,7 +90,6 @@
     <string name="loading_messages">Loading Messages</string>
     <string name="postbox_messages_title">Relay Messages</string>
     <string name="list_relay_message_failed">Failed to get relay messages</string>
-    <string name="try_again">Try Again</string>
     <string name="subscription_failed">Failed to subscribe to relay events</string>
     <string name="enter_new_message">Enter message…</string>
     <string name="invalid_peer_connection_id_title">Invalid Input.</string>
@@ -81,5 +111,7 @@
     <string name="placeholder">-</string>
     <string name="details">Details</string>
     <string name="date_placeholder">Date</string>
+    <string name="create">Create</string>
+    <string name="delete">Delete</string>
 
 </resources>

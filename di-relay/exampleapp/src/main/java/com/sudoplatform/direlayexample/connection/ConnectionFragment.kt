@@ -23,7 +23,11 @@ import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
 import com.sudoplatform.direlayexample.connection.ConnectionTransformer.toListDisplayItems
 import com.sudoplatform.direlayexample.connection.ConnectionViewHolder.Companion.TEMPORARY_SENDING_MESSAGE_PREFIX
+import com.sudoplatform.direlayexample.connection.connectiondetails.ConnectionDetailsFragment
 import com.sudoplatform.direlayexample.databinding.FragmentConnectionBinding
+import com.sudoplatform.direlayexample.establishconnection.invite.InviteFragment
+import com.sudoplatform.direlayexample.establishconnection.scaninivitation.ScanInvitationFragment
+import com.sudoplatform.direlayexample.postboxes.PostboxesFragment
 import com.sudoplatform.direlayexample.showAlertDialog
 import com.sudoplatform.direlayexample.util.ObjectDelegate
 import com.sudoplatform.sudodirelay.SudoDIRelayClient
@@ -184,7 +188,7 @@ class ConnectionFragment : Fragment(), CoroutineScope {
             showLoading()
             try {
                 val relayMessages = withContext(Dispatchers.IO) {
-                    app.diRelayClient.getMessages(connectionId)
+                    app.diRelayClient.listMessages(connectionId)
                 }
                 relayMessageList.clear()
                 relayMessageList.addAll(attemptDecryptRelayMessages(relayMessages))

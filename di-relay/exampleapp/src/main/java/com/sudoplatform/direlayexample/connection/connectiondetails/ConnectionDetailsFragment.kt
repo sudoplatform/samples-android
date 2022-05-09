@@ -16,6 +16,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
+import com.sudoplatform.direlayexample.connection.ConnectionFragment
 import com.sudoplatform.direlayexample.databinding.FragmentConnectionDetailsBinding
 import com.sudoplatform.direlayexample.showAlertDialog
 import com.sudoplatform.direlayexample.util.ObjectDelegate

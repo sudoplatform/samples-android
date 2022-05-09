@@ -21,6 +21,8 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.direlayexample.BaseRobot
 import com.sudoplatform.direlayexample.R
 import com.sudoplatform.direlayexample.register.login
+import com.sudoplatform.virtualcardsexample.sudos.createSudo
+import com.sudoplatform.virtualcardsexample.sudos.sudos
 import org.hamcrest.Matcher
 
 fun postboxes(func: PostboxesRobot.() -> Unit) = PostboxesRobot().apply { func() }
@@ -42,12 +44,11 @@ class PostboxesRobot : BaseRobot() {
     private val postboxList = withId(R.id.postboxRecyclerView)
 
     fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
+        waitForViewToDisplay(loadingDialog, 5_000L, mayMissDisplay = true)
         waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
     fun checkPostboxesItemsDisplayed() {
-        waitForViewToDisplay(postboxList)
         waitForViewToDisplay(createPostboxButton)
         waitForViewToDisplay(toolbar)
         waitForViewToDisplay(toolbarDeregisterButton)
@@ -55,6 +56,7 @@ class PostboxesRobot : BaseRobot() {
 
     fun pressBackUntilPostboxesDisplayed() {
         pressBackUntilViewIsDisplayed(createPostboxButton)
+        waitForLoading()
     }
 
     fun navigateFromLaunchToPostboxes() {
@@ -65,12 +67,26 @@ class PostboxesRobot : BaseRobot() {
                 // Login screen was skipped because already logged in
             }
         }
+        sudos {
+            checkSudosItemsDisplayed()
+            waitForLoading()
+            navigateToCreateSudoScreen()
+        }
+        createSudo {
+            checkCreateSudoItemsDisplayed()
+            setSudoName("Shopping")
+            clickOnCreateButton()
+            waitForLoading()
+            clickPositiveAlertDialogButton()
+        }
         checkPostboxesItemsDisplayed()
+        waitForLoading()
     }
 
     fun createPostboxFlow() {
         navigateFromLaunchToPostboxes()
         createPostbox()
+        waitForViewToDisplay(postboxList, 30_000L)
     }
 
     fun createPostbox() {

@@ -17,6 +17,9 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
 import com.sudoplatform.direlayexample.databinding.FragmentConnectionOptionsBinding
+import com.sudoplatform.direlayexample.establishconnection.invite.InviteFragment
+import com.sudoplatform.direlayexample.establishconnection.scaninivitation.ScanInvitationFragment
+import com.sudoplatform.direlayexample.postboxes.PostboxesFragment
 import com.sudoplatform.direlayexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

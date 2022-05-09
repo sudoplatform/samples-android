@@ -19,16 +19,22 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
+import com.sudoplatform.direlayexample.connection.ConnectionFragment
 import com.sudoplatform.direlayexample.databinding.FragmentPostboxesBinding
+import com.sudoplatform.direlayexample.establishconnection.options.ConnectionOptionsFragment
+import com.sudoplatform.direlayexample.register.RegisterFragment
 import com.sudoplatform.direlayexample.showAlertDialog
 import com.sudoplatform.direlayexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.direlayexample.util.ObjectDelegate
 import com.sudoplatform.sudodirelay.SudoDIRelayClient
+import com.sudoplatform.sudoprofiles.Sudo
+import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.RegisterException
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +63,10 @@ import kotlin.coroutines.CoroutineContext
  */
 class PostboxesFragment : Fragment(), CoroutineScope {
 
+    companion object {
+        const val POSTBOX_CREATE_AUDIENCE = "sudoplatform.relay.postbox"
+    }
+
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -81,6 +91,15 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     /** A mutable list of Postboxes. */
     private var postboxList = mutableListOf<String>()
 
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: PostboxesFragmentArgs by navArgs()
+
+    /** A [Sudo] used to retrieve the ownership proof. */
+    private lateinit var sudo: Sudo
+
+    /** The ownership proof used to tie a [Sudo] to a Postbox. */
+    private lateinit var ownershipProof: String
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -88,6 +107,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     ): View {
         bindingDelegate.attach(FragmentPostboxesBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
+        sudo = args.sudo
         return binding.root
     }
 
@@ -100,13 +120,42 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         binding.createPostboxButton.setOnClickListener {
             createPostbox()
         }
+    }
 
-        updatePostboxesFromStorage()
+    override fun onResume() {
+        super.onResume()
+        launch {
+            setItemsEnabled(false)
+            showLoading(R.string.loading_postboxes)
+
+            updatePostboxesForSudo()
+            getOwnershipProof()
+
+            setItemsEnabled(true)
+            hideLoading()
+        }
+    }
+
+    /**
+     * Retrieve the ownership proof used to bind the [Sudo] and Postbox together.
+     */
+    private suspend fun getOwnershipProof() {
+        try {
+            ownershipProof = withContext(Dispatchers.IO) {
+                app.sudoProfilesClient.getOwnershipProof(sudo, POSTBOX_CREATE_AUDIENCE)
+            }
+        } catch (e: SudoProfileException) {
+            showAlertDialog(
+                titleResId = R.string.ownership_proof_error,
+                message = e.localizedMessage ?: "$e",
+                negativeButtonResId = android.R.string.cancel
+            )
+        }
     }
 
     /**
      * Configures the [RecyclerView] used to display the listed Postbox items and listens to
-     * item select events to navigate to the [PostboxMessagesFragment] for the selected postbox
+     * item select events to navigate to the [ConnectionFragment] for the selected postbox
      * or navigate to [ConnectionOptionsFragment]
      */
     private fun configureRecyclerView() {
@@ -184,7 +233,9 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         toolbar.inflateMenu(R.menu.general_nav_menu)
         val sharedPreferences = context?.getSharedPreferences("SignIn", Context.MODE_PRIVATE)
         val usedFSSO = sharedPreferences?.getBoolean("usedFSSO", false)
-        if (usedFSSO == true) { toolbar.menu.getItem(0)?.title = getString(R.string.sign_out) }
+        if (usedFSSO == true) {
+            toolbar.menu.getItem(0)?.title = getString(R.string.sign_out)
+        }
         with(toolbar) {
             title = getString(R.string.app_name)
             setOnMenuItemClickListener {
@@ -222,11 +273,14 @@ class PostboxesFragment : Fragment(), CoroutineScope {
             try {
                 val newConnectionID = UUID.randomUUID().toString()
                 app.logger.info("creating new postbox with ID: $newConnectionID")
-                app.diRelayClient.createPostbox(newConnectionID)
+                app.diRelayClient.createPostbox(newConnectionID, ownershipProof)
                 postboxList.add(newConnectionID)
                 adapter.notifyDataSetChanged()
 
-                app.connectionsStorage.storeConnectionId(newConnectionID, app.sudoUserClient.getUserName()!!)
+                app.connectionsStorage.storeConnectionId(
+                    newConnectionID,
+                    app.sudoUserClient.getUserName()!!
+                )
             } catch (e: SudoDIRelayClient.DIRelayException) {
                 showAlertDialog(
                     titleResId = R.string.postbox_creation_failed,
@@ -241,18 +295,22 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Gets all stored postboxes from internal storage and adds them to the recycler view list.
+     * Gets all stored postboxes on the service
      */
-    private fun updatePostboxesFromStorage() {
-        launch {
+    private suspend fun updatePostboxesForSudo() {
+        try {
             postboxList.addAll(
-                app.connectionsStorage.getAllConnectionIds(app.sudoUserClient.getUserName()!!)
-                    .filter {
-                        !postboxList.contains(it)
-                    }.map { it }
+                app.diRelayClient.listPostboxesForSudoId(sudo.id!!)
+                    .map { it.connectionId }
+                    .filter { !postboxList.contains(it) }
             )
-
             adapter.notifyDataSetChanged()
+        } catch (e: Exception) {
+            showAlertDialog(
+                titleResId = R.string.fetch_postboxes_failure,
+                message = e.localizedMessage ?: "$e",
+                negativeButtonResId = android.R.string.ok
+            )
         }
     }
 
@@ -291,7 +349,10 @@ class PostboxesFragment : Fragment(), CoroutineScope {
             withContext(Dispatchers.IO) {
                 val peerConnectionId =
                     app.connectionsStorage.getPeerConnectionIdForConnection(connectionId)
-                app.connectionsStorage.deleteConnection(connectionId, app.sudoUserClient.getUserName()!!)
+                app.connectionsStorage.deleteConnection(
+                    connectionId,
+                    app.sudoUserClient.getUserName()!!
+                )
 
                 peerConnectionId?.let {
                     app.keyManagement.removeKeysForConnection(it)

@@ -10,14 +10,17 @@
         android:name="com.sudoplatform.direlayexample.register.RegisterFragment"
         android:label="RegisterFragment" >
         <action
-            android:id="@+id/action_registerFragment_to_postboxesFragment"
-            app:destination="@id/postboxesFragment" />
+            android:id="@+id/action_registerFragment_to_sudosFragment"
+            app:destination="@id/sudosFragment" />
     </fragment>
     <fragment
         android:id="@+id/postboxesFragment"
         android:name="com.sudoplatform.direlayexample.postboxes.PostboxesFragment"
         android:label="fragment_postboxes"
         tools:layout="@layout/fragment_postboxes" >
+        <argument
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo" />
         <action
             android:id="@+id/action_postboxesFragment_to_connectionFragment"
             app:destination="@id/connectionFragment" />
@@ -88,5 +91,28 @@
         <argument
             android:name="connectionId"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/createSudoFragment"
+        android:name="com.sudoplatform.direlayexample.sudos.CreateSudoFragment"
+        android:label="fragment_create_sudo"
+        tools:layout="@layout/fragment_create_sudo" >
+        <action
+            android:id="@+id/action_createSudoFragment_to_postboxesFragment"
+            app:destination="@id/postboxesFragment"
+            app:popUpTo="@id/createSudoFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/sudosFragment"
+        android:name="com.sudoplatform.direlayexample.sudos.SudosFragment"
+        android:label="fragment_sudos"
+        tools:layout="@layout/fragment_sudos" >
+        <action
+            android:id="@+id/action_sudosFragment_to_postboxesFragment"
+            app:destination="@id/postboxesFragment" />
+        <action
+            android:id="@+id/action_sudosFragment_to_createSudoFragment"
+            app:destination="@id/createSudoFragment" />
     </fragment>
 </navigation>
