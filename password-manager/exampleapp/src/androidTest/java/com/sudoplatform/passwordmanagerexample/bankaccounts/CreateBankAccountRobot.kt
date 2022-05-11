@@ -8,11 +8,14 @@ package com.sudoplatform.passwordmanagerexample.bankaccounts
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.matcher.ViewMatchers.isChecked
+import androidx.test.espresso.matcher.ViewMatchers.isNotChecked
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
 
-fun createBankAccount(func: CreateBankAccountRobot.() -> Unit) = CreateBankAccountRobot().apply { func() }
+fun createBankAccount(func: CreateBankAccountRobot.() -> Unit) =
+    CreateBankAccountRobot().apply { func() }
 
 /**
  * Testing robot that manages the create Bank Account screen.
@@ -21,12 +24,15 @@ fun createBankAccount(func: CreateBankAccountRobot.() -> Unit) = CreateBankAccou
  */
 class CreateBankAccountRobot : BaseRobot() {
 
+    private val favoriteSwitch = withId(R.id.add_as_favorite_switch)
     private val accountNameField = withId(R.id.editText_accountName)
     private val bankNameField = withId(R.id.editText_bankName)
     private val accountNumberField = withId(R.id.editText_accountNumber)
     private val routingNumberField = withId(R.id.editText_routingNumber)
     private val accountTypeField = withId(R.id.editText_accountType)
     private val notesField = withId(R.id.editText_notes)
+    private val radioRed = withId(R.id.radio_red)
+    private val radioGray = withId(R.id.radio_gray)
     private val saveButton = withId(R.id.save)
     private val loadingDialog = withId(R.id.progressBar)
 
@@ -37,6 +43,7 @@ class CreateBankAccountRobot : BaseRobot() {
         waitForViewToDisplay(routingNumberField, timeout)
         waitForViewToDisplay(accountTypeField, timeout)
         waitForViewToDisplay(notesField, timeout)
+        waitForViewToDisplay(radioRed, timeout)
     }
 
     fun clickOnSave() {
@@ -46,6 +53,10 @@ class CreateBankAccountRobot : BaseRobot() {
 
     fun scrollToTop() {
         onView(saveButton).perform(ViewActions.scrollTo())
+    }
+
+    fun toggleFavorite() {
+        clickOnView(favoriteSwitch)
     }
 
     fun enterAccountName(text: String) {
@@ -70,6 +81,12 @@ class CreateBankAccountRobot : BaseRobot() {
 
     fun enterNotes(text: String) {
         replaceText(notesField, text)
+    }
+
+    fun selectRedColor() {
+        clickOnView(radioRed)
+        radioRed.matches(isChecked())
+        radioGray.matches(isNotChecked())
     }
 
     fun waitForLoading() {

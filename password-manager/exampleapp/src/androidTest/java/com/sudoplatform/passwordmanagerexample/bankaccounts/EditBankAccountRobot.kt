@@ -9,6 +9,7 @@ package com.sudoplatform.passwordmanagerexample.bankaccounts
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
@@ -25,6 +26,7 @@ private const val UPDATED_AT_LENGTH = 28
  */
 class EditBankAccountRobot : BaseRobot() {
 
+    private val favoriteSwitch = withId(R.id.switch_favorite)
     private val createdAtField = withId(R.id.label_createdAt)
     private val updatedAtField = withId(R.id.label_updatedAt)
     private val accountNameField = withId(R.id.editText_accountName)
@@ -33,18 +35,21 @@ class EditBankAccountRobot : BaseRobot() {
     private val routingNumberField = withId(R.id.editText_routingNumber)
     private val accountTypeField = withId(R.id.editText_accountType)
     private val notesField = withId(R.id.editText_notes)
+    private val radioRed = withId(R.id.radio_red)
+    private val radioGray = withId(R.id.radio_gray)
     private val saveButton = withId(R.id.save)
     private val loadingDialog = withId(R.id.progressBar)
 
     fun checkEditBankAccountItemsDisplayed(timeout: Long = 1000L) {
-        waitForViewToDisplay(createdAtField, timeout)
-        waitForViewToDisplay(updatedAtField, timeout)
         waitForViewToDisplay(accountNameField, timeout)
         waitForViewToDisplay(bankNameField, timeout)
         waitForViewToDisplay(accountNumberField, timeout)
         waitForViewToDisplay(routingNumberField, timeout)
         waitForViewToDisplay(accountTypeField, timeout)
+        scrollToView(updatedAtField)
         waitForViewToDisplay(notesField, timeout)
+        waitForViewToDisplay(createdAtField, timeout)
+        waitForViewToDisplay(updatedAtField, timeout)
     }
 
     fun checkDatesAreDisplayed() {
@@ -61,6 +66,10 @@ class EditBankAccountRobot : BaseRobot() {
 
     fun scrollToTop() {
         Espresso.onView(saveButton).perform(ViewActions.scrollTo())
+    }
+
+    fun toggleFavorite() {
+        clickOnView(favoriteSwitch)
     }
 
     fun enterAccountName(text: String) {
@@ -85,6 +94,16 @@ class EditBankAccountRobot : BaseRobot() {
 
     fun enterNotes(text: String) {
         replaceText(notesField, text)
+    }
+
+    fun selectRedColor() {
+        clickOnView(radioRed)
+        radioRed.matches(ViewMatchers.isChecked())
+        radioGray.matches(ViewMatchers.isNotChecked())
+    }
+
+    fun selectYellowColor() {
+        clickOnView(withId(R.id.radio_yellow))
     }
 
     fun waitForLoading() {

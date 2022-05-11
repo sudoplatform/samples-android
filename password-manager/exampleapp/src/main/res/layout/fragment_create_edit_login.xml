@@ -16,6 +16,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <include
+            android:id="@+id/switch_favorite"
+            layout="@layout/layout_favorite_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
         <TextView
             android:id="@+id/label_loginName"
             android:layout_width="wrap_content"
@@ -25,7 +35,7 @@
             android:text="@string/name"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/toolbar" />
+            app:layout_constraintTop_toBottomOf="@id/switch_favorite" />
 
         <EditText
             android:id="@+id/editText_loginName"
@@ -42,7 +52,7 @@
             app:layout_constraintTop_toBottomOf="@id/label_loginName" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/label_cardHolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -64,10 +74,10 @@
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView4" />
+            app:layout_constraintTop_toBottomOf="@+id/label_cardHolder" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/label_cardType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -89,10 +99,10 @@
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+            app:layout_constraintTop_toBottomOf="@+id/label_cardType" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/label_cardNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -114,10 +124,10 @@
             android:inputType="textVisiblePassword"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+            app:layout_constraintTop_toBottomOf="@+id/label_cardNumber" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/label_notes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -140,7 +150,17 @@
             android:minLines="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView7" />
+            app:layout_constraintTop_toBottomOf="@+id/label_notes" />
+
+        <include
+            android:id="@+id/color_row"
+            layout="@layout/layout_color_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/editText_notes" />
 
         <Button
             android:id="@+id/button_passwordGenerator"
@@ -160,7 +180,7 @@
             android:textColor="@android:color/black"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/editText_notes"
+            app:layout_constraintTop_toBottomOf="@id/color_row"
             tools:text="Created: 2020-11-09 01:25:25" />
 
         <TextView

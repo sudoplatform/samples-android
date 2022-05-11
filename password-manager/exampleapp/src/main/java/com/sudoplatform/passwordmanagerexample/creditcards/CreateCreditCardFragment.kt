@@ -12,6 +12,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -42,6 +43,15 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
+
+val colorArray: Array<String> = arrayOf(
+    "EE2003",
+    "E3612C",
+    "D3C524",
+    "70CD38",
+    "115DA5",
+    "6D727B"
+)
 
 /**
  * This [CreateCreditCardFragment] presents a screen that accepts the values of a set of credit card credentials.
@@ -75,9 +85,15 @@ class CreateCreditCardFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        bindingDelegate.attach(FragmentCreateEditCreditCardBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(
+            FragmentCreateEditCreditCardBinding.inflate(
+                inflater,
+                container,
+                false
+            )
+        )
         with(binding.toolbar.root) {
             title = getString(R.string.create_credit_card)
             inflateMenu(R.menu.nav_menu_with_save_button)
@@ -150,7 +166,13 @@ class CreateCreditCardFragment : Fragment(), CoroutineScope {
         val securityCode = binding.editTextSecurityCode.toSecureField()?.let { VaultItemValue(it) }
         val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
         val expiryString = binding.editTextExpiry.text.toString().trim()
-
+        val hexColor = colorArray[
+            Integer.parseInt(
+                view
+                    ?.findViewById<RadioButton>(binding.colorRow.radioGroupColors.checkedRadioButtonId)
+                    ?.tag as String
+            )
+        ]
         // default to null if date parsing fails
         var expiryDate: Date? = null
         try {
@@ -161,13 +183,15 @@ class CreateCreditCardFragment : Fragment(), CoroutineScope {
         }
         return VaultCreditCard(
             id = UUID.randomUUID().toString(),
+            favorite = binding.switchFavorite.addAsFavoriteSwitch.isChecked,
             name = binding.editTextCardName.text.toString().trim(),
             cardName = binding.editTextCardHolder.text.toString().trim(),
             cardType = binding.editTextCardType.text.toString().trim(),
             cardNumber = cardNumber,
             expiresAt = expiryDate,
             securityCode = securityCode,
-            notes = notes
+            notes = notes,
+            hexColor = hexColor,
         )
     }
 
@@ -188,7 +212,11 @@ class CreateCreditCardFragment : Fragment(), CoroutineScope {
                 val stringBuilder = StringBuilder("")
                 // keep string length to MM/YY format
                 stringBuilder.append(
-                    if (s!!.length > 5) { s.subSequence(0, 5) } else { s }
+                    if (s!!.length > 5) {
+                        s.subSequence(0, 5)
+                    } else {
+                        s
+                    }
                 )
 
                 if (stringBuilder.lastIndex == 2) {
@@ -211,6 +239,7 @@ class CreateCreditCardFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
+        binding.switchFavorite.addAsFavoriteSwitch.isEnabled = isEnabled
         binding.editTextCardName.isEnabled = isEnabled
         binding.editTextCardHolder.isEnabled = isEnabled
         binding.editTextCardType.isEnabled = isEnabled
@@ -218,6 +247,7 @@ class CreateCreditCardFragment : Fragment(), CoroutineScope {
         binding.editTextExpiry.isEnabled = isEnabled
         binding.editTextSecurityCode.isEnabled = isEnabled
         binding.editTextNotes.isEnabled = isEnabled
+        binding.colorRow.radioGroupColors.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

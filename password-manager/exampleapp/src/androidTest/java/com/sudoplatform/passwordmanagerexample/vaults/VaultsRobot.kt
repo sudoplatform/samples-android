@@ -37,7 +37,7 @@ class VaultsRobot : BaseRobot() {
     private val positiveAlertButton = withId(android.R.id.button1)
     private val nameText = withId(R.id.name)
 
-    fun waitForLoading(mayMissView: Boolean = false) {
+    fun waitForLoading(mayMissView: Boolean = true) {
         waitForViewToDisplay(loadingDialog, 2_500L, mayMissView)
         waitForViewToNotDisplay(loadingDialog, 10_000L)
     }
@@ -90,7 +90,7 @@ class VaultsRobot : BaseRobot() {
     }
 
     private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 5_000L)
+        waitForViewToDisplay(positiveAlertButton)
         onView(positiveAlertButton).check(matches(withText(android.R.string.ok)))
     }
 

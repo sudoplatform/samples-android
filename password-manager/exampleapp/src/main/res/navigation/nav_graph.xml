@@ -235,6 +235,126 @@
                 app:nullable="false"
                 app:argType="com.sudoplatform.sudopasswordmanager.models.VaultBankAccount" />
         </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createContactFragment"
+            app:destination="@id/createContactFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editContactFragment"
+            app:destination="@id/editContactFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultContact"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultContact" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createDriversLicenseFragment"
+            app:destination="@id/createDriversLicenseFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editDriversLicenseFragment"
+            app:destination="@id/editDriversLicenseFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultDriversLicense"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultDriversLicense" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createDocumentFragment"
+            app:destination="@id/createDocumentFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editDocumentFragment"
+            app:destination="@id/editDocumentFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultDocument"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultDocument" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createMembershipFragment"
+            app:destination="@id/createMembershipFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editMembershipFragment"
+            app:destination="@id/editMembershipFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultMembership"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultMembership" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createPassportFragment"
+            app:destination="@id/createPassportFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editPassportFragment"
+            app:destination="@id/editPassportFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultPassport"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultPassport" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_createSocialSecurityNumberFragment"
+            app:destination="@id/createSocialSecurityNumberFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        </action>
+        <action
+            android:id="@+id/action_vaultItemsFragment_to_editSocialSecurityNumberFragment"
+            app:destination="@id/editSocialSecurityNumberFragment">
+            <argument
+                android:name="vault"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+            <argument
+                android:name="vaultSocialSecurityNumber"
+                app:nullable="false"
+                app:argType="com.sudoplatform.sudopasswordmanager.models.VaultSocialSecurityNumber" />
+        </action>
     </fragment>
     <dialog
         android:id="@+id/passwordGeneratorDialog"
@@ -288,5 +408,149 @@
             android:name="vaultBankAccount"
             app:argType="com.sudoplatform.sudopasswordmanager.models.VaultBankAccount"
             app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/createContactFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.contacts.CreateContactFragment"
+        android:label="fragment_create_edit_contact"
+        tools:layout="@layout/fragment_create_edit_contact">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editContactFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.contacts.EditContactFragment"
+        android:label="fragment_edit_contact"
+        tools:layout="@layout/fragment_create_edit_contact">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultContact"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultContact" />
+    </fragment>
+    <fragment
+        android:id="@+id/createDriversLicenseFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.driverslicenses.CreateDriversLicenseFragment"
+        android:label="fragment_create_edit_drivers_license"
+        tools:layout="@layout/fragment_create_edit_drivers_license">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editDriversLicenseFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.driverslicenses.EditDriversLicenseFragment"
+        android:label="fragment_edit_drivers_license"
+        tools:layout="@layout/fragment_create_edit_drivers_license">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultDriversLicense"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultDriversLicense" />
+    </fragment>
+    <fragment
+        android:id="@+id/createDocumentFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.documents.CreateDocumentFragment"
+        android:label="fragment_create_edit_document"
+        tools:layout="@layout/fragment_create_edit_document">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editDocumentFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.documents.EditDocumentFragment"
+        android:label="fragment_edit_document"
+        tools:layout="@layout/fragment_create_edit_document">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultDocument"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultDocument" />
+    </fragment>
+    <fragment
+        android:id="@+id/createMembershipFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.memberships.CreateMembershipFragment"
+        android:label="fragment_create_edit_membership"
+        tools:layout="@layout/fragment_create_edit_membership">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editMembershipFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.memberships.EditMembershipFragment"
+        android:label="fragment_edit_membership"
+        tools:layout="@layout/fragment_create_edit_membership">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultMembership"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultMembership" />
+    </fragment>
+    <fragment
+        android:id="@+id/createPassportFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.passports.CreatePassportFragment"
+        android:label="fragment_create_edit_passport"
+        tools:layout="@layout/fragment_create_edit_passport">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editPassportFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.passports.EditPassportFragment"
+        android:label="fragment_edit_passport"
+        tools:layout="@layout/fragment_create_edit_passport">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultPassport"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultPassport" />
+    </fragment>
+    <fragment
+        android:id="@+id/createSocialSecurityNumberFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.socialsecuritynumbers.CreateSocialSecurityNumberFragment"
+        android:label="fragment_create_edit_social_security_number"
+        tools:layout="@layout/fragment_create_edit_social_security_number">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+    </fragment>
+    <fragment
+        android:id="@+id/editSocialSecurityNumberFragment"
+        android:name="com.sudoplatform.passwordmanagerexample.socialsecuritynumbers.EditSocialSecurityNumberFragment"
+        android:label="fragment_edit_social_security_number"
+        tools:layout="@layout/fragment_create_edit_social_security_number">
+        <argument
+            android:name="vault"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.Vault" />
+        <argument
+            android:name="vaultSocialSecurityNumber"
+            app:nullable="false"
+            app:argType="com.sudoplatform.sudopasswordmanager.models.VaultSocialSecurityNumber" />
     </fragment>
 </navigation>

@@ -23,6 +23,7 @@ import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.DrawerActions
 import androidx.test.espresso.contrib.NavigationViewActions.navigateTo
+import androidx.test.espresso.contrib.PickerActions
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
 import androidx.test.espresso.contrib.RecyclerViewActions.scrollTo
 import androidx.test.espresso.matcher.BoundedMatcher
@@ -46,6 +47,12 @@ open class BaseRobot {
             .perform(click())
             .perform(replaceText(text))
             .perform(pressImeActionButton())
+    }
+
+    // Assumes that the view is visible on screen.
+    fun setDate(matcher: Matcher<View>, year: Int, month: Int, day: Int) {
+        onView(matcher)
+            .perform(PickerActions.setDate(year, month, day))
     }
 
     // Assumes that the view is visible on screen.

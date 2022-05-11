@@ -37,7 +37,7 @@ class SudosRobot : BaseRobot() {
     private val loadingDialog = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
 
-    fun waitForLoading(mayMissView: Boolean = false) {
+    fun waitForLoading(mayMissView: Boolean = true) {
         waitForViewToDisplay(loadingDialog, 2_500L, mayMissView)
         waitForViewToNotDisplay(loadingDialog, 10_000L)
     }

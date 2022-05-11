@@ -14,7 +14,9 @@ package="com.sudoplatform.passwordmanagerexample">
     tools:replace="android:allowBackup">
     <activity
         android:name="com.sudoplatform.passwordmanagerexample.MainActivity"
-        android:theme="@style/AppThemeNoActionBar">
+        android:theme="@style/AppThemeNoActionBar"
+        android:windowSoftInputMode="adjustResize"
+        android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />

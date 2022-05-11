@@ -8,6 +8,7 @@ package com.sudoplatform.passwordmanagerexample.creditcards
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
@@ -21,6 +22,7 @@ fun createCreditCard(func: CreateCreditCardRobot.() -> Unit) = CreateCreditCardR
  */
 class CreateCreditCardRobot : BaseRobot() {
 
+    private val favoriteSwitch = withId(R.id.add_as_favorite_switch)
     private val cardNameField = withId(R.id.editText_cardName)
     private val cardHolderField = withId(R.id.editText_cardHolder)
     private val cardTypeField = withId(R.id.editText_cardType)
@@ -28,6 +30,8 @@ class CreateCreditCardRobot : BaseRobot() {
     private val expiryField = withId(R.id.editText_expiry)
     private val securityCodeField = withId(R.id.editText_securityCode)
     private val notesField = withId(R.id.editText_notes)
+    private val radioRed = withId(R.id.radio_red)
+    private val radioGray = withId(R.id.radio_gray)
     private val saveButton = withId(R.id.save)
     private val loadingDialog = withId(R.id.progressBar)
 
@@ -44,6 +48,10 @@ class CreateCreditCardRobot : BaseRobot() {
     fun clickOnSave() {
         Thread.sleep(1000)
         clickOnView(saveButton)
+    }
+
+    fun toggleFavorite() {
+        clickOnView(favoriteSwitch)
     }
 
     fun scrollToTop() {
@@ -76,6 +84,13 @@ class CreateCreditCardRobot : BaseRobot() {
 
     fun enterNotes(text: String) {
         replaceText(notesField, text)
+    }
+
+    fun selectRedColor() {
+        scrollToView(radioRed)
+        clickOnView(radioRed)
+        radioRed.matches(ViewMatchers.isChecked())
+        radioGray.matches(ViewMatchers.isNotChecked())
     }
 
     fun waitForLoading() {

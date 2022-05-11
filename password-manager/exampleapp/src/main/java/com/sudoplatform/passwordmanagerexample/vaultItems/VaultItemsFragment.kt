@@ -29,9 +29,15 @@ import com.sudoplatform.passwordmanagerexample.util.ObjectDelegate
 import com.sudoplatform.passwordmanagerexample.vaults.VaultsFragment
 import com.sudoplatform.sudopasswordmanager.models.Vault
 import com.sudoplatform.sudopasswordmanager.models.VaultBankAccount
+import com.sudoplatform.sudopasswordmanager.models.VaultContact
 import com.sudoplatform.sudopasswordmanager.models.VaultCreditCard
+import com.sudoplatform.sudopasswordmanager.models.VaultDocument
+import com.sudoplatform.sudopasswordmanager.models.VaultDriversLicense
 import com.sudoplatform.sudopasswordmanager.models.VaultItem
 import com.sudoplatform.sudopasswordmanager.models.VaultLogin
+import com.sudoplatform.sudopasswordmanager.models.VaultMembership
+import com.sudoplatform.sudopasswordmanager.models.VaultPassport
+import com.sudoplatform.sudopasswordmanager.models.VaultSocialSecurityNumber
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -180,7 +186,17 @@ class VaultItemsFragment : Fragment(), CoroutineScope {
      * Create a new [VaultItem]
      */
     private fun createItem() {
-        val itemTypes = arrayOf(getString(R.string.login), getString(R.string.credit_card), getString(R.string.bank_account))
+        val itemTypes = arrayOf(
+            getString(R.string.login),
+            getString(R.string.credit_card),
+            getString(R.string.bank_account),
+            getString(R.string.contact),
+            getString(R.string.drivers_license),
+            getString(R.string.document),
+            getString(R.string.membership),
+            getString(R.string.passport),
+            getString(R.string.social_security_number),
+        )
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.create_vault_item)
             .setItems(itemTypes) { _, which ->
@@ -193,6 +209,24 @@ class VaultItemsFragment : Fragment(), CoroutineScope {
                     }
                     2 -> {
                         navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreateBankAccountFragment(vault))
+                    }
+                    3 -> {
+                        navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreateContactFragment(vault))
+                    }
+                    4 -> {
+                        navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreateDriversLicenseFragment(vault))
+                    }
+                    5 -> {
+                        navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreateDocumentFragment(vault))
+                    }
+                    6 -> {
+                        navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreateMembershipFragment(vault))
+                    }
+                    7 -> {
+                        navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreatePassportFragment(vault))
+                    }
+                    8 -> {
+                        navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToCreateSocialSecurityNumberFragment(vault))
                     }
                 }
             }
@@ -243,6 +277,24 @@ class VaultItemsFragment : Fragment(), CoroutineScope {
             }
             (item as? VaultBankAccount)?.let {
                 navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditBankAccountFragment(vault, it))
+            }
+            (item as? VaultContact)?.let {
+                navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditContactFragment(vault, it))
+            }
+            (item as? VaultDriversLicense)?.let {
+                navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditDriversLicenseFragment(vault, it))
+            }
+            (item as? VaultDocument)?.let {
+                navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditDocumentFragment(vault, it))
+            }
+            (item as? VaultMembership)?.let {
+                navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditMembershipFragment(vault, it))
+            }
+            (item as? VaultPassport)?.let {
+                navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditPassportFragment(vault, it))
+            }
+            (item as? VaultSocialSecurityNumber)?.let {
+                navController.navigate(VaultItemsFragmentDirections.actionVaultItemsFragmentToEditSocialSecurityNumberFragment(vault, it))
             }
         }
         binding.itemRecyclerView.adapter = adapter

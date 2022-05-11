@@ -6,7 +6,7 @@
         android:title="@string/deregister"
         app:showAsAction="always" />
     <item
-        android:id="@+id/save"
-        android:title="@string/save"
+        android:id="@+id/unlock"
+        android:title="@string/unlock"
         app:showAsAction="always" />
 </menu>

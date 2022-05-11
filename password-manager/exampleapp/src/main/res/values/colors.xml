@@ -7,4 +7,12 @@
     <color name="colorOrange">#FF9800</color>
     <color name="colorGreen">#00B100</color>
     <color name="colorOffWhite">#FAFAFA</color>
+
+<!--    radio button colors-->
+    <color name="radioRed">#EE2003</color>
+    <color name="radioOrange">#E3612C</color>
+    <color name="radioYellow">#D3C524</color>
+    <color name="radioGreen">#70CD38</color>
+    <color name="radioBlue">#115DA5</color>
+    <color name="radioGray">#6D727B</color>
 </resources>

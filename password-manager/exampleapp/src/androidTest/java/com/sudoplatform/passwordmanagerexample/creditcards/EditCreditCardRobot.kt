@@ -9,6 +9,9 @@ package com.sudoplatform.passwordmanagerexample.creditcards
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.isChecked
+import androidx.test.espresso.matcher.ViewMatchers.isNotChecked
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
@@ -25,6 +28,7 @@ private const val UPDATED_AT_LENGTH = 28
  */
 class EditCreditCardRobot : BaseRobot() {
 
+    private val favoriteSwitch = withId(R.id.add_as_favorite_switch)
     private val createdAtField = withId(R.id.label_createdAt)
     private val updatedAtField = withId(R.id.label_updatedAt)
     private val cardNameField = withId(R.id.editText_cardName)
@@ -36,17 +40,21 @@ class EditCreditCardRobot : BaseRobot() {
     private val notesField = withId(R.id.editText_notes)
     private val saveButton = withId(R.id.save)
     private val loadingDialog = withId(R.id.progressBar)
+    private val radioRed = withId(R.id.radio_red)
+    private val radioGray = withId(R.id.radio_gray)
+    private val radioYellow = withId(R.id.radio_yellow)
 
     fun checkEditCreditCardItemsDisplayed(timeout: Long = 1000L) {
-        waitForViewToDisplay(createdAtField, timeout)
-        waitForViewToDisplay(updatedAtField, timeout)
         waitForViewToDisplay(cardNameField, timeout)
         waitForViewToDisplay(cardHolderField, timeout)
         waitForViewToDisplay(cardTypeField, timeout)
         waitForViewToDisplay(cardNumberField, timeout)
         waitForViewToDisplay(expiryField, timeout)
         waitForViewToDisplay(securityCodeField, timeout)
+        scrollToView(updatedAtField)
         waitForViewToDisplay(notesField, timeout)
+        waitForViewToDisplay(createdAtField, timeout)
+        waitForViewToDisplay(updatedAtField, timeout)
     }
 
     fun checkDatesAreDisplayed() {
@@ -63,6 +71,10 @@ class EditCreditCardRobot : BaseRobot() {
 
     fun scrollToTop() {
         Espresso.onView(saveButton).perform(ViewActions.scrollTo())
+    }
+
+    fun toggleFavorite() {
+        clickOnView(favoriteSwitch)
     }
 
     fun enterCardName(text: String) {
@@ -91,6 +103,19 @@ class EditCreditCardRobot : BaseRobot() {
 
     fun enterNotes(text: String) {
         replaceText(notesField, text)
+    }
+
+    fun selectRedColor() {
+        clickOnView(radioRed)
+        radioRed.matches(ViewMatchers.isChecked())
+        radioGray.matches(ViewMatchers.isNotChecked())
+    }
+
+    fun selectYellowColor() {
+        scrollToView(radioYellow)
+        clickOnView(radioYellow)
+        radioYellow.matches(isChecked())
+        radioRed.matches(isNotChecked())
     }
 
     fun waitForLoading() {

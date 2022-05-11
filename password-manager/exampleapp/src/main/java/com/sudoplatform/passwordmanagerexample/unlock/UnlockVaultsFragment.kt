@@ -130,6 +130,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                 toolbar.menu?.getItem(0)?.isVisible = false
                 toolbar.menu?.getItem(1)?.title = getString(R.string.unlock)
             }
+            else -> {}
         }
 
         toolbar.setOnMenuItemClickListener {
@@ -149,7 +150,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                         )
                     }
                 }
-                R.id.save -> {
+                R.id.unlock -> {
                     when (latestRegistrationStatus) {
                         PasswordManagerRegistrationStatus.NOT_REGISTERED -> {
                             register(EditorInfo.IME_ACTION_DONE)
@@ -160,6 +161,7 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
                         PasswordManagerRegistrationStatus.MISSING_SECRET_CODE -> {
                             unlockWithSecretCode(EditorInfo.IME_ACTION_DONE)
                         }
+                        else -> {}
                     }
                 }
             }
@@ -404,14 +406,15 @@ class UnlockVaultsFragment : Fragment(), CoroutineScope {
     }
 
     private fun downloadRescueKit() {
+        val context = requireContext()
         launch {
             try {
-                val rescueKitFile = renderRescueKitToFile(requireContext(), app.sudoPasswordManager)
-                shareRescueKit(requireContext(), rescueKitFile)
+                val rescueKitFile = renderRescueKitToFile(context, app.sudoPasswordManager)
+                shareRescueKit(context, rescueKitFile)
             } catch (e: Exception) {
                 app.logger.outputError(Error(e))
                 Toast.makeText(
-                    requireContext(),
+                    context,
                     getString(R.string.save_pdf_failure, e.localizedMessage),
                     Toast.LENGTH_LONG
                 ).show()

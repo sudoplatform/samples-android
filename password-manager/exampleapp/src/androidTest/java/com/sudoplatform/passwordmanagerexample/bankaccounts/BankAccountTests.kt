@@ -58,14 +58,18 @@ class BankAccountTests {
             checkVaultItemsDisplayed()
             clickOnCreateBankAccountButton()
         }
+
         createBankAccount {
             checkCreateBankAccountItemsDisplayed()
+            toggleFavorite()
             enterAccountName("My First Bank Account")
             enterBankName("My Bank")
             enterAccountNumber("12345")
             enterRoutingNumber("54321")
             enterAccountType("Checking")
+            enterNotes("Foo bar baz")
             closeSoftKeyboard()
+            selectRedColor()
             scrollToTop()
             clickOnSave()
             waitForLoading()
@@ -84,14 +88,17 @@ class BankAccountTests {
             waitForLoading(true)
             clickOnCreateBankAccountButton()
         }
+
         createBankAccount {
             checkCreateBankAccountItemsDisplayed()
+            toggleFavorite()
             enterAccountName("My First Bank Account")
             enterBankName("My Bank")
             enterAccountNumber("12345")
             enterRoutingNumber("54321")
             enterAccountType("Checking")
             closeSoftKeyboard()
+            selectRedColor()
             scrollToTop()
             clickOnSave()
             waitForLoading()
@@ -103,18 +110,22 @@ class BankAccountTests {
             waitForRecyclerView()
             clickOn(0)
         }
+
         editBankAccount {
             checkEditBankAccountItemsDisplayed()
+            toggleFavorite()
             enterAccountName("My Second Bank Account")
             enterBankName("My 2nd Bank")
             enterAccountNumber("54321")
             enterRoutingNumber("12345")
             enterAccountType("Savings")
             closeSoftKeyboard()
+            selectYellowColor()
             scrollToTop()
             clickOnSave()
             waitForLoading()
         }
+
         vaultItems {
             waitForLoading(true)
             waitForRecyclerView()

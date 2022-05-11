@@ -8,6 +8,7 @@ package com.sudoplatform.passwordmanagerexample.logins
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.passwordmanagerexample.BaseRobot
 import com.sudoplatform.passwordmanagerexample.R
@@ -25,6 +26,7 @@ private const val UPDATED_AT_LENGTH = 28
  */
 class EditLoginRobot : BaseRobot() {
 
+    private val favoriteSwitch = withId(R.id.add_as_favorite_switch)
     private val createdAtField = withId(R.id.label_createdAt)
     private val updatedAtField = withId(R.id.label_updatedAt)
     private val loginNameField = withId(R.id.editText_loginName)
@@ -35,16 +37,20 @@ class EditLoginRobot : BaseRobot() {
     private val generatePasswordButton = withId(R.id.button_passwordGenerator)
     private val saveButton = withId(R.id.save)
     private val loadingDialog = withId(R.id.progressBar)
+    private val radioRed = withId(R.id.radio_red)
+    private val radioGray = withId(R.id.radio_gray)
+    private val radioYellow = withId(R.id.radio_yellow)
 
     fun checkEditLoginItemsDisplayed(timeout: Long = 1000L) {
-        waitForViewToDisplay(createdAtField, timeout)
-        waitForViewToDisplay(updatedAtField, timeout)
         waitForViewToDisplay(loginNameField, timeout)
         waitForViewToDisplay(webAddressField, timeout)
         waitForViewToDisplay(usernameField, timeout)
         waitForViewToDisplay(passwordField, timeout)
+        scrollToView(updatedAtField)
         waitForViewToDisplay(notesField, timeout)
         waitForViewToDisplay(generatePasswordButton, timeout)
+        waitForViewToDisplay(createdAtField, timeout)
+        waitForViewToDisplay(updatedAtField, timeout)
     }
 
     fun checkPasswordIsNotBlank() {
@@ -62,6 +68,10 @@ class EditLoginRobot : BaseRobot() {
     fun clickOnSave() {
         Thread.sleep(1000)
         clickOnView(saveButton)
+    }
+
+    fun toggleFavorite() {
+        clickOnView(favoriteSwitch)
     }
 
     fun clickOnGeneratePassword() {
@@ -87,6 +97,19 @@ class EditLoginRobot : BaseRobot() {
 
     fun enterNotes(text: String) {
         replaceText(notesField, text)
+    }
+
+    fun selectRedColor() {
+        clickOnView(radioRed)
+        radioRed.matches(ViewMatchers.isChecked())
+        radioGray.matches(ViewMatchers.isNotChecked())
+    }
+
+    fun selectYellowColor() {
+        scrollToView(radioYellow)
+        clickOnView(radioYellow)
+        radioYellow.matches(ViewMatchers.isChecked())
+        radioRed.matches(ViewMatchers.isNotChecked())
     }
 
     fun waitForLoading() {

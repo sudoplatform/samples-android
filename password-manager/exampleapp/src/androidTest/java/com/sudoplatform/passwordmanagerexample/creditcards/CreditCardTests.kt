@@ -60,12 +60,14 @@ class CreditCardTests {
         }
         createCreditCard {
             checkCreateCreditCardItemsDisplayed()
+            toggleFavorite()
             enterCardName("My First Card")
             enterCardHolder("Bugs Bunny")
             enterCardType("VISA")
             enterCardNumber("4111 1111 1111 1111")
             enterCardExpiration("01/22")
             enterSecurityCode("123")
+            selectRedColor()
             closeSoftKeyboard()
             scrollToTop()
             clickOnSave()
@@ -87,12 +89,14 @@ class CreditCardTests {
         }
         createCreditCard {
             checkCreateCreditCardItemsDisplayed()
+            toggleFavorite()
             enterCardName("My First Card")
             enterCardHolder("Bugs Bunny")
             enterCardType("VISA")
             enterCardNumber("4111 1111 1111 1111")
             enterCardExpiration("01/22")
             enterSecurityCode("123")
+            selectRedColor()
             closeSoftKeyboard()
             scrollToTop()
             clickOnSave()
@@ -108,11 +112,13 @@ class CreditCardTests {
         editCreditCard {
             checkEditCreditCardItemsDisplayed()
             checkDatesAreDisplayed()
+            toggleFavorite()
             enterCardName("Not My First Card")
             enterCardHolder("Babs Bunny")
             enterCardType("Mastercard")
             enterCardNumber("2111 1111 1111 1111")
             enterCardExpiration("01/24")
+            selectYellowColor()
             closeSoftKeyboard()
             scrollToTop()
             clickOnSave()

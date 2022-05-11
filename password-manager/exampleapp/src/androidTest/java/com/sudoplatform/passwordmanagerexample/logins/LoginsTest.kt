@@ -112,8 +112,10 @@ class LoginsTest {
         editLogin {
             checkEditLoginItemsDisplayed()
             checkDatesAreDisplayed()
+            toggleFavorite()
             enterWebAddress("http://sbs.com.au/news")
             enterUsername("zaphodbeeblebrox")
+            selectYellowColor()
             clickOnGeneratePassword()
             passwordGenerator {
                 clickOnOkButton()

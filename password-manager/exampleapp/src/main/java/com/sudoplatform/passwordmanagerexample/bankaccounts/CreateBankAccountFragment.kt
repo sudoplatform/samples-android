@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.creditcards.colorArray
 import com.sudoplatform.passwordmanagerexample.databinding.FragmentCreateEditBankAccountBinding
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
 import com.sudoplatform.passwordmanagerexample.toSecureField
@@ -141,15 +143,24 @@ class CreateBankAccountFragment : Fragment(), CoroutineScope {
     private fun toVaultBankAccount(): VaultBankAccount {
         val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
         val accountNumber = binding.editTextAccountNumber.toSecureField()?.let { VaultItemValue(it) }
+        val hexColor = colorArray[
+            Integer.parseInt(
+                view
+                    ?.findViewById<RadioButton>(binding.colorRow.radioGroupColors.checkedRadioButtonId)
+                    ?.tag as String
+            )
+        ]
 
         return VaultBankAccount(
             id = UUID.randomUUID().toString(),
+            favorite = binding.switchFavorite.addAsFavoriteSwitch.isChecked,
             name = binding.editTextAccountName.text.toString().trim(),
             bankName = binding.editTextBankName.text.toString().trim(),
             accountNumber = accountNumber,
             routingNumber = binding.editTextRoutingNumber.text.toString().trim(),
             accountType = binding.editTextAccountType.text.toString().trim(),
-            notes = notes
+            notes = notes,
+            hexColor = hexColor,
         )
     }
 
@@ -159,12 +170,14 @@ class CreateBankAccountFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
+        binding.switchFavorite.addAsFavoriteSwitch.isEnabled = isEnabled
         binding.editTextAccountName.isEnabled = isEnabled
         binding.editTextBankName.isEnabled = isEnabled
         binding.editTextAccountNumber.isEnabled = isEnabled
         binding.editTextRoutingNumber.isEnabled = isEnabled
         binding.editTextAccountType.isEnabled = isEnabled
         binding.editTextNotes.isEnabled = isEnabled
+        binding.colorRow.radioGroupColors.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

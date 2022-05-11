@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -21,6 +22,7 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.passwordmanagerexample.App
 import com.sudoplatform.passwordmanagerexample.R
 import com.sudoplatform.passwordmanagerexample.createLoadingAlertDialog
+import com.sudoplatform.passwordmanagerexample.creditcards.colorArray
 import com.sudoplatform.passwordmanagerexample.databinding.FragmentCreateEditLoginBinding
 import com.sudoplatform.passwordmanagerexample.passwordgenerator.PasswordGeneratorDialog.Companion.GENERATED_PASSWORD
 import com.sudoplatform.passwordmanagerexample.showAlertDialog
@@ -73,7 +75,7 @@ class CreateLoginFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         bindingDelegate.attach(FragmentCreateEditLoginBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.create_login)
@@ -123,13 +125,22 @@ class CreateLoginFragment : Fragment(), CoroutineScope {
     private fun toVaultLogin(): VaultLogin {
         val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
         val password = binding.editTextPassword.toSecureField()?.let { VaultItemPassword(it) }
+        val hexColor = colorArray[
+            Integer.parseInt(
+                view
+                    ?.findViewById<RadioButton>(binding.colorRow.radioGroupColors.checkedRadioButtonId)
+                    ?.tag as String
+            )
+        ]
         return VaultLogin(
             id = UUID.randomUUID().toString(),
+            favorite = binding.switchFavorite.addAsFavoriteSwitch.isChecked,
             name = binding.editTextLoginName.text.toString().trim(),
             user = binding.editTextUsername.text.toString().trim(),
             url = binding.editTextWebAddress.text.toString().trim(),
             notes = notes,
-            password = password
+            password = password,
+            hexColor = hexColor,
         )
     }
 
@@ -184,11 +195,13 @@ class CreateLoginFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
+        binding.switchFavorite.addAsFavoriteSwitch.isEnabled = isEnabled
         binding.editTextUsername.isEnabled = isEnabled
         binding.editTextWebAddress.isEnabled = isEnabled
         binding.editTextLoginName.isEnabled = isEnabled
         binding.editTextNotes.isEnabled = isEnabled
         binding.editTextPassword.isEnabled = isEnabled
+        binding.colorRow.radioGroupColors.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

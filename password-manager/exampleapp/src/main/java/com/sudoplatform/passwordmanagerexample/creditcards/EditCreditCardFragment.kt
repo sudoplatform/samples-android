@@ -12,6 +12,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -78,9 +79,15 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        bindingDelegate.attach(FragmentCreateEditCreditCardBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(
+            FragmentCreateEditCreditCardBinding.inflate(
+                inflater,
+                container,
+                false
+            )
+        )
         with(binding.toolbar.root) {
             title = getString(R.string.edit_credit_card)
             inflateMenu(R.menu.nav_menu_with_save_button)
@@ -158,6 +165,14 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
         val securityCode = binding.editTextSecurityCode.toSecureField()?.let { VaultItemValue(it) }
         val notes = binding.editTextNotes.toSecureField()?.let { VaultItemNote(it) }
         val expiryString = binding.editTextExpiry.text.toString().trim()
+        val hexColor =
+            colorArray[
+                Integer.parseInt(
+                    view
+                        ?.findViewById<RadioButton>(binding.colorRow.radioGroupColors.checkedRadioButtonId)
+                        ?.tag as String
+                )
+            ]
 
         // default to null if date parsing fails
         var expiryDate: Date? = null
@@ -174,16 +189,25 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
             cardNumber = cardNumber,
             expiresAt = expiryDate,
             securityCode = securityCode,
-            notes = notes
+            notes = notes,
+            hexColor = hexColor,
+            favorite = binding.switchFavorite.addAsFavoriteSwitch.isChecked,
         )
     }
 
     private fun loadFromVaultCreditCard(vaultCard: VaultCreditCard) {
-        val dateFormat = SimpleDateFormat(getString(R.string.login_date_format), Locale.getDefault())
+        val dateFormat =
+            SimpleDateFormat(getString(R.string.login_date_format), Locale.getDefault())
         binding.labelCreatedAt.isVisible = true
         binding.labelUpdatedAt.isVisible = true
-        binding.labelCreatedAt.setText(getString(R.string.created_at, dateFormat.format(vaultCard.createdAt)))
-        binding.labelUpdatedAt.setText(getString(R.string.updated_at, dateFormat.format(vaultCard.updatedAt)))
+        binding.labelCreatedAt.text = getString(
+            R.string.created_at,
+            dateFormat.format(vaultCard.createdAt)
+        )
+        binding.labelUpdatedAt.text = getString(
+            R.string.updated_at,
+            dateFormat.format(vaultCard.updatedAt)
+        )
 
         binding.editTextCardName.setText(vaultCard.name)
         binding.editTextCardHolder.setText(vaultCard.cardName)
@@ -193,6 +217,10 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
         vaultCard.expiresAt?.let { binding.editTextExpiry.setText(expiryFormat.format(it)) }
         vaultCard.securityCode?.let { binding.editTextSecurityCode.setText(it.getValue()) }
         vaultCard.notes?.let { binding.editTextNotes.setText(it.getValue()) }
+        view?.findViewWithTag<RadioButton>(
+            colorArray.indexOf(vaultCard.hexColor).toString()
+        )?.let { binding.colorRow.radioGroupColors.check(it.id) }
+        vaultCard.favorite?.let { binding.switchFavorite.addAsFavoriteSwitch.isChecked = it }
     }
 
     private fun handleExpiryFormatting() {
@@ -212,7 +240,11 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
                 val stringBuilder = StringBuilder("")
                 // keep string length to MM/YY format
                 stringBuilder.append(
-                    if (s!!.length > 5) { s.subSequence(0, 5) } else { s }
+                    if (s!!.length > 5) {
+                        s.subSequence(0, 5)
+                    } else {
+                        s
+                    }
                 )
 
                 if (stringBuilder.lastIndex == 2) {
@@ -235,6 +267,7 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
+        binding.switchFavorite.addAsFavoriteSwitch.isEnabled = isEnabled
         binding.editTextCardName.isEnabled = isEnabled
         binding.editTextCardHolder.isEnabled = isEnabled
         binding.editTextCardType.isEnabled = isEnabled
@@ -242,6 +275,7 @@ class EditCreditCardFragment : Fragment(), CoroutineScope {
         binding.editTextExpiry.isEnabled = isEnabled
         binding.editTextSecurityCode.isEnabled = isEnabled
         binding.editTextNotes.isEnabled = isEnabled
+        binding.colorRow.radioGroupColors.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
