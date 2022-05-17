@@ -41,6 +41,7 @@ class EditMembershipRobot : BaseRobot() {
     private val notesField = withId(R.id.editText_notes)
     private val radioGray = withId(R.id.radio_gray)
     private val radioRed = withId(R.id.radio_red)
+    private val radioYellow = withId(R.id.radio_yellow)
     private val loadingDialog = withId(R.id.progressBar)
     private val saveButton = withId(R.id.save)
     private val createdAtField = withId(R.id.label_createdAt)
@@ -55,9 +56,9 @@ class EditMembershipRobot : BaseRobot() {
 
     fun checkDatesAreDisplayed() {
         Espresso.onView(createdAtField)
-            .check(ViewAssertions.matches(withTextLength(com.sudoplatform.passwordmanagerexample.memberships.CREATED_AT_LENGTH)))
+            .check(ViewAssertions.matches(withTextLength(CREATED_AT_LENGTH)))
         Espresso.onView(updatedAtField)
-            .check(ViewAssertions.matches(withTextLength(com.sudoplatform.passwordmanagerexample.memberships.UPDATED_AT_LENGTH)))
+            .check(ViewAssertions.matches(withTextLength(UPDATED_AT_LENGTH)))
     }
 
     fun clickOnSave() {
@@ -125,13 +126,18 @@ class EditMembershipRobot : BaseRobot() {
     }
 
     fun selectRedColor() {
+        scrollToView(radioRed)
         clickOnView(radioRed)
         radioRed.matches(ViewMatchers.isChecked())
         radioGray.matches(ViewMatchers.isNotChecked())
     }
 
     fun selectYellowColor() {
-        clickOnView(withId(R.id.radio_yellow))
+        scrollToView(radioYellow)
+        clickOnView(radioYellow)
+        radioYellow.matches(ViewMatchers.isChecked())
+        radioGray.matches(ViewMatchers.isNotChecked())
+        radioRed.matches(ViewMatchers.isNotChecked())
     }
 
     fun waitForLoading() {

@@ -2,11 +2,7 @@
 register_key*
 sudoplatformconfig.json
 secret.properties
-.idea/.name
-.idea/codeStyles/
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/misc.xml
+/.idea/**
 
 # Built application files
 *.apk

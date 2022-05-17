@@ -46,10 +46,11 @@ android {
 }
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:9.4.3'
-    implementation 'com.sudoplatform:sudoprofiles:7.0.1'
-    implementation 'com.sudoplatform:sudopasswordmanager:1.8.5'
-    implementation 'com.sudoplatform:sudoentitlements:2.3.1'
+    implementation 'com.sudoplatform:sudouser:11.1.1'
+    implementation 'com.sudoplatform:sudoprofiles:8.0.0'
+    implementation 'com.sudoplatform:sudopasswordmanager:1.8.6'
+    implementation 'com.sudoplatform:sudoentitlements:3.0.0'
+    implementation "com.sudoplatform:sudokeymanager:3.8.0"
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 

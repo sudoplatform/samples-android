@@ -215,7 +215,8 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 loadRegistrationKeys()
             }
         } else {
-            app.sudoUserClient.presentFederatedSignInUI { result ->
+            val activity = this.activity ?: return
+            app.sudoUserClient.presentFederatedSignInUI(activity) { result ->
                 when (result) {
                     is SignInResult.Success -> {
                         setUsedFssoFlag(true)
