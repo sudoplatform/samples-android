@@ -69,4 +69,5 @@
             android:text="@string/create_funding_source_button"
             android:textColor="@color/colorPrimary" />
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

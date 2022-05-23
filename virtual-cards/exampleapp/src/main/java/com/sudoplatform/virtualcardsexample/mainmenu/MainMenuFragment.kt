@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -22,11 +22,10 @@ import androidx.navigation.Navigation
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.RegisterException
-import com.sudoplatform.sudovirtualcards.types.Card
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.cards.OrphanCardsFragment
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
 import com.sudoplatform.virtualcardsexample.databinding.FragmentMainMenuBinding
 import com.sudoplatform.virtualcardsexample.fundingsources.FundingSourcesFragment
@@ -35,6 +34,7 @@ import com.sudoplatform.virtualcardsexample.register.RegisterFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.sudos.SudosFragment
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
+import com.sudoplatform.virtualcardsexample.virtualcards.OrphanVirtualCardsFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -57,8 +57,8 @@ import kotlin.coroutines.CoroutineContext
  *   will be presented so the user can view or choose to create [FundingSource]s.
  *  - [SudosFragment]: If a user taps the "Sudos" button, the [SudosFragment] will be presented so the
  *   user can view or choose to create [Sudo]s.
- *  - [OrphanCardsFragment]: If a user taps the "Orphan Cards" button, the [OrphanCardsFragment] will
- *   be presented so the user can view each orphan [Card] and its details.
+ *  - [OrphanVirtualCardsFragment]: If a user taps the "Orphan Virtual Cards" button, the [OrphanVirtualCardsFragment]
+ *   will be presented so the user can view each orphan [VirtualCard] and its details.
  *  - [RegisterFragment]: If a user taps the "Deregister" button, the [RegisterFragment] will be
  *   presented so the user can perform registration again.
  */
@@ -139,9 +139,9 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                 MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment()
             )
         }
-        binding.orphanCardsButton.setOnClickListener {
+        binding.orphanVirtualCardsButton.setOnClickListener {
             navController.navigate(
-                MainMenuFragmentDirections.actionMainMenuFragmentToOrphanCardsFragment()
+                MainMenuFragmentDirections.actionMainMenuFragmentToOrphanVirtualCardsFragment()
             )
         }
     }
@@ -193,7 +193,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
         binding.secureIdVerificationButton.isEnabled = isEnabled
         binding.fundingSourcesButton.isEnabled = isEnabled
         binding.sudosButton.isEnabled = isEnabled
-        binding.orphanCardsButton.isEnabled = isEnabled
+        binding.orphanVirtualCardsButton.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

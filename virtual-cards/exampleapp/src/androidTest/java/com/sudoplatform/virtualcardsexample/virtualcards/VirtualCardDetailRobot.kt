@@ -1,23 +1,21 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.virtualcardsexample.BaseRobot
 import com.sudoplatform.virtualcardsexample.R
 
-fun cardDetail(func: CardDetailRobot.() -> Unit) = CardDetailRobot().apply { func() }
+fun virtualCardDetail(func: VirtualCardDetailRobot.() -> Unit) = VirtualCardDetailRobot().apply { func() }
 
 /**
- * Testing robot that manages the Card Detail screen.
- *
- * @since 2020-07-29
+ * Testing robot that manages the Virtual Card Detail screen.
  */
-class CardDetailRobot : BaseRobot() {
+class VirtualCardDetailRobot : BaseRobot() {
 
     private val cardView = withId(R.id.cardView)
     private val transactionTextView = withId(R.id.transactionTitle)
@@ -27,7 +25,7 @@ class CardDetailRobot : BaseRobot() {
         waitForViewToDisplay(transactionRecyclerView, 15_000L)
     }
 
-    fun checkCardDetailItemsDisplayed(timeout: Long = 1000L) {
+    fun checkVirtualCardDetailItemsDisplayed(timeout: Long = 1000L) {
         waitForViewToDisplay(cardView, timeout)
         waitForViewToDisplay(transactionTextView, timeout)
     }

@@ -25,6 +25,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/progressText"
         android:layout_width="match_parent"
@@ -67,6 +68,5 @@
             android:text="@string/create_sudo_button"
             android:textColor="@color/colorPrimary" />
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

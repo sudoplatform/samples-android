@@ -30,8 +30,8 @@
             android:id="@+id/action_mainMenuFragment_to_sudosFragment"
             app:destination="@id/sudosFragment" />
         <action
-            android:id="@+id/action_mainMenuFragment_to_orphanCardsFragment"
-            app:destination="@id/orphanCardsFragment" />
+            android:id="@+id/action_mainMenuFragment_to_orphanVirtualCardsFragment"
+            app:destination="@id/orphanVirtualCardsFragment" />
         <action
             android:id="@+id/action_mainMenuFragment_to_registerFragment"
             app:destination="@id/registerFragment"
@@ -48,13 +48,13 @@
             app:destination="@id/createFundingSourceFragment" />
     </fragment>
     <fragment
-        android:id="@+id/orphanCardsFragment"
-        android:name="com.sudoplatform.virtualcardsexample.cards.OrphanCardsFragment"
-        android:label="fragment_orphan_cards"
-        tools:layout="@layout/fragment_orphan_cards" >
+        android:id="@+id/orphanVirtualCardsFragment"
+        android:name="com.sudoplatform.virtualcardsexample.virtualcards.OrphanVirtualCardsFragment"
+        android:label="fragment_orphan_virtual_cards"
+        tools:layout="@layout/fragment_orphan_virtual_cards" >
         <action
-            android:id="@+id/action_orphanCardsFragment_to_cardDetailFragment"
-            app:destination="@id/cardDetailFragment" />
+            android:id="@+id/action_orphanVirtualCardsFragment_to_virtualCardDetailFragment"
+            app:destination="@id/virtualCardDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/identityVerificationFragment"
@@ -68,7 +68,7 @@
         tools:layout="@layout/fragment_create_sudo" >
         <action
             android:id="@+id/action_createSudoFragment_to_cardsFragment"
-            app:destination="@id/cardsFragment"
+            app:destination="@id/virtualCardsFragment"
             app:popUpTo="@id/createSudoFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -81,8 +81,8 @@
             android:id="@+id/action_sudosFragment_to_createSudoFragment"
             app:destination="@id/createSudoFragment" />
         <action
-            android:id="@+id/action_sudosFragment_to_cardsFragment"
-            app:destination="@id/cardsFragment" />
+            android:id="@+id/action_sudosFragment_to_virtualCardsFragment"
+            app:destination="@id/virtualCardsFragment" />
     </fragment>
     <fragment
         android:id="@+id/createFundingSourceFragment"
@@ -96,57 +96,51 @@
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
-        android:id="@+id/cardsFragment"
-        android:name="com.sudoplatform.virtualcardsexample.cards.CardsFragment"
-        android:label="fragment_cards"
-        tools:layout="@layout/fragment_cards" >
+        android:id="@+id/virtualCardsFragment"
+        android:name="com.sudoplatform.virtualcardsexample.virtualcards.VirtualCardsFragment"
+        android:label="fragment_virtual_cards"
+        tools:layout="@layout/fragment_virtual_cards" >
         <argument
-            android:name="sudoId"
-            app:argType="string"
-            app:nullable="false" />
-        <argument
-            android:name="sudoLabel"
-            app:argType="string"
-            android:defaultValue="None" />
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
-            android:id="@+id/action_cardsFragment_to_createCardFragment"
-            app:destination="@id/createCardFragment" />
+            android:id="@+id/action_virtualCardsFragment_to_createVirtualCardFragment"
+            app:destination="@id/createVirtualCardFragment" />
         <action
-            android:id="@+id/action_cardsFragment_to_cardDetailFragment"
-            app:destination="@id/cardDetailFragment" />
+            android:id="@+id/action_virtualCardsFragment_to_virtualCardDetailFragment"
+            app:destination="@id/virtualCardDetailFragment" />
     </fragment>
     <fragment
-        android:id="@+id/createCardFragment"
-        android:name="com.sudoplatform.virtualcardsexample.cards.CreateCardFragment"
-        android:label="fragment_create_card"
-        tools:layout="@layout/fragment_create_card" >
+        android:id="@+id/createVirtualCardFragment"
+        android:name="com.sudoplatform.virtualcardsexample.virtualcards.CreateVirtualCardFragment"
+        android:label="fragment_create_virtual_card"
+        tools:layout="@layout/fragment_create_virtual_card" >
         <argument
-            android:name="sudoId"
-            app:argType="string"
-            android:defaultValue="None" />
-        <argument
-            android:name="sudoLabel"
-            app:argType="string"
-            android:defaultValue="None" />
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
-            android:id="@+id/action_createCardFragment_to_cardDetailFragment"
-            app:destination="@id/cardDetailFragment"
-            app:popUpTo="@id/createCardFragment"
+            android:id="@+id/action_createVirtualCardFragment_to_virtualCardDetailFragment"
+            app:destination="@id/virtualCardDetailFragment"
+            app:popUpTo="@id/createVirtualCardFragment"
             app:popUpToInclusive="true" />
 
     </fragment>
     <fragment
-        android:id="@+id/cardDetailFragment"
-        android:name="com.sudoplatform.virtualcardsexample.cards.CardDetailFragment"
-        android:label="fragment_card_detail"
-        tools:layout="@layout/fragment_card_detail" >
+        android:id="@+id/virtualCardDetailFragment"
+        android:name="com.sudoplatform.virtualcardsexample.virtualcards.VirtualCardDetailFragment"
+        android:label="fragment_virtual_card_detail"
+        tools:layout="@layout/fragment_virtual_card_detail" >
         <argument
-            android:name="card"
-            app:argType="com.sudoplatform.sudovirtualcards.types.Card"
+            android:name="virtualCard"
+            app:argType="com.sudoplatform.sudovirtualcards.types.VirtualCard"
             app:nullable="true"
             android:defaultValue="@null" />
         <action
-            android:id="@+id/action_cardDetailFragment_to_transactionDetailFragment"
+            android:id="@+id/action_virtualCardDetailFragment_to_transactionDetailFragment"
             app:destination="@id/transactionDetailFragment" />
     </fragment>
     <fragment
@@ -155,8 +149,8 @@
         android:label="fragment_transaction_detail"
         tools:layout="@layout/fragment_transaction_detail" >
         <argument
-            android:name="card"
-            app:argType="com.sudoplatform.sudovirtualcards.types.Card"
+            android:name="virtualCard"
+            app:argType="com.sudoplatform.sudovirtualcards.types.VirtualCard"
             app:nullable="true"
             android:defaultValue="@null" />
         <argument

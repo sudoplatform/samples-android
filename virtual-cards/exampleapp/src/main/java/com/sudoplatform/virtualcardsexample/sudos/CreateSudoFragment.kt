@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,14 +21,14 @@ import androidx.navigation.Navigation
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
-import com.sudoplatform.sudovirtualcards.types.Card
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.cards.CardsFragment
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
 import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateSudoBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
+import com.sudoplatform.virtualcardsexample.virtualcards.VirtualCardsFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -45,8 +45,8 @@ import kotlin.coroutines.CoroutineContext
  *  - [SudosFragment]: A user chooses the "Create Sudo" option at the bottom of the list.
  *
  * - Links To:
- *  - [CardsFragment]: If a user successfully creates a [Sudo], the [CardsFragment] will be presented
- *   so the user can create a [Card].
+ *  - [VirtualCardsFragment]: If a user successfully creates a [Sudo], the [VirtualCardsFragment] will be
+ *   presented so the user can create a [VirtualCard].
  */
 class CreateSudoFragment : Fragment(), CoroutineScope {
 
@@ -133,8 +133,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             CreateSudoFragmentDirections.actionCreateSudoFragmentToCardsFragment(
-                                newSudo.id!!,
-                                newSudo.label!!
+                                newSudo,
                             )
                         )
                     }

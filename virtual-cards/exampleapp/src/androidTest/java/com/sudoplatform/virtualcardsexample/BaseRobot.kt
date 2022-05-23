@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,12 +27,10 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import junit.framework.AssertionFailedError
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.not
+import org.hamcrest.core.IsNot.not
 
 /**
  * Base class of the visual testing robots.
- *
- * @since 2020-07-07
  */
 open class BaseRobot {
 

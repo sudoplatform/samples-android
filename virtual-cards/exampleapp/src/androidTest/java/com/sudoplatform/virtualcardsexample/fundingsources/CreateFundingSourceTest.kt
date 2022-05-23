@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -22,8 +22,6 @@ import timber.log.Timber
 
 /**
  * Test the funding source creation flow.
- *
- * @since 2020-07-29
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".cards.CardsFragment">
+    tools:context=".virtualcards.VirtualCardsFragment">
 
     <include
         android:id="@+id/toolbar"
@@ -30,7 +30,7 @@
         android:id="@+id/progressText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/loading_cards"
+        android:text="@string/loading_virtual_cards"
         android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:visibility="gone"
@@ -50,12 +50,12 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/cardRecyclerView"
+            android:id="@+id/virtualCardRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/createCardButton"
+            android:id="@+id/createVirtualCardButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:height="55dp"

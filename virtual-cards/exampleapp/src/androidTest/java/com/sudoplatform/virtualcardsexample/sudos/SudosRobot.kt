@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -14,14 +14,12 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.virtualcardsexample.BaseRobot
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.cards.cards
+import com.sudoplatform.virtualcardsexample.virtualcards.virtualCards
 
 fun sudos(func: SudosRobot.() -> Unit) = SudosRobot().apply { func() }
 
 /**
  * Testing robot that manages the Sudos screen.
- *
- * @since 2020-07-07
  */
 class SudosRobot : BaseRobot() {
 
@@ -53,10 +51,10 @@ class SudosRobot : BaseRobot() {
         }
     }
 
-    fun navigateToCardsScreen(position: Int) {
+    fun navigateToVirtualCardsScreen(position: Int) {
         clickRecyclerViewItem(position)
-        cards {
-            checkCardsItemsDisplayed()
+        virtualCards {
+            checkVirtualCardsItemsDisplayed()
         }
     }
 

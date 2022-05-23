@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -17,8 +17,6 @@ fun fundingSources(func: FundingSourcesRobot.() -> Unit) = FundingSourcesRobot()
 
 /**
  * Testing robot that manages the Funding Sources screen.
- *
- * @since 2020-07-07
  */
 class FundingSourcesRobot : BaseRobot() {
     private val createFundingSourceButton = withId(R.id.createFundingSourceButton)

@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import android.content.Intent
 import android.net.Uri
@@ -21,17 +21,20 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.sudoplatform.sudoprofiles.Sudo
+import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.BillingAddress
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
-import com.sudoplatform.sudovirtualcards.types.Card
 import com.sudoplatform.sudovirtualcards.types.FundingSource
-import com.sudoplatform.sudovirtualcards.types.ProvisionalCard
-import com.sudoplatform.sudovirtualcards.types.inputs.ProvisionCardInput
+import com.sudoplatform.sudovirtualcards.types.JsonValue
+import com.sudoplatform.sudovirtualcards.types.ProvisionalVirtualCard
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
+import com.sudoplatform.sudovirtualcards.types.inputs.ProvisionVirtualCardInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
-import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateCardBinding
+import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateVirtualCardBinding
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
@@ -45,16 +48,20 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [CreateCardFragment] presents a form so that a user can create a [Card].
+ * This [CreateVirtualCardFragment] presents a form so that a user can create a [VirtualCard].
  *
  * - Links From:
- *  - [CardsFragment]: A user taps the "Create Virtual Card" button at the bottom of the list.
+ *  - [VirtualCardsFragment]: A user taps the "Create Virtual Card" button at the bottom of the list.
  *
  * - Links To:
- *  - [CardDetailFragment]: If a user successfully creates a card, the [CardDetailFragment] will be
- *   presented so the user can view card details and transactions.
+ *  - [VirtualCardDetailFragment]: If a user successfully creates a virtual card, the
+ *   [VirtualCardDetailFragment] will be presented so the user can view card details and transactions.
  */
-class CreateCardFragment : Fragment(), CoroutineScope {
+class CreateVirtualCardFragment : Fragment(), CoroutineScope {
+
+    companion object {
+        const val VIRTUAL_CARD_AUDIENCE = "sudoplatform.virtual-cards.virtual-card"
+    }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -65,7 +72,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentCreateCardBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentCreateVirtualCardBinding>()
     private val binding by bindingDelegate
 
     /** Toolbar [Menu] displaying title and create button. */
@@ -90,24 +97,30 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     )
 
     /** Fragment arguments handled by Navigation Library safe args */
-    private val args: CreateCardFragmentArgs by navArgs()
+    private val args: CreateVirtualCardFragmentArgs by navArgs()
 
-    /** A [FundingSource] used to create a [Card]. */
+    /** A [FundingSource] used to create a [VirtualCard]. */
     private lateinit var fundingSource: FundingSource
+
+    /** A [Sudo] used to retrieve the ownership proof. */
+    private lateinit var sudo: Sudo
+
+    /** The ownership proof used to tie a [Sudo] to a [VirtualCard]. */
+    private lateinit var ownershipProof: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        bindingDelegate.attach(FragmentCreateCardBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentCreateVirtualCardBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.create_virtual_card)
             inflateMenu(R.menu.nav_menu_with_create_button)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.create -> {
-                        createCard()
+                        createVirtualCard()
                     }
                 }
                 true
@@ -115,6 +128,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
             toolbarMenu = menu
         }
         app = requireActivity().application as App
+        sudo = args.sudo!!
         return binding.root
     }
 
@@ -132,6 +146,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
         }
 
         loadFirstActiveFundingSource()
+        getOwnershipProof()
     }
 
     override fun onDestroy() {
@@ -143,10 +158,10 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Validates and creates a [Card] from the [SudoVirtualCardsClient] based on the submitted
+     * Validates and creates a [VirtualCard] from the [SudoVirtualCardsClient] based on the submitted
      * form inputs.
      */
-    private fun createCard() {
+    private fun createVirtualCard() {
         if (validateFormData()) {
             showAlertDialog(
                 titleResId = R.string.validate_fields,
@@ -154,7 +169,6 @@ class CreateCardFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val sudoId = args.sudoId
         val billingAddress = BillingAddress(
             addressLine1 = enteredInput[2] ?: "",
             addressLine2 = enteredInput[3],
@@ -163,33 +177,35 @@ class CreateCardFragment : Fragment(), CoroutineScope {
             postalCode = enteredInput[6] ?: "",
             country = enteredInput[7] ?: ""
         )
-        val input = ProvisionCardInput(
-            sudoId = sudoId,
+        val cardLabel = JsonValue.JsonString(enteredInput[1] ?: "")
+        val input = ProvisionVirtualCardInput(
+            ownershipProofs = listOf(ownershipProof),
             fundingSourceId = fundingSource.id,
             cardHolder = enteredInput[0] ?: "",
-            alias = enteredInput[1] ?: "",
+            metadata = cardLabel,
             billingAddress = billingAddress,
             currency = "USD"
         )
         launch {
             try {
-                showLoading(R.string.creating_card)
-                val initialProvisionalCard = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.provisionCard(input)
+                showLoading(R.string.creating_virtual_card)
+                app.sudoVirtualCardsClient.createKeysIfAbsent()
+                val initialProvisionalVirtualCard = withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.provisionVirtualCard(input)
                 }
-                var state = initialProvisionalCard.state
-                while (state == ProvisionalCard.State.PROVISIONING) {
+                var state = initialProvisionalVirtualCard.provisioningState
+                while (state == ProvisionalVirtualCard.ProvisioningState.PROVISIONING) {
                     val provisionalCard = withContext(Dispatchers.IO) {
-                        app.sudoVirtualCardsClient.getProvisionalCard(initialProvisionalCard.id)
+                        app.sudoVirtualCardsClient.getProvisionalCard(initialProvisionalVirtualCard.id)
                     }
-                    if (provisionalCard?.state == ProvisionalCard.State.COMPLETED) {
+                    if (provisionalCard?.provisioningState == ProvisionalVirtualCard.ProvisioningState.COMPLETED) {
                         showAlertDialog(
                             titleResId = R.string.success,
                             positiveButtonResId = android.R.string.ok,
                             onPositive = {
                                 navController.navigate(
-                                    CreateCardFragmentDirections
-                                        .actionCreateCardFragmentToCardDetailFragment(
+                                    CreateVirtualCardFragmentDirections
+                                        .actionCreateVirtualCardFragmentToVirtualCardDetailFragment(
                                             provisionalCard.card
                                         )
                                 )
@@ -197,14 +213,14 @@ class CreateCardFragment : Fragment(), CoroutineScope {
                         )
                         break
                     }
-                    state = provisionalCard?.state ?: ProvisionalCard.State.PROVISIONING
+                    state = provisionalCard?.provisioningState ?: ProvisionalVirtualCard.ProvisioningState.PROVISIONING
                 }
-            } catch (e: SudoVirtualCardsClient.CardException) {
+            } catch (e: SudoVirtualCardsClient.VirtualCardException) {
                 showAlertDialog(
-                    titleResId = R.string.create_card_failure,
+                    titleResId = R.string.create_virtual_card_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { createCard() },
+                    onPositive = { createVirtualCard() },
                     negativeButtonResId = android.R.string.cancel
                 )
             }
@@ -239,6 +255,25 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     }
 
     /**
+     * Retrieve the ownership proof used to bind the [Sudo] and [VirtualCard] together.
+     */
+    private fun getOwnershipProof() {
+        launch {
+            try {
+                ownershipProof = withContext(Dispatchers.IO) {
+                    app.sudoProfilesClient.getOwnershipProof(sudo, VIRTUAL_CARD_AUDIENCE)
+                }
+            } catch (e: SudoProfileException) {
+                showAlertDialog(
+                    titleResId = R.string.ownership_proof_error,
+                    message = e.localizedMessage ?: "$e",
+                    negativeButtonResId = android.R.string.cancel
+                )
+            }
+        }
+    }
+
+    /**
      * Configures the [RecyclerView] used to display the [InputFormCell]s and listens to input
      * change events to capture user input.
      */
@@ -264,7 +299,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
     /** Navigates to a Sudo Platform web page when the "Learn More" button is pressed. */
     private fun learnMore() {
         val openUrl = Intent(Intent.ACTION_VIEW)
-        openUrl.data = Uri.parse(getString(R.string.create_card_doc_url))
+        openUrl.data = Uri.parse(getString(R.string.create_virtual_card_doc_url))
         startActivity(openUrl)
     }
 
@@ -277,7 +312,7 @@ class CreateCardFragment : Fragment(), CoroutineScope {
 
     /** Set the [Sudo] label text containing the [Sudo] alias. */
     private fun setSudoLabelText() {
-        val sudoLabelText = args.sudoLabel
+        val sudoLabelText = args.sudo?.label
         binding.sudoLabel.text = sudoLabelText
     }
 

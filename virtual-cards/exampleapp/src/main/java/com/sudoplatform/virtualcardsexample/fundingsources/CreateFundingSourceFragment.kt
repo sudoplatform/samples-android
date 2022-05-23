@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,9 +20,13 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.stripe.android.Stripe
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.inputs.CompleteFundingSourceInput
 import com.sudoplatform.sudovirtualcards.types.inputs.CreditCardFundingSourceInput
+import com.sudoplatform.sudovirtualcards.types.inputs.FundingSourceType
+import com.sudoplatform.sudovirtualcards.types.inputs.SetupFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
@@ -31,6 +35,7 @@ import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
+import com.sudoplatform.virtualcardsexample.util.StripeIntentWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -158,7 +163,25 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.creating_funding_source)
                 withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.createFundingSource(input)
+                    // Retrieve the funding source client configuration
+                    val configuration = app.sudoVirtualCardsClient.getFundingSourceClientConfiguration()
+                    // Perform the funding source setup operation
+                    val setupInput = SetupFundingSourceInput("USD", FundingSourceType.CREDIT_CARD)
+                    val provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(setupInput)
+                    // Process stripe data
+                    val stripeClient = Stripe(requireContext(), configuration.first().apiKey)
+                    val stripeIntentWorker = StripeIntentWorker(requireContext(), stripeClient)
+                    val completionData = stripeIntentWorker.confirmSetupIntent(
+                        input,
+                        provisionalFundingSource.provisioningData.clientSecret
+                    )
+                    // Perform the funding source completion operation
+                    val completeInput = CompleteFundingSourceInput(
+                        provisionalFundingSource.id,
+                        completionData,
+                        null
+                    )
+                    app.sudoVirtualCardsClient.completeFundingSource(completeInput)
                 }
                 showAlertDialog(
                     titleResId = R.string.success,

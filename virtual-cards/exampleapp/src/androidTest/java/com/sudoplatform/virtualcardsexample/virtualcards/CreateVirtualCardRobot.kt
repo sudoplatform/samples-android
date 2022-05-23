@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -13,14 +13,12 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.virtualcardsexample.BaseRobot
 import com.sudoplatform.virtualcardsexample.R
 
-fun createCard(func: CreateCardRobot.() -> Unit) = CreateCardRobot().apply { func() }
+fun createVirtualCard(func: CreateVirtualCardRobot.() -> Unit) = CreateVirtualCardRobot().apply { func() }
 
 /**
- * Testing robot that manages the Create Card screen.
- *
- * @since 2020-07-29
+ * Testing robot that manages the Create Virtual Card screen.
  */
-class CreateCardRobot : BaseRobot() {
+class CreateVirtualCardRobot : BaseRobot() {
 
     private val inputForm = R.id.formRecyclerView
     private val toolbarCreateButton = withId(R.id.create)
@@ -36,7 +34,7 @@ class CreateCardRobot : BaseRobot() {
         waitForViewToNotDisplay(loadingDialog, 30_000L)
     }
 
-    fun checkCreateCardItemsDisplayed() {
+    fun checkCreateVirtualCardItemsDisplayed() {
         waitForViewToDisplay(withId(inputForm))
         waitForViewToDisplay(toolbarCreateButton)
         scrollToView(sudoTextView)

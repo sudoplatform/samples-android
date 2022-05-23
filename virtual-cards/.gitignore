@@ -15,3 +15,5 @@
 .cxx
 register_key*
 sudoplatformconfig.json
+secret.properties
+.vscode/

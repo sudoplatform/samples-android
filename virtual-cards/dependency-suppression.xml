@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-    <suppress>
+    <suppress until="2022-06-13">
         <notes><![CDATA[
-            okhttp uses certificate pinning which some claim and others dispute can allow a man-in-the-middle attack
-            ]]></notes>
-        <cve>CVE-2018-20200</cve>
-    </suppress>
-    <suppress until="2021-03-31">
-        <notes><![CDATA[
-            Kotlin script is not used in the Sudo Platform Virtual Cards Example App. Set suppression to expire in
-            2 months. We can re-evaluate and possible move to Kotlin 1.4.0 if it's out of RC by then.
-            ]]></notes>
-        <cve>CVE-2020-15824</cve>
-    </suppress>
-    <suppress until="2021-03-31">
-        <notes><![CDATA[
-            False positive due to coroutines libraries being less than 1.4.21
-            ]]></notes>
-        <cve>CVE-2020-29582</cve>
+        file name: kotlin-analysis-intellij-1.6.10.jar (shaded: com.google.protobuf:protobuf-java:2.6.1)
+        ]]></notes>
+        <cve>CVE-2021-22569</cve>
     </suppress>
 </suppressions>

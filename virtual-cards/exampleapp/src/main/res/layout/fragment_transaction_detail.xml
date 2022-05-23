@@ -74,7 +74,7 @@
                 android:layout_marginEnd="20dp">
 
                 <TextView
-                    android:id="@+id/cardLabel"
+                    android:id="@+id/virtualCardLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -85,7 +85,7 @@
                     android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/cardText"
+                    android:id="@+id/virtualCardText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/virtual_card"

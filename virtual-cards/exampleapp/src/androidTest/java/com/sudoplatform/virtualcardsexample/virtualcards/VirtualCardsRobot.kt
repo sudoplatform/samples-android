@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
@@ -13,17 +13,15 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.virtualcardsexample.BaseRobot
 import com.sudoplatform.virtualcardsexample.R
 
-fun cards(func: CardsRobot.() -> Unit) = CardsRobot().apply { func() }
+fun virtualCards(func: VirtualCardsRobot.() -> Unit) = VirtualCardsRobot().apply { func() }
 
 /**
- * Testing robot that manages the Cards screen.
- *
- * @since 2020-07-29
+ * Testing robot that manages the Virtual Cards screen.
  */
-class CardsRobot : BaseRobot() {
+class VirtualCardsRobot : BaseRobot() {
 
-    private val createCardButton = withId(R.id.createCardButton)
-    private val cardRecyclerView = withId(R.id.cardRecyclerView)
+    private val createVirtualCardButton = withId(R.id.createVirtualCardButton)
+    private val virtualCardRecyclerView = withId(R.id.virtualCardRecyclerView)
     private val loadingDialog = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
 
@@ -33,24 +31,24 @@ class CardsRobot : BaseRobot() {
     }
 
     fun waitForRecyclerView() {
-        waitForViewToDisplay(cardRecyclerView, 30_000L)
+        waitForViewToDisplay(virtualCardRecyclerView, 30_000L)
     }
 
-    fun checkCardsItemsDisplayed(timeout: Long = 60_000L) {
-        waitForViewToDisplay(createCardButton, timeout)
+    fun checkVirtualCardsItemsDisplayed(timeout: Long = 60_000L) {
+        waitForViewToDisplay(createVirtualCardButton, timeout)
     }
 
-    fun navigateToCreateCardScreen() {
-        clickOnView(createCardButton)
-        createCard {
-            checkCreateCardItemsDisplayed()
+    fun navigateToCreateVirtualCardScreen() {
+        clickOnView(createVirtualCardButton)
+        createVirtualCard {
+            checkCreateVirtualCardItemsDisplayed()
         }
     }
 
-    fun navigateToCardDetailScreen(position: Int) {
+    fun navigateToVirtualCardDetailScreen(position: Int) {
         clickRecyclerViewItem(position)
-        cardDetail {
-            checkCardDetailItemsDisplayed()
+        virtualCardDetail {
+            checkVirtualCardDetailItemsDisplayed()
         }
     }
 
@@ -61,8 +59,8 @@ class CardsRobot : BaseRobot() {
     }
 
     fun swipeLeftToCancel(position: Int) {
-        onView(cardRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(
+        onView(virtualCardRecyclerView).perform(
+            RecyclerViewActions.actionOnItemAtPosition<VirtualCardViewHolder>(
                 position,
                 ViewActions.swipeLeft()
             )
@@ -70,8 +68,8 @@ class CardsRobot : BaseRobot() {
     }
 
     private fun clickRecyclerViewItem(position: Int) {
-        onView(cardRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(
+        onView(virtualCardRecyclerView).perform(
+            RecyclerViewActions.actionOnItemAtPosition<VirtualCardViewHolder>(
                 position,
                 ViewActions.click()
             )

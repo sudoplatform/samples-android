@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,13 +27,13 @@ import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.cards.CardsFragment
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
 import com.sudoplatform.virtualcardsexample.databinding.FragmentSudosBinding
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
+import com.sudoplatform.virtualcardsexample.virtualcards.VirtualCardsFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -52,8 +52,8 @@ import kotlin.coroutines.CoroutineContext
  * - Links To:
  *  - [CreateSudoFragment]: If a user taps the "Create Sudo" button, the [CreateSudoFragment] will
  *   be presented so the user can create a new [Sudo].
- *  - [CardsFragment]: If a user chooses a [Sudo] from the list, the [CardsFragment] will be presented
- *   so the user can add a new card to their [Sudo].
+ *  - [VirtualCardsFragment]: If a user chooses a [Sudo] from the list, the [VirtualCardsFragment]
+ *   will be presented so the user can add a new card to their [Sudo].
  */
 class SudosFragment : Fragment(), CoroutineScope {
 
@@ -205,15 +205,14 @@ class SudosFragment : Fragment(), CoroutineScope {
 
     /**
      * Configures the [RecyclerView] used to display the listed [Sudo] items and listens to item
-     * select events to navigate to the [CardsFragment].
+     * select events to navigate to the [VirtualCardsFragment].
      */
     private fun configureRecyclerView() {
         adapter =
             SudoAdapter(sudoList) { sudo ->
                 navController.navigate(
-                    SudosFragmentDirections.actionSudosFragmentToCardsFragment(
-                        sudo.id!!,
-                        sudo.label!!
+                    SudosFragmentDirections.actionSudosFragmentToVirtualCardsFragment(
+                        sudo,
                     )
                 )
             }

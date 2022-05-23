@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -13,31 +13,29 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.virtualcardsexample.BaseRobot
 import com.sudoplatform.virtualcardsexample.R
 
-fun orphanCards(func: OrphanCardsRobot.() -> Unit) = OrphanCardsRobot().apply { func() }
+fun orphanVirtualCards(func: OrphanVirtualCardsRobot.() -> Unit) = OrphanVirtualCardsRobot().apply { func() }
 
 /**
- * Testing robot that manages the Orphan Cards screen.
- *
- * @since 2020-07-07
+ * Testing robot that manages the Orphan Virtual Cards screen.
  */
-class OrphanCardsRobot : BaseRobot() {
+class OrphanVirtualCardsRobot : BaseRobot() {
 
-    private val orphanCardRecyclerView = withId(R.id.orphanCardRecyclerView)
+    private val orphanCardRecyclerView = withId(R.id.orphanVirtualCardRecyclerView)
 
     fun waitForRecyclerView() {
         waitForViewToDisplay(orphanCardRecyclerView, 5_000L)
     }
 
-    fun navigateToCardDetailScreen(position: Int) {
+    fun navigateToVirtualCardDetailScreen(position: Int) {
         clickRecyclerViewItem(position)
-        cardDetail {
-            checkCardDetailItemsDisplayed()
+        virtualCardDetail {
+            checkVirtualCardDetailItemsDisplayed()
         }
     }
 
     private fun clickRecyclerViewItem(position: Int) {
         onView(orphanCardRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<CardViewHolder>(
+            RecyclerViewActions.actionOnItemAtPosition<VirtualCardViewHolder>(
                 position,
                 click()
             )

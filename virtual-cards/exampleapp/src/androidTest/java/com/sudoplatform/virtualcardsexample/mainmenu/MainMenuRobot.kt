@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,8 +21,6 @@ fun mainMenu(func: MainMenuRobot.() -> Unit) = MainMenuRobot().apply { func() }
 
 /**
  * Testing robot that manages the Main Menu screen.
- *
- * @since 2020-07-07
  */
 class MainMenuRobot : BaseRobot() {
 
@@ -33,7 +31,7 @@ class MainMenuRobot : BaseRobot() {
     private val secureIdVerificationButton = withId(R.id.secureIdVerificationButton)
     private val fundingSourcesButton = withId(R.id.fundingSourcesButton)
     private val sudosButton = withId(R.id.sudosButton)
-    private val orphanCardsButton = withId(R.id.orphanCardsButton)
+    private val orphanVirtualCardsButton = withId(R.id.orphanVirtualCardsButton)
     private val positiveAlertButton = withId(android.R.id.button1)
     private val negativeAlertButton = withId(android.R.id.button2)
 
@@ -47,7 +45,7 @@ class MainMenuRobot : BaseRobot() {
         waitForViewToDisplay(secureIdVerificationButton, timeout)
         waitForViewToDisplay(fundingSourcesButton, timeout)
         waitForViewToDisplay(sudosButton, timeout)
-        waitForViewToDisplay(orphanCardsButton, timeout)
+        waitForViewToDisplay(orphanVirtualCardsButton, timeout)
     }
 
     fun navigateToIdentityVerificationScreen() {
@@ -68,8 +66,8 @@ class MainMenuRobot : BaseRobot() {
         }
     }
 
-    fun navigateToOrphanCardsScreen() {
-        clickOnView(orphanCardsButton)
+    fun navigateToOrphanVirtualCardsScreen() {
+        clickOnView(orphanVirtualCardsButton)
     }
 
     fun navigateFromLaunchToMainMenu() {

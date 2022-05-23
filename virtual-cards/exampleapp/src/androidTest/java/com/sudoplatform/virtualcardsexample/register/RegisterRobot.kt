@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -14,8 +14,6 @@ fun login(func: RegisterRobot.() -> Unit) = RegisterRobot().apply { func() }
 
 /**
  * Testing robot that manages the register/login screen.
- *
- * @since 2020-07-07
  */
 class RegisterRobot : BaseRobot() {
 

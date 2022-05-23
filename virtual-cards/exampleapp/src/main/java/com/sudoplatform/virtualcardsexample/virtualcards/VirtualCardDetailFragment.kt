@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -21,12 +21,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.subscription.TransactionSubscriber
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
-import com.sudoplatform.sudovirtualcards.types.Card
+import com.sudoplatform.sudovirtualcards.types.CardState
+import com.sudoplatform.sudovirtualcards.types.ListAPIResult
 import com.sudoplatform.sudovirtualcards.types.Transaction
-import com.sudoplatform.sudovirtualcards.types.inputs.filters.filterTransactionsBy
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.databinding.FragmentCardDetailBinding
+import com.sudoplatform.virtualcardsexample.databinding.FragmentVirtualCardDetailBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.transactions.TransactionAdapter
 import com.sudoplatform.virtualcardsexample.transactions.transactiondetail.TransactionDetailFragment
@@ -41,20 +42,20 @@ import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
 /**
- * The [CardDetailFragment] presents a view containing [Card] details and a list of [Transaction]
- * created against the selected [Card].
+ * The [VirtualCardDetailFragment] presents a view containing [VirtualCard] details and a list of
+ * [Transaction]s created against the selected [VirtualCard].
  *
  * - Links From:
- *  - [CreateCardFragment]: A user chooses the "Create" option from the top right corner of the
- *   tool bar.
- *  - [CardsFragment]: A user chooses a [Card] from the list.
- *  - [OrphanCardsFragment]: A user chooses an orphan [Card] from the list.
+ *  - [CreateVirtualCardFragment]: A user chooses the "Create" option from the top right corner of
+ *   the tool bar.
+ *  - [VirtualCardsFragment]: A user chooses a [VirtualCard] from the list.
+ *  - [OrphanVirtualCardsFragment]: A user chooses an orphan [VirtualCard] from the list.
  *
  * - Links To:
  *  - [TransactionDetailFragment]: If a user selects a [Transaction] from the list, the
  *   [TransactionDetailFragment] will be presented so that the user can view transaction details.
  */
-class CardDetailFragment : Fragment(), CoroutineScope {
+class VirtualCardDetailFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -65,7 +66,7 @@ class CardDetailFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentCardDetailBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentVirtualCardDetailBinding>()
     private val binding by bindingDelegate
 
     /** A reference to the [RecyclerView.Adapter] handling [Transaction] data. */
@@ -75,10 +76,10 @@ class CardDetailFragment : Fragment(), CoroutineScope {
     private var transactionList = mutableListOf<Transaction>()
 
     /** Fragment arguments handled by Navigation Library safe args */
-    private val args: CardDetailFragmentArgs by navArgs()
+    private val args: VirtualCardDetailFragmentArgs by navArgs()
 
-    /** The selected [Card] used for display. */
-    private lateinit var card: Card
+    /** The selected [VirtualCard] used for display. */
+    private lateinit var virtualCard: VirtualCard
 
     /** Subscription ID for transactions */
     private val subscriptionId = UUID.randomUUID().toString()
@@ -88,18 +89,18 @@ class CardDetailFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        bindingDelegate.attach(FragmentCardDetailBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentVirtualCardDetailBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
-            title = getString(R.string.card_detail)
+            title = getString(R.string.virtual_card_detail)
         }
         app = requireActivity().application as App
-        card = args.card!!
+        virtualCard = args.virtualCard!!
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configureCardView()
+        configureVirtualCardView()
         configureRecyclerView()
         navController = Navigation.findNavController(view)
 
@@ -133,17 +134,31 @@ class CardDetailFragment : Fragment(), CoroutineScope {
             try {
                 showLoading()
                 val transactions = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listTransactions(
-                        cachePolicy = cachePolicy,
-                        filter = { filterTransactionsBy { cardId equalTo card.id } }
+                    app.sudoVirtualCardsClient.listTransactionsByCardId(
+                        cardId = virtualCard.id,
+                        cachePolicy = cachePolicy
                     )
                 }
-                transactionList.clear()
-                for (transaction in transactions.items) {
-                    transactionList.add(transaction)
+                when (transactions) {
+                    is ListAPIResult.Success -> {
+                        transactionList.clear()
+                        for (transaction in transactions.result.items) {
+                            transactionList.add(transaction)
+                        }
+                        adapter.notifyDataSetChanged()
+                        setEmptyTransactionsLabel()
+                    }
+                    is ListAPIResult.Partial -> {
+                        val cause = transactions.result.failed.first().cause
+                        showAlertDialog(
+                            titleResId = R.string.list_transactions_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { listTransactions(CachePolicy.REMOTE_ONLY) },
+                            negativeButtonResId = android.R.string.cancel
+                        )
+                    }
                 }
-                adapter.notifyDataSetChanged()
-                setEmptyTransactionsLabel()
             } catch (e: SudoVirtualCardsClient.TransactionException) {
                 showAlertDialog(
                     titleResId = R.string.list_transactions_failure,
@@ -221,23 +236,23 @@ class CardDetailFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Configures each field with the various card details on the graphical representation of a
-     * virtual card.
+     * Configures each field with the various virtual card details on the graphical representation
+     * of a virtual card.
      */
-    private fun configureCardView() {
-        val expirationMonthStr = card.expirationMonth.toString().padStart(2, '0')
-        val expirationYearStr = (card.expirationYear % 100).toString()
+    private fun configureVirtualCardView() {
+        val expirationMonthStr = virtualCard.expiry.mm.padStart(2, '0')
+        val expirationYearStr = (virtualCard.expiry.yyyy.toInt() % 100).toString()
 
-        if (card.state == Card.State.CLOSED) {
+        if (virtualCard.state == CardState.CLOSED) {
             binding.stateView.visibility = View.VISIBLE
         } else {
             binding.stateView.visibility = View.GONE
         }
-        binding.cardNameField.text = card.alias
-        binding.accountNumberField.text = formatAccountNumber(card.cardNumber)
-        binding.securityCodeField.text = card.securityCode
+        binding.cardNameField.text = virtualCard.metadata?.unwrap().toString()
+        binding.accountNumberField.text = formatAccountNumber(virtualCard.cardNumber)
+        binding.securityCodeField.text = virtualCard.securityCode
         binding.expiryDateField.text = getString(R.string.expiry_date_field, expirationMonthStr, expirationYearStr)
-        binding.cardHolderNameField.text = card.cardHolder
+        binding.cardHolderNameField.text = virtualCard.cardHolder
     }
 
     /**
@@ -259,8 +274,8 @@ class CardDetailFragment : Fragment(), CoroutineScope {
         adapter =
             TransactionAdapter(transactionList) { transaction ->
                 navController.navigate(
-                    CardDetailFragmentDirections.actionCardDetailFragmentToTransactionDetailFragment(
-                        card,
+                    VirtualCardDetailFragmentDirections.actionVirtualCardDetailFragmentToTransactionDetailFragment(
+                        virtualCard,
                         transaction
                     )
                 )

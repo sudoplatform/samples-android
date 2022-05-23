@@ -68,7 +68,7 @@
             android:textColor="@color/colorPrimary" />
 
         <Button
-            android:id="@+id/orphanCardsButton"
+            android:id="@+id/orphanVirtualCardsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:height="55dp"
@@ -77,7 +77,8 @@
             android:gravity="center|start"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:text="@string/orphan_cards"
+            android:text="@string/orphan_virtual_cards"
             android:textColor="@color/colorPrimary" />
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudoidentityverification.QueryOption
 import com.sudoplatform.sudoidentityverification.SudoIdentityVerificationClient
 import com.sudoplatform.sudoidentityverification.SudoIdentityVerificationException
+import com.sudoplatform.sudoidentityverification.types.inputs.VerifyIdentityInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
@@ -144,19 +145,20 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         if (!addressLine2.isNullOrEmpty()) {
             addressLine1 = "$addressLine1 $addressLine2"
         }
+        val input = VerifyIdentityInput(
+            firstName = enteredInput[0] ?: "",
+            lastName = enteredInput[1] ?: "",
+            address = addressLine1 ?: "",
+            city = "",
+            state = "",
+            postalCode = enteredInput[4] ?: "",
+            country = enteredInput[5] ?: "",
+            dateOfBirth = enteredInput[6] ?: ""
+        )
         launch {
             try {
                 val verifiedIdentity = withContext(Dispatchers.IO) {
-                    app.identityVerificationClient.verifyIdentity(
-                        firstName = enteredInput[0] ?: "",
-                        lastName = enteredInput[1] ?: "",
-                        address = addressLine1 ?: "",
-                        city = "",
-                        state = "",
-                        postalCode = enteredInput[4] ?: "",
-                        country = enteredInput[5] ?: "",
-                        dateOfBirth = enteredInput[6] ?: ""
-                    )
+                    app.identityVerificationClient.verifyIdentity(input)
                 }
                 if (verifiedIdentity.verified) {
                     showAlertDialog(

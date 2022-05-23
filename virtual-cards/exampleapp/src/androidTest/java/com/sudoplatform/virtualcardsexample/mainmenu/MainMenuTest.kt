@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -11,10 +11,10 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.virtualcardsexample.MainActivity
-import com.sudoplatform.virtualcardsexample.cards.orphanCards
 import com.sudoplatform.virtualcardsexample.fundingsources.fundingSources
 import com.sudoplatform.virtualcardsexample.identityverification.identityVerification
 import com.sudoplatform.virtualcardsexample.sudos.sudos
+import com.sudoplatform.virtualcardsexample.virtualcards.orphanVirtualCards
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -24,8 +24,6 @@ import timber.log.Timber
 
 /**
  * Test navigation from the main menu screen to all the other screens in the app.
- *
- * @since 2020-07-07
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -77,9 +75,9 @@ class MainMenuTest {
         }
         mainMenu {
             checkMainMenuItemsDisplayed()
-            navigateToOrphanCardsScreen()
+            navigateToOrphanVirtualCardsScreen()
         }
-        orphanCards {
+        orphanVirtualCards {
             pressBack()
         }
         mainMenu {

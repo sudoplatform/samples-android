@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.Transaction
+import com.sudoplatform.sudovirtualcards.types.TransactionType
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.databinding.LayoutTransactionCellBinding
 import java.util.Date
@@ -46,8 +47,8 @@ class TransactionViewHolder(private val binding: LayoutTransactionCellBinding) :
 
     fun bind(transaction: Transaction) {
         val description = when (transaction.type) {
-            Transaction.Type.DECLINE -> binding.root.context.getString(R.string.declined_transaction_desc, transaction.description)
-            Transaction.Type.REFUND -> binding.root.context.getString(R.string.refunded_transaction_desc, transaction.description)
+            TransactionType.DECLINE -> binding.root.context.getString(R.string.declined_transaction_desc, transaction.description)
+            TransactionType.REFUND -> binding.root.context.getString(R.string.refunded_transaction_desc, transaction.description)
             else -> transaction.description
         }
         binding.descriptionLabel.text = description

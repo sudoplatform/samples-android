@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,8 +20,6 @@ fun createFundingSource(func: CreateFundingSourceRobot.() -> Unit) = CreateFundi
 
 /**
  * Testing robot that manages the Create Funding Source screen.
- *
- * @since 2020-07-29
  */
 class CreateFundingSourceRobot : BaseRobot() {
 

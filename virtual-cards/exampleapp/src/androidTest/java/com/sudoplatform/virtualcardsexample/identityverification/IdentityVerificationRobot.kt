@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,8 +19,6 @@ fun identityVerification(func: IdentityVerificationRobot.() -> Unit) = IdentityV
 
 /**
  * Testing robot that manages the Secure Identity Verification screen.
- *
- * @since 2020-07-29
  */
 class IdentityVerificationRobot : BaseRobot() {
     private val loadingDialog = withId(R.id.progressBar)
@@ -39,9 +37,9 @@ class IdentityVerificationRobot : BaseRobot() {
     fun checkIdentityVerificationItemsDisplayed() {
         waitForViewToDisplay(toolBarVerifyButton)
         waitForViewToDisplay(inputFormRecyclerView)
-        waitForViewToDisplay(learnMoreTextView)
         waitForViewToDisplay(statusLabel)
         scrollToView(learnMoreButton)
+        waitForViewToDisplay(learnMoreTextView)
         waitForViewToDisplay(learnMoreButton)
     }
 

@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,10 +22,11 @@ import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
-import com.sudoplatform.sudovirtualcards.types.Card
+import com.sudoplatform.sudovirtualcards.types.ListAPIResult
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.databinding.FragmentOrphanCardsBinding
+import com.sudoplatform.virtualcardsexample.databinding.FragmentOrphanVirtualCardsBinding
 import com.sudoplatform.virtualcardsexample.mainmenu.MainMenuFragment
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
@@ -38,19 +39,20 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [OrphanCardsFragment] presents a list of orphan [Card]s which are associated with
- * deleted Sudos.
+ * This [OrphanVirtualCardsFragment] presents a list of orphan [VirtualCard]s which are associated
+ * with deleted Sudos.
  *
  * - Links From:
- *  - [MainMenuFragment]: A user chooses the "Orphan Cards" option from the main menu which will show
- *   this view with the list of orphan cards. The orphan card's [Card.alias] property is used as the
- *   text for each card.
+ *  - [MainMenuFragment]: A user chooses the "Orphan Virtual Cards" option from the main menu which
+ *   will show this view with the list of orphan virtual cards. The orphan card's [VirtualCard.metadata]
+ *   property is used as the text for each virtual card.
  *
  * - Links To:
- *  - [CardDetailFragment]: If a user chooses an orphan [Card] from the list, the [CardDetailFragment]
- *   will be presented so the user can view card details and transactions.
+ *  - [VirtualCardDetailFragment]: If a user chooses an orphan [VirtualCard] from the list, the
+ *   [VirtualCardDetailFragment] will be presented so the user can view virtual card details and
+ *   transactions.
  */
-class OrphanCardsFragment : Fragment(), CoroutineScope {
+class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -61,14 +63,14 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentOrphanCardsBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentOrphanVirtualCardsBinding>()
     private val binding by bindingDelegate
 
-    /** A reference to the [RecyclerView.Adapter] handling orphan [Card] data. */
-    private lateinit var adapter: CardAdapter
+    /** A reference to the [RecyclerView.Adapter] handling orphan [VirtualCard] data. */
+    private lateinit var adapter: VirtualCardAdapter
 
-    /** A mutable list of orphan [Card]s that are associated with a deleted [Sudo]'s identifier. */
-    private var orphanCardList = mutableListOf<Card>()
+    /** A mutable list of orphan [VirtualCard]s that are associated with a deleted [Sudo]'s identifier. */
+    private var orphanCardList = mutableListOf<VirtualCard>()
 
     /** A mutable list of [Sudo]s to check for deleted [Sudo]s. */
     private var sudoList = mutableListOf<Sudo>()
@@ -78,9 +80,9 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        bindingDelegate.attach(FragmentOrphanCardsBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentOrphanVirtualCardsBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
-            title = getString(R.string.orphan_cards)
+            title = getString(R.string.orphan_virtual_cards)
         }
         app = requireActivity().application as App
         return binding.root
@@ -92,7 +94,7 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
         navController = Navigation.findNavController(view)
 
         listSudos(ListOption.REMOTE_ONLY)
-        listOrphanCards(CachePolicy.REMOTE_ONLY)
+        listOrphanVirtualCards(CachePolicy.REMOTE_ONLY)
     }
 
     override fun onDestroy() {
@@ -103,32 +105,46 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * List orphan [Card]s from the [SudoVirtualCardsClient].
+     * List orphan [VirtualCard]s from the [SudoVirtualCardsClient].
      *
-     * @param cachePolicy Option of either retrieving [Card] data from the cache or network.
+     * @param cachePolicy Option of either retrieving [VirtualCard] data from the cache or network.
      */
-    private fun listOrphanCards(cachePolicy: CachePolicy) {
+    private fun listOrphanVirtualCards(cachePolicy: CachePolicy) {
         launch {
             try {
                 showLoading()
-                val orphanCards = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listCards(cachePolicy = cachePolicy)
+                val orphanVirtualCards = withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.listVirtualCards(cachePolicy = cachePolicy)
                 }
-                orphanCardList.clear()
-                val sudoIds = sudoList.map { it.id ?: "" }
-                for (card in orphanCards.items) {
-                    if (card.owners.all { !sudoIds.contains(it.id) }) {
-                        orphanCardList.add(card)
+                when (orphanVirtualCards) {
+                    is ListAPIResult.Success -> {
+                        orphanCardList.clear()
+                        val sudoIds = sudoList.map { it.id ?: "" }
+                        for (card in orphanVirtualCards.result.items) {
+                            if (card.owners.all { !sudoIds.contains(it.id) }) {
+                                orphanCardList.add(card)
+                            }
+                        }
+                        setEmptyOrphanVirtualCardsLabel()
+                        adapter.notifyDataSetChanged()
+                    }
+                    is ListAPIResult.Partial -> {
+                        val cause = orphanVirtualCards.result.failed.first().cause
+                        showAlertDialog(
+                            titleResId = R.string.list_orphan_virtual_cards_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { listOrphanVirtualCards(CachePolicy.REMOTE_ONLY) },
+                            negativeButtonResId = android.R.string.cancel
+                        )
                     }
                 }
-                setEmptyOrphanCardsLabel()
-                adapter.notifyDataSetChanged()
-            } catch (e: SudoVirtualCardsClient.CardException) {
+            } catch (e: SudoVirtualCardsClient.VirtualCardException) {
                 showAlertDialog(
-                    titleResId = R.string.list_orphan_cards_failure,
+                    titleResId = R.string.list_orphan_virtual_cards_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listOrphanCards(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listOrphanVirtualCards(CachePolicy.REMOTE_ONLY) },
                     negativeButtonResId = android.R.string.cancel
                 )
             }
@@ -160,29 +176,30 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Configures the [RecyclerView] used to display the listed orphan [Card] items and listens to
-     * item select events to navigate to the [CardDetailFragment].
+     * Configures the [RecyclerView] used to display the listed orphan [VirtualCard] items and listens
+     * to item select events to navigate to the [VirtualCardDetailFragment].
      */
     private fun configureRecyclerView() {
         adapter =
-            CardAdapter(orphanCardList) { card ->
+            VirtualCardAdapter(orphanCardList) { virtualCard ->
                 navController.navigate(
-                    OrphanCardsFragmentDirections.actionOrphanCardsFragmentToCardDetailFragment(
-                        card
-                    )
+                    OrphanVirtualCardsFragmentDirections
+                        .actionOrphanVirtualCardsFragmentToVirtualCardDetailFragment(
+                            virtualCard
+                        )
                 )
             }
-        binding.orphanCardRecyclerView.adapter = adapter
-        binding.orphanCardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.orphanVirtualCardRecyclerView.adapter = adapter
+        binding.orphanVirtualCardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    /** Set the visibility of the [emptyCardsLabel] in the view. */
-    private fun setEmptyOrphanCardsLabel() {
+    /** Set the visibility of the [emptyVirtualCardsLabel] in the view. */
+    private fun setEmptyOrphanVirtualCardsLabel() {
         if (bindingDelegate.isAttached()) {
             if (orphanCardList.isEmpty()) {
-                binding.emptyCardsLabel.visibility = View.VISIBLE
+                binding.emptyVirtualCardsLabel.visibility = View.VISIBLE
             } else {
-                binding.emptyCardsLabel.visibility = View.GONE
+                binding.emptyVirtualCardsLabel.visibility = View.GONE
             }
         }
     }
@@ -193,7 +210,7 @@ class OrphanCardsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        binding.orphanCardRecyclerView.isEnabled = isEnabled
+        binding.orphanVirtualCardRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */

@@ -8,7 +8,7 @@
     <string name="secure_id_verification">Secure ID Verification</string>
     <string name="funding_sources">Funding Sources</string>
     <string name="sudos">Sudos</string>
-    <string name="orphan_cards">Orphan Cards</string>
+    <string name="orphan_virtual_cards">Orphan Virtual Cards</string>
     <string name="learn_more">Learn More</string>
     <string name="validate_fields">Please ensure all required fields are filled out.</string>
     <string name="address_line_2">Address Line 2</string>
@@ -17,10 +17,15 @@
 
     <!-- RegisterFragment -->
     <string name="sample_app">Sample App</string>
+    <string name="registration_method">Registration Method</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
+    <string name="sign_out">Sign Out</string>
     <string name="signin_failure">Failed to Sign In: %1$s</string>
     <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
+    <string name="reset">Reset</string>
 
     <!-- MainMenuFragment -->
     <string name="virtual_card_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards</string>
@@ -87,28 +92,28 @@
     <string name="create_funding_source_learn_more">A Funding source is required to link a real credit or debit card to a virtual card. This funding source is used to fund a transaction performed on the virtual card.</string>
     <string name="create_funding_source_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-funding-sources#creating-a-funding-source</string>
 
-    <!-- CardsFragment -->
-    <string name="loading_cards">Loading Cards</string>
+    <!-- VirtualCardsFragment -->
+    <string name="loading_virtual_cards">Loading Virtual Cards</string>
     <string name="create_virtual_card_button">+ Create Virtual Card</string>
-    <string name="cancelling_card">Cancelling card&#8230;</string>
-    <string name="creating_card">Creating virtual card&#8230;</string>
-    <string name="list_cards_failure">Failed to list cards</string>
-    <string name="cancel_card_failure">Failed to cancel card</string>
-    <string name="card_label">%1$s</string>
-    <string name="card_cancelled_label">%1$s - Cancelled</string>
+    <string name="cancelling_virtual_card">Cancelling virtual card&#8230;</string>
+    <string name="creating_virtual_card">Creating virtual card&#8230;</string>
+    <string name="list_virtual_cards_failure">Failed to list virtual cards</string>
+    <string name="cancel_virtual_card_failure">Failed to cancel virtual card</string>
+    <string name="virtual_card_label">%1$s</string>
+    <string name="virtual_card_cancelled_label">%1$s - Cancelled</string>
 
-    <!-- CreateCardFragment -->
+    <!-- CreateVirtualCardFragment -->
     <string name="create_virtual_card">Create Virtual Card</string>
-    <string name="create_card_failure">Failed to create virtual card</string>
+    <string name="create_virtual_card_failure">Failed to create virtual card</string>
     <string name="sudo">Sudo</string>
     <string name="funding_source">Funding Source</string>
     <string name="load_funding_source_error">Funding source cannot be found</string>
-    <string name="sudo_id_error">Sudo id cannot be found</string>
-    <string name="missing_funding_source">Funding Source is required to add a card</string>
-    <string name="create_card_learn_more">Virtual cards are the cornerstone of the Virtual Cards SDK. Virtual cards can be used as a proxy between a user\'s personal funding source and online merchants.</string>
-    <string name="create_card_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-virtual-cards#creating-a-virtual-card</string>
+    <string name="ownership_proof_error">Ownership proof cannot be found</string>
+    <string name="missing_funding_source">Funding Source is required to add a virtual card</string>
+    <string name="create_virtual_card_learn_more">Virtual cards are the cornerstone of the Virtual Cards SDK. Virtual cards can be used as a proxy between a user\'s personal funding source and online merchants.</string>
+    <string name="create_virtual_card_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-virtual-cards#creating-a-virtual-card</string>
 
-    <!-- CardDetailFragment -->
+    <!-- VirtualCardDetailFragment -->
     <string name="trademark_label">Mastercard&#9415; Virtual Card</string>
     <string name="card_name">Card Name</string>
     <string name="account_number">ACCOUNT NUMBER</string>
@@ -117,7 +122,7 @@
     <string name="card_holder_name">Cardholder name</string>
     <string name="powered_sudo_platform">Powered by Sudo Platform</string>
     <string name="transactions">Transactions</string>
-    <string name="card_detail">Card Detail</string>
+    <string name="virtual_card_detail">Virtual Card Detail</string>
     <string name="security_code_placeholder">123</string>
     <string name="expiry_date_placeholder">10/20</string>
     <string name="account_number_placeholder">1234 1234 1234 1234</string>
@@ -149,10 +154,10 @@
     <string name="date_declined">Date declined</string>
     <string name="decline_reason">Decline reason</string>
 
-    <!-- OrphanCardsFragment -->
-    <string name="loading_orphan_cards">Loading Orphan Cards</string>
-    <string name="list_orphan_cards_failure">Failed to list orphan cards</string>
-    <string name="no_orphan_cards">There are no orphan cards to view</string>
+    <!-- OrphanVirtualCardsFragment -->
+    <string name="loading_orphan_virtual_cards">Loading Orphan Virtual Cards</string>
+    <string name="list_orphan_virtual_cards_failure">Failed to list orphan virtual cards</string>
+    <string name="no_orphan_virtual_cards">There are no orphan virtual cards to view</string>
 
     <!-- Layout -->
     <string name="item_name">Item Name</string>

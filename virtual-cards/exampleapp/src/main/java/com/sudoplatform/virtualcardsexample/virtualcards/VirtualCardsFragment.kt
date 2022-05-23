@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,11 +22,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
-import com.sudoplatform.sudovirtualcards.types.Card
+import com.sudoplatform.sudovirtualcards.types.ListAPIResult
+import com.sudoplatform.sudovirtualcards.types.SingleAPIResult
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
-import com.sudoplatform.virtualcardsexample.databinding.FragmentCardsBinding
+import com.sudoplatform.virtualcardsexample.databinding.FragmentVirtualCardsBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.sudos.CreateSudoFragment
 import com.sudoplatform.virtualcardsexample.sudos.SudosFragment
@@ -41,20 +43,21 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [CardsFragment] presents a list of [Card]s.
+ * This [VirtualCardsFragment] presents a list of [VirtualCard]s.
  *
  * - Links From:
  *  - [CreateSudoFragment]: A user chooses the "Create" option from the top right corner of the toolbar.
  *  - [SudosFragment]: A user selects a [Sudo] from the list which will show this view with the list of
- *   [Card]s created against this [Sudo]. The card's alias property is used as the text for each card.
+ *   [VirtualCard]s created against this [Sudo]. The [VirtualCard.metadata] property is used as the text
+ *   for each virtual card.
  *
  * - Links To:
- *  - [CreateCardFragment]: If a user taps the "Create Virtual Card" button, the [CreateCardFragment]
- *   will be presented so that the user can add a new [Card] to their [Sudo].
- *  - [CardDetailFragment]: If a user selects a [Card] from the list, the [CardDetailFragment] will
- *   be presented so that the user can view card details and transactions.
+ *  - [CreateVirtualCardFragment]: If a user taps the "Create Virtual Card" button, the [CreateVirtualCardFragment]
+ *   will be presented so that the user can add a new [VirtualCard] to their [Sudo].
+ *  - [VirtualCardDetailFragment]: If a user selects a [VirtualCard] from the list, the [VirtualCardDetailFragment]
+ *   will be presented so that the user can view virtual card details and transactions.
  */
-class CardsFragment : Fragment(), CoroutineScope {
+class VirtualCardsFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -65,35 +68,35 @@ class CardsFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentCardsBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentVirtualCardsBinding>()
     private val binding by bindingDelegate
 
-    /** A reference to the [RecyclerView.Adapter] handling [Card] data. */
-    private lateinit var adapter: CardAdapter
+    /** A reference to the [RecyclerView.Adapter] handling [VirtualCard] data. */
+    private lateinit var adapter: VirtualCardAdapter
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
     private var loading: AlertDialog? = null
 
-    /** A mutable list of [Card]s. */
-    private var cardList = mutableListOf<Card>()
+    /** A mutable list of [VirtualCard]s. */
+    private var virtualCardList = mutableListOf<VirtualCard>()
 
     /** Fragment arguments handled by Navigation Library safe args */
-    private val args: CardsFragmentArgs by navArgs()
+    private val args: VirtualCardsFragmentArgs by navArgs()
 
-    /** A [Sudo] identifier used to filter [Card]s. */
-    private lateinit var sudoId: String
+    /** A [Sudo] used to filter [VirtualCard]s. */
+    private lateinit var sudo: Sudo
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        bindingDelegate.attach(FragmentCardsBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentVirtualCardsBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.virtual_cards)
         }
         app = requireActivity().application as App
-        sudoId = args.sudoId
+        sudo = args.sudo!!
         return binding.root
     }
 
@@ -101,11 +104,10 @@ class CardsFragment : Fragment(), CoroutineScope {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
-        val sudoLabel = args.sudoLabel
 
-        binding.createCardButton.setOnClickListener {
+        binding.createVirtualCardButton.setOnClickListener {
             navController.navigate(
-                CardsFragmentDirections.actionCardsFragmentToCreateCardFragment(sudoId, sudoLabel)
+                VirtualCardsFragmentDirections.actionVirtualCardsFragmentToCreateVirtualCardFragment(sudo)
             )
         }
 
@@ -121,27 +123,41 @@ class CardsFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * List [Card]s from the [SudoVirtualCardsClient].
+     * List [VirtualCard]s from the [SudoVirtualCardsClient].
      *
-     * @param cachePolicy Option of either retrieving [Card] data from the cache or network.
+     * @param cachePolicy Option of either retrieving [VirtualCard] data from the cache or network.
      */
     private fun listCards(cachePolicy: CachePolicy) {
         launch {
             try {
                 showLoading()
-                val cards = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listCards(cachePolicy = cachePolicy)
+                val virtualCards = withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.listVirtualCards(cachePolicy = cachePolicy)
                 }
-                cardList.clear()
-                for (card in cards.items) {
-                    if (card.owners.all { it.id == sudoId }) {
-                        cardList.add(card)
+                when (virtualCards) {
+                    is ListAPIResult.Success -> {
+                        virtualCardList.clear()
+                        for (card in virtualCards.result.items) {
+                            if (card.owners.all { it.id == sudo.id }) {
+                                virtualCardList.add(card)
+                            }
+                        }
+                        adapter.notifyDataSetChanged()
+                    }
+                    is ListAPIResult.Partial -> {
+                        val cause = virtualCards.result.failed.first().cause
+                        showAlertDialog(
+                            titleResId = R.string.list_virtual_cards_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { listCards(CachePolicy.REMOTE_ONLY) },
+                            negativeButtonResId = android.R.string.cancel
+                        )
                     }
                 }
-                adapter.notifyDataSetChanged()
-            } catch (e: SudoVirtualCardsClient.CardException) {
+            } catch (e: SudoVirtualCardsClient.VirtualCardException) {
                 showAlertDialog(
-                    titleResId = R.string.list_cards_failure,
+                    titleResId = R.string.list_virtual_cards_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listCards(CachePolicy.REMOTE_ONLY) },
@@ -153,28 +169,41 @@ class CardsFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Cancel a [Card] from the [SudoVirtualCardsClient] based on the input [id].
+     * Cancel a [VirtualCard] from the [SudoVirtualCardsClient] based on the input [id].
      *
-     * @param id The identifier of the [Card] to cancel.
+     * @param id The identifier of the [VirtualCard] to cancel.
      * @param completion Callback which executes when the operation is completed.
      */
-    private fun cancelCard(id: String, completion: (Card) -> Unit) {
+    private fun cancelVirtualCard(id: String, completion: (VirtualCard) -> Unit) {
         launch {
             try {
-                showCancelAlert(R.string.cancelling_card)
-                val card = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.cancelCard(id)
+                showCancelAlert(R.string.cancelling_virtual_card)
+                val virtualCard = withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.cancelVirtualCard(id)
                 }
-                completion(card)
+                when (virtualCard) {
+                    is SingleAPIResult.Success -> {
+                        completion(virtualCard.result)
+                        hideCancelAlert()
+                        showAlertDialog(
+                            titleResId = R.string.success,
+                            positiveButtonResId = android.R.string.ok
+                        )
+                    }
+                    is SingleAPIResult.Partial -> {
+                        val cause = virtualCard.result.cause
+                        hideCancelAlert()
+                        showAlertDialog(
+                            titleResId = R.string.cancel_virtual_card_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            negativeButtonResId = android.R.string.cancel
+                        )
+                    }
+                }
+            } catch (e: SudoVirtualCardsClient.VirtualCardException) {
                 hideCancelAlert()
                 showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok
-                )
-            } catch (e: SudoVirtualCardsClient.CardException) {
-                hideCancelAlert()
-                showAlertDialog(
-                    titleResId = R.string.cancel_card_failure,
+                    titleResId = R.string.cancel_virtual_card_failure,
                     message = e.localizedMessage ?: "$e",
                     negativeButtonResId = android.R.string.cancel
                 )
@@ -183,18 +212,19 @@ class CardsFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Configures the [RecyclerView] used to display the listed [Card] items and listens to item
-     * select events to navigate to the [CardDetailFragment].
+     * Configures the [RecyclerView] used to display the listed [VirtualCard] items and listens to
+     * item select events to navigate to the [VirtualCardDetailFragment].
      */
     private fun configureRecyclerView() {
         adapter =
-            CardAdapter(cardList) { card ->
+            VirtualCardAdapter(virtualCardList) { virtualCard ->
                 navController.navigate(
-                    CardsFragmentDirections.actionCardsFragmentToCardDetailFragment(card)
+                    VirtualCardsFragmentDirections
+                        .actionVirtualCardsFragmentToVirtualCardDetailFragment(virtualCard)
                 )
             }
-        binding.cardRecyclerView.adapter = adapter
-        binding.cardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.virtualCardRecyclerView.adapter = adapter
+        binding.virtualCardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToCancel()
     }
 
@@ -204,8 +234,8 @@ class CardsFragment : Fragment(), CoroutineScope {
      * @param isEnabled If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
-        binding.createCardButton.isEnabled = isEnabled
-        binding.cardRecyclerView.isEnabled = isEnabled
+        binding.createVirtualCardButton.isEnabled = isEnabled
+        binding.virtualCardRecyclerView.isEnabled = isEnabled
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
@@ -215,7 +245,7 @@ class CardsFragment : Fragment(), CoroutineScope {
         }
         binding.progressBar.visibility = View.VISIBLE
         binding.progressText.visibility = View.VISIBLE
-        binding.cardRecyclerView.visibility = View.GONE
+        binding.virtualCardRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
@@ -224,7 +254,7 @@ class CardsFragment : Fragment(), CoroutineScope {
         if (bindingDelegate.isAttached()) {
             binding.progressBar.visibility = View.GONE
             binding.progressText.visibility = View.GONE
-            binding.cardRecyclerView.visibility = View.VISIBLE
+            binding.virtualCardRecyclerView.visibility = View.VISIBLE
             setItemsEnabled(true)
         }
     }
@@ -249,16 +279,16 @@ class CardsFragment : Fragment(), CoroutineScope {
      */
     private fun configureSwipeToCancel() {
         val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
-        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.cardRecyclerView)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.virtualCardRecyclerView)
     }
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val card = cardList[viewHolder.adapterPosition]
-        cancelCard(card.id) { cancelledCard ->
+        val card = virtualCardList[viewHolder.adapterPosition]
+        cancelVirtualCard(card.id) { cancelledCard ->
             val position = viewHolder.adapterPosition
-            cardList.removeAt(position)
+            virtualCardList.removeAt(position)
             adapter.notifyItemRemoved(position)
-            cardList.add(position, cancelledCard)
+            virtualCardList.add(position, cancelledCard)
             adapter.notifyItemInserted(position)
         }
     }

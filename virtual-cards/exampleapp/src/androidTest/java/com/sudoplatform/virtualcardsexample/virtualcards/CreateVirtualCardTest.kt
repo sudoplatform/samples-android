@@ -1,10 +1,10 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.virtualcardsexample.cards
+package com.sudoplatform.virtualcardsexample.virtualcards
 
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -26,12 +26,10 @@ import timber.log.Timber
 
 /**
  * Test the virtual card creation flow.
- *
- * @since 2020-07-29
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class CreateCardTest {
+class CreateVirtualCardTest {
 
     @get:Rule
     val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
@@ -53,7 +51,7 @@ class CreateCardTest {
     }
 
     @Test
-    fun testCreateAndCancelCard() {
+    fun testCreateAndCancelVirtualCard() {
         mainMenu {
             navigateFromLaunchToMainMenu()
             navigateToIdentityVerificationScreen()
@@ -98,42 +96,42 @@ class CreateCardTest {
             waitForLoading()
             clickPositiveAlertDialogButton()
         }
-        cards {
+        virtualCards {
             waitForLoading()
-            checkCardsItemsDisplayed()
-            navigateToCreateCardScreen()
+            checkVirtualCardsItemsDisplayed()
+            navigateToCreateVirtualCardScreen()
         }
-        createCard {
+        createVirtualCard {
             clickCreateButton()
             waitForLoading()
             clickPositiveAlertDialogButton()
         }
-        cardDetail {
-            checkCardDetailItemsDisplayed()
+        virtualCardDetail {
+            checkVirtualCardDetailItemsDisplayed()
             pressBack()
         }
-        cards {
+        virtualCards {
             waitForRecyclerView()
-            checkCardsItemsDisplayed()
+            checkVirtualCardsItemsDisplayed()
             pressBack()
         }
         sudos {
             waitForLoading()
             waitForRecyclerView()
             checkSudosItemsDisplayed()
-            navigateToCardsScreen(0)
+            navigateToVirtualCardsScreen(0)
         }
-        cards {
+        virtualCards {
             waitForRecyclerView()
-            navigateToCardDetailScreen(0)
+            navigateToVirtualCardDetailScreen(0)
         }
-        cardDetail {
-            checkCardDetailItemsDisplayed()
+        virtualCardDetail {
+            checkVirtualCardDetailItemsDisplayed()
             pressBack()
         }
-        cards {
+        virtualCards {
             waitForRecyclerView()
-            checkCardsItemsDisplayed()
+            checkVirtualCardsItemsDisplayed()
             swipeLeftToCancel(0)
             waitForLoading()
             clickOnPositiveAlertDialogButton()
@@ -147,7 +145,7 @@ class CreateCardTest {
     }
 
     @Test
-    fun testCreateCardAndDeleteSudo() {
+    fun testCreateVirtualCardAndDeleteSudo() {
         mainMenu {
             navigateFromLaunchToMainMenu()
             navigateToIdentityVerificationScreen()
@@ -193,23 +191,23 @@ class CreateCardTest {
             waitForLoading()
             clickPositiveAlertDialogButton()
         }
-        cards {
+        virtualCards {
             waitForLoading()
-            checkCardsItemsDisplayed()
-            navigateToCreateCardScreen()
+            checkVirtualCardsItemsDisplayed()
+            navigateToCreateVirtualCardScreen()
         }
-        createCard {
+        createVirtualCard {
             clickCreateButton()
             waitForLoading()
             clickPositiveAlertDialogButton()
         }
-        cardDetail {
-            checkCardDetailItemsDisplayed()
+        virtualCardDetail {
+            checkVirtualCardDetailItemsDisplayed()
             pressBack()
         }
-        cards {
+        virtualCards {
             waitForRecyclerView()
-            checkCardsItemsDisplayed()
+            checkVirtualCardsItemsDisplayed()
             pressBack()
         }
         sudos {
@@ -222,17 +220,17 @@ class CreateCardTest {
         }
         mainMenu {
             checkMainMenuItemsDisplayed()
-            navigateToOrphanCardsScreen()
+            navigateToOrphanVirtualCardsScreen()
         }
-        orphanCards {
+        orphanVirtualCards {
             waitForRecyclerView()
-            navigateToCardDetailScreen(0)
+            navigateToVirtualCardDetailScreen(0)
         }
-        cardDetail {
-            checkCardDetailItemsDisplayed()
+        virtualCardDetail {
+            checkVirtualCardDetailItemsDisplayed()
             pressBack()
         }
-        orphanCards {
+        orphanVirtualCards {
             pressBack()
         }
     }

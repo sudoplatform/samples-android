@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,16 +21,17 @@ import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
-import com.sudoplatform.sudovirtualcards.types.Card
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.Transaction
+import com.sudoplatform.sudovirtualcards.types.TransactionType
+import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
-import com.sudoplatform.virtualcardsexample.cards.CardDetailFragment
 import com.sudoplatform.virtualcardsexample.databinding.FragmentTransactionDetailBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
+import com.sudoplatform.virtualcardsexample.virtualcards.VirtualCardDetailFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,8 +43,8 @@ import kotlin.coroutines.CoroutineContext
  * This [TransactionDetailFragment] presents a list of transaction details.
  *
  * - Links From:
- *  - [CardDetailFragment]: A user selects a [Transaction] from the list which will show this view
- *    with the list of transaction details.
+ *  - [VirtualCardDetailFragment]: A user selects a [Transaction] from the list which will show this
+ *    view with the list of transaction details.
  */
 class TransactionDetailFragment : Fragment(), CoroutineScope {
 
@@ -81,24 +82,24 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val transaction = args.transaction!!
-        val card = args.card!!
+        val card = args.virtualCard!!
         configureRecyclerView()
         configureTransactionDetailCells(transaction)
         configureAccountDetails(card)
     }
 
     /**
-     * Retrieve the [Sudo] from the [SudoProfilesClient] associated with the selected [Card].
+     * Retrieve the [Sudo] from the [SudoProfilesClient] associated with the selected [VirtualCard].
      *
-     * @param card The selected [Card].
+     * @param virtualCard The selected [VirtualCard].
      */
-    private fun retrieveAssociatedSudo(card: Card) {
+    private fun retrieveAssociatedSudo(virtualCard: VirtualCard) {
         launch {
             try {
                 val sudoList = withContext(Dispatchers.IO) {
                     app.sudoProfilesClient.listSudos(ListOption.REMOTE_ONLY)
                 }.toMutableList()
-                val sudo = sudoList.firstOrNull { sudo -> card.owners.all { it.id == sudo.id } }
+                val sudo = sudoList.firstOrNull { sudo -> virtualCard.owners.all { it.id == sudo.id } }
                 if (sudo != null) {
                     binding.sudoLabel.text = sudo.label
                 }
@@ -113,15 +114,16 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Retrieve the [FundingSource] from the [SudoVirtualCardsClient] used to fund the selected [Card].
+     * Retrieve the [FundingSource] from the [SudoVirtualCardsClient] used to fund the selected
+     * [VirtualCard].
      *
-     * @param card The selected [Card].
+     * @param virtualCard The selected [VirtualCard].
      */
-    private fun retrieveAssociatedFundingSource(card: Card) {
+    private fun retrieveAssociatedFundingSource(virtualCard: VirtualCard) {
         launch {
             try {
                 val fundingSource = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.getFundingSource(card.fundingSourceId, cachePolicy = CachePolicy.REMOTE_ONLY)
+                    app.sudoVirtualCardsClient.getFundingSource(virtualCard.fundingSourceId, cachePolicy = CachePolicy.REMOTE_ONLY)
                 }
                 if (fundingSource != null) {
                     binding.fundingSourceLabel.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
@@ -151,7 +153,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     private fun configureTransactionDetailCells(transaction: Transaction) {
         val merchantCell = TransactionDetailCell(getString(R.string.merchant), "", transaction.description)
         val statusCell = TransactionDetailCell(getString(R.string.status), "", transaction.type.name)
-        if (transaction.type == Transaction.Type.DECLINE) {
+        if (transaction.type == TransactionType.DECLINE) {
             val declineReasonCell = TransactionDetailCell(getString(R.string.decline_reason), "", transaction.declineReason?.description(requireContext()) ?: getString(R.string.dr_declined))
             transactionDetailCells.add(declineReasonCell)
         }
@@ -161,7 +163,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
         val amountCell = TransactionDetailCell(getString(R.string.amount), "", formatCurrencyAmount(transactionDetail.virtualCardAmount))
         transactionDetailCells.add(amountCell)
         when (transaction.type) {
-            Transaction.Type.PENDING, Transaction.Type.COMPLETE -> {
+            TransactionType.PENDING, TransactionType.COMPLETE -> {
                 val feePercentStr = "%.2f%%".format((transactionDetail.markup.percent / 1000.0))
                 val feeFlatStr = "$%.2f".format((transactionDetail.markup.flat / 100.0))
                 val serviceFeeSubtitle = "$feePercentStr + $feeFlatStr"
@@ -180,19 +182,19 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
      */
     private fun configureTransactionDateCells(transaction: Transaction) {
         when (transaction.type) {
-            Transaction.Type.PENDING -> {
+            TransactionType.PENDING -> {
                 val dateChargedCell = TransactionDetailCell(getString(R.string.date_charged), "", formatDate(transaction.transactedAt))
                 transactionDetailCells.add(dateChargedCell)
             }
-            Transaction.Type.COMPLETE -> {
+            TransactionType.COMPLETE -> {
                 val dateSettledCell = TransactionDetailCell(getString(R.string.date_settled), "", formatDate(transaction.transactedAt))
                 transactionDetailCells.add(dateSettledCell)
             }
-            Transaction.Type.REFUND -> {
+            TransactionType.REFUND -> {
                 val dateRefundedCell = TransactionDetailCell(getString(R.string.date_refunded), "", formatDate(transaction.transactedAt))
                 transactionDetailCells.add(dateRefundedCell)
             }
-            Transaction.Type.DECLINE -> {
+            TransactionType.DECLINE -> {
                 val dateDeclinedCell = TransactionDetailCell(getString(R.string.date_declined), "", formatDate(transaction.transactedAt))
                 transactionDetailCells.add(dateDeclinedCell)
             }
@@ -201,14 +203,14 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Configures the labels and value text of [Sudo], [FundingSource] and [Card] details.
+     * Configures the labels and value text of [Sudo], [FundingSource] and [VirtualCard] details.
      *
-     * @param card The selected [Card] to display its associated account details.
+     * @param virtualCard The selected [VirtualCard] to display its associated account details.
      */
-    private fun configureAccountDetails(card: Card) {
-        binding.cardLabel.text = card.alias
-        retrieveAssociatedFundingSource(card)
-        retrieveAssociatedSudo(card)
+    private fun configureAccountDetails(virtualCard: VirtualCard) {
+        binding.virtualCardLabel.text = virtualCard.metadata?.unwrap().toString()
+        retrieveAssociatedFundingSource(virtualCard)
+        retrieveAssociatedSudo(virtualCard)
     }
 
     /**
