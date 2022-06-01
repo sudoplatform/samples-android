@@ -33,6 +33,8 @@ class App : Application(), CoroutineScope {
         const val SIGN_IN_PREFERENCES = "SignIn"
         /** True if Federated Single Sign On was used. */
         const val FSSO_USED_PREFERENCE = "usedFSSO"
+
+        const val version = "3.0.1"
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
