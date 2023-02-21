@@ -14,7 +14,8 @@
         tools:replace="android:allowBackup">
         <activity
             android:name="com.sudoplatform.virtualcardsexample.MainActivity"
-            android:theme="@style/AppThemeNoActionBar">
+            android:theme="@style/AppThemeNoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

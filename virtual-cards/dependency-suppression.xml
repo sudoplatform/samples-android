@@ -6,4 +6,60 @@
         ]]></notes>
         <cve>CVE-2021-22569</cve>
     </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: aws-android-sdk-appsync-api-3.3.2.jar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.amazonaws/aws\-android\-sdk\-appsync\-api@.*$</packageUrl>
+        <cve>CVE-2015-10043</cve>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: aws-android-sdk-appsync-runtime-3.3.2.jar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.amazonaws/aws\-android\-sdk\-appsync\-runtime@.*$</packageUrl>
+        <cve>CVE-2015-10043</cve>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: commons-codec-1.15.jar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-codec/commons\-codec@.*$</packageUrl>
+        <cve>CVE-2021-37533</cve>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: junit-4.12.jar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
+        <cve>CVE-2020-15250</cve>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: legacy-support-core-utils-1.0.0.aar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/androidx\.legacy/legacy\-support\-core\-utils@.*$</packageUrl>
+        <cve>CVE-2021-4277</cve>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: ui-1.1.1.aar: inspector.jar (shaded: com.google.protobuf:protobuf-javalite:3.10.0)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.google\.protobuf/protobuf\-javalite@.*$</packageUrl>
+        <cpe>cpe:/a:google:protobuf-java</cpe>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: ui-1.1.1.aar: inspector.jar (shaded: com.google.protobuf:protobuf-javalite:3.10.0)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.google\.protobuf/protobuf\-javalite@.*$</packageUrl>
+        <vulnerabilityName>CVE-2022-3171</vulnerabilityName>
+    </suppress>
+    <suppress until="2023-07-03">
+        <notes><![CDATA[
+        file name: ui-1.1.1.aar: inspector.jar (shaded: com.google.protobuf:protobuf-javalite:3.10.0)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.google\.protobuf/protobuf\-javalite@.*$</packageUrl>
+        <vulnerabilityName>CVE-2022-3510</vulnerabilityName>
+    </suppress>
 </suppressions>

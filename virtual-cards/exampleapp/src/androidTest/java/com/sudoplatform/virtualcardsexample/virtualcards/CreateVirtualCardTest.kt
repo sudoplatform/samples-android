@@ -102,6 +102,7 @@ class CreateVirtualCardTest {
             navigateToCreateVirtualCardScreen()
         }
         createVirtualCard {
+            waitForLoading()
             clickCreateButton()
             waitForLoading()
             clickPositiveAlertDialogButton()
@@ -197,6 +198,7 @@ class CreateVirtualCardTest {
             navigateToCreateVirtualCardScreen()
         }
         createVirtualCard {
+            waitForLoading()
             clickCreateButton()
             waitForLoading()
             clickPositiveAlertDialogButton()
