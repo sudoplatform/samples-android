@@ -59,13 +59,10 @@
         android:label="fragment_email_addresses"
         tools:layout="@layout/fragment_email_addresses" >
         <argument
-            android:name="sudoId"
-            app:argType="string"
-            app:nullable="false" />
-        <argument
-            android:name="sudoLabel"
-            app:argType="string"
-            android:defaultValue="None" />
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <argument
             android:name="emailAddress"
             app:argType="string"
@@ -89,12 +86,10 @@
         android:label="fragment_provision_email_address"
         tools:layout="@layout/fragment_provision_email_address" >
         <argument
-            android:name="sudoId"
-            app:argType="string" />
-        <argument
-            android:name="sudoLabel"
-            app:argType="string"
-            android:defaultValue="None" />
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_provisionEmailAddressFragment_to_emailAddressesFragment"
             app:destination="@id/emailAddressesFragment"

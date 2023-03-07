@@ -11,12 +11,18 @@
 
     <!-- RegisterFragment -->
     <string name="sample_app">Sample App</string>
+    <string name="registration_method">Registration Method</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
+    <string name="sign_out">Sign Out</string>
     <string name="signin_failure">Failed to Sign In: %1$s</string>
     <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
+    <string name="reset">Reset</string>
 
     <!-- MainMenuFragment -->
+    <string name="email_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email</string>
     <string name="deregister">Deregister</string>
     <string name="deregister_confirmation">Are you sure you want to deregister? All Sudos, email addresses and associated data will be deleted.</string>
     <string name="deregistering">Deregistering&#8230;</string>
@@ -28,6 +34,8 @@
     <string name="list_sudos_failure">Failed to list Sudos</string>
     <string name="delete_sudo_failure">Failed to delete Sudo</string>
     <string name="try_again">Try Again</string>
+    <string name="what_is_a_sudo">What is a Sudo?</string>
+    <string name="sudo_explanation">Email addresses must belong to a Sudo. A Sudo is a digital identity created and owned by a real person</string>
 
     <!-- CreateSudoFragment -->
     <string name="create_sudo_button">+ Create Sudo</string>
@@ -57,6 +65,7 @@
     <string name="provisioning_email_address">Provisioning email address&#8230;</string>
     <string name="provision_email_address_failure">Failed to provision an email address</string>
     <string name="check_address_availability_failure">Failed to retrieve available addresses</string>
+    <string name="ownership_proof_error">Ownership proof cannot be found</string>
     <string name="sudo">Sudo</string>
     <string name="provision_email_address_learn_more">Addresses from different configured domains can be provisioned and used to communicate with other recipients. Entering the local part of the email address above will perform an address availability check based on the currently configured domains.</string>
     <string name="provision_email_address_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email/manage-email-addresses</string>
@@ -65,11 +74,14 @@
     <string name="email_messages">Email Messages</string>
     <string name="loading_email_messages">Loading Email Messages</string>
     <string name="list_email_messages_failure">Failed to list email messages</string>
+    <string name="list_email_folders_failure">Failed to list email folders</string>
     <string name="from_recipient">From: %1$s</string>
     <string name="to_recipient">To: %1$s</string>
     <string name="no_subject">No Subject</string>
     <string name="deleting_email_message">Deleting email message&#8230;</string>
     <string name="deleting_email_message_failure">Failed to delete email message</string>
+    <string name="moving_email_message_to_trash">Moving to trash&#8230;</string>
+    <string name="moving_email_message_failure">Failed to move email message</string>
     <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
     <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
 
@@ -98,6 +110,7 @@
 
     <!-- Layout -->
     <string name="item_name">Item Name</string>
+    <string name="folder_name">Folder Name</string>
     <string name="placeholder">-</string>
     <string name="create">Create</string>
     <string name="recipient_placeholder">Recipient/s</string>

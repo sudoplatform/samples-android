@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -18,8 +18,6 @@ fun createSudo(func: CreateSudoRobot.() -> Unit) = CreateSudoRobot().apply { fun
 
 /**
  * Testing robot that manages the Create Sudo screen.
- *
- * @since 2020-08-06
  */
 class CreateSudoRobot : BaseRobot() {
 

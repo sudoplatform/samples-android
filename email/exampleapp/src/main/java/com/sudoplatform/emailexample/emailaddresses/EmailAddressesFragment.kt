@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -32,6 +32,8 @@ import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
+import com.sudoplatform.sudoemail.types.ListAPIResult
+import com.sudoplatform.sudoemail.types.inputs.ListEmailAddressesForSudoIdInput
 import com.sudoplatform.sudoprofiles.Sudo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -80,8 +82,8 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: EmailAddressesFragmentArgs by navArgs()
 
-    /** A [Sudo] identifier used to filter [EmailAddress]es. */
-    private lateinit var sudoId: String
+    /** A [Sudo] used to filter [EmailAddress]s. */
+    private lateinit var sudo: Sudo
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -93,7 +95,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
             title = getString(R.string.email_addresses)
         }
         app = requireActivity().application as App
-        sudoId = args.sudoId
+        sudo = args.sudo!!
         return binding.root
     }
 
@@ -101,14 +103,12 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
-        val sudoLabel = args.sudoLabel
 
         binding.createEmailAddressButton.setOnClickListener {
             navController.navigate(
                 EmailAddressesFragmentDirections
                     .actionEmailAddressesFragmentToProvisionEmailAddressFragment(
-                        sudoId,
-                        sudoLabel
+                        sudo
                     )
             )
         }
@@ -134,15 +134,29 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
             try {
                 showLoading()
                 val emailAddresses = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.listEmailAddresses(cachePolicy = cachePolicy)
+                    val input = ListEmailAddressesForSudoIdInput(
+                        sudoId = sudo.id!!,
+                        cachePolicy = cachePolicy
+                    )
+                    app.sudoEmailClient.listEmailAddressesForSudoId(input)
                 }
-                emailAddressList.clear()
-                for (emailAddress in emailAddresses.items) {
-                    if (emailAddress.owners.all { it.id == sudoId }) {
-                        emailAddressList.add(emailAddress)
+                when (emailAddresses) {
+                    is ListAPIResult.Success -> {
+                        emailAddressList.clear()
+                        emailAddressList.addAll(emailAddresses.result.items)
+                        adapter.notifyDataSetChanged()
+                    }
+                    is ListAPIResult.Partial -> {
+                        val cause = emailAddresses.result.failed.first().cause
+                        showAlertDialog(
+                            titleResId = R.string.list_email_addresses_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { listEmailAddresses(CachePolicy.REMOTE_ONLY) },
+                            negativeButtonResId = android.R.string.cancel
+                        )
                     }
                 }
-                adapter.notifyDataSetChanged()
             } catch (e: SudoEmailClient.EmailAddressException) {
                 showAlertDialog(
                     titleResId = R.string.list_email_addresses_failure,
@@ -157,7 +171,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * De-provision a selected [EmailAddress] from the [SudoEmailClient].
+     * Deprovision a selected [EmailAddress] from the [SudoEmailClient].
      *
      * @param emailAddressId The identifier of the [EmailAddress] to de-provision.
      */

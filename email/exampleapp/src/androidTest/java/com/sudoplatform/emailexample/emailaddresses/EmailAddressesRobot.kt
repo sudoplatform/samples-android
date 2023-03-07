@@ -1,12 +1,12 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.sudoplatform.emailexample.emailaddresses
 
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -18,8 +18,6 @@ fun emailAddresses(func: EmailAddressesRobot.() -> Unit) = EmailAddressesRobot()
 
 /**
  * Testing robot that manages the email addresses screen.
- *
- * @since 2020-08-6
  */
 class EmailAddressesRobot : BaseRobot() {
 
@@ -64,7 +62,8 @@ class EmailAddressesRobot : BaseRobot() {
     }
 
     fun swipeLeftToDelete(position: Int) {
-        Espresso.onView(emailAddressRecyclerView).perform(
+        checkRecyclerViewHasMinimumItemAmount(emailAddressRecyclerView, position + 1)
+        onView(emailAddressRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
                 position,
                 ViewActions.swipeLeft()
@@ -73,7 +72,8 @@ class EmailAddressesRobot : BaseRobot() {
     }
 
     private fun clickRecyclerViewItem(position: Int) {
-        Espresso.onView(emailAddressRecyclerView).perform(
+        checkRecyclerViewHasMinimumItemAmount(emailAddressRecyclerView, position + 1)
+        onView(emailAddressRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
                 position,
                 ViewActions.click()

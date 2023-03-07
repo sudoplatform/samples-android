@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -28,17 +28,16 @@ import androidx.test.espresso.contrib.NavigationViewActions.navigateTo
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
 import androidx.test.espresso.contrib.RecyclerViewActions.scrollTo
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import junit.framework.AssertionFailedError
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.not
 
 /**
  * Base class of the visual testing robots.
- *
- * @since 2020-08-02
  */
 open class BaseRobot {
 
@@ -106,6 +105,23 @@ open class BaseRobot {
     fun clickViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
         onView(withId(recyclerViewId))
             .perform(actionOnItem<ViewHolder>(matcher, click()))
+    }
+
+    // Check that the recycler view has the minimum amount of items specified
+    fun checkRecyclerViewHasMinimumItemAmount(matcher: Matcher<View>, minimumAmount: Int, timeout: Long = 10_000L) {
+        val retryInterval = 100L // 100 ms between retries var attempts = 1
+        for (x in 0..timeout step retryInterval) {
+            try {
+                onView(matcher).check(matches(hasMinimumChildCount(minimumAmount)))
+                break
+            } catch (e: NoMatchingViewException) {
+                println("NoMatchingViewException Exception")
+                Thread.sleep(retryInterval)
+            } catch (e: AssertionFailedError) {
+                println("AssertionFailedError Exception")
+                Thread.sleep(retryInterval)
+            }
+        }
     }
 
     // Check view is displayed

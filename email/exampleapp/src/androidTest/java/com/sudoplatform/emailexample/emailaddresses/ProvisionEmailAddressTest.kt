@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -24,8 +24,6 @@ import java.util.UUID
 
 /**
  * Test the provision email address flow.
- *
- * @since 2020-08-06
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -136,7 +134,7 @@ class ProvisionEmailAddressTest {
     }
 
     @Test
-    fun testAttemptToProvisionMultipleEmailAddresses() {
+    fun testProvisionMultipleEmailAddresses() {
         provisionEmailAddress {
             provisionEmailAddressFlow()
             clickOnPositiveAlertDialogButton()

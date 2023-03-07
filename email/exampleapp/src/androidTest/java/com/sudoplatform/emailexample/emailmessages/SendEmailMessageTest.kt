@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.sudoplatform.emailexample.emailmessages
 
 import androidx.test.espresso.Espresso.pressBack
@@ -19,8 +25,6 @@ import timber.log.Timber
 
 /**
  * Test the send email message flow.
- *
- * @since 2020-08-18
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -89,6 +93,19 @@ class SendEmailMessageTest {
         }
         emailMessages {
             waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+
+            // Navigate to SENT folder and swipe to move message to TRASH
+            clickEmailFolderSpinner("SENT")
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            swipeLeftToDelete(0)
+            waitForLoading()
+            clickOnPositiveAlertDialogButton()
+
+            // Navigate to TRASH folder and swipe to permanently delete message
+            clickEmailFolderSpinner("TRASH")
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
             swipeLeftToDelete(0)
@@ -190,6 +207,9 @@ class SendEmailMessageTest {
         }
         emailMessages {
             waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            clickEmailFolderSpinner("SENT")
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
             pressBack()

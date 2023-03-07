@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,6 +27,7 @@ import com.sudoplatform.emailexample.util.Rfc822MessageFactory
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -141,7 +142,11 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                         subject = binding.subjectTextView.text.toString(),
                         body = binding.contentBody.text.toString()
                     )
-                    app.sudoEmailClient.sendEmailMessage(rfc822Data, emailAddressId)
+                    val input = SendEmailMessageInput(
+                        rfc822Data = rfc822Data,
+                        senderEmailAddressId = emailAddressId
+                    )
+                    app.sudoEmailClient.sendEmailMessage(input)
                 }
                 showAlertDialog(
                     titleResId = R.string.sent,

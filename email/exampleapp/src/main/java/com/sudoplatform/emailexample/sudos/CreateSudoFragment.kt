@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -120,9 +120,9 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
         }
         val sudo = Sudo(UUID.randomUUID().toString())
         sudo.label = name
+        showLoading(R.string.creating_sudo)
         launch {
             try {
-                showLoading(R.string.creating_sudo)
                 val newSudo = withContext(Dispatchers.IO) {
                     app.sudoProfilesClient.createSudo(sudo)
                 }
@@ -131,7 +131,11 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.success,
                     positiveButtonResId = android.R.string.ok,
                     onPositive = {
-                        navController.navigate(CreateSudoFragmentDirections.actionCreateSudoFragmentToEmailAddressesFragment(newSudo.id!!, newSudo.label!!))
+                        navController.navigate(
+                            CreateSudoFragmentDirections.actionCreateSudoFragmentToEmailAddressesFragment(
+                                newSudo
+                            )
+                        )
                     }
                 )
             } catch (e: SudoProfileException) {
@@ -142,8 +146,9 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     onPositive = { createSudo() },
                     negativeButtonResId = android.R.string.cancel
                 )
+            } finally {
+                hideLoading()
             }
-            hideLoading()
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,8 +21,6 @@ import timber.log.Timber
 
 /**
  * Test navigation from the main menu screen to all the other screens in the app.
- *
- * @since 2020-08-03
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest

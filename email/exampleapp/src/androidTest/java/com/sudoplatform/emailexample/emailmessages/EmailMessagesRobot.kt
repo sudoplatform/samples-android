@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,6 +8,7 @@ package com.sudoplatform.emailexample.emailmessages
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -19,8 +20,6 @@ fun emailMessages(func: EmailMessagesRobot.() -> Unit) = EmailMessagesRobot().ap
 
 /**
  * Testing robot that manages the email messages screen.
- *
- * @since 2020-08-18
  */
 class EmailMessagesRobot : BaseRobot() {
 
@@ -28,6 +27,7 @@ class EmailMessagesRobot : BaseRobot() {
     private val emailMessagesRecyclerView = withId(R.id.emailMessageRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
+    private val dropdownSpinner = withId(R.id.foldersSpinner)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingProgress, 5_000L)
@@ -63,7 +63,13 @@ class EmailMessagesRobot : BaseRobot() {
         clickOnView(positiveAlertButton)
     }
 
+    fun clickEmailFolderSpinner(folderName: String) {
+        clickOnView(dropdownSpinner)
+        onView(withText(folderName)).perform(click())
+    }
+
     fun swipeLeftToDelete(position: Int) {
+        checkRecyclerViewHasMinimumItemAmount(emailMessagesRecyclerView, position + 1)
         onView(emailMessagesRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
                 position,
@@ -79,10 +85,11 @@ class EmailMessagesRobot : BaseRobot() {
     }
 
     private fun clickRecyclerViewItem(position: Int) {
+        checkRecyclerViewHasMinimumItemAmount(emailMessagesRecyclerView, position + 1)
         onView(emailMessagesRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
                 position,
-                ViewActions.click()
+                click()
             )
         )
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -34,7 +34,10 @@ import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
+import com.sudoplatform.sudoemail.types.inputs.CheckEmailAddressAvailabilityInput
+import com.sudoplatform.sudoemail.types.inputs.ProvisionEmailAddressInput
 import com.sudoplatform.sudoprofiles.Sudo
+import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -64,6 +67,9 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
          * user to finish typing.
          */
         const val CHECK_DELAY = 1000L
+
+        /** Audience used to retrieve the ownership proof token. */
+        const val EMAIL_AUDIENCE = "sudoplatform.email.email-address"
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -90,11 +96,11 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: ProvisionEmailAddressFragmentArgs by navArgs()
 
-    /** A [Sudo] identifier used to provision an [EmailAddress]. */
-    private lateinit var sudoId: String
+    /** A [Sudo] used to retrieve the ownership proof. */
+    private lateinit var sudo: Sudo
 
-    /** The [Sudo] label used to present to the user. */
-    private lateinit var sudoLabel: String
+    /** The ownership proof used to tie a [Sudo] to an [EmailAddress]. */
+    private lateinit var ownershipProof: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,8 +122,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
             toolbarMenu = menu
         }
         app = requireActivity().application as App
-        sudoId = args.sudoId
-        sudoLabel = args.sudoLabel
+        sudo = args.sudo!!
         return binding.root
     }
 
@@ -130,6 +135,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         binding.learnMoreButton.setOnClickListener {
             learnMore()
         }
+        getOwnershipProof()
     }
 
     override fun onDestroy() {
@@ -156,7 +162,11 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                 if (availableAddresses.isNotEmpty()) {
                     val address = availableAddresses.first()
                     withContext(Dispatchers.IO) {
-                        app.sudoEmailClient.provisionEmailAddress(address, sudoId)
+                        val input = ProvisionEmailAddressInput(
+                            emailAddress = address,
+                            ownershipProofToken = ownershipProof
+                        )
+                        app.sudoEmailClient.provisionEmailAddress(input)
                     }
                     showAlertDialog(
                         titleResId = R.string.success,
@@ -165,8 +175,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                             navController.navigate(
                                 ProvisionEmailAddressFragmentDirections
                                     .actionProvisionEmailAddressFragmentToEmailAddressesFragment(
-                                        sudoId,
-                                        sudoLabel
+                                        sudo
                                     )
                             )
                         }
@@ -198,8 +207,10 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                     CachePolicy.REMOTE_ONLY
                 )
                 val emailAddresses = app.sudoEmailClient.checkEmailAddressAvailability(
-                    localParts,
-                    supportedDomains
+                    CheckEmailAddressAvailabilityInput(
+                        localParts,
+                        supportedDomains
+                    )
                 )
                 availableAddresses.clear()
                 availableAddresses.addAll(emailAddresses)
@@ -219,6 +230,25 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                 setAvailabilityLabel(
                     text = e.localizedMessage ?: "$e",
                     colorResId = R.color.colorNegativeMsg
+                )
+            }
+        }
+    }
+
+    /**
+     * Retrieve the ownership proof used to bind the [Sudo] and [EmailAddress] together.
+     */
+    private fun getOwnershipProof() {
+        launch {
+            try {
+                ownershipProof = withContext(Dispatchers.IO) {
+                    app.sudoProfilesClient.getOwnershipProof(sudo, EMAIL_AUDIENCE)
+                }
+            } catch (e: SudoProfileException) {
+                showAlertDialog(
+                    titleResId = R.string.ownership_proof_error,
+                    message = e.localizedMessage ?: "$e",
+                    negativeButtonResId = android.R.string.cancel
                 )
             }
         }
@@ -275,7 +305,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
 
     /** Set the [Sudo] label text containing the [Sudo] alias. */
     private fun setSudoLabelText() {
-        binding.sudoLabelText.text = sudoLabel
+        binding.sudoLabelText.text = sudo.label
     }
 
     /**

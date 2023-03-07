@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -14,8 +14,6 @@ fun readEmailMessage(func: ReadEmailMessageRobot.() -> Unit) = ReadEmailMessageR
 
 /**
  * Testing robot that manages the read email message screen.
- *
- * @since 2020-08-18
  */
 class ReadEmailMessageRobot : BaseRobot() {
 

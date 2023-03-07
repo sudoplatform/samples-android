@@ -1,13 +1,16 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.sudoplatform.emailexample.sudos
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
@@ -66,6 +69,9 @@ class SudosFragment : Fragment(), CoroutineScope {
     private val bindingDelegate = ObjectDelegate<FragmentSudosBinding>()
     private val binding by bindingDelegate
 
+    /** Toolbar [Menu] displaying title and toolbar items. */
+    private lateinit var toolbarMenu: Menu
+
     /** A reference to the [RecyclerView.Adapter] handling [Sudo] data. */
     private lateinit var adapter: SudoAdapter
 
@@ -83,6 +89,22 @@ class SudosFragment : Fragment(), CoroutineScope {
         bindingDelegate.attach(FragmentSudosBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.sudos)
+            inflateMenu(R.menu.nav_menu_info)
+            setOnMenuItemClickListener {
+                when (it?.itemId) {
+                    R.id.info -> {
+                        showAlertDialog(
+                            titleResId = R.string.what_is_a_sudo,
+                            messageResId = R.string.sudo_explanation,
+                            positiveButtonResId = android.R.string.ok,
+                            negativeButtonResId = R.string.learn_more,
+                            onNegative = { learnMore() }
+                        )
+                    }
+                }
+                true
+            }
+            toolbarMenu = menu
         }
         app = requireActivity().application as App
         return binding.root
@@ -119,9 +141,9 @@ class SudosFragment : Fragment(), CoroutineScope {
      * @param listOption Option of either retrieving [Sudo] data from the cache or network.
      */
     private fun listSudos(listOption: ListOption) {
+        showLoading(R.string.loading_sudos)
         launch {
             try {
-                showLoading(R.string.loading_sudos)
                 val sudos = withContext(Dispatchers.IO) {
                     app.sudoProfilesClient.listSudos(listOption)
                 }
@@ -145,8 +167,9 @@ class SudosFragment : Fragment(), CoroutineScope {
                     onPositive = { listSudos(ListOption.REMOTE_ONLY) },
                     negativeButtonResId = android.R.string.cancel
                 )
+            } finally {
+                hideLoading()
             }
-            hideLoading()
         }
     }
 
@@ -156,9 +179,9 @@ class SudosFragment : Fragment(), CoroutineScope {
      * @param sudo The selected [Sudo] to delete.
      */
     private fun deleteSudo(sudo: Sudo) {
+        showDeleteAlert(R.string.deleting_sudos)
         launch {
             try {
-                showDeleteAlert(R.string.deleting_sudos)
                 withContext(Dispatchers.IO) {
                     app.sudoProfilesClient.deleteSudo(sudo)
                 }
@@ -172,8 +195,9 @@ class SudosFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     negativeButtonResId = android.R.string.cancel
                 )
+            } finally {
+                hideDeleteAlert()
             }
-            hideDeleteAlert()
         }
     }
 
@@ -184,20 +208,31 @@ class SudosFragment : Fragment(), CoroutineScope {
     private fun configureRecyclerView() {
         adapter =
             SudoAdapter(sudoList) { sudo ->
-                navController.navigate(SudosFragmentDirections.actionSudosFragmentToEmailAddressesFragment(sudo.id!!, sudo.label!!))
+                navController.navigate(
+                    SudosFragmentDirections.actionSudosFragmentToEmailAddressesFragment(
+                        sudo
+                    )
+                )
             }
-
         binding.sudoRecyclerView.adapter = adapter
         binding.sudoRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToDelete()
     }
 
+    /** Navigates to a Sudo Platform web page when the "Learn More" button is pressed. */
+    private fun learnMore() {
+        val openUrl = Intent(Intent.ACTION_VIEW)
+        openUrl.data = Uri.parse(getString(R.string.email_doc_url))
+        startActivity(openUrl)
+    }
+
     /**
-     * Sets buttons and recycler view to enabled/disabled.
+     * Sets toolbar items, buttons and recycler view to enabled/disabled.
      *
-     * @param isEnabled If true, buttons and recycler view will be enabled.
+     * @param isEnabled If true, toolbar items, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
+        toolbarMenu.getItem(0)?.isEnabled = isEnabled
         binding.createSudoButton.isEnabled = isEnabled
         binding.sudoRecyclerView.isEnabled = isEnabled
     }

@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.sudoplatform.emailexample.emailmessages
 
 import android.os.Bundle
@@ -21,8 +27,8 @@ import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageParser
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
-import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.inputs.GetEmailMessageRfc822DataInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -133,14 +139,15 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading(R.string.reading)
+                val input = GetEmailMessageRfc822DataInput(
+                    id = emailMessage.id,
+                    emailAddressId = emailAddressId
+                )
                 val rfc822Data = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.getEmailMessageRfc822Data(
-                        emailMessage.messageId,
-                        cachePolicy = CachePolicy.REMOTE_ONLY
-                    )
+                    app.sudoEmailClient.getEmailMessageRfc822Data(input)
                 }
                 if (rfc822Data != null) {
-                    emailMessageWithBody = Rfc822MessageParser.parseRfc822Data(rfc822Data)
+                    emailMessageWithBody = Rfc822MessageParser.parseRfc822Data(rfc822Data.rfc822Data)
                     configureEmailMessageContents(emailMessage)
                 }
             } catch (e: SudoEmailClient.EmailMessageException) {

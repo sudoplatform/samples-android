@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.databinding.LayoutEmailMessageCellBinding
+import com.sudoplatform.sudoemail.types.Direction
 import com.sudoplatform.sudoemail.types.EmailMessage
 import java.util.Date
 
@@ -39,7 +40,7 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
     }
 
     fun bind(emailMessage: EmailMessage) {
-        if (emailMessage.direction == EmailMessage.Direction.INBOUND) {
+        if (emailMessage.direction == Direction.INBOUND) {
             binding.recipientLabel.text = binding.root.context.getString(R.string.from_recipient, emailMessage.from[0])
         } else {
             binding.recipientLabel.text = binding.root.context.getString(R.string.to_recipient, emailMessage.to.joinToString())

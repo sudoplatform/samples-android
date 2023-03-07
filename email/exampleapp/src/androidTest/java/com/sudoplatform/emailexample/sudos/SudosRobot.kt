@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,8 +19,6 @@ fun sudos(func: SudosRobot.() -> Unit) = SudosRobot().apply { func() }
 
 /**
  * Testing robot that manages the Sudos screen.
- *
- * @since 2020-08-03
  */
 class SudosRobot : BaseRobot() {
 

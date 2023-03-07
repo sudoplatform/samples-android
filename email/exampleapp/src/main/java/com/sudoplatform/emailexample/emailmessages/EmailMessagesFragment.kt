@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -25,6 +27,7 @@ import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
 import com.sudoplatform.emailexample.databinding.FragmentEmailMessagesBinding
 import com.sudoplatform.emailexample.emailaddresses.EmailAddressesFragment
+import com.sudoplatform.emailexample.emailfolders.EmailFolderAdapter
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.emailexample.util.ObjectDelegate
@@ -32,7 +35,12 @@ import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.subscription.EmailMessageSubscriber
 import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
+import com.sudoplatform.sudoemail.types.EmailFolder
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.ListAPIResult
+import com.sudoplatform.sudoemail.types.inputs.ListEmailFoldersForEmailAddressIdInput
+import com.sudoplatform.sudoemail.types.inputs.ListEmailMessagesForEmailFolderIdInput
+import com.sudoplatform.sudoemail.types.inputs.UpdateEmailMessagesInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -55,7 +63,7 @@ import kotlin.coroutines.CoroutineContext
  *  - [SendEmailMessageFragment]: If a user taps the "Compose" button on the top right of the toolbar,
  *   the [SendEmailMessageFragment] will be presented so that the user can compose a new email message.
  */
-class EmailMessagesFragment : Fragment(), CoroutineScope {
+class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedListener {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -71,6 +79,12 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
 
     /** Toolbar [Menu] displaying title and compose button. */
     private lateinit var toolbarMenu: Menu
+
+    /** A list of folders to organize email messages. */
+    private var emailFoldersList = mutableListOf<EmailFolder>()
+
+    /** A reference to the [ArrayAdapter] holding the [EmailFolder] data. */
+    private lateinit var foldersAdapter: EmailFolderAdapter
 
     /** A reference to the [RecyclerView.Adapter] handling [EmailMessage] data. */
     private lateinit var adapter: EmailMessageAdapter
@@ -89,6 +103,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
 
     /** The selected Email address Identifier used to filter email messages. */
     private lateinit var emailAddressId: String
+
+    /** The selected [EmailFolder] used to filter email messages. */
+    private lateinit var selectedEmailFolder: EmailFolder
 
     /** Subscription ID for email messages */
     private val subscriptionId = UUID.randomUUID().toString()
@@ -129,7 +146,14 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
         configureRecyclerView()
         navController = Navigation.findNavController(view)
 
-        listEmailMessages(CachePolicy.REMOTE_ONLY)
+        binding.foldersSpinner.onItemSelectedListener = this
+        listEmailFolders(CachePolicy.REMOTE_ONLY)
+        foldersAdapter = EmailFolderAdapter(
+            requireContext(),
+            emailFoldersList
+        )
+        foldersAdapter.notifyDataSetChanged()
+        binding.foldersSpinner.adapter = foldersAdapter
     }
 
     override fun onDestroy() {
@@ -151,46 +175,130 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
     }
 
     /**
+     * List [EmailFolder]s from the [SudoEmailClient].
+     *
+     * @param cachePolicy Option of either retrieving [EmailFolder] data from the cache or network.
+     */
+    private fun listEmailFolders(cachePolicy: CachePolicy) {
+        launch {
+            showLoading()
+            try {
+                val emailFolders = withContext(Dispatchers.IO) {
+                    val input = ListEmailFoldersForEmailAddressIdInput(
+                        emailAddressId = emailAddressId,
+                        cachePolicy = cachePolicy
+                    )
+                    app.sudoEmailClient.listEmailFoldersForEmailAddressId(input)
+                }
+                emailFoldersList.clear()
+                emailFoldersList.addAll(emailFolders.items)
+                foldersAdapter.notifyDataSetChanged()
+            } catch (e: SudoEmailClient.EmailFolderException) {
+                showAlertDialog(
+                    titleResId = R.string.list_email_folders_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { listEmailFolders(CachePolicy.REMOTE_ONLY) },
+                    negativeButtonResId = android.R.string.cancel
+                )
+            }
+            binding.filter.visibility = View.VISIBLE
+        }
+    }
+
+    /**
      * List [EmailMessage]s from the [SudoEmailClient].
      *
+     * @param emailFolderId The identifier of the email folder assigned to the email messages to
+     *  retrieve.
      * @param cachePolicy Option of either retrieving [EmailMessage] data from the cache or network.
      */
-    private fun listEmailMessages(cachePolicy: CachePolicy) {
+    private fun listEmailMessages(emailFolderId: String, cachePolicy: CachePolicy) {
         launch {
             try {
                 showLoading()
                 val emailMessages = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.listEmailMessages(cachePolicy = cachePolicy)
+                    val input = ListEmailMessagesForEmailFolderIdInput(
+                        emailFolderId,
+                        cachePolicy
+                    )
+                    app.sudoEmailClient.listEmailMessagesForEmailFolderId(input)
                 }
-                emailMessageList.clear()
-                val address = EmailMessage.EmailAddress(emailAddress)
-                for (emailMessage in emailMessages.items) {
-                    if (emailMessage.emailAddressId == emailAddressId ||
-                        emailMessage.to.contains(address) ||
-                        emailMessage.cc.contains(address) ||
-                        emailMessage.bcc.contains(address)
-                    ) {
-                        emailMessageList.add(emailMessage)
+                when (emailMessages) {
+                    is ListAPIResult.Success -> {
+                        emailMessageList.clear()
+                        val address = EmailMessage.EmailAddress(emailAddress)
+                        for (emailMessage in emailMessages.result.items) {
+                            if (emailMessage.emailAddressId == emailAddressId ||
+                                emailMessage.to.contains(address) ||
+                                emailMessage.cc.contains(address) ||
+                                emailMessage.bcc.contains(address)
+                            ) {
+                                emailMessageList.add(emailMessage)
+                            }
+                        }
+                        emailMessageList.sortWith { lhs, rhs ->
+                            when {
+                                lhs.createdAt.before(rhs.createdAt) -> 1
+                                lhs.createdAt.after(rhs.createdAt) -> -1
+                                else -> 0
+                            }
+                        }
+                        adapter.notifyDataSetChanged()
+                    }
+                    is ListAPIResult.Partial -> {
+                        val cause = emailMessages.result.failed.first().cause
+                        showAlertDialog(
+                            titleResId = R.string.list_email_addresses_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { listEmailMessages(selectedEmailFolder.id, CachePolicy.REMOTE_ONLY) },
+                            negativeButtonResId = android.R.string.cancel
+                        )
                     }
                 }
-                emailMessageList.sortWith { lhs, rhs ->
-                    when {
-                        lhs.createdAt.before(rhs.createdAt) -> 1
-                        lhs.createdAt.after(rhs.createdAt) -> -1
-                        else -> 0
-                    }
-                }
-                adapter.notifyDataSetChanged()
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
                     titleResId = R.string.list_email_messages_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listEmailMessages(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listEmailMessages(selectedEmailFolder.id, CachePolicy.REMOTE_ONLY) },
                     negativeButtonResId = android.R.string.cancel
                 )
             }
             hideLoading()
+        }
+    }
+
+    /**
+     * Move the selected [EmailMessage] to the trash folder.
+     *
+     * @param id The identifier of the [EmailMessage] to move to the trash folder.
+     */
+    private fun moveEmailMessageToTrash(id: String) {
+        launch {
+            try {
+                showDeleteAlert(R.string.moving_email_message_to_trash)
+                val trashFolder = (emailFoldersList.filter { it.folderName == "TRASH" }).first()
+                val updateInput = UpdateEmailMessagesInput(
+                    ids = listOf(id),
+                    values = UpdateEmailMessagesInput.UpdatableValues(folderId = trashFolder.id)
+                )
+                withContext(Dispatchers.IO) {
+                    app.sudoEmailClient.updateEmailMessages(updateInput)
+                }
+                showAlertDialog(
+                    titleResId = R.string.success,
+                    positiveButtonResId = android.R.string.ok
+                )
+            } catch (e: SudoEmailClient.EmailMessageException) {
+                showAlertDialog(
+                    titleResId = R.string.moving_email_message_failure,
+                    message = e.localizedMessage ?: e.toString(),
+                    negativeButtonResId = android.R.string.cancel
+                )
+            }
+            hideDeleteAlert()
         }
     }
 
@@ -356,8 +464,19 @@ class EmailMessagesFragment : Fragment(), CoroutineScope {
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val emailMessage = emailMessageList[viewHolder.adapterPosition]
-        deleteEmailMessage(emailMessage.messageId)
+        if (selectedEmailFolder.folderName == "TRASH") {
+            deleteEmailMessage(emailMessage.id)
+        } else {
+            moveEmailMessageToTrash(emailMessage.id)
+        }
         emailMessageList.removeAt(viewHolder.adapterPosition)
         adapter.notifyItemRemoved(viewHolder.adapterPosition)
     }
+
+    /** Sets the selected folder type. */
+    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+        selectedEmailFolder = parent.getItemAtPosition(pos) as EmailFolder
+        listEmailMessages(selectedEmailFolder.id, CachePolicy.REMOTE_ONLY)
+    }
+    override fun onNothingSelected(parent: AdapterView<*>) { /* no-op */ }
 }

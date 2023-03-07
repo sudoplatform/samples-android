@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,6 +8,7 @@ package com.sudoplatform.emailexample.emailaddresses
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -20,8 +21,6 @@ fun provisionEmailAddress(func: ProvisionEmailAddressRobot.() -> Unit) = Provisi
 
 /**
  * Testing robot that manages the provision email address screen.
- *
- * @since 2020-08-06
  */
 class ProvisionEmailAddressRobot : BaseRobot() {
 
@@ -70,6 +69,7 @@ class ProvisionEmailAddressRobot : BaseRobot() {
     }
 
     fun clickOnCreateButton() {
+        onView(toolbarCreateButton).check(matches(isEnabled()))
         clickOnView(toolbarCreateButton)
     }
 

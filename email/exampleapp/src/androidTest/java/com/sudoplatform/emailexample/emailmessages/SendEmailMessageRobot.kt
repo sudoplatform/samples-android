@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -13,14 +13,12 @@ import androidx.test.espresso.matcher.ViewMatchers.withSubstring
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import org.hamcrest.Matchers.not
+import org.hamcrest.CoreMatchers.not
 
 fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) = SendEmailMessageRobot().apply { func() }
 
 /**
  * Testing robot that manages the send email message screen.
- *
- * @since 2020-08-18
  */
 class SendEmailMessageRobot : BaseRobot() {
 
