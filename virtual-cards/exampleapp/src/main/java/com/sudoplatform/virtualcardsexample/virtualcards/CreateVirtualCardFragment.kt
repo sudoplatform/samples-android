@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -27,6 +28,7 @@ import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.BillingAddress
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.FundingSourceState
 import com.sudoplatform.sudovirtualcards.types.JsonValue
 import com.sudoplatform.sudovirtualcards.types.ProvisionalVirtualCard
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
@@ -35,6 +37,7 @@ import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
 import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateVirtualCardBinding
+import com.sudoplatform.virtualcardsexample.fundingsources.FundingSourceSpinnerAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
@@ -57,7 +60,7 @@ import kotlin.coroutines.CoroutineContext
  *  - [VirtualCardDetailFragment]: If a user successfully creates a virtual card, the
  *   [VirtualCardDetailFragment] will be presented so the user can view card details and transactions.
  */
-class CreateVirtualCardFragment : Fragment(), CoroutineScope {
+class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedListener {
 
     companion object {
         const val VIRTUAL_CARD_AUDIENCE = "sudoplatform.virtual-cards.virtual-card"
@@ -99,8 +102,14 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope {
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: CreateVirtualCardFragmentArgs by navArgs()
 
-    /** A [FundingSource] used to create a [VirtualCard]. */
-    private lateinit var fundingSource: FundingSource
+    /** A list of funding sources that can fund a virtual card. */
+    private var fundingSourcesList = mutableListOf<FundingSource>()
+
+    /** A reference to the [FundingSourceSpinnerAdapter] holding the [FundingSource] data. */
+    private lateinit var fundingSourcesSpinnerAdapter: FundingSourceSpinnerAdapter
+
+    /** The selected [FundingSource] used to create a [VirtualCard]. */
+    private lateinit var selectedFundingSource: FundingSource
 
     /** A [Sudo] used to retrieve the ownership proof. */
     private lateinit var sudo: Sudo
@@ -141,11 +150,18 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope {
         setItemsEnabled(false)
         navController = Navigation.findNavController(view)
 
+        binding.fundingSourcesSpinner.onItemSelectedListener = this
+        listActiveFundingSources()
+        fundingSourcesSpinnerAdapter = FundingSourceSpinnerAdapter(
+            requireContext(),
+            fundingSourcesList,
+        )
+        fundingSourcesSpinnerAdapter.notifyDataSetChanged()
+        binding.fundingSourcesSpinner.adapter = fundingSourcesSpinnerAdapter
+
         binding.learnMoreButton.setOnClickListener {
             learnMore()
         }
-
-        loadFirstActiveFundingSource()
         getOwnershipProof()
     }
 
@@ -180,7 +196,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope {
         val cardLabel = JsonValue.JsonString(enteredInput[1] ?: "")
         val input = ProvisionVirtualCardInput(
             ownershipProofs = listOf(ownershipProof),
-            fundingSourceId = fundingSource.id,
+            fundingSourceId = selectedFundingSource.id,
             cardHolder = enteredInput[0] ?: "",
             metadata = cardLabel,
             billingAddress = billingAddress,
@@ -228,16 +244,17 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope {
         }
     }
 
-    /** Load the first active [FundingSource] from the [SudoVirtualCardsClient] associated with the user's account. */
-    private fun loadFirstActiveFundingSource() {
+    /** List the active [FundingSource]s from the [SudoVirtualCardsClient] associated with the user's account. */
+    private fun listActiveFundingSources() {
         launch {
             try {
                 val fundingSources = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.listFundingSources(cachePolicy = CachePolicy.REMOTE_ONLY)
                 }
-                fundingSource = fundingSources.items.first { it.state == FundingSource.State.ACTIVE }
-                binding.fundingSourceLabel.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
-                setItemsEnabled(true)
+                val filtered = fundingSources.items.filter { it.state == FundingSourceState.ACTIVE }
+                fundingSourcesList.clear()
+                fundingSourcesList.addAll(filtered)
+                fundingSourcesSpinnerAdapter.notifyDataSetChanged()
             } catch (e: Exception) {
                 when (e) {
                     is NoSuchElementException -> setErrorLabelHidden(false)
@@ -348,4 +365,11 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope {
             setItemsEnabled(true)
         }
     }
+
+    /** Sets the selected funding source. */
+    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+        selectedFundingSource = parent.getItemAtPosition(pos) as FundingSource
+        setItemsEnabled(true)
+    }
+    override fun onNothingSelected(parent: AdapterView<*>) { /* no-op */ }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -25,23 +25,24 @@ class CreateFundingSourceRobot : BaseRobot() {
 
     private val inputForm = R.id.formRecyclerView
     private val toolbarCreateButton = withId(R.id.create)
-    private val learnMoreTextView = withId(R.id.learnMoreTextView)
-    private val learnMoreButton = withId(R.id.learnMoreButton)
     private val loadingDialog = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
     private val negativeAlertButton = withId(android.R.id.button2)
+    private val launchPlaidLinkButton = withId(R.id.launchPlaidLinkButton)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L, true)
         waitForViewToNotDisplay(loadingDialog, 60_000L)
     }
 
-    fun checkCreateFundingSourceItemsDisplayed() {
+    fun checkCreateCreditCardFundingSourceItemsDisplayed() {
         waitForViewToDisplay(withId(inputForm))
         waitForViewToDisplay(toolbarCreateButton)
-        scrollToView(learnMoreButton)
-        waitForViewToDisplay(learnMoreTextView)
-        waitForViewToDisplay(learnMoreButton)
+    }
+
+    fun checkCreateBankAccountFundingSourceItemsDisplayed() {
+        waitForViewToDisplay(launchPlaidLinkButton)
+        waitForViewToDisplay(toolbarCreateButton)
     }
 
     fun clickOnCreateButton() {

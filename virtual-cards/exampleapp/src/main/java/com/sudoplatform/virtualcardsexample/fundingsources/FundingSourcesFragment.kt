@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -46,8 +46,9 @@ import kotlin.coroutines.CoroutineContext
  *   source's card number and credit card network is used as the text for each funding source.
  *
  * - Links To:
- *  - [CreateFundingSourceFragment]: If a user taps the "Create Funding Source" button, the
- *   [CreateFundingSourceFragment] will be presented so the user can create a new funding source.
+ *  - [CreateFundingSourceMenuFragment]: If a user taps the "Create Funding Source" button, the
+ *   [CreateFundingSourceMenuFragment] will be presented so the user can select a funding source to
+ *   create.
  */
 class FundingSourcesFragment : Fragment(), CoroutineScope {
 
@@ -93,7 +94,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
         binding.createFundingSourceButton.setOnClickListener {
             navController.navigate(
                 FundingSourcesFragmentDirections
-                    .actionFundingSourcesFragmentToCreateFundingSourceFragment()
+                    .actionFundingSourcesFragmentToCreateFundingSourceMenuFragment()
             )
         }
 

@@ -11,7 +11,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 31
         versionCode 1
-        versionName "1.0.0"
+        versionName "5.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -40,17 +40,23 @@ android {
 }
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:13.0.1'
-    implementation 'com.sudoplatform:sudoidentityverification:9.0.0'
-    implementation 'com.sudoplatform:sudoprofiles:10.0.0'
-    implementation 'com.sudoplatform:sudoentitlements:5.0.1'
-    implementation 'com.sudoplatform:sudovirtualcards:4.0.1'
+    implementation 'com.sudoplatform:sudouser:14.0.0'
+    implementation 'com.sudoplatform:sudoidentityverification:10.0.1'
+    implementation 'com.sudoplatform:sudoprofiles:11.0.0'
+    implementation 'com.sudoplatform:sudoentitlements:6.0.0'
+    implementation 'com.sudoplatform:sudovirtualcards:9.1.1'
 
     // Stripe
     implementation "com.stripe:stripe-android:20.5.0"
 
+    // Checkout.com
+    implementation "com.github.checkout:frames-android:3.1.2"
+
+    // Plaid
+    implementation "com.plaid.link:sdk-core:3.10.2"
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.nimbusds:nimbus-jose-jwt:9.23"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.31"
 
     def coroutine_version = "1.6.0-native-mt"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"

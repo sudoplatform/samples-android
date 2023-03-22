@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -85,7 +85,6 @@ class App : Application(), CoroutineScope {
         sudoVirtualCardsClient = SudoVirtualCardsClient.builder()
             .setContext(this)
             .setSudoUserClient(sudoUserClient)
-            .setSudoProfilesClient(sudoProfilesClient)
             .build()
     }
 

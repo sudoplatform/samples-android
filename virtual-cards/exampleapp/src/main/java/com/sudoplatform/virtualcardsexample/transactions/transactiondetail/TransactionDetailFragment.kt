@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,7 +20,9 @@ import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
+import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
+import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.Transaction
@@ -125,8 +127,14 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
                 val fundingSource = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.getFundingSource(virtualCard.fundingSourceId, cachePolicy = CachePolicy.REMOTE_ONLY)
                 }
-                if (fundingSource != null) {
-                    binding.fundingSourceLabel.text = getString(R.string.funding_source_label, fundingSource.network, fundingSource.last4)
+                when (fundingSource) {
+                    is CreditCardFundingSource -> {
+                        binding.fundingSourceLabel.text = getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.network)
+                    }
+                    is BankAccountFundingSource -> {
+                        binding.fundingSourceLabel.text = getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType)
+                    }
+                    else -> { /* Nothing to do here */ }
                 }
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(

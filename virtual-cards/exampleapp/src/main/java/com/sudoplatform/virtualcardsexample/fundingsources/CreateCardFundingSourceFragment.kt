@@ -1,13 +1,11 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.sudoplatform.virtualcardsexample.fundingsources
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -23,14 +21,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.Stripe
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.FundingSourceType
+import com.sudoplatform.sudovirtualcards.types.StripeCardProvisioningData
 import com.sudoplatform.sudovirtualcards.types.inputs.CompleteFundingSourceInput
 import com.sudoplatform.sudovirtualcards.types.inputs.CreditCardFundingSourceInput
-import com.sudoplatform.sudovirtualcards.types.inputs.FundingSourceType
 import com.sudoplatform.sudovirtualcards.types.inputs.SetupFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
-import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateFundingSourceBinding
+import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateCardFundingSourceBinding
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
@@ -46,17 +45,17 @@ import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [CreateFundingSourceFragment] presents a form so that a user can create a [FundingSource].
+ * This [CreateCardFundingSourceFragment] presents a form so that a user can create a Stripe
+ * credit card based [FundingSource].
  *
  * - Links From:
- *  - [FundingSourcesFragment]: A user taps the "Create Funding Source" button at the bottom of the
- *    list.
+ *  - [CreateFundingSourceMenuFragment]: A user taps the "Create Stripe Funding Source" button.
  *
  * - Links To:
  *  - [FundingSourcesFragment]: If a user successfully creates a funding source, they will be returned
  *   to this form.
  */
-class CreateFundingSourceFragment : Fragment(), CoroutineScope {
+class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -67,7 +66,7 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentCreateFundingSourceBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentCreateCardFundingSourceBinding>()
     private val binding by bindingDelegate
 
     /** Toolbar [Menu] displaying title and create button. */
@@ -96,9 +95,9 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        bindingDelegate.attach(FragmentCreateFundingSourceBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentCreateCardFundingSourceBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
-            title = getString(R.string.create_funding_source)
+            title = getString(R.string.add_credit_card)
             inflateMenu(R.menu.nav_menu_with_create_button)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
@@ -119,10 +118,6 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
         configureRecyclerView()
         configureFormCells()
         navController = Navigation.findNavController(view)
-
-        binding.learnMoreButton.setOnClickListener {
-            learnMore()
-        }
     }
 
     override fun onDestroy() {
@@ -171,9 +166,10 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
                     // Process stripe data
                     val stripeClient = Stripe(requireContext(), configuration.first().apiKey)
                     val stripeIntentWorker = StripeIntentWorker(requireContext(), stripeClient)
+                    val provisioningData = provisionalFundingSource.provisioningData as StripeCardProvisioningData
                     val completionData = stripeIntentWorker.confirmSetupIntent(
                         input,
-                        provisionalFundingSource.provisioningData.clientSecret
+                        provisioningData.clientSecret
                     )
                     // Perform the funding source completion operation
                     val completeInput = CompleteFundingSourceInput(
@@ -188,8 +184,8 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
                     positiveButtonResId = android.R.string.ok,
                     onPositive = {
                         navController.navigate(
-                            CreateFundingSourceFragmentDirections
-                                .actionCreateFundingSourceFragmentToFundingSourcesFragment()
+                            CreateCardFundingSourceFragmentDirections
+                                .actionCreateCardFundingSourceFragmentToFundingSourcesFragment()
                         )
                     }
                 )
@@ -227,13 +223,6 @@ class CreateFundingSourceFragment : Fragment(), CoroutineScope {
             val hint = if (labels[i].contains(getString(R.string.address_line_2))) getString(R.string.enter_optional_input, labels[i]) else getString(R.string.enter_non_optional_input, labels[i])
             inputFormCells.add(InputFormCell(labels[i], enteredInput[i] ?: "", hint))
         }
-    }
-
-    /** Navigates to a Sudo Platform web page when the "Learn More" button is pressed. */
-    private fun learnMore() {
-        val openUrl = Intent(Intent.ACTION_VIEW)
-        openUrl.data = Uri.parse(getString(R.string.create_funding_source_doc_url))
-        startActivity(openUrl)
     }
 
     /** Returns the next calendar year. */

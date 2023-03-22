@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,11 +21,11 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the funding source creation flow.
+ * Test the credit card funding source creation flow.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class CreateFundingSourceTest {
+class CreateCreditCardFundingSourceTest {
 
     @get:Rule
     val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
@@ -62,7 +62,7 @@ class CreateFundingSourceTest {
             }
             pressBack()
         }
-        createFundingSource()
+        createCreditCardFundingSource()
         createFundingSource {
             clickOnPositiveAlertDialogButton()
         }
@@ -90,12 +90,12 @@ class CreateFundingSourceTest {
             }
             pressBack()
         }
-        createFundingSource()
+        createCreditCardFundingSource()
         createFundingSource {
             clickOnPositiveAlertDialogButton()
             pressBack()
         }
-        createFundingSource()
+        createCreditCardFundingSource()
         createFundingSource {
             clickOnNegativeErrorAlertDialogButton()
             pressBack()
@@ -110,7 +110,7 @@ class CreateFundingSourceTest {
         mainMenu {
             navigateFromLaunchToMainMenu()
         }
-        createFundingSource()
+        createCreditCardFundingSource()
         createFundingSource {
             clickOnNegativeErrorAlertDialogButton()
             pressBack()
@@ -120,13 +120,17 @@ class CreateFundingSourceTest {
         }
     }
 
-    private fun createFundingSource() {
+    private fun createCreditCardFundingSource() {
         mainMenu {
             navigateToFundingSourcesScreen()
         }
         fundingSources {
             waitForLoading()
-            navigateToCreateFundingSourcesScreen()
+            navigateToCreateFundingSourceMenuScreen()
+        }
+        createFundingSourceMenu {
+            checkMenuItemsDisplayed()
+            navigateToAddStripeCreditCardScreen()
         }
         createFundingSource {
             clickOnCreateButton()

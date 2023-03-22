@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.ProviderCompletionData
+import com.sudoplatform.sudovirtualcards.types.StripeCardProviderCompletionData
 import com.sudoplatform.sudovirtualcards.types.inputs.CreditCardFundingSourceInput
 import com.sudoplatform.sudovirtualcards.util.LocaleUtil
 
@@ -69,7 +70,7 @@ internal class StripeIntentWorker(
             }
         // Return completion data
         setupIntent.paymentMethodId?.let {
-            return ProviderCompletionData(paymentMethod = it)
+            return StripeCardProviderCompletionData(paymentMethod = it)
         }
         throw SudoVirtualCardsClient.FundingSourceException.FailedException()
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -37,10 +37,10 @@ class FundingSourcesRobot : BaseRobot() {
         waitForViewToDisplay(fundingSourceRecyclerView, 5_000L)
     }
 
-    fun navigateToCreateFundingSourcesScreen() {
+    fun navigateToCreateFundingSourceMenuScreen() {
         clickOnView(createFundingSourceButton)
-        createFundingSource {
-            checkCreateFundingSourceItemsDisplayed()
+        createFundingSourceMenu {
+            checkMenuItemsDisplayed()
         }
     }
 

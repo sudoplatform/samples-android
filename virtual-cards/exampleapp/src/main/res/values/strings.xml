@@ -80,17 +80,38 @@
     <string name="list_funding_sources_failure">Failed to list funding sources</string>
     <string name="cancel_funding_source_failure">Failed to cancel funding source</string>
     <string name="what_is_a_funding_source">What is a Funding Source?</string>
-    <string name="funding_source_label">%1$s &#8226;&#8226;&#8226;&#8226;%2$s</string>
-    <string name="funding_source_cancelled_label">%1$s &#8226;&#8226;&#8226;&#8226;%2$s - Cancelled</string>
-    <string name="funding_source_explanation">A Funding source is required to link a real credit or debit card to a virtual card. This funding source is used to fund a transaction performed on the virtual card.</string>
-    <string name="funding_source_doc_url" translatable="false">"https://docs.sudoplatform.com/guides/virtual-cards/manage-funding-sources"</string>
+    <string name="funding_source_credit_card_label">Card: %1$s</string>
+    <string name="funding_source_credit_card_description">&#8226;&#8226;&#8226;&#8226;%1$s (%2$s)</string>
+    <string name="funding_source_bank_account_label">Bank Account: %1$s</string>
+    <string name="funding_source_bank_account_description">&#8226;&#8226;&#8226;&#8226;%1$s (%2$s)</string>
+    <string name="funding_source_credit_card_cancelled_label">Card: %1$s - Cancelled</string>
+    <string name="funding_source_bank_account_cancelled_label">Bank Account: %1$s - Cancelled</string>
 
-    <!-- CreateFundingSourceFragment -->
+    <!-- CreateFundingSourceMenuFragment -->
     <string name="create_funding_source">Create Funding Source</string>
+    <string name="create_stripe_card">Add Stripe Credit Card</string>
+    <string name="create_checkout_bank_account">Add Checkout Bank Account</string>
+    <string name="create_funding_source_learn_more">A Funding source is required to link a real credit card, debit card or bank account to a virtual card. This funding source is used to fund a transaction performed on the virtual card.</string>
+    <string name="create_funding_source_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-funding-sources#creating-a-funding-source</string>
+
+    <!-- CreateCardFundingSourceFragment -->
+    <string name="create_stripe_funding_source">Create Stripe Funding Source</string>
     <string name="creating_funding_source">Creating funding source&#8230;</string>
     <string name="create_funding_source_failure">Failed to create funding source</string>
-    <string name="create_funding_source_learn_more">A Funding source is required to link a real credit or debit card to a virtual card. This funding source is used to fund a transaction performed on the virtual card.</string>
-    <string name="create_funding_source_doc_url" translatable="false">https://docs.sudoplatform.com/guides/virtual-cards/manage-funding-sources#creating-a-funding-source</string>
+    <string name="add_credit_card">Add Credit Card</string>
+
+    <!-- CreateBankAccountFundingSourceFragment -->
+    <string name="add_bank_account">Add Bank Account</string>
+    <string name="launching_plaid_link">Launching Plaid Link&#8230;</string>
+    <string name="plaid_link_explanation">Launch Plaid Link to connect a bank account</string>
+    <string name="launch_plaid_link">Launch Plaid Link</string>
+    <string name="plaid_link_error">Plaid Link encountered and error</string>
+    <string name="institution">Institution:</string>
+    <string name="account_type">Account type:</string>
+    <string name="account_name">Account name:</string>
+    <string name="account_number_ending">Account number ending:</string>
+    <string name="account_number_ending_label">&#8226;&#8226;&#8226;&#8226;%1$s</string>
+    <string name="agreement_text_confirmation">By checking this box you agree to the terms of the ACH Authorization Agreement above.</string>
 
     <!-- VirtualCardsFragment -->
     <string name="loading_virtual_cards">Loading Virtual Cards</string>

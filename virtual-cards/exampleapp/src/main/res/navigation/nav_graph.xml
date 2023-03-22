@@ -44,8 +44,8 @@
         android:label="fragment_funding_sources"
         tools:layout="@layout/fragment_funding_sources" >
         <action
-            android:id="@+id/action_fundingSourcesFragment_to_createFundingSourceFragment"
-            app:destination="@id/createFundingSourceFragment" />
+            android:id="@+id/action_fundingSourcesFragment_to_createFundingSourceMenuFragment"
+            app:destination="@id/createFundingSourceMenuFragment" />
     </fragment>
     <fragment
         android:id="@+id/orphanVirtualCardsFragment"
@@ -85,12 +85,35 @@
             app:destination="@id/virtualCardsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/createFundingSourceFragment"
-        android:name="com.sudoplatform.virtualcardsexample.fundingsources.CreateFundingSourceFragment"
-        android:label="fragment_create_funding_source"
-        tools:layout="@layout/fragment_create_funding_source" >
+        android:id="@+id/createFundingSourceMenuFragment"
+        android:name="com.sudoplatform.virtualcardsexample.fundingsources.CreateFundingSourceMenuFragment"
+        android:label="fragment_create_funding_source_menu"
+        tools:layout="@layout/fragment_create_funding_source_menu" >
         <action
-            android:id="@+id/action_createFundingSourceFragment_to_fundingSourcesFragment"
+            android:id="@+id/action_createFundingSourceMenuFragment_to_createCardFundingSourceFragment"
+            app:destination="@id/createCardFundingSourceFragment" />
+        <action
+            android:id="@+id/action_createFundingSourceMenuFragment_to_createCheckoutBankAccountFundingSourceFragment"
+            app:destination="@id/createBankAccountFundingSourceFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createCardFundingSourceFragment"
+        android:name="com.sudoplatform.virtualcardsexample.fundingsources.CreateCardFundingSourceFragment"
+        android:label="fragment_create_card_funding_source"
+        tools:layout="@layout/fragment_create_card_funding_source" >
+        <action
+            android:id="@+id/action_createCardFundingSourceFragment_to_fundingSourcesFragment"
+            app:destination="@id/fundingSourcesFragment"
+            app:popUpTo="@id/fundingSourcesFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/createBankAccountFundingSourceFragment"
+        android:name="com.sudoplatform.virtualcardsexample.fundingsources.CreateBankAccountFundingSourceFragment"
+        android:label="fragment_create_bank_account_funding_source"
+        tools:layout="@layout/fragment_create_bank_account_funding_source" >
+        <action
+            android:id="@+id/action_createBankAccountFundingSourceFragment_to_fundingSourcesFragment"
             app:destination="@id/fundingSourcesFragment"
             app:popUpTo="@id/fundingSourcesFragment"
             app:popUpToInclusive="true" />

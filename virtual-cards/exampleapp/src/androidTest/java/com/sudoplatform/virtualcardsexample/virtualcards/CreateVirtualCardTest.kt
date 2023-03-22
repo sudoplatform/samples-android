@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.virtualcardsexample.MainActivity
 import com.sudoplatform.virtualcardsexample.fundingsources.createFundingSource
+import com.sudoplatform.virtualcardsexample.fundingsources.createFundingSourceMenu
 import com.sudoplatform.virtualcardsexample.fundingsources.fundingSources
 import com.sudoplatform.virtualcardsexample.identityverification.identityVerification
 import com.sudoplatform.virtualcardsexample.mainmenu.mainMenu
@@ -71,7 +72,10 @@ class CreateVirtualCardTest {
         }
         fundingSources {
             waitForLoading()
-            navigateToCreateFundingSourcesScreen()
+            navigateToCreateFundingSourceMenuScreen()
+        }
+        createFundingSourceMenu {
+            navigateToAddStripeCreditCardScreen()
         }
         createFundingSource {
             clickOnCreateButton()
@@ -167,7 +171,10 @@ class CreateVirtualCardTest {
         }
         fundingSources {
             waitForLoading()
-            navigateToCreateFundingSourcesScreen()
+            navigateToCreateFundingSourceMenuScreen()
+        }
+        createFundingSourceMenu {
+            navigateToAddStripeCreditCardScreen()
         }
         createFundingSource {
             clickOnCreateButton()
