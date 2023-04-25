@@ -41,4 +41,16 @@
         android:text="@string/description_placeholder"
         android:textSize="14sp" />
 
+    <Button
+        android:id="@+id/refreshButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:height="55dp"
+        android:background="#FFFFFF"
+        android:drawableTint="#FFFFFF"
+        android:layout_alignParentEnd="true"
+        android:text="@string/refresh"
+        android:textColor="@color/colorPrimary"
+        android:visibility="visible" />
+
 </RelativeLayout>

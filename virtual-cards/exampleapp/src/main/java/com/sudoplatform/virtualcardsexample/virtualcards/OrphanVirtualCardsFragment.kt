@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -107,7 +107,8 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     /**
      * List orphan [VirtualCard]s from the [SudoVirtualCardsClient].
      *
-     * @param cachePolicy Option of either retrieving [VirtualCard] data from the cache or network.
+     * @param cachePolicy [CachePolicy] Option of either retrieving [VirtualCard] data from the
+     *  cache or network.
      */
     private fun listOrphanVirtualCards(cachePolicy: CachePolicy) {
         launch {
@@ -155,7 +156,8 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     /**
      * List [Sudo]s from the [SudoProfilesClient].
      *
-     * @param listOption Option of either retrieving [Sudo] data from the cache or network.
+     * @param listOption [ListOption] Option of either retrieving [Sudo] data from the cache
+     *  or network.
      */
     private fun listSudos(listOption: ListOption) {
         launch {
@@ -176,8 +178,8 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Configures the [RecyclerView] used to display the listed orphan [VirtualCard] items and listens
-     * to item select events to navigate to the [VirtualCardDetailFragment].
+     * Configures the [RecyclerView] used to display the listed orphan [VirtualCard] items and
+     * listens to item select events to navigate to the [VirtualCardDetailFragment].
      */
     private fun configureRecyclerView() {
         adapter =
@@ -193,7 +195,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
         binding.orphanVirtualCardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    /** Set the visibility of the [emptyVirtualCardsLabel] in the view. */
+    /** Set the visibility of the empty virtual cards label in the view. */
     private fun setEmptyOrphanVirtualCardsLabel() {
         if (bindingDelegate.isAttached()) {
             if (orphanCardList.isEmpty()) {
@@ -207,7 +209,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     /**
      * Sets recycler view to enabled/disabled.
      *
-     * @param isEnabled If true, recycler view will be enabled.
+     * @param isEnabled [Boolean] If true, recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         binding.orphanVirtualCardRecyclerView.isEnabled = isEnabled

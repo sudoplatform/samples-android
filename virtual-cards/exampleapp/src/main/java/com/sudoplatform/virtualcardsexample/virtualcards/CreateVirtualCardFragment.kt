@@ -333,7 +333,11 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         binding.sudoLabel.text = sudoLabelText
     }
 
-    /** Hide the [errorLabel] from the view. */
+    /**
+     * Hide the error label from the view.
+     *
+     * @param isHidden [Boolean] If true, the error label is hidden.
+     */
     private fun setErrorLabelHidden(isHidden: Boolean) {
         if (isHidden) {
             binding.errorLabel.visibility = View.GONE
@@ -345,7 +349,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     /**
      * Sets toolbar items to enabled/disabled.
      *
-     * @param isEnabled If true, toolbar items will be enabled.
+     * @param isEnabled [Boolean] If true, toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

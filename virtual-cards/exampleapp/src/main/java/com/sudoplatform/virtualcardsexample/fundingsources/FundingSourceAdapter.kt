@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -16,7 +16,7 @@ import com.sudoplatform.sudovirtualcards.types.FundingSource
  *
  * @property items List of [FundingSource] data items to display.
  */
-class FundingSourceAdapter(private val items: List<FundingSource>) : RecyclerView.Adapter<FundingSourceViewHolder>() {
+class FundingSourceAdapter(private val items: List<FundingSource>, private val buttonClickedListener: (FundingSource) -> Unit) : RecyclerView.Adapter<FundingSourceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FundingSourceViewHolder {
         return FundingSourceViewHolder.inflate(
@@ -31,5 +31,9 @@ class FundingSourceAdapter(private val items: List<FundingSource>) : RecyclerVie
     override fun onBindViewHolder(holder: FundingSourceViewHolder, position: Int) {
         val fundingSource = items[position]
         holder.bind(fundingSource)
+
+        holder.getRefreshButton().setOnClickListener {
+            buttonClickedListener(fundingSource)
+        }
     }
 }

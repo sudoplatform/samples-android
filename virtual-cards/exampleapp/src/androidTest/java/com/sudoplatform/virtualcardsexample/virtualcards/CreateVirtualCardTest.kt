@@ -33,7 +33,7 @@ import timber.log.Timber
 class CreateVirtualCardTest {
 
     @get:Rule
-    val activityRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
+    val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
     @Before
     fun setup() {

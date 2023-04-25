@@ -86,6 +86,7 @@
     <string name="funding_source_bank_account_description">&#8226;&#8226;&#8226;&#8226;%1$s (%2$s)</string>
     <string name="funding_source_credit_card_cancelled_label">Card: %1$s - Cancelled</string>
     <string name="funding_source_bank_account_cancelled_label">Bank Account: %1$s - Cancelled</string>
+    <string name="refresh">Refresh</string>
 
     <!-- CreateFundingSourceMenuFragment -->
     <string name="create_funding_source">Create Funding Source</string>
@@ -112,6 +113,12 @@
     <string name="account_number_ending">Account number ending:</string>
     <string name="account_number_ending_label">&#8226;&#8226;&#8226;&#8226;%1$s</string>
     <string name="agreement_text_confirmation">By checking this box you agree to the terms of the ACH Authorization Agreement above.</string>
+
+    <!-- RefreshBankAccountFundingSourceFragment -->
+    <string name="refresh_bank_account">Refresh Bank Account</string>
+    <string name="refreshing_funding_source">Refreshing funding source&#8230;</string>
+    <string name ="refresh_funding_source_failure">Failed to refresh funding source</string>
+    <string name="plaid_link_refresh_explanation">Launch Plaid Link to refresh a bank account</string>
 
     <!-- VirtualCardsFragment -->
     <string name="loading_virtual_cards">Loading Virtual Cards</string>
@@ -166,14 +173,15 @@
     <string name="funded_by">Funded by</string>
     <string name="get_funding_source_failure">Failed to retrieve funding source</string>
     <string name="merchant">Merchant</string>
-    <string name="amount">Amount</string>
+    <string name="merchant_amount">Merchant Amount</string>
     <string name="service_fee">Service fee</string>
-    <string name="total">Total</string>
+    <string name="funding_source_charge_amount">Funding Source Charge Amount</string>
     <string name="date_charged">Date charged</string>
     <string name="date_settled">Date settled</string>
     <string name="date_refunded">Date refunded</string>
     <string name="date_declined">Date declined</string>
     <string name="decline_reason">Decline reason</string>
+    <string name="charge_status">Charge status</string>
 
     <!-- OrphanVirtualCardsFragment -->
     <string name="loading_orphan_virtual_cards">Loading Orphan Virtual Cards</string>

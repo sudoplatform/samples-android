@@ -9,7 +9,9 @@ package com.sudoplatform.virtualcardsexample.fundingsources
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
@@ -59,10 +61,22 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                 setCardNetwork(fundingSource.network)
             }
             is BankAccountFundingSource -> {
-                if (fundingSource.state == FundingSourceState.INACTIVE) {
-                    binding.name.text = binding.root.context.getString(R.string.funding_source_bank_account_cancelled_label, fundingSource.institutionName)
-                } else {
-                    binding.name.text = binding.root.context.getString(R.string.funding_source_bank_account_label, fundingSource.institutionName)
+                when (fundingSource.state) {
+                    FundingSourceState.INACTIVE -> {
+                        binding.name.text =
+                            binding.root.context.getString(R.string.funding_source_bank_account_cancelled_label, fundingSource.institutionName)
+                        binding.refreshButton.visibility = View.GONE
+                    }
+                    FundingSourceState.REFRESH -> {
+                        binding.name.text =
+                            binding.root.context.getString(R.string.funding_source_bank_account_label, fundingSource.institutionName)
+                        binding.refreshButton.visibility = View.VISIBLE
+                    }
+                    else -> {
+                        binding.name.text =
+                            binding.root.context.getString(R.string.funding_source_bank_account_label, fundingSource.institutionName)
+                        binding.refreshButton.visibility = View.GONE
+                    }
                 }
                 binding.description.text = binding.root.context.getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType)
                 if (fundingSource.institutionLogo != null) {
@@ -74,6 +88,10 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                 }
             }
         }
+    }
+
+    fun getRefreshButton(): Button {
+        return binding.refreshButton
     }
 
     private fun setCardNetwork(network: CreditCardFundingSource.CreditCardNetwork) {

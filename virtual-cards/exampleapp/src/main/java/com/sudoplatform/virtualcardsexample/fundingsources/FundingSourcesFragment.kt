@@ -20,7 +20,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
+import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderRefreshData
+import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountRefreshUserInteractionData
+import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.inputs.RefreshFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
@@ -112,7 +116,8 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     /**
      * List [FundingSource]s from the [SudoVirtualCardsClient].
      *
-     * @param cachePolicy Option of either retrieving [FundingSource] data from the cache or network.
+     * @param cachePolicy [CachePolicy] Option of either retrieving [FundingSource] data from the
+     *  cache or network.
      */
     private fun listFundingSources(cachePolicy: CachePolicy) {
         launch {
@@ -142,7 +147,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     /**
      * Cancel a [FundingSource] from the [SudoVirtualCardsClient] based on the input [id].
      *
-     * @param id The identifier of the [FundingSource] to cancel.
+     * @param id [String] The identifier of the [FundingSource] to cancel.
      * @param completion Callback which executes when the operation is completed.
      */
     private fun cancelFundingSource(id: String, completion: (FundingSource) -> Unit) {
@@ -170,10 +175,77 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     }
 
     /**
+     * Refreshes the bank account funding source from the [SudoVirtualCardsClient].
+     *
+     * @param id [String] The identifier of the funding source to refresh.
+     */
+    private fun refreshFundingSource(id: String) {
+        launch {
+            try {
+                showLoading(R.string.refreshing_funding_source)
+                withContext(Dispatchers.IO) {
+                    val refreshData = CheckoutBankAccountProviderRefreshData(
+                        accountId = null,
+                        authorizationText = null,
+                    )
+                    val input = RefreshFundingSourceInput(
+                        id,
+                        refreshData,
+                        ClientApplicationData("androidApplication"),
+                        language = "en-US",
+                    )
+                    app.sudoVirtualCardsClient.refreshFundingSource(input)
+                }
+            } catch (e: SudoVirtualCardsClient.FundingSourceException) {
+                when (e) {
+                    is SudoVirtualCardsClient.FundingSourceException.FundingSourceRequiresUserInteractionException -> {
+                        when (e.interactionData) {
+                            is CheckoutBankAccountRefreshUserInteractionData -> {
+                                val userInteractionData = e.interactionData as CheckoutBankAccountRefreshUserInteractionData
+                                val linkToken = userInteractionData.linkToken.linkToken
+                                val authorizationText = userInteractionData.authorizationText
+                                navController.navigate(
+                                    FundingSourcesFragmentDirections
+                                        .actionFundingSourcesFragmentToRefreshBankAccountFundingSourceFragment(
+                                            id,
+                                            authorizationText.toTypedArray(),
+                                            linkToken
+                                        )
+                                )
+                            }
+                            else -> {
+                                showAlertDialog(
+                                    titleResId = R.string.refresh_funding_source_failure,
+                                    message = e.localizedMessage ?: "$e",
+                                    positiveButtonResId = R.string.try_again,
+                                    onPositive = { refreshFundingSource(id) },
+                                    negativeButtonResId = android.R.string.cancel
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        showAlertDialog(
+                            titleResId = R.string.refresh_funding_source_failure,
+                            message = e.localizedMessage ?: "$e",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { refreshFundingSource(id) },
+                            negativeButtonResId = android.R.string.cancel
+                        )
+                    }
+                }
+            }
+            hideLoading()
+        }
+    }
+
+    /**
      * Configures the [RecyclerView] used to display the listed [FundingSource] items.
      */
     private fun configureRecyclerView() {
-        adapter = FundingSourceAdapter(fundingSourceList)
+        adapter = FundingSourceAdapter(fundingSourceList) { fundingSource ->
+            refreshFundingSource(fundingSource.id)
+        }
         binding.fundingSourceRecyclerView.adapter = adapter
         binding.fundingSourceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToCancel()
@@ -182,7 +254,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     /**
      * Sets buttons and recycler view to enabled/disabled.
      *
-     * @param isEnabled If true, buttons and recycler view will be enabled.
+     * @param isEnabled [Boolean] If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         binding.createFundingSourceButton.isEnabled = isEnabled

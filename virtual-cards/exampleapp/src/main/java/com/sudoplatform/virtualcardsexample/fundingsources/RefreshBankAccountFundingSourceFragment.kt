@@ -16,23 +16,21 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import com.plaid.link.OpenPlaidLink
 import com.plaid.link.configuration.LinkTokenConfiguration
 import com.plaid.link.result.LinkExit
 import com.plaid.link.result.LinkSuccess
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
-import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderCompletionData
-import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProvisioningData
+import com.sudoplatform.sudovirtualcards.types.AuthorizationText
+import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderRefreshData
 import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
 import com.sudoplatform.sudovirtualcards.types.FundingSource
-import com.sudoplatform.sudovirtualcards.types.FundingSourceType
-import com.sudoplatform.sudovirtualcards.types.ProvisionalFundingSource
-import com.sudoplatform.sudovirtualcards.types.inputs.CompleteFundingSourceInput
-import com.sudoplatform.sudovirtualcards.types.inputs.SetupFundingSourceInput
+import com.sudoplatform.sudovirtualcards.types.inputs.RefreshFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.createLoadingAlertDialog
-import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateBankAccountFundingSourceBinding
+import com.sudoplatform.virtualcardsexample.databinding.FragmentRefreshBankAccountFundingSourceBinding
 import com.sudoplatform.virtualcardsexample.showAlertDialog
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import kotlinx.coroutines.CoroutineScope
@@ -44,17 +42,18 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [CreateBankAccountFundingSourceFragment] presents a form so that a user can create a Checkout
- * bank account based [FundingSource].
+ * This [RefreshBankAccountFundingSourceFragment] presents a form so that a user can refresh a Checkout
+ * bank account based [FundingSource] that has expired or has been reset.
  *
  * - Links From:
- *  - [CreateFundingSourceMenuFragment]: A user taps the "Add Checkout Bank Account" button.
+ *  - [FundingSourcesFragment]: A user taps the "Refresh" button on a funding source that is in a
+ *   REFRESH state.
  *
  * - Links To:
- *  - [FundingSourcesFragment]: If a user successfully creates a funding source, they will be returned
+ *  - [FundingSourcesFragment]: If a user successfully refreshes a funding source, they will be returned
  *   to this form.
  */
-class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
+class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -65,7 +64,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentCreateBankAccountFundingSourceBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentRefreshBankAccountFundingSourceBinding>()
     private val binding by bindingDelegate
 
     /** Toolbar [Menu] displaying title and create button. */
@@ -74,11 +73,17 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     /** An [AlertDialog] used to indicate that an operation is occurring. */
     private var loading: AlertDialog? = null
 
-    /** A [ProvisionalFundingSource] used to complete the funding source creation. */
-    private lateinit var provisionalFundingSource: ProvisionalFundingSource
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: RefreshBankAccountFundingSourceFragmentArgs by navArgs()
 
-    /** The [CheckoutBankAccountProvisioningData] containing link token and authorization text. */
-    private lateinit var provisioningData: CheckoutBankAccountProvisioningData
+    /** The identifier of the selected [FundingSource] used for display. */
+    private lateinit var fundingSourceId: String
+
+    /** The [AuthorizationText] to display to the user. */
+    private lateinit var authorizationText: List<AuthorizationText>
+
+    /** The link token required to refresh the bank account funding source. */
+    private lateinit var linkToken: String
 
     /** The [LinkSuccess] result from the Plaid Link Flow. */
     private lateinit var linkSuccess: LinkSuccess
@@ -88,14 +93,14 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        bindingDelegate.attach(FragmentCreateBankAccountFundingSourceBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentRefreshBankAccountFundingSourceBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
-            title = getString(R.string.add_bank_account)
-            inflateMenu(R.menu.nav_menu_with_create_button)
+            title = getString(R.string.refresh_bank_account)
+            inflateMenu(R.menu.nav_menu_with_refresh_button)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
-                    R.id.create -> {
-                        completeFundingSource()
+                    R.id.refresh -> {
+                        refreshFundingSource()
                     }
                 }
                 true
@@ -103,6 +108,9 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
             toolbarMenu = menu
         }
         app = requireActivity().application as App
+        fundingSourceId = args.fundingSourceId!!
+        authorizationText = args.authorizationText!!.toList()
+        linkToken = args.linkToken!!
         return binding.root
     }
 
@@ -113,7 +121,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         setToolbarItemsEnabled(false)
         hideAuthorizationScrollView()
         binding.launchPlaidLinkButton.setOnClickListener {
-            setupFundingSource()
+            startRefreshFundingSource()
         }
         binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -132,33 +140,23 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Initiates the setup of the bank account funding source creation flow from the
-     * [SudoVirtualCardsClient] and launches the Plaid Link flow.
+     * Starts the bank account funding source refresh flow from the [SudoVirtualCardsClient] by
+     * launching the Plaid Link flow.
      */
-    private fun setupFundingSource() {
+    private fun startRefreshFundingSource() {
         launch {
             try {
                 showLoading(R.string.launching_plaid_link)
-                withContext(Dispatchers.IO) {
-                    val input = SetupFundingSourceInput(
-                        "USD",
-                        FundingSourceType.BANK_ACCOUNT,
-                        ClientApplicationData("androidApplication")
-                    )
-                    provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(input)
-                    provisioningData = provisionalFundingSource.provisioningData as CheckoutBankAccountProvisioningData
-                    val linkToken = provisioningData.linkToken.linkToken
-                    launchPlaidLink(linkToken)
-                    activity?.runOnUiThread {
-                        configureAuthorizationWebView(provisioningData)
-                    }
+                launchPlaidLink(linkToken)
+                activity?.runOnUiThread {
+                    configureAuthorizationWebView(authorizationText)
                 }
-            } catch (e: SudoVirtualCardsClient.FundingSourceException) {
+            } catch (e: Exception) {
                 showAlertDialog(
-                    titleResId = R.string.create_funding_source_failure,
+                    titleResId = R.string.refresh_funding_source_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { setupFundingSource() },
+                    onPositive = { startRefreshFundingSource() },
                     negativeButtonResId = android.R.string.cancel
                 )
             }
@@ -166,42 +164,41 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         }
     }
 
-    /** Completes the bank account funding source creation flow from the [SudoVirtualCardsClient]. */
-    private fun completeFundingSource() {
+    /** Refreshes the bank account funding source from the [SudoVirtualCardsClient]. */
+    private fun refreshFundingSource() {
         launch {
             try {
-                showLoading(R.string.creating_funding_source)
+                showLoading(R.string.refreshing_funding_source)
                 app.sudoVirtualCardsClient.createKeysIfAbsent()
                 withContext(Dispatchers.IO) {
-                    val completionData = CheckoutBankAccountProviderCompletionData(
-                        publicToken = linkSuccess.publicToken,
-                        institutionId = linkSuccess.metadata.institution?.id ?: "",
+                    val refreshData = CheckoutBankAccountProviderRefreshData(
                         accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = provisioningData.authorizationText[0],
+                        authorizationText = authorizationText[0],
                     )
-                    val input = CompleteFundingSourceInput(
-                        provisionalFundingSource.id,
-                        completionData,
-                        null
+                    val input = RefreshFundingSourceInput(
+                        fundingSourceId,
+                        refreshData,
+                        ClientApplicationData("androidApplication"),
+                        authorizationText[0].language
                     )
-                    app.sudoVirtualCardsClient.completeFundingSource(input)
+                    app.sudoVirtualCardsClient.refreshFundingSource(input)
                 }
                 showAlertDialog(
                     titleResId = R.string.success,
                     positiveButtonResId = android.R.string.ok,
                     onPositive = {
                         navController.navigate(
-                            CreateBankAccountFundingSourceFragmentDirections
-                                .actionCreateBankAccountFundingSourceFragmentToFundingSourcesFragment()
+                            RefreshBankAccountFundingSourceFragmentDirections
+                                .actionRefreshBankAccountFundingSourceFragmentToFundingSourcesFragment()
                         )
                     }
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(
-                    titleResId = R.string.create_funding_source_failure,
+                    titleResId = R.string.refresh_funding_source_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { completeFundingSource() },
+                    onPositive = { refreshFundingSource() },
                     negativeButtonResId = android.R.string.cancel
                 )
             }
@@ -245,16 +242,15 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     /**
      * Configures the web view used to hold the authorization text.
      *
-     * @param provisioningData [CheckoutBankAccountProvisioningData] Provisioning data containing
-     *  the authorization text.
+     * @param authorizationText [List<AuthorizationText>] The authorization text to display.
      */
-    private fun configureAuthorizationWebView(provisioningData: CheckoutBankAccountProvisioningData) {
-        var authorizationTextHtml = provisioningData.authorizationText.find {
+    private fun configureAuthorizationWebView(authorizationText: List<AuthorizationText>) {
+        var authorizationTextHtml = authorizationText.find {
                 a ->
             a.contentType == "text/html"
         }?.content
         if (authorizationTextHtml == null) {
-            val authorizationTextPlain = provisioningData.authorizationText.find {
+            val authorizationTextPlain = authorizationText.find {
                     a ->
                 a.contentType == "text/plain"
             }?.content ?: ""

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,6 +10,9 @@ import android.content.Context
 import com.sudoplatform.sudovirtualcards.types.DeclineReason
 import com.sudoplatform.virtualcardsexample.R
 
+/**
+ * Extension mapping [DeclineReason] name to a description.
+ */
 fun DeclineReason.description(context: Context): String {
     return when (this) {
         DeclineReason.INSUFFICIENT_FUNDS -> context.getString(R.string.dr_insufficient_funds)

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -325,7 +325,8 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     /**
      * Sets the register button to enabled/disabled and modifies associated text.
      *
-     * @param isEnabled If true, the register button will be enabled with its corresponding text.
+     * @param isEnabled [Boolean] If true, the register button will be enabled with its
+     *  corresponding text.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         if (isEnabled) {

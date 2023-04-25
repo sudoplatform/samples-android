@@ -32,8 +32,10 @@ internal class StripeIntentWorker(
      * Processes the payment setup confirmation to return the data needed to complete
      * the funding source creation process.
      *
-     * @param input The credit card input required to build the card and billing details.
-     * @param clientSecret The client secret from the provisional funding source provisioning data.
+     * @param input [CreditCardFundingSourceInput] The credit card input required to build the card
+     *  and billing details.
+     * @param clientSecret [String] The client secret from the provisional funding source
+     *  provisioning data.
      */
     suspend fun confirmSetupIntent(
         input: CreditCardFundingSourceInput,
@@ -78,7 +80,7 @@ internal class StripeIntentWorker(
     /**
      * Parses the [countryCode] and ensures that it is of a ISO-3166 Alpha-2 format.
      *
-     * @param countryCode The country code to parse.
+     * @param countryCode [String] The country code to parse.
      */
     private fun ensureAlpha2CountryCode(context: Context, countryCode: String): String {
         if (countryCode.trim().length != 3) {

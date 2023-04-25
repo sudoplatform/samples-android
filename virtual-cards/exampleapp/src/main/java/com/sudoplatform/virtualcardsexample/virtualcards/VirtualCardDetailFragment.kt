@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -127,7 +127,8 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
     /**
      * List [Transaction]s from the [SudoVirtualCardsClient].
      *
-     * @param cachePolicy Option of either retrieving [Transaction] data from the cache or network.
+     * @param cachePolicy [CachePolicy] Option of either retrieving [Transaction] data from the
+     *  cache or network.
      */
     private fun listTransactions(cachePolicy: CachePolicy) {
         launch {
@@ -284,7 +285,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
         binding.transactionRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    /** Set the visibility of the [emptyTxnsLabel] in the view. */
+    /** Set the visibility of the empty transactions label in the view. */
     private fun setEmptyTransactionsLabel() {
         if (bindingDelegate.isAttached()) {
             if (transactionList.isEmpty()) {

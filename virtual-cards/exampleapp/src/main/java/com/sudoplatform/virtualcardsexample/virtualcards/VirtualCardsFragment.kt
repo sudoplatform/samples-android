@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -125,7 +125,8 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
     /**
      * List [VirtualCard]s from the [SudoVirtualCardsClient].
      *
-     * @param cachePolicy Option of either retrieving [VirtualCard] data from the cache or network.
+     * @param cachePolicy [CachePolicy] Option of either retrieving [VirtualCard] data from the
+     *  cache or network.
      */
     private fun listCards(cachePolicy: CachePolicy) {
         launch {
@@ -171,7 +172,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
     /**
      * Cancel a [VirtualCard] from the [SudoVirtualCardsClient] based on the input [id].
      *
-     * @param id The identifier of the [VirtualCard] to cancel.
+     * @param id [String] The identifier of the [VirtualCard] to cancel.
      * @param completion Callback which executes when the operation is completed.
      */
     private fun cancelVirtualCard(id: String, completion: (VirtualCard) -> Unit) {
@@ -231,7 +232,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
     /**
      * Sets buttons and recycler view to enabled/disabled.
      *
-     * @param isEnabled If true, buttons and recycler view will be enabled.
+     * @param isEnabled [Boolean] If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         binding.createVirtualCardButton.isEnabled = isEnabled

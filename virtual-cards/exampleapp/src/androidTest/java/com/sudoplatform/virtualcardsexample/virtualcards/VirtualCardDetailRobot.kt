@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,11 +19,6 @@ class VirtualCardDetailRobot : BaseRobot() {
 
     private val cardView = withId(R.id.cardView)
     private val transactionTextView = withId(R.id.transactionTitle)
-    private val transactionRecyclerView = withId(R.id.transactionRecyclerView)
-
-    fun waitForRecyclerView() {
-        waitForViewToDisplay(transactionRecyclerView, 15_000L)
-    }
 
     fun checkVirtualCardDetailItemsDisplayed(timeout: Long = 1000L) {
         waitForViewToDisplay(cardView, timeout)

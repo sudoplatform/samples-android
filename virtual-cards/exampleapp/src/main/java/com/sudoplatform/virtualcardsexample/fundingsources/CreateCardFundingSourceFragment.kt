@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.Stripe
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
+import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.FundingSourceType
 import com.sudoplatform.sudovirtualcards.types.StripeCardProvisioningData
@@ -161,7 +162,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                     // Retrieve the funding source client configuration
                     val configuration = app.sudoVirtualCardsClient.getFundingSourceClientConfiguration()
                     // Perform the funding source setup operation
-                    val setupInput = SetupFundingSourceInput("USD", FundingSourceType.CREDIT_CARD)
+                    val setupInput = SetupFundingSourceInput("USD", FundingSourceType.CREDIT_CARD, ClientApplicationData("androidApplication"))
                     val provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(setupInput)
                     // Process stripe data
                     val stripeClient = Stripe(requireContext(), configuration.first().apiKey)
@@ -242,7 +243,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
     /**
      * Sets toolbar items to enabled/disabled.
      *
-     * @param isEnabled If true, toolbar items will be enabled.
+     * @param isEnabled [Boolean] If true, toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

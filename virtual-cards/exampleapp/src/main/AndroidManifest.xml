@@ -27,6 +27,10 @@
                 <data android:scheme="com.sudoplatform.virtualcardsexample"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.plaid.internal.LinkRedirectActivity"
+            android:theme="@style/Theme.AppCompat"
+            tools:replace="android:theme" />
     </application>
 
 </manifest>

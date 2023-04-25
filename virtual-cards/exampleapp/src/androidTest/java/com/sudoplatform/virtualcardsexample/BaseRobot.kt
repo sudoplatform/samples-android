@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -160,7 +160,7 @@ open class BaseRobot {
         try {
             onView(matcher)
                 .check(matches(not(isDisplayed())))
-        } catch (e: NoMatchingViewException) {
+        } catch (_: NoMatchingViewException) {
         }
     }
 

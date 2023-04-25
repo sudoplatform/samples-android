@@ -167,19 +167,23 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
         }
         transactionDetailCells.addAll(arrayListOf(merchantCell, statusCell))
         configureTransactionDateCells(transaction)
-        val transactionDetail = transaction.details.first()
-        val amountCell = TransactionDetailCell(getString(R.string.amount), "", formatCurrencyAmount(transactionDetail.virtualCardAmount))
-        transactionDetailCells.add(amountCell)
-        when (transaction.type) {
-            TransactionType.PENDING, TransactionType.COMPLETE -> {
-                val feePercentStr = "%.2f%%".format((transactionDetail.markup.percent / 1000.0))
-                val feeFlatStr = "$%.2f".format((transactionDetail.markup.flat / 100.0))
-                val serviceFeeSubtitle = "$feePercentStr + $feeFlatStr"
-                val serviceFeeCell = TransactionDetailCell(getString(R.string.service_fee), serviceFeeSubtitle, formatCurrencyAmount(transactionDetail.markupAmount))
-                val totalFeeCell = TransactionDetailCell(getString(R.string.total), "", formatCurrencyAmount(transactionDetail.fundingSourceAmount))
-                transactionDetailCells.addAll(arrayListOf(serviceFeeCell, totalFeeCell))
+        for (transactionDetail in transaction.details) {
+            val amountCell = TransactionDetailCell(getString(R.string.merchant_amount), "", formatCurrencyAmount(transactionDetail.virtualCardAmount))
+            transactionDetailCells.add(amountCell)
+            when (transaction.type) {
+                TransactionType.PENDING, TransactionType.COMPLETE -> {
+                    val feePercentStr = "%.2f%%".format((transactionDetail.markup.percent / 1000.0))
+                    val feeFlatStr = "$%.2f".format((transactionDetail.markup.flat / 100.0))
+                    val serviceFeeSubtitle = "$feePercentStr + $feeFlatStr"
+                    val serviceFeeCell = TransactionDetailCell(getString(R.string.service_fee), serviceFeeSubtitle, formatCurrencyAmount(transactionDetail.markupAmount))
+                    val totalFeeCell = TransactionDetailCell(getString(R.string.funding_source_charge_amount), "", formatCurrencyAmount(transactionDetail.fundingSourceAmount))
+                    transactionDetailCells.addAll(arrayListOf(serviceFeeCell, totalFeeCell))
+                }
+                else -> {}
             }
-            else -> {}
+            val chargeStatus = transactionDetail.state
+            val chargeStatusCell = TransactionDetailCell(getString(R.string.charge_status), "", chargeStatus.name)
+            transactionDetailCells.add(chargeStatusCell)
         }
     }
 
@@ -239,6 +243,6 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
      * @return A presentable [String] containing the date.
      */
     private fun formatDate(date: Date): String {
-        return DateFormat.format("MMM, dd yyyy", date).toString()
+        return DateFormat.format("MMM dd, yyyy", date).toString()
     }
 }
