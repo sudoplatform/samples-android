@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,7 +27,9 @@ import com.sudoplatform.emailexample.util.Rfc822MessageFactory
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.inputs.CreateDraftEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.UpdateDraftEmailMessageInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -91,6 +93,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     R.id.send -> {
                         sendEmailMessage()
                     }
+                    R.id.save -> {
+                        saveDraftEmailMessage()
+                    }
                 }
                 true
             }
@@ -109,7 +114,14 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         val emailMessageWithBody = args.emailMessageWithBody
         val emailMessage = args.emailMessage
         if (emailMessageWithBody != null && emailMessage != null) {
-            configureReplyContents(emailMessage, emailMessageWithBody)
+            if (emailMessageWithBody.isDraft) {
+                configureEmailMessageContents(
+                    emailMessage,
+                    emailMessageWithBody
+                )
+            } else {
+                configureReplyContents(emailMessage, emailMessageWithBody)
+            }
         }
     }
 
@@ -174,16 +186,90 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
     }
 
+    /** Saves a draft email message from the [SudoEmailClient]. */
+    private fun saveDraftEmailMessage() {
+        launch {
+            try {
+                showLoading(R.string.saving)
+                withContext(Dispatchers.IO) {
+                    val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
+                        from = emailAddress,
+                        to = binding.toTextView.text.split(",").toList(),
+                        cc = binding.ccTextView.text.split(",").toList(),
+                        bcc = binding.bccTextView.text.split(",").toList(),
+                        subject = binding.subjectTextView.text.toString(),
+                        body = binding.contentBody.text.toString()
+                    )
+                    val message = args.emailMessageWithBody
+                    if (message?.isDraft == true) {
+                        val input = UpdateDraftEmailMessageInput(
+                            rfc822Data = rfc822Data,
+                            senderEmailAddressId = emailAddressId,
+                            id = message.id
+                        )
+                        app.sudoEmailClient.updateDraftEmailMessage(input)
+                    } else {
+                        val input = CreateDraftEmailMessageInput(
+                            rfc822Data = rfc822Data,
+                            senderEmailAddressId = emailAddressId
+                        )
+                        app.sudoEmailClient.createDraftEmailMessage(input)
+                    }
+                }
+                showAlertDialog(
+                    titleResId = R.string.saved,
+                    positiveButtonResId = android.R.string.ok,
+                    onPositive = {
+                        navController.navigate(
+                            SendEmailMessageFragmentDirections
+                                .actionSendEmailMessageFragmentToEmailMessagesFragment(
+                                    emailAddress,
+                                    emailAddressId
+                                )
+                        )
+                    }
+                )
+            } catch (e: SudoEmailClient.EmailMessageException) {
+                showAlertDialog(
+                    titleResId = R.string.save_email_message_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { saveDraftEmailMessage() },
+                    negativeButtonResId = android.R.string.cancel
+                )
+            }
+            hideLoading()
+        }
+    }
+
     /** Validates submitted input form data. */
     private fun validateFormData(): Boolean {
         return binding.toTextView.text.isBlank()
     }
 
     /**
+     * Configures the view with the appropriate values from the email message contents.
+     *
+     * @param emailMessage [EmailMessage] Email message to configure the view with.
+     * @param emailMessageWithBody [SimplifiedEmailMessage] Email message containing the message
+     *  body to configure the view with.
+     */
+    private fun configureEmailMessageContents(
+        emailMessage: EmailMessage,
+        emailMessageWithBody: SimplifiedEmailMessage
+    ) {
+        binding.toTextView.setText(if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") else "")
+        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") else "")
+        binding.subjectTextView.setText(if (emailMessage.subject.isNullOrBlank()) "" else emailMessage.subject)
+        binding.contentBody.setText(emailMessageWithBody.body)
+    }
+
+    /**
      * Configures the view with the information required to compose a reply message.
      *
-     * @param emailMessage Email message to configure the view with.
-     * @param emailMessageWithBody Email message containing the message body to configure the view with.
+     * @param emailMessage [EmailMessage] Email message to configure the view with.
+     * @param emailMessageWithBody [SimplifiedEmailMessage] Email message containing the message
+     *  body to configure the view with.
      */
     private fun configureReplyContents(
         emailMessage: EmailMessage,
@@ -202,7 +288,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /**
      * Sets toolbar items and edit text fields to enabled/disabled.
      *
-     * @param isEnabled If true, toolbar items and edit text fields will be enabled.
+     * @param isEnabled [Boolean] If true, toolbar items and edit text fields will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

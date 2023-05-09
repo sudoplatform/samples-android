@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -14,7 +14,7 @@ import com.sudoplatform.sudoprofiles.Sudo
  * A [RecyclerView.Adapter] used to feed [Sudo] data to the list view and handle creation and
  * replacement of views for the [Sudo] data items.
  *
- * @property items List of [Sudo] data items to display.
+ * @property items [List<Sudo>] List of [Sudo] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
 class SudoAdapter(private val items: List<Sudo>, private val itemSelectedListener: (Sudo) -> Unit) : RecyclerView.Adapter<SudoViewHolder>() {

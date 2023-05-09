@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -39,9 +39,9 @@ internal object Rfc822MessageFactory {
 
         val message = MimeMessage(session)
         message.setFrom(InternetAddress(from))
-        to.map { message.addRecipient(Message.RecipientType.TO, InternetAddress(it)) }
-        cc?.map { if (!it.isBlank()) message.addRecipient(Message.RecipientType.CC, InternetAddress(it)) }
-        bcc?.map { if (!it.isBlank()) message.addRecipient(Message.RecipientType.BCC, InternetAddress(it)) }
+        to.map { if (it.isNotBlank()) message.addRecipient(Message.RecipientType.TO, InternetAddress(it)) }
+        cc?.map { if (it.isNotBlank()) message.addRecipient(Message.RecipientType.CC, InternetAddress(it)) }
+        bcc?.map { if (it.isNotBlank()) message.addRecipient(Message.RecipientType.BCC, InternetAddress(it)) }
         message.subject = subject
 
         val textPart = MimeBodyPart()

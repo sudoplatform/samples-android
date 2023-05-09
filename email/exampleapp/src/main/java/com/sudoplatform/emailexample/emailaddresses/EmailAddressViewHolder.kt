@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -18,7 +18,7 @@ import com.sudoplatform.sudoemail.types.EmailAddress
  *
  * The item view contains a name label of the address.
  *
- * @property binding The [EmailAddress] item view binding component.
+ * @property binding [LayoutItemCellBinding] The [EmailAddress] item view binding component.
  */
 class EmailAddressViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
 

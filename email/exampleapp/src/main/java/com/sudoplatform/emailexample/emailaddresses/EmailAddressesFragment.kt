@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -127,7 +127,8 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     /**
      * List [EmailAddress]es from the [SudoEmailClient].
      *
-     * @param cachePolicy Option of either retrieving [EmailAddress] data from the cache or network.
+     * @param cachePolicy [CachePolicy] Option of either retrieving [EmailAddress] data from the
+     *  cache or network.
      */
     private fun listEmailAddresses(cachePolicy: CachePolicy) {
         launch {
@@ -173,7 +174,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     /**
      * Deprovision a selected [EmailAddress] from the [SudoEmailClient].
      *
-     * @param emailAddressId The identifier of the [EmailAddress] to de-provision.
+     * @param emailAddressId [String] The identifier of the [EmailAddress] to de-provision.
      */
     private fun deprovisionEmailAddress(emailAddressId: String) {
         launch {
@@ -221,7 +222,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     /**
      * Sets buttons and recycler view to enabled/disabled.
      *
-     * @param isEnabled If true, buttons and recycler view will be enabled.
+     * @param isEnabled [Boolean] If true, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         binding.createEmailAddressButton.isEnabled = isEnabled

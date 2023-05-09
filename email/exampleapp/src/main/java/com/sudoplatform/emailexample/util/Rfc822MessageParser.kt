@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,12 +19,14 @@ import java.io.InputStream
 
 @Parcelize
 data class SimplifiedEmailMessage(
+    val id: String,
     val from: List<String>,
     val to: List<String>,
     val cc: List<String>,
     val bcc: List<String>,
     val subject: String,
-    val body: String
+    val body: String,
+    val isDraft: Boolean = false,
 ) : Parcelable
 
 /**
@@ -34,14 +36,18 @@ internal object Rfc822MessageParser {
 
     private val session = Session.getDefaultInstance(System.getProperties(), null)
 
-    private class LocalMimeMessage(session: Session, rfc822Ins: InputStream) : MimeMessage(session, rfc822Ins) {
+    private class LocalMimeMessage(session: Session, rfc822Ins: InputStream) :
+        MimeMessage(session, rfc822Ins) {
 
         override fun toString(): String {
 
             val sender = from?.map { it.toString() } ?: emptyList()
-            val toRecipients = getRecipients(Message.RecipientType.TO)?.map { it.toString() } ?: emptyList()
-            val ccRecipients = getRecipients(Message.RecipientType.CC)?.map { it.toString() } ?: emptyList()
-            val bccRecipients = getRecipients(Message.RecipientType.BCC)?.map { it.toString() } ?: emptyList()
+            val toRecipients =
+                getRecipients(Message.RecipientType.TO)?.map { it.toString() } ?: emptyList()
+            val ccRecipients =
+                getRecipients(Message.RecipientType.CC)?.map { it.toString() } ?: emptyList()
+            val bccRecipients =
+                getRecipients(Message.RecipientType.BCC)?.map { it.toString() } ?: emptyList()
 
             return buildString {
                 if (dataHandler.dataSource.contentType.contains("text/plain")) {
@@ -91,9 +97,15 @@ internal object Rfc822MessageParser {
     private fun toSimplifiedEmailMessage(message: Message): SimplifiedEmailMessage {
 
         val sender = message.from?.map { it.toString() } ?: emptyList()
-        val toRecipients = message.getRecipients(Message.RecipientType.TO)?.map { it.toString() } ?: emptyList()
-        val ccRecipients = message.getRecipients(Message.RecipientType.CC)?.map { it.toString() } ?: emptyList()
-        val bccRecipients = message.getRecipients(Message.RecipientType.BCC)?.map { it.toString() } ?: emptyList()
+        val toRecipients =
+            message.getRecipients(Message.RecipientType.TO)?.map { it.toString() }
+                ?: emptyList()
+        val ccRecipients =
+            message.getRecipients(Message.RecipientType.CC)?.map { it.toString() }
+                ?: emptyList()
+        val bccRecipients =
+            message.getRecipients(Message.RecipientType.BCC)?.map { it.toString() }
+                ?: emptyList()
 
         val body: String
         if (message.isMimeType("text/plain")) {
@@ -119,6 +131,7 @@ internal object Rfc822MessageParser {
         }
 
         return SimplifiedEmailMessage(
+            id = "",
             from = sender,
             to = toRecipients,
             cc = ccRecipients,

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,13 +15,23 @@ import com.sudoplatform.emailexample.R
 import com.sudoplatform.sudoemail.types.EmailFolder
 
 /**
- * An Adapter used to feed [EmailFolder] data to the drop down spinner list.
- *
- * @property items List of [EmailFolder] data items to display.
+ * Enumeration of the types of supported email folders.
  */
-class EmailFolderAdapter(context: Context, private val items: List<EmailFolder>) : BaseAdapter() {
+enum class FolderTypes {
+    INBOX,
+    OUTBOX,
+    SENT,
+    DRAFTS,
+    TRASH
+}
 
-    private val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+/**
+ * An Adapter used to feed [EmailFolder] data to the drop down spinner list.
+ */
+class EmailFolderAdapter(context: Context) : BaseAdapter() {
+
+    private val inflater =
+        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
 
@@ -35,17 +45,17 @@ class EmailFolderAdapter(context: Context, private val items: List<EmailFolder>)
             view = convertView
             emailFolderViewHolder = view.tag as EmailFolderViewHolder
         }
-        emailFolderViewHolder.label.text = items[position].folderName
+        emailFolderViewHolder.label.text = FolderTypes.values()[position].toString()
 
         return view
     }
 
     override fun getItem(position: Int): Any {
-        return items[position]
+        return FolderTypes.values()[position].toString()
     }
 
     override fun getCount(): Int {
-        return items.count()
+        return FolderTypes.values().size
     }
 
     override fun getItemId(position: Int): Long {

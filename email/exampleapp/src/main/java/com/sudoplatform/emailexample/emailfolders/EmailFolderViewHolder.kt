@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,7 +15,7 @@ import com.sudoplatform.sudoemail.types.EmailFolder
  * A View Holder used to describe the [EmailFolder] item view which contains a text view of
  * the folder name.
  *
- * @property row The view which contains the [EmailFolder] item.
+ * @property row [View] The view which contains the [EmailFolder] item.
  */
 class EmailFolderViewHolder(private val row: View?) {
     val label: TextView = row?.findViewById(R.id.textView) as TextView

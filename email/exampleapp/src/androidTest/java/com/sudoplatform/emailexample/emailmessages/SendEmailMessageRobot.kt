@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,7 +15,8 @@ import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 import org.hamcrest.CoreMatchers.not
 
-fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) = SendEmailMessageRobot().apply { func() }
+fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) =
+    SendEmailMessageRobot().apply { func() }
 
 /**
  * Testing robot that manages the send email message screen.
@@ -23,6 +24,7 @@ fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) = SendEmailMessageR
 class SendEmailMessageRobot : BaseRobot() {
 
     private val toolbarSendButton = withId(R.id.send)
+    private val toolbarSaveButton = withId(R.id.save)
     private val toField = R.id.toTextView
     private val toLabel = withId(R.id.toLabel)
     private val ccField = R.id.ccTextView
@@ -56,6 +58,10 @@ class SendEmailMessageRobot : BaseRobot() {
 
     fun clickOnSendEmailButton() {
         clickOnView(toolbarSendButton)
+    }
+
+    fun clickOnSaveDraftEmailButton() {
+        clickOnView(toolbarSaveButton)
     }
 
     fun clickOnPositiveAlertDialogButton() {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -138,7 +138,8 @@ class SudosFragment : Fragment(), CoroutineScope {
     /**
      * List [Sudo]s from the [SudoProfilesClient].
      *
-     * @param listOption Option of either retrieving [Sudo] data from the cache or network.
+     * @param listOption [ListOption] Option of either retrieving [Sudo] data from the cache
+     *  or network.
      */
     private fun listSudos(listOption: ListOption) {
         showLoading(R.string.loading_sudos)
@@ -176,7 +177,7 @@ class SudosFragment : Fragment(), CoroutineScope {
     /**
      * Delete a selected [Sudo] from the [SudoProfilesClient].
      *
-     * @param sudo The selected [Sudo] to delete.
+     * @param sudo [Sudo] The selected [Sudo] to delete.
      */
     private fun deleteSudo(sudo: Sudo) {
         showDeleteAlert(R.string.deleting_sudos)
@@ -229,7 +230,7 @@ class SudosFragment : Fragment(), CoroutineScope {
     /**
      * Sets toolbar items, buttons and recycler view to enabled/disabled.
      *
-     * @param isEnabled If true, toolbar items, buttons and recycler view will be enabled.
+     * @param isEnabled [Boolean] If true, toolbar items, buttons and recycler view will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

@@ -80,6 +80,8 @@
     <string name="no_subject">No Subject</string>
     <string name="deleting_email_message">Deleting email message&#8230;</string>
     <string name="deleting_email_message_failure">Failed to delete email message</string>
+    <string name="deleting_draft_email_message">Deleting draft email message&#8230;</string>
+    <string name="deleting_draft_email_message_failure">Failed to delete draft email message</string>
     <string name="moving_email_message_to_trash">Moving to trash&#8230;</string>
     <string name="moving_email_message_failure">Failed to move email message</string>
     <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
@@ -94,7 +96,10 @@
     <string name="compose_email_message">Compose Email Message</string>
     <string name="sending">Sending&#8230;</string>
     <string name="sent">Sent</string>
+    <string name="saving">Saving Draft&#8230;</string>
+    <string name="saved">Saved</string>
     <string name="send_email_message_failure">Failed to send email message</string>
+    <string name="save_email_message_failure">Failed to save draft</string>
     <string name="get_email_address_failure">Failed to retrieve email address</string>
     <string name="validate_to_address">Please ensure the to address field is filled out.</string>
     <string name="reply_message">Re: %1$s</string>

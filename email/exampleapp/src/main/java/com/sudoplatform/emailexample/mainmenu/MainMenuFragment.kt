@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -143,7 +143,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     /**
      * Sets main menu buttons and toolbar items to enabled/disabled.
      *
-     * @param isEnabled If true, buttons and toolbar items will be enabled.
+     * @param isEnabled [Boolean] If true, buttons and toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

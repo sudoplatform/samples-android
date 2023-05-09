@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -198,7 +198,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
      * Checks the availability of an email address based on its local parts and domain from the
      * [SudoEmailClient] and returns a list of the available email addresses to provision.
      *
-     * @param localParts A list of local parts to check for address availability.
+     * @param localParts [List<String>] A list of local parts to check for address availability.
      */
     private fun checkEmailAddressAvailability(localParts: List<String>) {
         launch {
@@ -311,7 +311,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     /**
      * Sets buttons and input field enabled/disabled.
      *
-     * @param isEnabled If true, buttons and input field will be enabled.
+     * @param isEnabled [Boolean] If true, buttons and input field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

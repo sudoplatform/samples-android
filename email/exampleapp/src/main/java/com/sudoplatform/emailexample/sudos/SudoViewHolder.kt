@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,7 +19,7 @@ import com.sudoplatform.sudoprofiles.Sudo
  *
  * The item view contains a label [TextView] of the [Sudo] name.
  *
- * @property binding The [Sudo] item view binding component.
+ * @property binding [LayoutItemCellBinding] The [Sudo] item view binding component.
  */
 class SudoViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
 

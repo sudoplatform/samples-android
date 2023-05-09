@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -22,7 +22,7 @@ import java.util.Date
  *
  * The item view contains a recipient, subject and a date label.
  *
- * @property binding The [EmailMessage] item view binding component.
+ * @property binding [LayoutEmailMessageCellBinding] The [EmailMessage] item view binding component.
  */
 class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding) : RecyclerView.ViewHolder(binding.root) {
 
@@ -52,7 +52,7 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
     /**
      * Formats a [Date] to a presentable String.
      *
-     * @param date The [Date] to be formatted.
+     * @param date [Date] The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
     private fun formatDate(date: Date): String {

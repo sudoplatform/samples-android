@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -45,6 +45,14 @@ class EmailMessagesRobot : BaseRobot() {
     fun navigateToSendEmailMessageScreen() {
         clickOnView(toolbarComposeButton)
         sendEmailMessage {
+            checkSendEmailMessageItemsDisplayed()
+        }
+    }
+
+    fun navigateToEditDraftEmailMessageScreen(position: Int) {
+        clickRecyclerViewItem(position)
+        sendEmailMessage {
+            waitForLoading()
             checkSendEmailMessageItemsDisplayed()
         }
     }

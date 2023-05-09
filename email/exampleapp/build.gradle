@@ -42,12 +42,10 @@ android {
 
 dependencies {
 
-    implementation 'com.sudoplatform:sudouser:12.0.1'
-    implementation 'com.sudoplatform:sudoprofiles:9.0.0'
-    implementation 'com.sudoplatform:sudoentitlements:4.0.0'
-
-    // TODO: Replace with the fully published version once the Email 2.0 work is complete.
-    implementation 'com.sudoplatform:sudoemail:3.0.0-1662102601-SNAPSHOT'
+    implementation 'com.sudoplatform:sudouser:14.0.0'
+    implementation 'com.sudoplatform:sudoprofiles:11.0.1'
+    implementation 'com.sudoplatform:sudoentitlements:6.0.1'
+    implementation 'com.sudoplatform:sudoemail:3.0.0'
 
     constraints {
         implementation("com.squareup.okhttp3:okhttp:4.9.3") {

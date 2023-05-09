@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -162,7 +162,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
     /**
      * Sets toolbar items and edit text field to enabled/disabled.
      *
-     * @param isEnabled If true, toolbar items and edit text field will be enabled.
+     * @param isEnabled [Boolean] If true, toolbar items and edit text field will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         binding.editText.isEnabled = isEnabled

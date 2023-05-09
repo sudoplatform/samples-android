@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -166,7 +166,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /**
      * Configures the view with the appropriate values from the email message contents.
      *
-     * @param emailMessage Email message to configure the view with.
+     * @param emailMessage [EmailMessage] Email message to configure the view with.
      */
     private fun configureEmailMessageContents(emailMessage: EmailMessage) {
         binding.dateValue.text = formatDate(emailMessage.createdAt)
@@ -180,7 +180,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /**
      * Formats a [Date] to a presentable String.
      *
-     * @param date The [Date] to be formatted.
+     * @param date [Date] The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
     private fun formatDate(date: Date): String {
@@ -190,7 +190,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /**
      * Sets toolbar items to enabled/disabled.
      *
-     * @param isEnabled If true, toolbar items will be enabled.
+     * @param isEnabled [Boolean] If true, toolbar items will be enabled.
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled

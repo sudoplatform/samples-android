@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -14,7 +14,7 @@ import com.sudoplatform.sudoemail.types.EmailAddress
  * A [RecyclerView.Adapter] used to feed [EmailAddress] data to the list view and handle creation
  * and replacement of views for the [EmailAddress] data items.
  *
- * @property items List of [EmailAddress] data items to display.
+ * @property items [List<EmailMessage>] List of [EmailAddress] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
 class EmailAddressAdapter(private val items: List<EmailAddress>, private val itemSelectedListener: (EmailAddress) -> Unit) : RecyclerView.Adapter<EmailAddressViewHolder>() {
