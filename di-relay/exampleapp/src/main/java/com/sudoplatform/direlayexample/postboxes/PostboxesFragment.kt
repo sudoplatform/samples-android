@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,6 +8,7 @@ package com.sudoplatform.direlayexample.postboxes
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -25,14 +26,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
-import com.sudoplatform.direlayexample.connection.ConnectionFragment
 import com.sudoplatform.direlayexample.databinding.FragmentPostboxesBinding
-import com.sudoplatform.direlayexample.establishconnection.options.ConnectionOptionsFragment
 import com.sudoplatform.direlayexample.register.RegisterFragment
 import com.sudoplatform.direlayexample.showAlertDialog
 import com.sudoplatform.direlayexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.direlayexample.util.ObjectDelegate
 import com.sudoplatform.sudodirelay.SudoDIRelayClient
+import com.sudoplatform.sudodirelay.types.Postbox
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudouser.SudoUserClient
@@ -43,23 +43,29 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [PostboxesFragment] presents a view showing the [connectionId]s of the users active postboxes,
+ * Wrapper class to allow us to pass the postbox through to the PostboxFragment rather than
+ * passing it by id and requiring it to be fetched again from the server.
+ */
+@Parcelize
+data class PostboxWrapper(
+    val postbox: @RawValue Postbox,
+) : Parcelable
+
+/**
+ * This [PostboxesFragment] presents a view showing the [Postbox.id]s of the users active postboxes,
  * which they can navigate to, and an option to create a new relay postbox.
  *
  * Links From:
  *  - [RegisterFragment]: A user clicked start.
  *
  * Links To:
- *  - [ConnectionOptionsFragment]: If a user clicks on a postbox which has not established a peer
- *   connection yet. The [ConnectionOptionsFragment] will be presented to the user can choose
- *   how they wish to establish a connection with a peer for the selected postbox.
- *  - [ConnectionFragment]: If a user clicks on a postbox which has already established a peer
- *   connection. The [ConnectionFragment] will be presented to allow the user to interact with
- *   the chosen postbox's connection.
+ *  - [PostboxFragment]: Details about a postbox, including messages.
  */
 class PostboxesFragment : Fragment(), CoroutineScope {
 
@@ -89,7 +95,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     private var loading: AlertDialog? = null
 
     /** A mutable list of Postboxes. */
-    private var postboxList = mutableListOf<String>()
+    private var postboxList = mutableListOf<Postbox>()
 
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: PostboxesFragmentArgs by navArgs()
@@ -155,14 +161,13 @@ class PostboxesFragment : Fragment(), CoroutineScope {
 
     /**
      * Configures the [RecyclerView] used to display the listed Postbox items and listens to
-     * item select events to navigate to the [ConnectionFragment] for the selected postbox
-     * or navigate to [ConnectionOptionsFragment]
+     * item select events to navigate to the [PostboxFragment] for the selected postbox.
      */
     private fun configureRecyclerView() {
         adapter =
             PostboxAdapter(postboxList) { postbox ->
                 launch {
-                    navigateToMessagesOrConnectionOptions(postbox)
+                    navigateToMessages(postbox)
                 }
             }
 
@@ -172,29 +177,17 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Navigate to either the [ConnectionFragment] or [ConnectionOptionsFragment] with the
-     * [postbox] as navigation argument. If there is already a peer connection established
-     * with the given [postbox], the [ConnectionFragment] will be navigated to, else navigate
-     * to [ConnectionOptionsFragment] so a connection can be established with a peer.
+     * Navigate to the [PostboxFragment] with the
+     * [postbox] as navigation argument.
      *
-     * @param postbox the unique connectionId identifier of the selected postbox.
+     * @param postbox the selected postbox.
      */
-    private suspend fun navigateToMessagesOrConnectionOptions(postbox: String) {
-        val connectionInitialized = app.connectionsStorage.isPeerConnected(postbox)
-
-        if (connectionInitialized) {
-            navController.navigate(
-                PostboxesFragmentDirections.actionPostboxesFragmentToConnectionFragment(
-                    connectionId = postbox
-                )
+    private fun navigateToMessages(postbox: Postbox) {
+        navController.navigate(
+            PostboxesFragmentDirections.actionPostboxesFragmentToPostboxFragment(
+                postbox = PostboxWrapper(postbox)
             )
-        } else {
-            navController.navigate(
-                PostboxesFragmentDirections.actionPostboxesFragmentToConnectionOptionsFragment(
-                    connectionId = postbox
-                )
-            )
-        }
+        )
     }
 
     override fun onDestroy() {
@@ -237,7 +230,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
             toolbar.menu.getItem(0)?.title = getString(R.string.sign_out)
         }
         with(toolbar) {
-            title = getString(R.string.app_name)
+            title = getString(R.string.postboxes_title)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.deregister -> {
@@ -271,16 +264,11 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         launch {
             showLoading(R.string.creating_postbox)
             try {
-                val newConnectionID = UUID.randomUUID().toString()
-                app.logger.info("creating new postbox with ID: $newConnectionID")
-                app.diRelayClient.createPostbox(newConnectionID, ownershipProof)
-                postboxList.add(newConnectionID)
+                val connectionId = UUID.randomUUID().toString()
+                app.logger.info("creating new postbox with ID: $connectionId")
+                val newPostbox = app.diRelayClient.createPostbox(connectionId, ownershipProof)
+                postboxList.add(newPostbox)
                 adapter.notifyDataSetChanged()
-
-                app.connectionsStorage.storeConnectionId(
-                    newConnectionID,
-                    app.sudoUserClient.getUserName()!!
-                )
             } catch (e: SudoDIRelayClient.DIRelayException) {
                 showAlertDialog(
                     titleResId = R.string.postbox_creation_failed,
@@ -295,14 +283,14 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Gets all stored postboxes on the service
+     * Gets all stored postboxes from the service
      */
     private suspend fun updatePostboxesForSudo() {
+        postboxList.clear()
         try {
             postboxList.addAll(
-                app.diRelayClient.listPostboxesForSudoId(sudo.id!!)
-                    .map { it.connectionId }
-                    .filter { !postboxList.contains(it) }
+                app.diRelayClient.listPostboxes().items
+                    .filter { it.sudoId == sudo.id }
             )
             adapter.notifyDataSetChanged()
         } catch (e: Exception) {
@@ -328,37 +316,22 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         launch {
             val postbox = postboxList[viewHolder.adapterPosition]
-            deletePostbox(postbox)
+            deletePostbox(postbox.id)
             postboxList.removeAt(viewHolder.adapterPosition)
             adapter.notifyItemRemoved(viewHolder.adapterPosition)
         }
     }
 
     /**
-     * Calls the relay client to delete the postbox with id of [connectionId].
-     * The internal storage and keys related to the [connectionId] are cleaned up as well.
+     * Calls the relay client to delete the postbox with id of [postboxId].
+     * The internal storage and keys related to the [postboxId] are cleaned up as well.
      *
-     * @param connectionId The identifier of the postbox to be deleted
+     * @param postboxId The identifier of the postbox to be deleted
      */
-    private suspend fun deletePostbox(connectionId: String) {
+    private suspend fun deletePostbox(postboxId: String) {
         try {
             showLoading(R.string.delete_postbox_pending)
-            app.diRelayClient.deletePostbox(connectionId)
-
-            // clean up database and stored keys
-            withContext(Dispatchers.IO) {
-                val peerConnectionId =
-                    app.connectionsStorage.getPeerConnectionIdForConnection(connectionId)
-                app.connectionsStorage.deleteConnection(
-                    connectionId,
-                    app.sudoUserClient.getUserName()!!
-                )
-
-                peerConnectionId?.let {
-                    app.keyManagement.removeKeysForConnection(it)
-                }
-                app.keyManagement.removeKeysForConnection(connectionId)
-            }
+            app.diRelayClient.deletePostbox(postboxId)
         } catch (e: SudoDIRelayClient.DIRelayException) {
             showAlertDialog(
                 titleResId = R.string.postbox_delete_failed,

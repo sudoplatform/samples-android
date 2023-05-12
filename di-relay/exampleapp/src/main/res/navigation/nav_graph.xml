@@ -22,75 +22,18 @@
             android:name="sudo"
             app:argType="com.sudoplatform.sudoprofiles.Sudo" />
         <action
-            android:id="@+id/action_postboxesFragment_to_connectionFragment"
-            app:destination="@id/connectionFragment" />
-        <action
-            android:id="@+id/action_postboxesFragment_to_connectionOptionsFragment"
-            app:destination="@id/connectionOptionsFragment" />
-        <action
             android:id="@+id/action_postboxesFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_postboxesFragment_to_postboxFragment"
+            app:destination="@id/postboxFragment" />
     </fragment>
     <fragment
-        android:id="@+id/connectionFragment"
-        android:name="com.sudoplatform.direlayexample.connection.ConnectionFragment"
+        android:id="@+id/messageFragment"
+        android:name="com.sudoplatform.direlayexample.postbox.MessageFragment"
         android:label="ConnectionFragment">
-    <argument
-        android:name="connectionId"
-        app:argType="string"
-        app:nullable="false" />
-        <action
-            android:id="@+id/action_connectionFragment_to_connectionDetailsFragment"
-            app:destination="@id/connectionDetailsFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/connectionOptionsFragment"
-        android:name="com.sudoplatform.direlayexample.establishconnection.options.ConnectionOptionsFragment"
-        android:label="ConnectionOptionsFragment">
-    <argument
-        android:name="connectionId"
-        app:argType="string"
-        app:nullable="false" />
-        <action
-            android:id="@+id/action_connectionOptionsFragment_to_scanInvitationFragment"
-            app:destination="@id/scanInvitationFragment" />
-        <action
-            android:id="@+id/action_connectionOptionsFragment_to_inviteFragment"
-            app:destination="@id/inviteFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/inviteFragment"
-        android:name="com.sudoplatform.direlayexample.establishconnection.invite.InviteFragment"
-        android:label="InviteFragment" >
-        <argument
-            android:name="connectionId"
-            app:argType="string"
-            app:nullable="false" />
-        <action
-            android:id="@+id/action_inviteFragment_to_connectionFragment"
-            app:destination="@id/connectionFragment"
-            app:popUpTo="@id/postboxesFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/scanInvitationFragment"
-        android:name="com.sudoplatform.direlayexample.establishconnection.scaninivitation.ScanInvitationFragment"
-        android:label="ScanInvitationFragment" >
-        <argument
-            android:name="connectionId"
-            app:argType="string"
-            app:nullable="false" />
-        <action
-            android:id="@+id/action_scanInvitationFragment_to_connectionFragment"
-            app:destination="@id/connectionFragment"
-            app:popUpTo="@id/postboxesFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/connectionDetailsFragment"
-        android:name="com.sudoplatform.direlayexample.connection.connectiondetails.ConnectionDetailsFragment"
-        android:label="ConnectionDetailsFragment">
-        <argument
-            android:name="connectionId"
-            app:argType="string" />
+        <argument android:name="message"
+            app:argType="com.sudoplatform.direlayexample.postbox.MessageWrapper" />
     </fragment>
     <fragment
         android:id="@+id/createSudoFragment"
@@ -114,5 +57,15 @@
         <action
             android:id="@+id/action_sudosFragment_to_createSudoFragment"
             app:destination="@id/createSudoFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/postboxFragment"
+        android:name="com.sudoplatform.direlayexample.postbox.PostboxFragment"
+        android:label="PostboxFragment" >
+        <argument android:name="postbox"
+            app:argType="com.sudoplatform.direlayexample.postboxes.PostboxWrapper" />
+        <action
+            android:id="@+id/action_postboxFragment_to_messageFragment"
+            app:destination="@id/messageFragment" />
     </fragment>
 </navigation>

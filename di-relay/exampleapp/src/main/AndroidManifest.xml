@@ -18,7 +18,8 @@
         <activity
             android:name="com.sudoplatform.direlayexample.MainActivity"
             android:theme="@style/AppThemeNoActionBar"
-            android:windowSoftInputMode="stateAlwaysHidden">
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -27,17 +27,17 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/connectionTitle"
+                android:id="@+id/messageIdTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/my_connectionID"
+                android:layout_marginEnd="16dp"
+                android:text="@string/messageId_title"
                 android:textColor="@android:color/primary_text_light" />
 
             <TextView
-                android:id="@+id/connectionId"
+                android:id="@+id/messageId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -45,17 +45,17 @@
                 tools:text="1234-1234-1234-1234" />
 
             <TextView
-                android:id="@+id/peerConnectionTitle"
+                android:id="@+id/postboxIdTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/peer_connectionID"
+                android:layout_marginEnd="16dp"
+                android:text="@string/postboxId_title"
                 android:textColor="@android:color/primary_text_light" />
 
             <TextView
-                android:id="@+id/peerConnectionId"
+                android:id="@+id/postbox_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -63,77 +63,77 @@
                 tools:text="1234-1234-1234-1234" />
 
             <TextView
-                android:id="@+id/postboxEndpointTitle"
+                android:id="@+id/messageCreatedAtTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="32dp"
-                android:text="@string/my_http_endpoint"
+                android:layout_marginEnd="16dp"
+                android:text="@string/createdAt_title"
                 android:textColor="@android:color/primary_text_light" />
 
             <TextView
-                android:id="@+id/postboxEndpoint"
+                android:id="@+id/messageCreatedAt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                tools:text="http://example.com/1234-1234-1234-1234" />
+                tools:text="December 1, 2021" />
 
             <TextView
-                android:id="@+id/peerPostboxEndpointTitle"
+                android:id="@+id/messageOwnerTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/peer_http_endpoint"
+                android:layout_marginEnd="16dp"
+                android:text="@string/messageOwner_title"
                 android:textColor="@android:color/primary_text_light" />
 
             <TextView
-                android:id="@+id/peerPostboxEndpoint"
+                android:id="@+id/messageOwner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                tools:text="http://example.com/1234-1234-1234-1234" />
+                tools:text="1234-1234-1234-1234" />
 
             <TextView
-                android:id="@+id/publicKeyTitle"
+                android:id="@+id/sudoOwnerTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/sudoOwner_title"
+                android:textColor="@android:color/primary_text_light" />
+
+            <TextView
+                android:id="@+id/sudoOwner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                tools:text="1234-1234-1234-1234" />
+
+            <TextView
+                android:id="@+id/messageContentsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="32dp"
-                android:text="@string/my_public_key"
+                android:layout_marginEnd="16dp"
+                android:text="@string/messageContents_title"
                 android:textColor="@android:color/primary_text_light" />
 
             <TextView
-                android:id="@+id/publicKey"
+                android:id="@+id/messageContents"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 tools:text="1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234" />
 
-            <TextView
-                android:id="@+id/peerPublicKeyTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/peer_public_key"
-                android:textColor="@android:color/primary_text_light" />
-
-            <TextView
-                android:id="@+id/peerPublicKey"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="32dp"
-                tools:text="1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234" />
         </LinearLayout>
     </ScrollView>
 

@@ -1,10 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = "1.6.10"
-    ext.nav_version = "2.4.2"
+    ext.kotlin_version = "1.7.20"
+    ext.nav_version = "2.5.3"
     ext.room_version = "2.4.2"
-    ext.okhttp_version = "4.9.2"
+    ext.okhttp_version = "4.9.3"
     repositories {
         maven { url = "https://plugins.gradle.org/m2" }
         google()
@@ -30,6 +30,14 @@ buildscript {
 allprojects {
     repositories {
         mavenLocal()
+        maven {
+            name = "android-releases"
+            url = "https://repo.tools.anonyome.com/repository/android-releases/"
+            credentials {
+                username = nexusUsername
+                password = nexusPassword
+            }
+        }
         maven {
             name = "android-snapshots"
             url = "https://repo.tools.anonyome.com/repository/android-snapshots/"

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,6 +8,7 @@ package com.sudoplatform.direlayexample.postboxes
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.sudoplatform.sudodirelay.types.Postbox
 
 /**
  * A [RecyclerView.Adapter] used to feed Postbox ID data to the list view and handle creation
@@ -17,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
  * @property itemSelectedListener Callback which listens for list item select events.
  */
 class PostboxAdapter(
-    private val items: List<String>,
-    private val itemSelectedListener: (String) -> Unit
+    private val items: List<Postbox>,
+    private val itemSelectedListener: (Postbox) -> Unit
 ) : RecyclerView.Adapter<PostboxViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostboxViewHolder {

@@ -1,21 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-    <suppress>
-        <notes><![CDATA[
-            Guava temporary file creation is not used in the Sudo Decentralized Identity Relay Sample App.
-            ]]></notes>
-        <cve>CVE-2020-8908</cve>
-    </suppress>
-    <suppress until="2022-06-30">
+    <suppress until="2023-12-31">
         <notes><![CDATA[
             Sudo Platform DI Relay Sample App (nor dependencies) do not use the loadXML() function.
             ]]></notes>
         <cve>CVE-2018-1000840</cve>
     </suppress>
-    <suppress until="2022-06-30">
+    <suppress until="2023-12-31">
         <notes><![CDATA[
-            Unrelated JetBrains Multiplatform Gradle Project vulnerability.
-            ]]></notes>
+         file name: aws-android-sdk-appsync-api-3.3.2.jar
+         Related to file path traversal.
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.amazonaws/aws\-android\-sdk\-appsync\-api@.*$
+        </packageUrl>
+        <cve>CVE-2015-10043</cve>
+    </suppress>
+    <suppress until="2023-12-31">
+        <notes><![CDATA[
+         file name: aws-android-sdk-appsync-runtime-3.3.2.jar
+         Related to file path traversal.
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.amazonaws/aws\-android\-sdk\-appsync\-runtime@.*$
+        </packageUrl>
+        <cve>CVE-2015-10043</cve>
+    </suppress>
+    <!-- following 4 suppressions are due to version 2.4.2 of androidx.room:room-compiler -->
+    <suppress until="2023-12-31">
+        <notes><![CDATA[
+         file name: gson-2.8.0.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.google\.code\.gson/gson@.*$</packageUrl>
+        <cve>CVE-2022-25647</cve>
+    </suppress>
+    <suppress until="2023-12-31">
+        <notes><![CDATA[
+         file name: commons-codec-1.10.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-codec/commons\-codec@.*$</packageUrl>
+        <cve>CVE-2021-37533</cve>
+    </suppress>
+    <suppress until="2023-12-31">
+        <notes><![CDATA[
+         file name: kotlin-reflect-1.4.31.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin\-reflect@.*$</packageUrl>
         <cve>CVE-2022-24329</cve>
+    </suppress>
+    <suppress until="2023-12-31">
+        <notes><![CDATA[
+            Guava temporary file creation is not used in the Sudo Decentralized Identity Relay Sample App.
+            ]]></notes>
+        <cve>CVE-2020-8908</cve>
+    </suppress>
+    <suppress until="2023-12-31">
+        <notes><![CDATA[
+         file name: legacy-support-core-utils-1.0.0.aar
+         Not applicable to this example app
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/androidx\.legacy/legacy\-support\-core\-utils@.*$</packageUrl>
+        <cve>CVE-2021-4277</cve>
     </suppress>
 </suppressions>

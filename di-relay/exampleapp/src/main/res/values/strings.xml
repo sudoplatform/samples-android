@@ -48,7 +48,7 @@
     <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
 
     <!-- Postboxes Fragment -->
-    <string name="postbox_title">Postboxes</string>
+    <string name="postboxes_title">Postboxes</string>
     <string name="creating_postbox">Creating Postbox</string>
     <string name="create_postbox_button">+ Create Postbox</string>
     <string name="postbox_creation_failed">Failed to create postbox</string>
@@ -64,27 +64,18 @@
     <string name="fetch_postboxes_failure">Failed to fetch Sudo Postboxes</string>
     <string name="loading_postboxes">Loading Postboxes</string>
 
-    <!-- Connection Start Fragment -->
-    <string name="peer_connect_toolbar_title">Begin Peer Connection</string>
-    <string name="create_invitation">Create an Invitation</string>
-    <string name="accept_invitation">Scan an Invitation</string>
-    <string name="connect_to_peer_title">Connect this postbox with a peer to continue. Please choose one of the following options.</string>
-
-    <!-- Invite Fragment -->
-    <string name="invite_toolbar_title">Invite a Peer</string>
-    <string name="invite_title">Scan this invitation on another device sample app to initialize connection.</string>
-    <string name="copy_invitation_prompt">OR, manually send your invitation to a peer:</string>
-    <string name="invalid_response">Received Invalid Response</string>
-
-    <!-- Scan Invitation Fragment -->
-    <string name="scan_invitation_toolbar_title">Scan Invitation</string>
-    <string name="scan_invitation_title">Scan an invitation from another device sample app to initialize connection.</string>
-    <string name="enable_camera_prompt_title">Camera Permissions Denied</string>
-    <string name="enable_camera_prompt">Please grant camera permissions for this sample app in your phone\'s settings in order to use the QR Code Scanner. Alternatively, you can manually enter an invitation code.</string>
-    <string name="type_invitation_title">OR, manually enter the peer\'s invitation below:</string>
-    <string name="enter_invitation_prompt">Enter Invitation…</string>
-    <string name="invalid_invitation">Error Processing Invitation</string>
-    <string name="connect_btn">Connect</string>
+    <!-- Postbox Fragment - includes message listing and sending of messages to postbox-->
+    <string name="send_message_button">Send Message</string>
+    <string name="sending_message">Sending Message</string>
+    <string name="message_sending_failed">Failed to send message</string>
+    <string name="delete_message_pending">Deleting Message</string>
+    <string name="message_delete_failed">Failed to delete message</string>
+    <string name="message_delete_success">Successfully deleted message</string>
+    <string name="fetch_messages_failure">Failed to fetch Messages</string>
+    <string name="postbox_messages">Postbox Messages</string>
+    <string name="postbox_is_enabled">Postbox Enabled</string>
+    <string name="updating_postbox">Updating Postbox</string>
+    <string name="update_postbox_failure">Failed to update Postbox</string>
 
     <!-- Postbox Messages Fragment -->
     <string name="loading_messages">Loading Messages</string>
@@ -96,18 +87,20 @@
     <string name="invalid_peer_connection_id">Invalid peer connection ID. This ID should be UUIDv4 formatted. Please try again.</string>
     <string name="post_message_failed">Message failed to send</string>
 
-    <!-- Details Fragment -->
-    <string name="details_toolbar_title">Connection Details</string>
-    <string name="my_connectionID">My Connection ID</string>
-    <string name="peer_connectionID">Peer Connection ID</string>
-    <string name="my_http_endpoint">My HTTP Endpoint</string>
-    <string name="peer_http_endpoint">Peer HTTP Endpoint</string>
-    <string name="my_public_key">My Public Key</string>
-    <string name="peer_public_key">Peer Public Key</string>
-    <string name="error_retrieving_details">Error Processing Connection Details</string>
+    <!-- Message Details Fragment -->
+    <string name="details_toolbar_title">Message Details</string>
+    <string name="messageId_title">Message Id</string>
+    <string name="postboxId_title">Postbox Id</string>
+    <string name="createdAt_title">Created At</string>
+    <string name="messageOwner_title">Owner</string>
+    <string name="sudoOwner_title">Sudo Owner</string>
+    <string name="messageContents_title">Message Contents</string>
+    <string name="message_details_failed">Displaying Message Details Failed</string>
 
     <!-- Layout -->
     <string name="item_name">Item Name</string>
+    <string name="endpoint">Service Endpoint:</string>
+    <string name="message_text">Message Text:</string>
     <string name="placeholder">-</string>
     <string name="details">Details</string>
     <string name="date_placeholder">Date</string>

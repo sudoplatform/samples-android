@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,10 +7,8 @@
 package com.sudoplatform.direlayexample.register
 
 import android.content.Context
-import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,9 +19,6 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.safetynet.SafetyNet
 import com.sudoplatform.direlayexample.App
 import com.sudoplatform.direlayexample.R
 import com.sudoplatform.direlayexample.databinding.FragmentRegisterBinding
@@ -47,12 +42,11 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-enum class RegistrationMethod { TEST, FSSO, SAFETY_NET }
+enum class RegistrationMethod { TEST, FSSO }
 
 /**
  * This [RegisterFragment] presents a start display
@@ -73,12 +67,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
     /** The [App] that holds references to the APIs this fragment needs. */
     lateinit var app: App
-
-    /** The API Key for querying SafetyNet. */
-    private lateinit var safetyNetApiKey: String
-
-    /** A flag for whether the safetyNet API key is available for usage. */
-    private var safetyNetApiKeyAvailable = true
 
     /** A list of registration methods. */
     private val registrationMethodList: ArrayList<String> = ArrayList()
@@ -108,23 +96,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
         app = requireActivity().application as App
 
-        // check if safetyNet API available
-        try {
-            safetyNetApiKey =
-                resources.openRawResource(
-                    resources.getIdentifier(
-                        "safetynet_api_dev",
-                        "raw",
-                        app.packageName
-                    )
-                )
-                    .bufferedReader(Charsets.UTF_8)
-                    .use { it.readText() }
-                    .trim()
-        } catch (e: Resources.NotFoundException) {
-            safetyNetApiKeyAvailable = false
-        }
-
         // get registration options
         binding.registrationMethodSpinner.onItemSelectedListener = this
         val challengeTypes = app.sudoUserClient.getSupportedRegistrationChallengeType()
@@ -132,9 +103,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         registrationMethodList.add(getString(R.string.test_registration))
         if (challengeTypes.contains(RegistrationChallengeType.FSSO)) {
             registrationMethodList.add(getString(R.string.federated_signin))
-        }
-        if (challengeTypes.contains(RegistrationChallengeType.SAFETY_NET)) {
-            registrationMethodList.add(getString(R.string.safety_net_reg))
         }
         registrationMethodAdapter = ArrayAdapter(
             requireContext(),
@@ -262,23 +230,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         }
     }
 
-    private suspend fun getAttestationResult(nonce: String): String? = suspendCoroutine { cont ->
-        if (GoogleApiAvailability.getInstance()
-            .isGooglePlayServicesAvailable(app) ==
-            ConnectionResult.SUCCESS
-        ) {
-            SafetyNet.getClient(app).attest(nonce.toByteArray(), safetyNetApiKey)
-                .addOnSuccessListener {
-                    cont.resume(it.jwsResult)
-                }
-                .addOnFailureListener {
-                    cont.resume(null)
-                }
-        } else {
-            cont.resume(null)
-        }
-    }
-
     /** Redeem entitlements from the [SudoEntitlementsClient]. */
     private suspend fun redeemEntitlements() {
         try {
@@ -312,43 +263,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                         showRegistrationFailure(result.error)
                     }
                 }
-            }
-        } else if (selectedRegistrationMethod == RegistrationMethod.SAFETY_NET) {
-            if (safetyNetApiKeyAvailable) {
-                showProgressUpdateToast("Attempting registration with SafetyNet")
-                @SuppressWarnings("HardwareIds")
-                val vendorId = Settings.Secure.getString(
-                    app.contentResolver,
-                    Settings.Secure.ANDROID_ID
-                )
-                launch {
-                    try {
-                        withContext(Dispatchers.IO) {
-                            val attestationResult = getAttestationResult(vendorId)
-
-                            if (attestationResult != null) {
-                                app.sudoUserClient.registerWithSafetyNetAttestation(
-                                    attestationResult,
-                                    vendorId,
-                                    UUID.randomUUID().toString()
-                                )
-                            } else {
-                                errorLogger.error("safetyNet attestation result was null.")
-                                throw Exception("safetyNet attestation result was null.")
-                            }
-                        }
-                        signIn()
-                    } catch (e: Exception) {
-                        showRegistrationFailure(e)
-                        if (e.localizedMessage?.contains("UserValidationFailed") == true) {
-                            showProgressUpdateToast("UserValidationFailed exception: This device may have used up its max allowed safetyNet registrations.")
-                        }
-                    }
-                }
-            } else {
-                showProgressUpdateToast("Cannot use safetyNet, no API key present.")
-                hideLoading()
-                setItemsEnabled(true)
             }
         } else {
             // Default to trying via TEST registration keys
@@ -422,7 +336,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             "testRegisterAudience",
             privateKey,
             null,
-            app.keyManagement.keyManager,
+            app.keyManager,
             keyId
         )
         // register with auth provider
@@ -497,7 +411,6 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     /** Sets the registration method */
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
         selectedRegistrationMethod = when (registrationMethodList[pos]) {
-            getString(R.string.safety_net_reg) -> RegistrationMethod.SAFETY_NET
             getString(R.string.federated_signin) -> RegistrationMethod.FSSO
             else -> RegistrationMethod.TEST
         }

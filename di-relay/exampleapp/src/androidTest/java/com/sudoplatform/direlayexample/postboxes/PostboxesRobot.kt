@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -125,7 +125,7 @@ class PostboxesRobot : BaseRobot() {
                 result = v.text.toString()
             }
         }
-        onView(withId(R.id.postboxRecyclerView))
+        onView(withId(R.id.messageRecyclerView))
             .perform(
                 RecyclerViewActions.actionOnItemAtPosition<ViewHolder>(
                     position, storeTextViewAction
@@ -152,20 +152,14 @@ class PostboxesRobot : BaseRobot() {
         )
     }
 
-    fun clickOnDeregister() {
+    private fun clickOnDeregister() {
         clickOnView(toolbarDeregisterButton)
     }
 
-    fun clickOnPositiveDeregisterAlertDialogButton() {
+    private fun clickOnPositiveDeregisterAlertDialogButton() {
         checkDeregisterAlertDialog()
         Thread.sleep(1_000L)
         clickOnView(positiveAlertButton)
-    }
-
-    fun clickOnNegativeDeregisterAlertDialogButton() {
-        checkDeregisterAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(negativeAlertButton)
     }
 
     private fun checkDeregisterAlertDialog() {

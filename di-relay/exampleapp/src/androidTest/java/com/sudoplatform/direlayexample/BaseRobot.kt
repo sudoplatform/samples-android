@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,8 +7,10 @@
 package com.sudoplatform.direlayexample
 
 import android.view.View
+import android.widget.Checkable
 import android.widget.EditText
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
@@ -24,16 +26,18 @@ import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.DrawerActions
-import androidx.test.espresso.contrib.NavigationViewActions.navigateTo
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
 import androidx.test.espresso.contrib.RecyclerViewActions.scrollTo
+import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import junit.framework.AssertionFailedError
+import org.hamcrest.BaseMatcher
+import org.hamcrest.Description
 import org.hamcrest.Matcher
+import org.hamcrest.Matchers.isA
 import org.hamcrest.core.IsNot.not
 
 /**
@@ -84,6 +88,11 @@ open class BaseRobot {
             .perform(click())
     }
 
+    fun setSwitch(matcher: Matcher<View>, checked: Boolean) {
+        onView(matcher)
+            .perform(setChecked(checked))
+    }
+
     fun longClickOnView(matcher: Matcher<View>) {
         onView(matcher)
             .perform(longClick())
@@ -92,18 +101,6 @@ open class BaseRobot {
     fun scrollToView(matcher: Matcher<View>) {
         onView(matcher)
             .perform(scrollTo())
-    }
-
-    // Use this when the method to open the Drawer does not matter.
-    fun openNavigationDrawer(matcher: Matcher<View>) {
-        onView(matcher)
-            .perform(DrawerActions.open())
-    }
-
-    // Navigate via the drawer
-    fun selectNavigationDrawerDestination(matcher: Matcher<View>, resourceId: Int) {
-        onView(matcher)
-            .perform(navigateTo(resourceId))
     }
 
     // Scroll to the View in the Recycler View
@@ -181,6 +178,22 @@ open class BaseRobot {
         }
     }
 
+    fun waitForViewToHaveItems(matcher: Matcher<View>, itemCount: Int, timeout: Long = 10_000L) {
+        val retryInterval = 250L // 250 ms between retries var attempts = 1
+        for (x in 0..timeout step retryInterval) {
+            try {
+                recyclerViewSizeMatcher(itemCount).matches(matcher)
+                break
+            } catch (e: NoMatchingViewException) {
+                println("NoMatchingViewException Exception")
+                Thread.sleep(retryInterval)
+            } catch (e: AssertionFailedError) {
+                println("AssertionFailedError Exception")
+                Thread.sleep(retryInterval)
+            }
+        }
+    }
+
     // Perform a delay when executing an action on a view.
     fun waitFor(delay: Long): ViewAction {
         return object : ViewAction {
@@ -227,5 +240,33 @@ open class BaseRobot {
             }
         })
         return text
+    }
+
+    // Custom matchers
+    fun setChecked(checked: Boolean) = object : ViewAction {
+        val checkableViewMatcher = object : BaseMatcher<View>() {
+            override fun matches(item: Any?): Boolean = isA(Checkable::class.java).matches(item)
+            override fun describeTo(description: Description?) {
+                description?.appendText("is Checkable instance with correct value ")
+            }
+        }
+
+        override fun getConstraints(): BaseMatcher<View> = checkableViewMatcher
+        override fun getDescription(): String? = null
+        override fun perform(uiController: UiController?, view: View) {
+            val checkableView: Checkable = view as Checkable
+            checkableView.isChecked = checked
+        }
+    }
+    fun recyclerViewSizeMatcher(matcherSize: Int): Matcher<View?> {
+        return object : BoundedMatcher<View?, RecyclerView>(RecyclerView::class.java) {
+            override fun describeTo(description: Description) {
+                description.appendText("with list size: $matcherSize")
+            }
+
+            override fun matchesSafely(recyclerView: RecyclerView): Boolean {
+                return matcherSize == recyclerView.adapter!!.itemCount
+            }
+        }
     }
 }
