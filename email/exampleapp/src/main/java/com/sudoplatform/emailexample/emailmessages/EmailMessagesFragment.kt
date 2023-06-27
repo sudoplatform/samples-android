@@ -587,7 +587,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 unseenCount = 1,
                 version = 1,
                 createdAt = Date(),
-                updatedAt = Date(),
+                updatedAt = Date()
             )
             listEmailMessages(item.toString(), CachePolicy.CACHE_ONLY)
         } else {

@@ -34,7 +34,6 @@ class EmailFolderAdapter(context: Context) : BaseAdapter() {
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-
         val view: View
         val emailFolderViewHolder: EmailFolderViewHolder
         if (convertView == null) {

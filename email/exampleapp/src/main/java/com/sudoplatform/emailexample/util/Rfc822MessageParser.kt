@@ -26,7 +26,7 @@ data class SimplifiedEmailMessage(
     val bcc: List<String>,
     val subject: String,
     val body: String,
-    val isDraft: Boolean = false,
+    val isDraft: Boolean = false
 ) : Parcelable
 
 /**
@@ -40,7 +40,6 @@ internal object Rfc822MessageParser {
         MimeMessage(session, rfc822Ins) {
 
         override fun toString(): String {
-
             val sender = from?.map { it.toString() } ?: emptyList()
             val toRecipients =
                 getRecipients(Message.RecipientType.TO)?.map { it.toString() } ?: emptyList()
@@ -95,7 +94,6 @@ internal object Rfc822MessageParser {
 
     @Throws(MessagingException::class, IOException::class)
     private fun toSimplifiedEmailMessage(message: Message): SimplifiedEmailMessage {
-
         val sender = message.from?.map { it.toString() } ?: emptyList()
         val toRecipients =
             message.getRecipients(Message.RecipientType.TO)?.map { it.toString() }
