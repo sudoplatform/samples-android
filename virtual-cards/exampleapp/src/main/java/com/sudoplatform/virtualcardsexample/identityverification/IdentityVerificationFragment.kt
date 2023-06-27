@@ -81,7 +81,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     enum class VerificationStatus(val status: Int) {
         VERIFIED(R.string.verified),
         UNVERIFIED(R.string.not_verified),
-        UNKNOWN(R.string.unknown),
+        UNKNOWN(R.string.unknown)
     }
 
     override fun onCreateView(
@@ -229,10 +229,14 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     private fun configureFormCells() {
         labels = resources.getStringArray(R.array.identity_verification_labels)
         for (i in labels.indices) {
-            val hint = if (labels[i].contains(getString(R.string.address_line_2))) getString(
-                R.string.enter_optional_input,
-                labels[i]
-            ) else getString(R.string.enter_non_optional_input, labels[i])
+            val hint = if (labels[i].contains(getString(R.string.address_line_2))) {
+                getString(
+                    R.string.enter_optional_input,
+                    labels[i]
+                )
+            } else {
+                getString(R.string.enter_non_optional_input, labels[i])
+            }
             inputFormCells.add(InputFormCell(labels[i], enteredInput[i] ?: "", hint))
         }
     }

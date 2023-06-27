@@ -173,7 +173,7 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val refreshData = CheckoutBankAccountProviderRefreshData(
                         accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = authorizationText[0],
+                        authorizationText = authorizationText[0]
                     )
                     val input = RefreshFundingSourceInput(
                         fundingSourceId,
@@ -270,7 +270,8 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         binding.accountTypeLabel.text = linkSuccess.metadata.accounts[0].subtype.json
         binding.accountNameLabel.text = linkSuccess.metadata.accounts[0].name
         binding.accountNumberEndingLabel.text = getString(
-            R.string.account_number_ending_label, linkSuccess.metadata.accounts[0].mask
+            R.string.account_number_ending_label,
+            linkSuccess.metadata.accounts[0].mask
         )
     }
 

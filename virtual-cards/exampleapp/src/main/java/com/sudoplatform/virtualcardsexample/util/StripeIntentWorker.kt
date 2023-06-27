@@ -39,7 +39,7 @@ internal class StripeIntentWorker(
      */
     suspend fun confirmSetupIntent(
         input: CreditCardFundingSourceInput,
-        clientSecret: String,
+        clientSecret: String
     ): ProviderCompletionData {
         // Build card details
         val cardDetails = PaymentMethodCreateParams.Card.Builder()

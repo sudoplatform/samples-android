@@ -186,13 +186,13 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val refreshData = CheckoutBankAccountProviderRefreshData(
                         accountId = null,
-                        authorizationText = null,
+                        authorizationText = null
                     )
                     val input = RefreshFundingSourceInput(
                         id,
                         refreshData,
                         ClientApplicationData("androidApplication"),
-                        language = "en-US",
+                        language = "en-US"
                     )
                     app.sudoVirtualCardsClient.refreshFundingSource(input)
                 }

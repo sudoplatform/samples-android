@@ -31,10 +31,11 @@ class App : Application(), CoroutineScope {
     companion object {
         /** Name of the preference set that holds sign in information. */
         const val SIGN_IN_PREFERENCES = "SignIn"
+
         /** True if Federated Single Sign On was used. */
         const val FSSO_USED_PREFERENCE = "usedFSSO"
 
-        const val version = "3.0.1"
+        const val version = "7.0.0"
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main

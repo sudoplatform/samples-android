@@ -177,7 +177,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                         publicToken = linkSuccess.publicToken,
                         institutionId = linkSuccess.metadata.institution?.id ?: "",
                         accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = provisioningData.authorizationText[0],
+                        authorizationText = provisioningData.authorizationText[0]
                     )
                     val input = CompleteFundingSourceInput(
                         provisionalFundingSource.id,
@@ -274,7 +274,8 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         binding.accountTypeLabel.text = linkSuccess.metadata.accounts[0].subtype.json
         binding.accountNameLabel.text = linkSuccess.metadata.accounts[0].name
         binding.accountNumberEndingLabel.text = getString(
-            R.string.account_number_ending_label, linkSuccess.metadata.accounts[0].mask
+            R.string.account_number_ending_label,
+            linkSuccess.metadata.accounts[0].mask
         )
     }
 

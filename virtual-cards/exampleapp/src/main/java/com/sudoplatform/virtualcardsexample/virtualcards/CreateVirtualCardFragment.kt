@@ -95,8 +95,14 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
 
     /** An array of the default text populated for each [InputFormCell]. */
     private val enteredInput = arrayOf(
-        "Unlimited Cards", "Shopping", "123 Street Rd", null,
-        "Salt Lake City", "UT", "84044", "US"
+        "Unlimited Cards",
+        "Shopping",
+        "123 Street Rd",
+        null,
+        "Salt Lake City",
+        "UT",
+        "84044",
+        "US"
     )
 
     /** Fragment arguments handled by Navigation Library safe args */
@@ -154,7 +160,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         listActiveFundingSources()
         fundingSourcesSpinnerAdapter = FundingSourceSpinnerAdapter(
             requireContext(),
-            fundingSourcesList,
+            fundingSourcesList
         )
         fundingSourcesSpinnerAdapter.notifyDataSetChanged()
         binding.fundingSourcesSpinner.adapter = fundingSourcesSpinnerAdapter

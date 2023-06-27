@@ -17,3 +17,4 @@ register_key*
 sudoplatformconfig.json
 secret.properties
 .vscode/
+exampleapp/src/main/assets

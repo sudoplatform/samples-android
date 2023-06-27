@@ -133,7 +133,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             CreateSudoFragmentDirections.actionCreateSudoFragmentToCardsFragment(
-                                newSudo,
+                                newSudo
                             )
                         )
                     }

@@ -39,9 +39,10 @@ class VirtualCardViewHolder(private val binding: LayoutItemCellBinding) : Recycl
     }
 
     fun bind(virtualCard: VirtualCard) {
-        if (virtualCard.state == CardState.CLOSED)
+        if (virtualCard.state == CardState.CLOSED) {
             binding.name.text = binding.root.context.getString(R.string.virtual_card_cancelled_label, virtualCard.metadata?.unwrap())
-        else
+        } else {
             binding.name.text = binding.root.context.getString(R.string.virtual_card_label, virtualCard.metadata?.unwrap())
+        }
     }
 }

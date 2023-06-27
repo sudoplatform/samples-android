@@ -6,12 +6,13 @@ apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 android {
     compileSdkVersion 31
+    namespace "com.sudoplatform.virtualcardsexample"
     defaultConfig {
         applicationId 'com.sudoplatform.virtualcardsexample'
         minSdkVersion 24
         targetSdkVersion 31
         versionCode 1
-        versionName "6.0.0"
+        versionName "7.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -25,10 +26,10 @@ android {
     }
     compileOptions {
         sourceCompatibility 11
-        targetCompatibility 11
+        targetCompatibility 17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     packagingOptions {
         pickFirst("META-INF/atomicfu.kotlin_module")
@@ -40,11 +41,11 @@ android {
 }
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:14.0.0'
-    implementation 'com.sudoplatform:sudoidentityverification:10.0.2'
-    implementation 'com.sudoplatform:sudoprofiles:11.0.1'
-    implementation 'com.sudoplatform:sudoentitlements:6.0.1'
-    implementation 'com.sudoplatform:sudovirtualcards:10.0.1'
+    implementation 'com.sudoplatform:sudouser:16.0.0'
+    implementation 'com.sudoplatform:sudoidentityverification:11.0.0'
+    implementation 'com.sudoplatform:sudoprofiles:12.0.0'
+    implementation 'com.sudoplatform:sudoentitlements:7.0.0'
+    implementation 'com.sudoplatform:sudovirtualcards:11.0.0'
 
     // Stripe
     implementation "com.stripe:stripe-android:20.5.0"
@@ -58,7 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.nimbusds:nimbus-jose-jwt:9.31"
 
-    def coroutine_version = "1.6.0-native-mt"
+    def coroutine_version = "1.7.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
 
@@ -76,16 +77,13 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'com.google.android.material:material:1.5.0'
     constraints {
-        implementation("com.squareup.okhttp3:okhttp:4.9.3") {
-            because("Versions < 4.9.3 has CVE-2021-0341")
-        }
         implementation("com.google.android.gms:play-services-basement:18.1.0") {
             because("Versions < 18.1.0 have CVE-2022-1799")
         }
     }
 
     def androidxTest = "1.5.0"
-    def espresso = "3.4.0"
+    def espresso = "3.5.1"
     androidTestImplementation "androidx.test:core:$androidxTest"
     androidTestImplementation "androidx.test:core-ktx:$androidxTest"
     androidTestImplementation "androidx.test.ext:junit:1.1.5"
@@ -94,21 +92,14 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidxTest"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:3.3.0"
+    androidTestImplementation "com.jakewharton.timber:timber:4.7.1"
 }
 
 configurations.all {
     resolutionStrategy {
         dependencySubstitution {
-            // Bouncy Castle 1.62 is a transitive dependency of the certificate
-            // transparency library that sudouser uses. This can be upgraded transparently
-            // to bcprov-jdk15on:1.65, but stripe library above needs bcprov-jdk15to18
-            // i.e. different module name, and so we get duplicate classes. Substitute
-            // here for the bcprov/bcpkix-jdk15to18 modules
-            substitute module("org.bouncycastle:bcprov-jdk15on") with module("org.bouncycastle:bcprov-jdk15to18:1.68")
-            substitute module("org.bouncycastle:bcpkix-jdk15on") with module("org.bouncycastle:bcpkix-jdk15to18:1.68")
-
             // Don't get too far ahead
-            substitute module("androidx.fragment:fragment-ktx") with module("androidx.fragment:fragment-ktx:1.2.5")
+            substitute module("androidx.fragment:fragment-ktx") using module("androidx.fragment:fragment-ktx:1.2.5")
         }
     }
 }

@@ -213,7 +213,7 @@ class SudosFragment : Fragment(), CoroutineScope {
             SudoAdapter(sudoList) { sudo ->
                 navController.navigate(
                     SudosFragmentDirections.actionSudosFragmentToVirtualCardsFragment(
-                        sudo,
+                        sudo
                     )
                 )
             }
