@@ -35,7 +35,7 @@ class App : Application(), CoroutineScope {
         /** True if Federated Single On was used. */
         const val FSSO_USED_PREFERENCE = "usedFSSO"
 
-        const val version = "4.0.0"
+        const val version = "5.0.0"
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
