@@ -9,10 +9,10 @@ android {
     namespace "com.sudoplatform.virtualcardsexample"
     defaultConfig {
         applicationId 'com.sudoplatform.virtualcardsexample'
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdkVersion 31
         versionCode 1
-        versionName "7.0.0"
+        versionName "8.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -41,11 +41,11 @@ android {
 }
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:16.0.0'
-    implementation 'com.sudoplatform:sudoidentityverification:11.0.0'
-    implementation 'com.sudoplatform:sudoprofiles:12.0.0'
-    implementation 'com.sudoplatform:sudoentitlements:7.0.0'
-    implementation 'com.sudoplatform:sudovirtualcards:11.0.0'
+    implementation 'com.sudoplatform:sudouser:17.0.0'
+    implementation 'com.sudoplatform:sudoidentityverification:12.0.1'
+    implementation 'com.sudoplatform:sudoprofiles:13.0.1'
+    implementation 'com.sudoplatform:sudoentitlements:8.0.1'
+    implementation 'com.sudoplatform:sudovirtualcards:12.0.0'
 
     // Stripe
     implementation "com.stripe:stripe-android:20.5.0"
