@@ -115,7 +115,7 @@ class MessageFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.message_details_failed,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.ok,
+                    negativeButtonResId = android.R.string.ok
                 )
             }
         }

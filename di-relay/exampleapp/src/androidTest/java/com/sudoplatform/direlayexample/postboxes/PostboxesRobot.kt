@@ -128,7 +128,8 @@ class PostboxesRobot : BaseRobot() {
         onView(withId(R.id.messageRecyclerView))
             .perform(
                 RecyclerViewActions.actionOnItemAtPosition<ViewHolder>(
-                    position, storeTextViewAction
+                    position,
+                    storeTextViewAction
                 )
             )
         return storeTextViewAction.result

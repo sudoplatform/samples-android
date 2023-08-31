@@ -54,7 +54,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @Parcelize
 data class MessageWrapper(
-    val message: @RawValue Message,
+    val message: @RawValue Message
 ) : Parcelable
 
 /**

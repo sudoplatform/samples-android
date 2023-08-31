@@ -212,7 +212,7 @@ class SudosFragment : Fragment(), CoroutineScope {
             SudoAdapter(sudoList) { sudo ->
                 navController.navigate(
                     SudosFragmentDirections.actionSudosFragmentToPostboxesFragment(
-                        sudo,
+                        sudo
                     )
                 )
             }

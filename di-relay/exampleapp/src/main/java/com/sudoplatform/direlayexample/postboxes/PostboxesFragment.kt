@@ -54,7 +54,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @Parcelize
 data class PostboxWrapper(
-    val postbox: @RawValue Postbox,
+    val postbox: @RawValue Postbox
 ) : Parcelable
 
 /**

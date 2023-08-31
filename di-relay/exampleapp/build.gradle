@@ -5,13 +5,14 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 android {
-    compileSdkVersion 31
+    namespace 'com.sudoplatform.direlayexample'
+    compileSdk 33
     defaultConfig {
         applicationId 'com.sudoplatform.direlayexample'
-        minSdkVersion 24
-        targetSdkVersion 31
+        minSdkVersion 26
+        targetSdkVersion 33
         versionCode 1
-        versionName "3.0.0"
+        versionName "3.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -29,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility 11
-        targetCompatibility 11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = 17
     }
     packagingOptions {
         pickFirst("META-INF/atomicfu.kotlin_module")
@@ -46,13 +47,12 @@ android {
 
 
 dependencies {
-
     // Sudo Platform
-    implementation "com.sudoplatform:sudokeymanager:5.2.0"
-    implementation "com.sudoplatform:sudodirelay:3.0.0"
-    implementation "com.sudoplatform:sudouser:15.0.0"
+    implementation "com.sudoplatform:sudokeymanager:6.0.0"
+    implementation "com.sudoplatform:sudodirelay:3.1.0"
+    implementation "com.sudoplatform:sudouser:17.0.0"
     implementation 'com.sudoplatform:sudoprofiles:11.0.1'
-    implementation 'com.sudoplatform:sudoentitlements:6.0.1'
+    implementation 'com.sudoplatform:sudoentitlements:8.0.1'
 
     // Peer Connection Storage
     implementation "androidx.room:room-runtime:$room_version"
@@ -61,40 +61,42 @@ dependencies {
     // Posting to peer
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
 
-    // QR CODE SCANNING
-    implementation 'com.github.yuriy-budiyev:code-scanner:2.1.2'
-    implementation "com.google.zxing:core:3.4.0"
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    def coroutine_version = "1.6.0-native-mt"
+    def coroutine_version = "1.7.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
 
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    def fragment_version = "1.5.5"
+    def fragment_version = "1.6.1"
     implementation "androidx.fragment:fragment:$fragment_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    implementation 'com.google.code.gson:gson:2.9.0'
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.google.android.material:material:1.9.0'
 
-    def androidxTest = "1.5.0"
-    def espresso = "3.4.0"
-    androidTestImplementation "androidx.test:core:$androidxTest"
-    androidTestImplementation "androidx.test:core-ktx:$androidxTest"
+    androidTestImplementation "androidx.test:core:1.5.0"
+    androidTestImplementation "androidx.test:core-ktx:1.5.0"
     androidTestImplementation "androidx.test.ext:junit:1.1.5"
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
-    androidTestImplementation "androidx.test:runner:$androidxTest"
-    androidTestImplementation "androidx.test:rules:$androidxTest"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso"
+    androidTestImplementation "androidx.test:runner:1.5.2"
+    androidTestImplementation "androidx.test:rules:1.5.0"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:3.3.0" // 3.3.0 due to hamcrest resolution issue
+    androidTestImplementation "com.jakewharton.timber:timber:5.0.1"
+}
+
+allprojects {
+    configurations.configureEach {
+        resolutionStrategy {
+            // TODO: sqlite-jdbc is a transitive dependency of room-compiler. Remove this when room-compiler no longer contains CVE-2023-32697.
+            force "org.xerial:sqlite-jdbc:3.41.2.2"
+        }
+    }
 }
 
 // Kotlin Lint
