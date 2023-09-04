@@ -12,7 +12,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 33
         versionCode 1
-        versionName "3.1.0"
+        versionName "3.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -49,9 +49,9 @@ android {
 dependencies {
     // Sudo Platform
     implementation "com.sudoplatform:sudokeymanager:6.0.0"
-    implementation "com.sudoplatform:sudodirelay:3.1.0"
+    implementation "com.sudoplatform:sudodirelay:3.1.1"
     implementation "com.sudoplatform:sudouser:17.0.0"
-    implementation 'com.sudoplatform:sudoprofiles:11.0.1'
+    implementation 'com.sudoplatform:sudoprofiles:13.0.2'
     implementation 'com.sudoplatform:sudoentitlements:8.0.1'
 
     // Peer Connection Storage
