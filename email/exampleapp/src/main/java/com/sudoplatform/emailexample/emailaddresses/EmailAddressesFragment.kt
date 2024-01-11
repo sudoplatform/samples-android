@@ -88,7 +88,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentEmailAddressesBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -108,8 +108,8 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
             navController.navigate(
                 EmailAddressesFragmentDirections
                     .actionEmailAddressesFragmentToProvisionEmailAddressFragment(
-                        sudo
-                    )
+                        sudo,
+                    ),
             )
         }
 
@@ -137,7 +137,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                 val emailAddresses = withContext(Dispatchers.IO) {
                     val input = ListEmailAddressesForSudoIdInput(
                         sudoId = sudo.id!!,
-                        cachePolicy = cachePolicy
+                        cachePolicy = cachePolicy,
                     )
                     app.sudoEmailClient.listEmailAddressesForSudoId(input)
                 }
@@ -154,7 +154,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
                             onPositive = { listEmailAddresses(CachePolicy.REMOTE_ONLY) },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -164,7 +164,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listEmailAddresses(CachePolicy.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -185,13 +185,13 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                 }
                 showAlertDialog(
                     titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok
+                    positiveButtonResId = android.R.string.ok,
                 )
             } catch (e: SudoEmailClient.EmailAddressException) {
                 showAlertDialog(
                     titleResId = R.string.deleting_email_address_failure,
                     message = e.localizedMessage ?: e.toString(),
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideDeleteAlert()
@@ -209,8 +209,8 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                     EmailAddressesFragmentDirections
                         .actionEmailAddressesFragmentToEmailMessagesFragment(
                             emailAddress.emailAddress,
-                            emailAddress.id
-                        )
+                            emailAddress.id,
+                        ),
                 )
             }
 

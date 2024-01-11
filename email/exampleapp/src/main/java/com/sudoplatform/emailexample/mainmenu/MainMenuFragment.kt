@@ -70,7 +70,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentMainMenuBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -84,7 +84,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                             messageResId = R.string.deregister_confirmation,
                             positiveButtonResId = R.string.deregister,
                             onPositive = { deregister() },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -102,7 +102,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
 
         binding.sudosButton.setOnClickListener {
             navController.navigate(
-                MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment()
+                MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment(),
             )
         }
     }
@@ -128,13 +128,13 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                 }
                 hideLoading()
                 navController.navigate(
-                    MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment()
+                    MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment(),
                 )
             } catch (e: RegisterException) {
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.deregister_failure, e.localizedMessage),
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_LONG,
                 ).show()
             }
         }

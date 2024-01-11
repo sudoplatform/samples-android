@@ -22,7 +22,7 @@ enum class FolderTypes {
     OUTBOX,
     SENT,
     DRAFTS,
-    TRASH
+    TRASH,
 }
 
 /**

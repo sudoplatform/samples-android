@@ -26,10 +26,10 @@ class EmailAddressViewHolder(private val binding: LayoutItemCellBinding) : Recyc
         fun inflate(parent: ViewGroup): EmailAddressViewHolder {
             val binding = LayoutItemCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return EmailAddressViewHolder(binding)
         }

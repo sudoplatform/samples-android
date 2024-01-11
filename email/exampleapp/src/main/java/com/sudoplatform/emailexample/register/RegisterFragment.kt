@@ -28,7 +28,6 @@ import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudouser.FederatedSignInResult
-import com.sudoplatform.sudouser.RegistrationChallengeType
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
@@ -83,7 +82,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         app = requireActivity().application as App
         bindingDelegate.attach(FragmentRegisterBinding.inflate(inflater, container, false))
@@ -95,16 +94,17 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         navController = Navigation.findNavController(view)
 
         binding.registrationMethodSpinner.onItemSelectedListener = this
-        val challengeTypes = app.sudoUserClient.getSupportedRegistrationChallengeType()
         registrationMethodList.clear()
-        registrationMethodList.add(getString(R.string.test_registration))
-        if (challengeTypes.contains(RegistrationChallengeType.FSSO)) {
-            registrationMethodList.add(getString(R.string.federated_signin))
-        }
+        registrationMethodList.addAll(
+            listOf(
+                getString(R.string.test_registration),
+                getString(R.string.federated_signin),
+            ),
+        )
         registrationMethodAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
-            registrationMethodList
+            registrationMethodList,
         )
         registrationMethodAdapter.notifyDataSetChanged()
         binding.registrationMethodSpinner.adapter = registrationMethodAdapter
@@ -167,7 +167,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                         launch {
                             redeemEntitlements()
                             navController.navigate(
-                                RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                                RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                             )
                         }
                     }
@@ -181,7 +181,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 launch {
                     redeemEntitlements()
                     navController.navigate(
-                        RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                        RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                     )
                 }
             } else if (app.sudoUserClient.isRegistered()) {
@@ -222,7 +222,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                         launch {
                             redeemEntitlements()
                             navController.navigate(
-                                RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                                RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                             )
                         }
                     }
@@ -259,7 +259,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 launch {
                     redeemEntitlements()
                     navController.navigate(
-                        RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment()
+                        RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                     )
                 }
             } catch (e: AuthenticationException) {
@@ -296,7 +296,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             privateKey,
             null,
             app.keyManager,
-            keyId
+            keyId,
         )
         // register with auth provider
         launch {
@@ -304,7 +304,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 withContext(Dispatchers.IO) {
                     app.sudoUserClient.registerWithAuthenticationProvider(
                         authProvider,
-                        "dummy_rid"
+                        "dummy_rid",
                     )
                 }
                 signIn()
@@ -320,7 +320,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         Toast.makeText(
             requireContext(),
             getString(R.string.register_failure, e.localizedMessage),
-            Toast.LENGTH_LONG
+            Toast.LENGTH_LONG,
         ).show()
     }
 
@@ -346,7 +346,9 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
     /** Hides the progress bar spinner indicating that an operation has finished. */
     private fun hideLoading() {
-        binding.progressBar.visibility = View.GONE
+        if (bindingDelegate.isAttached()) {
+            binding.progressBar.visibility = View.GONE
+        }
     }
 
     /** Sets the registration method */

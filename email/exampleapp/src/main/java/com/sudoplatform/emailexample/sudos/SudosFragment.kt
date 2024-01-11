@@ -84,7 +84,7 @@ class SudosFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentSudosBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -98,7 +98,7 @@ class SudosFragment : Fragment(), CoroutineScope {
                             messageResId = R.string.sudo_explanation,
                             positiveButtonResId = android.R.string.ok,
                             negativeButtonResId = R.string.learn_more,
-                            onNegative = { learnMore() }
+                            onNegative = { learnMore() },
                         )
                     }
                 }
@@ -166,7 +166,7 @@ class SudosFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listSudos(ListOption.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideLoading()
@@ -188,13 +188,13 @@ class SudosFragment : Fragment(), CoroutineScope {
                 }
                 showAlertDialog(
                     titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok
+                    positiveButtonResId = android.R.string.ok,
                 )
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.delete_sudo_failure,
                     message = e.localizedMessage ?: e.toString(),
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideDeleteAlert()
@@ -211,8 +211,8 @@ class SudosFragment : Fragment(), CoroutineScope {
             SudoAdapter(sudoList) { sudo ->
                 navController.navigate(
                     SudosFragmentDirections.actionSudosFragmentToEmailAddressesFragment(
-                        sudo
-                    )
+                        sudo,
+                    ),
                 )
             }
         binding.sudoRecyclerView.adapter = adapter

@@ -21,7 +21,7 @@ class EmailMessageAdapter(private val items: List<EmailMessage>, private val ite
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailMessageViewHolder {
         return EmailMessageViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

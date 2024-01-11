@@ -30,10 +30,10 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
         fun inflate(parent: ViewGroup): EmailMessageViewHolder {
             val binding = LayoutEmailMessageCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return EmailMessageViewHolder(binding)
         }

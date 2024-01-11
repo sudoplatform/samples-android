@@ -59,8 +59,8 @@ class SudosRobot : BaseRobot() {
         onView(sudoRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 

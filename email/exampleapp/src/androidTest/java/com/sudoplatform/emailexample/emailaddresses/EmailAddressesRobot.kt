@@ -66,8 +66,8 @@ class EmailAddressesRobot : BaseRobot() {
         onView(emailAddressRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 
@@ -76,8 +76,8 @@ class EmailAddressesRobot : BaseRobot() {
         onView(emailAddressRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
                 position,
-                ViewActions.click()
-            )
+                ViewActions.click(),
+            ),
         )
     }
 }

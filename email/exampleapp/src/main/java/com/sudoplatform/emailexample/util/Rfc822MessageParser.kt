@@ -26,7 +26,7 @@ data class SimplifiedEmailMessage(
     val bcc: List<String>,
     val subject: String,
     val body: String,
-    val isDraft: Boolean = false
+    val isDraft: Boolean = false,
 ) : Parcelable
 
 /**
@@ -135,7 +135,7 @@ internal object Rfc822MessageParser {
             cc = ccRecipients,
             bcc = bccRecipients,
             subject = message.subject ?: "<No subject>",
-            body = body
+            body = body,
         )
     }
 }

@@ -21,7 +21,7 @@ class EmailAddressAdapter(private val items: List<EmailAddress>, private val ite
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailAddressViewHolder {
         return EmailAddressViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

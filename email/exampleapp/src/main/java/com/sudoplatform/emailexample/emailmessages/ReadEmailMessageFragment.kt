@@ -88,7 +88,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentReadEmailMessageBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -103,8 +103,8 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                                     emailAddress,
                                     emailAddressId,
                                     emailMessage,
-                                    emailMessageWithBody
-                                )
+                                    emailMessageWithBody,
+                                ),
                         )
                     }
                 }
@@ -141,7 +141,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                 showLoading(R.string.reading)
                 val input = GetEmailMessageRfc822DataInput(
                     id = emailMessage.id,
-                    emailAddressId = emailAddressId
+                    emailAddressId = emailAddressId,
                 )
                 val rfc822Data = withContext(Dispatchers.IO) {
                     app.sudoEmailClient.getEmailMessageRfc822Data(input)
@@ -156,7 +156,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { readEmailMessage() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()

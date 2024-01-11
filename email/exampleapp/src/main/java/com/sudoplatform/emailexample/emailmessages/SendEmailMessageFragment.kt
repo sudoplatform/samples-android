@@ -82,7 +82,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentSendEmailMessageBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -117,7 +117,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             if (emailMessageWithBody.isDraft) {
                 configureEmailMessageContents(
                     emailMessage,
-                    emailMessageWithBody
+                    emailMessageWithBody,
                 )
             } else {
                 configureReplyContents(emailMessage, emailMessageWithBody)
@@ -138,7 +138,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         if (validateFormData()) {
             showAlertDialog(
                 titleResId = R.string.validate_to_address,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -152,11 +152,11 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                         cc = binding.ccTextView.text.split(",").toList(),
                         bcc = binding.bccTextView.text.split(",").toList(),
                         subject = binding.subjectTextView.text.toString(),
-                        body = binding.contentBody.text.toString()
+                        body = binding.contentBody.text.toString(),
                     )
                     val input = SendEmailMessageInput(
                         rfc822Data = rfc822Data,
-                        senderEmailAddressId = emailAddressId
+                        senderEmailAddressId = emailAddressId,
                     )
                     app.sudoEmailClient.sendEmailMessage(input)
                 }
@@ -168,10 +168,10 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                             SendEmailMessageFragmentDirections
                                 .actionSendEmailMessageFragmentToEmailMessagesFragment(
                                     emailAddress,
-                                    emailAddressId
-                                )
+                                    emailAddressId,
+                                ),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
@@ -179,7 +179,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { sendEmailMessage() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -198,20 +198,20 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                         cc = binding.ccTextView.text.split(",").toList(),
                         bcc = binding.bccTextView.text.split(",").toList(),
                         subject = binding.subjectTextView.text.toString(),
-                        body = binding.contentBody.text.toString()
+                        body = binding.contentBody.text.toString(),
                     )
                     val message = args.emailMessageWithBody
                     if (message?.isDraft == true) {
                         val input = UpdateDraftEmailMessageInput(
                             rfc822Data = rfc822Data,
                             senderEmailAddressId = emailAddressId,
-                            id = message.id
+                            id = message.id,
                         )
                         app.sudoEmailClient.updateDraftEmailMessage(input)
                     } else {
                         val input = CreateDraftEmailMessageInput(
                             rfc822Data = rfc822Data,
-                            senderEmailAddressId = emailAddressId
+                            senderEmailAddressId = emailAddressId,
                         )
                         app.sudoEmailClient.createDraftEmailMessage(input)
                     }
@@ -224,10 +224,10 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                             SendEmailMessageFragmentDirections
                                 .actionSendEmailMessageFragmentToEmailMessagesFragment(
                                     emailAddress,
-                                    emailAddressId
-                                )
+                                    emailAddressId,
+                                ),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
@@ -235,7 +235,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { saveDraftEmailMessage() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -256,7 +256,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
      */
     private fun configureEmailMessageContents(
         emailMessage: EmailMessage,
-        emailMessageWithBody: SimplifiedEmailMessage
+        emailMessageWithBody: SimplifiedEmailMessage,
     ) {
         binding.toTextView.setText(if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") else "")
         binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") else "")
@@ -273,7 +273,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
      */
     private fun configureReplyContents(
         emailMessage: EmailMessage,
-        emailMessageWithBody: SimplifiedEmailMessage
+        emailMessageWithBody: SimplifiedEmailMessage,
     ) {
         binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString() else "")
         binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString() else "")

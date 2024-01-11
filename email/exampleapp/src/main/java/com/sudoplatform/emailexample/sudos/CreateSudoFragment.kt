@@ -71,7 +71,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentCreateSudoBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -114,7 +114,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
         if (name.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_sudo_name,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -133,10 +133,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             CreateSudoFragmentDirections.actionCreateSudoFragmentToEmailAddressesFragment(
-                                newSudo
-                            )
+                                newSudo,
+                            ),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoProfileException) {
                 showAlertDialog(
@@ -144,7 +144,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { createSudo() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideLoading()

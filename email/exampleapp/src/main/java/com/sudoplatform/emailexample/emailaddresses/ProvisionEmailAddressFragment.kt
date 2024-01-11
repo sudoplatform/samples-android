@@ -105,7 +105,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentProvisionEmailAddressBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -152,7 +152,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         if (localPart.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_local_part,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -164,7 +164,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                     withContext(Dispatchers.IO) {
                         val input = ProvisionEmailAddressInput(
                             emailAddress = address,
-                            ownershipProofToken = ownershipProof
+                            ownershipProofToken = ownershipProof,
                         )
                         app.sudoEmailClient.provisionEmailAddress(input)
                     }
@@ -175,10 +175,10 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                             navController.navigate(
                                 ProvisionEmailAddressFragmentDirections
                                     .actionProvisionEmailAddressFragmentToEmailAddressesFragment(
-                                        sudo
-                                    )
+                                        sudo,
+                                    ),
                             )
-                        }
+                        },
                     )
                 }
             } catch (e: SudoEmailClient.EmailAddressException) {
@@ -187,7 +187,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { provisionEmailAddress() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -204,32 +204,34 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 val supportedDomains = app.sudoEmailClient.getSupportedEmailDomains(
-                    CachePolicy.REMOTE_ONLY
+                    CachePolicy.REMOTE_ONLY,
                 )
                 val emailAddresses = app.sudoEmailClient.checkEmailAddressAvailability(
                     CheckEmailAddressAvailabilityInput(
                         localParts,
-                        supportedDomains
-                    )
+                        supportedDomains,
+                    ),
                 )
                 availableAddresses.clear()
                 availableAddresses.addAll(emailAddresses)
                 if (availableAddresses.isEmpty()) {
                     setAvailabilityLabel(
                         textResId = R.string.email_address_unavailable,
-                        colorResId = R.color.colorNegativeMsg
+                        colorResId = R.color.colorNegativeMsg,
                     )
                 } else {
-                    binding.addressHolder.text = availableAddresses.first()
+                    if (bindingDelegate.isAttached()) {
+                        binding.addressHolder.text = availableAddresses.first()
+                    }
                     setAvailabilityLabel(
                         textResId = R.string.email_address_available,
-                        colorResId = R.color.colorPositiveMsg
+                        colorResId = R.color.colorPositiveMsg,
                     )
                 }
             } catch (e: SudoEmailClient.EmailAddressException) {
                 setAvailabilityLabel(
                     text = e.localizedMessage ?: "$e",
-                    colorResId = R.color.colorNegativeMsg
+                    colorResId = R.color.colorNegativeMsg,
                 )
             }
         }
@@ -248,7 +250,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.ownership_proof_error,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -282,7 +284,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                             checkEmailAddressAvailability(listOf(p0.toString()))
                         }
                     },
-                    CHECK_DELAY
+                    CHECK_DELAY,
                 )
             }
         })
@@ -295,12 +297,14 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     private fun setAvailabilityLabel(
         text: String = "",
         @StringRes textResId: Int? = null,
-        @ColorRes colorResId: Int
+        @ColorRes colorResId: Int,
     ) {
         toolbarMenu.getItem(0)?.isEnabled = true
-        binding.availabilityLabel.isVisible = true
-        binding.availabilityLabel.text = if (textResId != null) getString(textResId) else text
-        binding.availabilityLabel.setTextColor(ContextCompat.getColor(requireContext(), colorResId))
+        if (bindingDelegate.isAttached()) {
+            binding.availabilityLabel.isVisible = true
+            binding.availabilityLabel.text = if (textResId != null) getString(textResId) else text
+            binding.availabilityLabel.setTextColor(ContextCompat.getColor(requireContext(), colorResId))
+        }
     }
 
     /** Set the [Sudo] label text containing the [Sudo] alias. */

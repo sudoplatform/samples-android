@@ -81,8 +81,8 @@ class EmailMessagesRobot : BaseRobot() {
         onView(emailMessagesRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 
@@ -97,8 +97,8 @@ class EmailMessagesRobot : BaseRobot() {
         onView(emailMessagesRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
                 position,
-                click()
-            )
+                click(),
+            ),
         )
     }
 }

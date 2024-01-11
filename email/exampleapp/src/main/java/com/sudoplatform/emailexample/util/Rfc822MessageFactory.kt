@@ -33,7 +33,7 @@ internal object Rfc822MessageFactory {
         cc: List<String>? = null,
         bcc: List<String>? = null,
         subject: String = "subject",
-        body: String = "body"
+        body: String = "body",
     ): ByteArray {
         val session = Session.getDefaultInstance(System.getProperties(), null)
 
