@@ -87,6 +87,16 @@
     <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
     <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
 
+    <!-- BlockedAddressesFragment.kt -->
+    <string name="blocked_addresses">Blocked Addresses</string>
+    <string name="list_blocked_addresses_failure">Failed to list blocked addresses</string>
+    <string name="blocking_address">Blocking email address</string>
+    <string name="unblocking_addresses">Unblocking email address(es)</string>
+    <string name="unblock_addresses_failure">Failed to unblock addresses</string>
+    <string name="block_address_failure">Failed to block address</string>
+    <string name="block_address_success">Address Blocked!</string>
+    <string name="continue_message">Continue</string>
+
     <!-- SendEmailMessageFragment.kt -->
     <string name="to">To:&#xA0;&#xA0;</string>
     <string name="cc">Cc:&#xA0;&#xA0;</string>

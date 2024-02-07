@@ -109,12 +109,19 @@
             android:name="emailAddressId"
             app:argType="string"
             app:nullable="false" />
+        <argument
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="false" />
         <action
             android:id="@+id/action_emailMessagesFragment_to_sendEmailMessageFragment"
             app:destination="@id/sendEmailMessageFragment" />
         <action
             android:id="@+id/action_emailMessagesFragment_to_readEmailMessageFragment"
             app:destination="@id/readEmailMessageFragment" />
+        <action
+            android:id="@+id/action_emailMessagesFragment_to_addressBlocklistFragment"
+            app:destination="@id/addressBlocklistFragment" />
     </fragment>
     <fragment
         android:id="@+id/sendEmailMessageFragment"
@@ -139,6 +146,10 @@
             app:argType="com.sudoplatform.emailexample.util.SimplifiedEmailMessage"
             app:nullable="true"
             android:defaultValue="@null"/>
+        <argument
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="false" />
         <action
             android:id="@+id/action_sendEmailMessageFragment_to_emailMessagesFragment"
             app:destination="@id/emailMessagesFragment"
@@ -162,8 +173,36 @@
             android:name="emailMessage"
             app:argType="com.sudoplatform.sudoemail.types.EmailMessage"
             app:nullable="false" />
+        <argument
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="false" />
         <action
             android:id="@+id/action_readEmailMessageFragment_to_sendEmailMessageFragment"
             app:destination="@id/sendEmailMessageFragment" />
+        <action
+            android:id="@+id/action_readEmailMessageFragment_to_emailMessagesFragment"
+            app:destination="@id/emailMessagesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addressBlocklistFragment"
+        android:name="com.sudoplatform.emailexample.addressblocklist.AddressBlocklistFragment"
+        android:label="fragment_address_blocklist"
+        tools:layout="@layout/fragment_address_blocklist" >
+        <argument
+            android:name="sudo"
+            app:argType="com.sudoplatform.sudoprofiles.Sudo"
+            app:nullable="false" />
+        <argument
+            android:name="emailAddressId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="emailAddress"
+            app:argType="string"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_addressBlocklistFragment_to_emailMessagesFragment"
+            app:destination="@id/emailMessagesFragment" />
     </fragment>
 </navigation>

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -142,6 +142,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                                 .actionEmailMessagesFragmentToSendEmailMessageFragment(
                                     emailAddress,
                                     emailAddressId,
+                                    args.sudo,
                                 ),
                         )
                     }
@@ -487,6 +488,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToSendEmailMessageFragment(
                         emailAddress,
                         emailAddressId,
+                        args.sudo,
                         emailMessage,
                         emailMessageWithBody = draftEmailMessageList.find { it.id === emailMessage.id },
                     ),
@@ -497,6 +499,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                         emailAddress,
                         emailAddressId,
                         emailMessage,
+                        args.sudo,
                     ),
                 )
             }
@@ -576,7 +579,16 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     /** Sets the selected folder type. */
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
         val item = parent.getItemAtPosition(pos)
-        if (item == FolderTypes.DRAFTS.toString()) {
+        if (item == FolderTypes.BLOCKLIST.toString()) {
+            navController.navigate(
+                EmailMessagesFragmentDirections
+                    .actionEmailMessagesFragmentToAddressBlocklistFragment(
+                        args.sudo,
+                        emailAddressId,
+                        emailAddress,
+                    ),
+            )
+        } else if (item == FolderTypes.DRAFTS.toString()) {
             selectedEmailFolder = EmailFolder(
                 id = "DRAFT_FOLDER",
                 owner = "draftEmailOwnerId",

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -26,9 +26,13 @@ import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageParser
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
+import com.sudoplatform.sudoapiclient.sudoApiClientLogger
 import com.sudoplatform.sudoemail.SudoEmailClient
+import com.sudoplatform.sudoemail.types.BatchOperationResult
+import com.sudoplatform.sudoemail.types.BatchOperationStatus
 import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.inputs.GetEmailMessageRfc822DataInput
+import com.sudoplatform.sudoprofiles.Sudo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -64,7 +68,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     private val bindingDelegate = ObjectDelegate<FragmentReadEmailMessageBinding>()
     private val binding by bindingDelegate
 
-    /** Toolbar [Menu] displaying title and reply button. */
+    /** Toolbar [Menu] displaying title and block and reply buttons. */
     private lateinit var toolbarMenu: Menu
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
@@ -85,6 +89,8 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /** The simplified email message containing the body. */
     private lateinit var emailMessageWithBody: SimplifiedEmailMessage
 
+    private lateinit var sudo: Sudo
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -93,7 +99,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         bindingDelegate.attach(FragmentReadEmailMessageBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.read_email_message)
-            inflateMenu(R.menu.nav_menu_with_reply_button)
+            inflateMenu(R.menu.nav_menu_with_block_reply_buttons)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.reply -> {
@@ -102,10 +108,15 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                                 .actionReadEmailMessageFragmentToSendEmailMessageFragment(
                                     emailAddress,
                                     emailAddressId,
+                                    args.sudo,
                                     emailMessage,
                                     emailMessageWithBody,
                                 ),
                         )
+                    }
+                    R.id.block -> {
+                        sudoApiClientLogger.info("Block clicked")
+                        blockEmailAddress(emailMessage.from[0].emailAddress)
                     }
                 }
                 true
@@ -116,6 +127,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         emailAddress = args.emailAddress
         emailAddressId = args.emailAddressId
         emailMessage = args.emailMessage
+        sudo = args.sudo
         return binding.root
     }
 
@@ -160,6 +172,56 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                 )
             }
             hideLoading()
+        }
+    }
+
+    /**
+     *
+     */
+    private fun blockEmailAddress(address: String) {
+        launch {
+            try {
+                showLoading(R.string.blocking_address)
+                when (val response = app.sudoEmailClient.blockEmailAddresses(listOf(address))) {
+                    is BatchOperationResult.SuccessOrFailureResult -> {
+                        if (response.status === BatchOperationStatus.SUCCESS) {
+                            showAlertDialog(
+                                titleResId = R.string.block_address_success,
+                                positiveButtonResId = R.string.continue_message,
+                                onPositive = {
+                                    navController.navigate(
+                                        ReadEmailMessageFragmentDirections.actionReadEmailMessageFragmentToEmailMessagesFragment(
+                                            emailAddress,
+                                            emailAddressId,
+                                            sudo,
+                                        ),
+                                    )
+                                },
+                            )
+                        } else {
+                            showAlertDialog(
+                                titleResId = R.string.block_address_failure,
+                                message = "Something went wrong.",
+                                positiveButtonResId = R.string.try_again,
+                                onPositive = { blockEmailAddress(address) },
+                                negativeButtonResId = android.R.string.cancel,
+                            )
+                        }
+                    } is BatchOperationResult.PartialResult -> {
+                        // no-op
+                    }
+                }
+            } catch (e: SudoEmailClient.EmailBlocklistException) {
+                showAlertDialog(
+                    titleResId = R.string.block_address_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { blockEmailAddress(address) },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            } finally {
+                hideLoading()
+            }
         }
     }
 
