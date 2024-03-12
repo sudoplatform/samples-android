@@ -75,8 +75,8 @@
     <string name="loading_email_messages">Loading Email Messages</string>
     <string name="list_email_messages_failure">Failed to list email messages</string>
     <string name="list_email_folders_failure">Failed to list email folders</string>
-    <string name="from_recipient">From: %1$s</string>
-    <string name="to_recipient">To: %1$s</string>
+    <string name="from_recipient">%2$sFrom: %1$s</string>
+    <string name="to_recipient">%2$sTo: %1$s</string>
     <string name="no_subject">No Subject</string>
     <string name="deleting_email_message">Deleting email message&#8230;</string>
     <string name="deleting_email_message_failure">Failed to delete email message</string>
@@ -114,6 +114,8 @@
     <string name="validate_to_address">Please ensure the to address field is filled out.</string>
     <string name="reply_message">Re: %1$s</string>
     <string name="reply_body">\n\n---------------\n\n%1$s</string>
+    <string name="encrypted_indicator_label">🔒 End-to-end encrypted</string>
+    <string name="encrypted_email_address_lookup_failure">Failed to lookup email address encryption status</string>
 
     <!-- ReadEmailMessageFragment.kt -->
     <string name="read_email_message">Read Email Message</string>

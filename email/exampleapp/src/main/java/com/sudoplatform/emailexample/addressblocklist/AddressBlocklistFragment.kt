@@ -27,6 +27,7 @@ import com.sudoplatform.sudoapiclient.sudoApiClientLogger
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.BatchOperationResult
 import com.sudoplatform.sudoemail.types.BatchOperationStatus
+import com.sudoplatform.sudoemail.types.UnsealedBlockedAddressStatus
 import com.sudoplatform.sudoprofiles.Sudo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -136,7 +137,15 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
                 }
                 sudoApiClientLogger.debug("Returned ${blockedAddresses.size} items")
                 blockedAddressesList.clear()
-                blockedAddressesList.addAll(blockedAddresses)
+                val cleartextAddresses = mutableListOf<String>()
+                for (blockedAddress in blockedAddresses) {
+                    if (blockedAddress.status === UnsealedBlockedAddressStatus.Completed) {
+                        cleartextAddresses.add(blockedAddress.address)
+                    } else {
+                        // Handle error. Likely a missing key in which case the address could be unblocked using the hashed value
+                    }
+                }
+                blockedAddressesList.addAll(cleartextAddresses)
                 adaptor.notifyDataSetChanged()
             } catch (e: SudoEmailClient.EmailBlocklistException) {
                 sudoApiClientLogger.error(e.localizedMessage ?: "$e")

@@ -7,10 +7,13 @@
 package com.sudoplatform.emailexample.emailmessages
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -28,6 +31,7 @@ import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.inputs.CreateDraftEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.LookupEmailAddressesPublicInfoInput
 import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.UpdateDraftEmailMessageInput
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +40,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Timer
+import java.util.TimerTask
+import java.util.regex.Pattern
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -51,6 +58,14 @@ import kotlin.coroutines.CoroutineContext
  *   to this view.
  */
 class SendEmailMessageFragment : Fragment(), CoroutineScope {
+
+    companion object {
+        /**
+         * A delay between executing the address availability checks to allow a
+         * user to finish typing.
+         */
+        const val CHECK_DELAY = 1000L
+    }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -78,6 +93,19 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
 
     /** Email Address Identifier used to compose a reply email message. */
     private lateinit var emailAddressId: String
+
+    /** Timer to prevent stacking SDK calls for looking up encrypted email addresses. */
+    private var encryptedEmailAddressLookupTimer: Timer? = null
+
+    /**
+     * Encryption status for each email address ui input.
+     * Used to track cases where multiple values need to be verified without stacking requests.
+     */
+    private val encryptedInputStatuses: MutableMap<String, Boolean?> = mutableMapOf(
+        "to" to null,
+        "cc" to null,
+        "bcc" to null,
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -109,6 +137,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        configureFieldListener(binding.toTextView, "to")
+        configureFieldListener(binding.bccTextView, "cc")
+        configureFieldListener(binding.ccTextView, "bcc")
         navController = Navigation.findNavController(view)
 
         val emailMessageWithBody = args.emailMessageWithBody
@@ -127,10 +158,36 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
 
     override fun onDestroy() {
         loading?.dismiss()
+        encryptedEmailAddressLookupTimer?.cancel()
         coroutineContext.cancelChildren()
         coroutineContext.cancel()
         bindingDelegate.detach()
         super.onDestroy()
+    }
+
+    private fun configureFieldListener(textView: TextView, fieldName: String) {
+        textView.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) { /* no-op */ }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { /* no-op */ }
+            var timer = Timer()
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                hideEncryptedIndicatorView()
+                timer.cancel()
+                timer = Timer()
+                timer.schedule(
+                    object : TimerTask() {
+                        override fun run() {
+                            handleEncryptedIndicatorView(
+                                addresses = s?.toString() ?: "",
+                                fieldName = fieldName,
+                            )
+                        }
+                    },
+                    CHECK_DELAY,
+                )
+                encryptedEmailAddressLookupTimer = timer
+            }
+        })
     }
 
     /** Sends an email message from the [SudoEmailClient]. */
@@ -148,9 +205,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
                         from = emailAddress,
-                        to = binding.toTextView.text.split(",").toList(),
-                        cc = binding.ccTextView.text.split(",").toList(),
-                        bcc = binding.bccTextView.text.split(",").toList(),
+                        to = addressesToArray(binding.toTextView.text.toString()),
+                        cc = addressesToArray(binding.ccTextView.text.toString()),
+                        bcc = addressesToArray(binding.bccTextView.text.toString()),
                         subject = binding.subjectTextView.text.toString(),
                         body = binding.contentBody.text.toString(),
                     )
@@ -195,9 +252,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
                         from = emailAddress,
-                        to = binding.toTextView.text.split(",").toList(),
-                        cc = binding.ccTextView.text.split(",").toList(),
-                        bcc = binding.bccTextView.text.split(",").toList(),
+                        to = addressesToArray(binding.toTextView.text.toString()),
+                        cc = addressesToArray(binding.ccTextView.text.toString()),
+                        bcc = addressesToArray(binding.bccTextView.text.toString()),
                         subject = binding.subjectTextView.text.toString(),
                         body = binding.contentBody.text.toString(),
                     )
@@ -241,6 +298,115 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 )
             }
             hideLoading()
+        }
+    }
+
+    /**
+     * Validates that an email address string is correctly formatted.
+     */
+    private fun validateEmailAddress(address: String): Boolean {
+        val addressSpecPattern = Pattern.compile("^.+@[^.].*\\.[a-z]{2,}$")
+        val rfc822AddressPattern = Pattern.compile("^.*<.+@[^.].*\\.[a-z]{2,}>$")
+
+        return if (address.contains(" ")) {
+            rfc822AddressPattern.matcher(address).find()
+        } else {
+            addressSpecPattern.matcher(address).find()
+        }
+    }
+
+    /**
+     * Transforms a string of comma-separated email addresses in a mutable list of email
+     * address strings.
+     */
+    private fun addressesToArray(addresses: String): MutableList<String> {
+        val result: MutableList<String> = mutableListOf()
+        val split = addresses.split(",").map { it.trim() }
+        result.addAll(split)
+        return result
+    }
+
+    /**
+     * Validates that a list of email addresses (in comma-separated string format) are
+     * correctly formatted.
+     */
+    private fun validateEmailAddressList(addresses: String): Boolean {
+        val addressesArray = addressesToArray(addresses)
+        for (address in addressesArray) {
+            if (!validateEmailAddress(address)) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private suspend fun validateEncryptedEmailAddresses(addressesInput: String): Boolean {
+        if (!validateEmailAddressList(addressesInput)) {
+            return false
+        }
+
+        val emailAddresses = addressesToArray(addressesInput)
+        val input = LookupEmailAddressesPublicInfoInput(emailAddresses)
+
+        val emailAddressesPublicInfo = withContext(Dispatchers.IO) {
+            app.sudoEmailClient.lookupEmailAddressesPublicInfo(input)
+        }
+
+        val resultEmailAddresses = emailAddressesPublicInfo.map { it.emailAddress }
+        val result = emailAddresses.all { emailAddress ->
+            resultEmailAddresses.contains(emailAddress)
+        }
+
+        return result
+    }
+
+    /**
+     * Callback provided to each of the text input fields that's invoked when the
+     * text value is updated.
+     */
+    private fun handleEncryptedIndicatorView(addresses: String, fieldName: String) {
+        launch {
+            try {
+                encryptedInputStatuses[fieldName] = null
+                hideEncryptedIndicatorView()
+
+                if (addresses.isNotBlank()) {
+                    val isEncrypted = validateEncryptedEmailAddresses(addresses)
+                    encryptedInputStatuses[fieldName] = isEncrypted
+                }
+
+                // Check if at least one input value is true (encrypted), and the rest are null (empty)
+                val validInput = encryptedInputStatuses.any { it.value == true }
+                val invalidInput = encryptedInputStatuses.any { it.value == false }
+                val validInputs = validInput && !invalidInput
+
+                if (validInputs) {
+                    showEncryptedIndicatorView()
+                }
+            } catch (e: SudoEmailClient.EmailAddressException) {
+                withContext(Dispatchers.Main) {
+                    showAlertDialog(
+                        titleResId = R.string.encrypted_email_address_lookup_failure,
+                        message = e.localizedMessage ?: "$e",
+                        negativeButtonResId = android.R.string.cancel,
+                    )
+                }
+            }
+        }
+    }
+
+    /** Shows the encrypted indicator view. */
+    private fun showEncryptedIndicatorView() {
+        if (binding.encryptedIndicator.visibility == View.GONE) {
+            binding.encryptedIndicator.visibility = View.VISIBLE
+        }
+    }
+
+    /** Hides the encrypted indicator view. */
+    private fun hideEncryptedIndicatorView() {
+        if (binding.encryptedIndicator.visibility == View.VISIBLE) {
+            binding.encryptedIndicator.visibility = View.GONE
         }
     }
 

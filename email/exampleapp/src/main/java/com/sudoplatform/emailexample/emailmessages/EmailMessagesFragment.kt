@@ -44,6 +44,7 @@ import com.sudoplatform.sudoemail.types.DraftEmailMessageWithContent
 import com.sudoplatform.sudoemail.types.EmailAddress
 import com.sudoplatform.sudoemail.types.EmailFolder
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.EncryptionStatus
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.Owner
 import com.sudoplatform.sudoemail.types.State
@@ -259,6 +260,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     val emailMessages = withContext(Dispatchers.IO) {
                         val input = ListEmailMessagesForEmailFolderIdInput(
                             emailFolderId,
+                            null,
                             cachePolicy,
                         )
                         app.sudoEmailClient.listEmailMessagesForEmailFolderId(input)
@@ -659,6 +661,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             sentAt = null,
             receivedAt = null,
             hasAttachments = false,
+            EncryptionStatus.UNENCRYPTED,
         )
     }
 

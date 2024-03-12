@@ -252,4 +252,62 @@ class SendEmailMessageTest {
             pressBack()
         }
     }
+
+    @Test
+    fun testEncryptedEmailAddressHandlesEncryptedIndicator() {
+        createSudo {
+            registerAndCreateSudoFlow()
+        }
+        emailAddresses {
+            waitForLoading()
+            checkEmailAddressesItemsDisplayed()
+            navigateToProvisionEmailAddressScreen()
+        }
+        var address = ""
+        provisionEmailAddress {
+            setLocalPart()
+            waitForRootFocus()
+            checkAvailableAddressMsg()
+            address = getAddressFromTextView()
+            clickOnCreateButton()
+            waitForLoading()
+            clickOnPositiveAlertDialogButton()
+        }
+        emailAddresses {
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            navigateToEmailMessagesScreen(0)
+        }
+        emailMessages {
+            navigateToSendEmailMessageScreen()
+        }
+        sendEmailMessage {
+            checkEncryptedIndicatorNotVisible()
+            setToField("$address,$address")
+            checkEncryptedIndicatorVisible()
+            setCcField(address)
+            checkEncryptedIndicatorVisible()
+            setToField("not-an-address")
+            checkEncryptedIndicatorNotVisible()
+            pressBack()
+        }
+        emailMessages {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            pressBack()
+        }
+        emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            pressBack()
+        }
+        sudos {
+            waitForLoading()
+            waitForRecyclerView()
+            checkSudosItemsDisplayed()
+            pressBack()
+        }
+    }
 }

@@ -25,6 +25,7 @@ class SendEmailMessageRobot : BaseRobot() {
 
     private val toolbarSendButton = withId(R.id.send)
     private val toolbarSaveButton = withId(R.id.save)
+    private val encryptedIndicator = withId(R.id.encryptedIndicator)
     private val toField = R.id.toTextView
     private val toLabel = withId(R.id.toLabel)
     private val ccField = R.id.ccTextView
@@ -118,5 +119,13 @@ class SendEmailMessageRobot : BaseRobot() {
             .check(matches(withText(R.string.try_again)))
         onView(negativeAlertButton)
             .check(matches(withText(android.R.string.cancel)))
+    }
+
+    fun checkEncryptedIndicatorVisible() {
+        waitForViewToDisplay(encryptedIndicator, 15_000L)
+    }
+
+    fun checkEncryptedIndicatorNotVisible() {
+        waitForViewToNotDisplay(encryptedIndicator, 15_000L)
     }
 }

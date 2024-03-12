@@ -1,6 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext {
+        agp_version = '8.1.1'
+    }
     ext.kotlin_version = "1.8.20"
     ext.nav_version = "2.5.3"
     repositories {
@@ -9,7 +12,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath "com.android.tools.build:gradle:$agp_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jmailen.gradle:kotlinter-gradle:3.16.0"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"

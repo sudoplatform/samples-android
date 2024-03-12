@@ -14,6 +14,7 @@ import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.databinding.LayoutEmailMessageCellBinding
 import com.sudoplatform.sudoemail.types.Direction
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.EncryptionStatus
 import java.util.Date
 
 /**
@@ -40,10 +41,11 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
     }
 
     fun bind(emailMessage: EmailMessage) {
+        val encryptionIndicator = if (emailMessage.encryptionStatus === EncryptionStatus.ENCRYPTED) "🔒 " else ""
         if (emailMessage.direction == Direction.INBOUND) {
-            binding.recipientLabel.text = binding.root.context.getString(R.string.from_recipient, emailMessage.from[0])
+            binding.recipientLabel.text = binding.root.context.getString(R.string.from_recipient, emailMessage.from[0], encryptionIndicator)
         } else {
-            binding.recipientLabel.text = binding.root.context.getString(R.string.to_recipient, emailMessage.to.joinToString())
+            binding.recipientLabel.text = binding.root.context.getString(R.string.to_recipient, emailMessage.to.joinToString(), encryptionIndicator)
         }
         binding.subjectLabel.text = emailMessage.subject ?: binding.root.context.getString(R.string.no_subject)
         binding.dateLabel.text = formatDate(emailMessage.createdAt)
