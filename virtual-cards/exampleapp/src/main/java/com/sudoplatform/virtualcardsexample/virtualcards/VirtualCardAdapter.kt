@@ -21,7 +21,7 @@ class VirtualCardAdapter(private val items: List<VirtualCard>, private val itemS
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VirtualCardViewHolder {
         return VirtualCardViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

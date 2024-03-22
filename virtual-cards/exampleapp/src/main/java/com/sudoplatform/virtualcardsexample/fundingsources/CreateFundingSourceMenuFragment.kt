@@ -57,7 +57,7 @@ class CreateFundingSourceMenuFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentCreateFundingSourceMenuBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -74,13 +74,13 @@ class CreateFundingSourceMenuFragment : Fragment(), CoroutineScope {
         binding.createStripeCardButton.setOnClickListener {
             navController.navigate(
                 CreateFundingSourceMenuFragmentDirections
-                    .actionCreateFundingSourceMenuFragmentToCreateCardFundingSourceFragment()
+                    .actionCreateFundingSourceMenuFragmentToCreateCardFundingSourceFragment(),
             )
         }
         binding.createCheckoutBankAccountButton.setOnClickListener {
             navController.navigate(
                 CreateFundingSourceMenuFragmentDirections
-                    .actionCreateFundingSourceMenuFragmentToCreateCheckoutBankAccountFundingSourceFragment()
+                    .actionCreateFundingSourceMenuFragmentToCreateCheckoutBankAccountFundingSourceFragment(),
             )
         }
         binding.learnMoreButton.setOnClickListener {

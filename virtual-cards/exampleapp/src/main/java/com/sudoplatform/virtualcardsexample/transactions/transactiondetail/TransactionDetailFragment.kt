@@ -25,6 +25,7 @@ import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.FundingSourceFlags
 import com.sudoplatform.sudovirtualcards.types.Transaction
 import com.sudoplatform.sudovirtualcards.types.TransactionType
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
@@ -71,7 +72,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentTransactionDetailBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -109,7 +110,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.list_sudos_failure,
                     message = e.localizedMessage ?: e.toString(),
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -132,7 +133,8 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
                         binding.fundingSourceLabel.text = getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.network)
                     }
                     is BankAccountFundingSource -> {
-                        binding.fundingSourceLabel.text = getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType)
+                        val unfundedSuffix = if (fundingSource.flags.contains(FundingSourceFlags.UNFUNDED)) " ***UNFUNDED***" else ""
+                        binding.fundingSourceLabel.text = getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType, unfundedSuffix)
                     }
                     else -> { /* Nothing to do here */ }
                 }
@@ -140,7 +142,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.get_funding_source_failure,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }

@@ -86,7 +86,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentCreateBankAccountFundingSourceBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -143,7 +143,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     val input = SetupFundingSourceInput(
                         "USD",
                         FundingSourceType.BANK_ACCOUNT,
-                        ClientApplicationData("androidApplication")
+                        ClientApplicationData("androidApplication"),
                     )
                     provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(input)
                     provisioningData = provisionalFundingSource.provisioningData as CheckoutBankAccountProvisioningData
@@ -159,7 +159,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { setupFundingSource() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -177,12 +177,12 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                         publicToken = linkSuccess.publicToken,
                         institutionId = linkSuccess.metadata.institution?.id ?: "",
                         accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = provisioningData.authorizationText[0]
+                        authorizationText = provisioningData.authorizationText[0],
                     )
                     val input = CompleteFundingSourceInput(
                         provisionalFundingSource.id,
                         completionData,
-                        null
+                        null,
                     )
                     app.sudoVirtualCardsClient.completeFundingSource(input)
                 }
@@ -192,9 +192,9 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             CreateBankAccountFundingSourceFragmentDirections
-                                .actionCreateBankAccountFundingSourceFragmentToFundingSourcesFragment()
+                                .actionCreateBankAccountFundingSourceFragmentToFundingSourcesFragment(),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(
@@ -202,7 +202,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { completeFundingSource() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -236,7 +236,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.create_funding_source_failure,
                     message = it.error?.displayMessage ?: getString(R.string.plaid_link_error),
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -275,7 +275,7 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         binding.accountNameLabel.text = linkSuccess.metadata.accounts[0].name
         binding.accountNumberEndingLabel.text = getString(
             R.string.account_number_ending_label,
-            linkSuccess.metadata.accounts[0].mask
+            linkSuccess.metadata.accounts[0].mask,
         )
     }
 
@@ -297,11 +297,11 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         binding.launchPlaidLinkButton.isEnabled = isEnabled
         if (isEnabled) {
             binding.launchPlaidLinkButton.setBackgroundColor(
-                resources.getColor(R.color.colorPrimary, null)
+                resources.getColor(R.color.colorPrimary, null),
             )
         } else {
             binding.launchPlaidLinkButton.setBackgroundColor(
-                resources.getColor(R.color.colorGrey, null)
+                resources.getColor(R.color.colorGrey, null),
             )
         }
     }

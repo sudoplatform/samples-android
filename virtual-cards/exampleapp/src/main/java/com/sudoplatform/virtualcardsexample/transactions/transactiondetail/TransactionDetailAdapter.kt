@@ -19,10 +19,10 @@ class TransactionDetailAdapter(private val items: List<TransactionDetailCell>) :
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): TransactionDetailViewHolder {
         return TransactionDetailViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

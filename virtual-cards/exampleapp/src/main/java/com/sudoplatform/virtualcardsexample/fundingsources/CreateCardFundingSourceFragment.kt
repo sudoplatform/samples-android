@@ -88,13 +88,13 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
     /** An array of the default text populated for each [InputFormCell]. */
     private val enteredInput = arrayOf(
         "4242424242424242", "10", expirationYear(),
-        "123", "222333 Peachtree Place", null, "Atlanta", "GA", "30318", "US"
+        "123", "222333 Peachtree Place", null, "Atlanta", "GA", "30318", "US",
     )
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentCreateCardFundingSourceBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -137,7 +137,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
         if (validateFormData()) {
             showAlertDialog(
                 titleResId = R.string.validate_fields,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -153,7 +153,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
             city = enteredInput[6] ?: "",
             state = enteredInput[7] ?: "",
             postalCode = enteredInput[8] ?: "",
-            country = enteredInput[9] ?: ""
+            country = enteredInput[9] ?: "",
         )
         launch {
             try {
@@ -170,13 +170,13 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                     val provisioningData = provisionalFundingSource.provisioningData as StripeCardProvisioningData
                     val completionData = stripeIntentWorker.confirmSetupIntent(
                         input,
-                        provisioningData.clientSecret
+                        provisioningData.clientSecret,
                     )
                     // Perform the funding source completion operation
                     val completeInput = CompleteFundingSourceInput(
                         provisionalFundingSource.id,
                         completionData,
-                        null
+                        null,
                     )
                     app.sudoVirtualCardsClient.completeFundingSource(completeInput)
                 }
@@ -186,9 +186,9 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             CreateCardFundingSourceFragmentDirections
-                                .actionCreateCardFundingSourceFragmentToFundingSourcesFragment()
+                                .actionCreateCardFundingSourceFragmentToFundingSourcesFragment(),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(
@@ -196,7 +196,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { createFundingSource() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()

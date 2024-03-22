@@ -62,8 +62,8 @@ class VirtualCardsRobot : BaseRobot() {
         onView(virtualCardRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<VirtualCardViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 
@@ -71,8 +71,8 @@ class VirtualCardsRobot : BaseRobot() {
         onView(virtualCardRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<VirtualCardViewHolder>(
                 position,
-                ViewActions.click()
-            )
+                ViewActions.click(),
+            ),
         )
     }
 }

@@ -16,6 +16,9 @@ import com.sudoplatform.virtualcardsexample.R
 fun DeclineReason.description(context: Context): String {
     return when (this) {
         DeclineReason.INSUFFICIENT_FUNDS -> context.getString(R.string.dr_insufficient_funds)
+        DeclineReason.INSUFFICIENT_ENTITLEMENTS -> context.getString(
+            R.string.dr_insufficient_entitlements,
+        )
         DeclineReason.SUSPICIOUS -> context.getString(R.string.dr_suspcious)
         DeclineReason.CARD_STOPPED -> context.getString(R.string.dr_card_stopped)
         DeclineReason.CARD_EXPIRED -> context.getString(R.string.dr_card_expired)
@@ -30,6 +33,7 @@ fun DeclineReason.description(context: Context): String {
         DeclineReason.VELOCITY_EXCEEDED -> context.getString(R.string.dr_velocity_exceeded)
         DeclineReason.CURRENCY_BLOCKED -> context.getString(R.string.dr_currency_blocked)
         DeclineReason.FUNDING_ERROR -> context.getString(R.string.dr_funding_error)
+        DeclineReason.SERVICE_UNAVAILABLE -> context.getString(R.string.dr_service_unavailable)
         DeclineReason.UNKNOWN -> this.name
     }
 }

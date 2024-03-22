@@ -24,6 +24,7 @@ import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderRefres
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountRefreshUserInteractionData
 import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.FundingSourceFlags
 import com.sudoplatform.sudovirtualcards.types.inputs.RefreshFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
@@ -80,7 +81,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentFundingSourcesBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -98,7 +99,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
         binding.createFundingSourceButton.setOnClickListener {
             navController.navigate(
                 FundingSourcesFragmentDirections
-                    .actionFundingSourcesFragmentToCreateFundingSourceMenuFragment()
+                    .actionFundingSourcesFragmentToCreateFundingSourceMenuFragment(),
             )
         }
 
@@ -137,7 +138,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listFundingSources(CachePolicy.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -153,22 +154,52 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     private fun cancelFundingSource(id: String, completion: (FundingSource) -> Unit) {
         launch {
             try {
-                showCancelAlert(R.string.cancelling_funding_source)
+                showWorkingAlert(R.string.cancelling_funding_source)
                 val fundingSource = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.cancelFundingSource(id)
                 }
-                hideCancelAlert()
+                hideWorkingAlert()
                 completion(fundingSource)
                 showAlertDialog(
                     titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok
+                    positiveButtonResId = android.R.string.ok,
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
-                hideCancelAlert()
+                hideWorkingAlert()
                 showAlertDialog(
                     titleResId = R.string.cancel_funding_source_failure,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            }
+        }
+    }
+
+    /**
+     * Request review of a [FundingSource] from the [SudoVirtualCardsClient] based on the input [id].
+     *
+     * @param id [String] The identifier of the [FundingSource] to cancel.
+     * @param completion Callback which executes when the operation is completed.
+     */
+    private fun reviewFundingSource(id: String, completion: (FundingSource) -> Unit) {
+        launch {
+            try {
+                showWorkingAlert(R.string.reviewing_funding_source)
+                val fundingSource = withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.reviewUnfundedFundingSource(id)
+                }
+                hideWorkingAlert()
+                completion(fundingSource)
+                showAlertDialog(
+                    titleResId = R.string.success,
+                    positiveButtonResId = android.R.string.ok,
+                )
+            } catch (e: SudoVirtualCardsClient.FundingSourceException) {
+                hideWorkingAlert()
+                showAlertDialog(
+                    titleResId = R.string.review_funding_source_failure,
+                    message = e.localizedMessage ?: "$e",
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -186,13 +217,13 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val refreshData = CheckoutBankAccountProviderRefreshData(
                         accountId = null,
-                        authorizationText = null
+                        authorizationText = null,
                     )
                     val input = RefreshFundingSourceInput(
                         id,
                         refreshData,
                         ClientApplicationData("androidApplication"),
-                        language = "en-US"
+                        language = "en-US",
                     )
                     app.sudoVirtualCardsClient.refreshFundingSource(input)
                 }
@@ -209,8 +240,8 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                                         .actionFundingSourcesFragmentToRefreshBankAccountFundingSourceFragment(
                                             id,
                                             authorizationText.toTypedArray(),
-                                            linkToken
-                                        )
+                                            linkToken,
+                                        ),
                                 )
                             }
                             else -> {
@@ -219,7 +250,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                                     message = e.localizedMessage ?: "$e",
                                     positiveButtonResId = R.string.try_again,
                                     onPositive = { refreshFundingSource(id) },
-                                    negativeButtonResId = android.R.string.cancel
+                                    negativeButtonResId = android.R.string.cancel,
                                 )
                             }
                         }
@@ -230,7 +261,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                             message = e.localizedMessage ?: "$e",
                             positiveButtonResId = R.string.try_again,
                             onPositive = { refreshFundingSource(id) },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -283,13 +314,13 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that a cancel operation is occurring. */
-    private fun showCancelAlert(@StringRes textResId: Int) {
+    private fun showWorkingAlert(@StringRes textResId: Int) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }
 
     /** Dismisses the loading [AlertDialog] indicating that a cancel operation has finished. */
-    private fun hideCancelAlert() {
+    private fun hideWorkingAlert() {
         loading?.dismiss()
     }
 
@@ -307,6 +338,16 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val fundingSource = fundingSourceList[viewHolder.adapterPosition]
+        if (fundingSource.flags.contains(FundingSourceFlags.UNFUNDED)) {
+            reviewFundingSource(fundingSource.id) { reviewedFundingSource ->
+                val position = viewHolder.adapterPosition
+                fundingSourceList.removeAt(position)
+                adapter.notifyItemRemoved(position)
+                fundingSourceList.add(position, reviewedFundingSource)
+                adapter.notifyItemInserted(position)
+            }
+            return
+        }
         cancelFundingSource(fundingSource.id) { cancelledFundingSource ->
             val position = viewHolder.adapterPosition
             fundingSourceList.removeAt(position)

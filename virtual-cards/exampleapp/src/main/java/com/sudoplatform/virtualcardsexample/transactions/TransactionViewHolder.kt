@@ -36,10 +36,10 @@ class TransactionViewHolder(private val binding: LayoutTransactionCellBinding) :
         fun inflate(parent: ViewGroup): TransactionViewHolder {
             val binding = LayoutTransactionCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return TransactionViewHolder(binding)
         }

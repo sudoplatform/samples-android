@@ -20,13 +20,13 @@ import com.sudoplatform.virtualcardsexample.R
  */
 class SwipeLeftActionHelper(
     private val context: Context,
-    private val onSwipedAction: (viewHolder: RecyclerView.ViewHolder, direction: Int) -> Unit
+    private val onSwipedAction: (viewHolder: RecyclerView.ViewHolder, direction: Int) -> Unit,
 ) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder
+        target: RecyclerView.ViewHolder,
     ): Boolean {
         return false
     }
@@ -42,7 +42,7 @@ class SwipeLeftActionHelper(
         dX: Float,
         dY: Float,
         actionState: Int,
-        isCurrentlyActive: Boolean
+        isCurrentlyActive: Boolean,
     ) {
         super.onChildDraw(
             c,
@@ -51,7 +51,7 @@ class SwipeLeftActionHelper(
             dX,
             dY,
             actionState,
-            isCurrentlyActive
+            isCurrentlyActive,
         )
 
         val itemView = viewHolder.itemView
@@ -62,7 +62,7 @@ class SwipeLeftActionHelper(
             itemView.right + dX.toInt(),
             itemView.top,
             itemView.right,
-            itemView.bottom
+            itemView.bottom,
         )
         background.draw(c)
 

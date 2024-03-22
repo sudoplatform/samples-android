@@ -77,13 +77,15 @@
     <string name="loading_funding_sources">Loading Funding Sources</string>
     <string name="create_funding_source_button">+ Create Funding Source</string>
     <string name="cancelling_funding_source">Cancelling funding source&#8230;</string>
+    <string name="reviewing_funding_source">Requesting review of funding source&#8230;</string>
     <string name="list_funding_sources_failure">Failed to list funding sources</string>
     <string name="cancel_funding_source_failure">Failed to cancel funding source</string>
+    <string name="review_funding_source_failure">Failed to review funding source</string>
     <string name="what_is_a_funding_source">What is a Funding Source?</string>
     <string name="funding_source_credit_card_label">Card: %1$s</string>
     <string name="funding_source_credit_card_description">&#8226;&#8226;&#8226;&#8226;%1$s (%2$s)</string>
     <string name="funding_source_bank_account_label">Bank Account: %1$s</string>
-    <string name="funding_source_bank_account_description">&#8226;&#8226;&#8226;&#8226;%1$s (%2$s)</string>
+    <string name="funding_source_bank_account_description">&#8226;&#8226;&#8226;&#8226;%1$s (%2$s) %3$s</string>
     <string name="funding_source_credit_card_cancelled_label">Card: %1$s - Cancelled</string>
     <string name="funding_source_bank_account_cancelled_label">Bank Account: %1$s - Cancelled</string>
     <string name="refresh">Refresh</string>
@@ -210,10 +212,12 @@
     <string name="dr_declined">Declined</string>
     <string name="dr_funding_error">Funding error</string>
     <string name="dr_insufficient_funds">Insufficient funds</string>
+    <string name="dr_insufficient_entitlements">Insufficient entitlements</string>
     <string name="dr_merchant_blocked">Merchant blocked</string>
     <string name="dr_merchant_code_blocked">Merchant category blocked</string>
     <string name="dr_merchant_country_blocked">Merchant country blocked</string>
     <string name="dr_processing_error">Processing error</string>
     <string name="dr_suspcious">Suspicious</string>
     <string name="dr_velocity_exceeded">Velocity exceeded</string>
+    <string name="dr_service_unavailable">Service unavailable</string>
 </resources>

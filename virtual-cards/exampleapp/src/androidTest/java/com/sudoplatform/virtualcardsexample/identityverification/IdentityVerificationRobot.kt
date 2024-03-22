@@ -58,8 +58,8 @@ class IdentityVerificationRobot : BaseRobot() {
         try {
             onView(statusLabel).check(
                 matches(
-                    withText("Verified")
-                )
+                    withText("Verified"),
+                ),
             ).withFailureHandler { _, _ ->
                 verified = false
             }

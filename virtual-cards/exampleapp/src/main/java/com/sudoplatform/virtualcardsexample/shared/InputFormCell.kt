@@ -17,5 +17,5 @@ package com.sudoplatform.virtualcardsexample.shared
 data class InputFormCell(
     val label: String,
     val inputFieldText: String,
-    val inputFieldHint: String
+    val inputFieldHint: String,
 )

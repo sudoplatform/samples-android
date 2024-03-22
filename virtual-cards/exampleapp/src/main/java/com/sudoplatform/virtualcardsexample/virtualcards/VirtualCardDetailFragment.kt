@@ -87,7 +87,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentVirtualCardDetailBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -137,7 +137,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                 val transactions = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.listTransactionsByCardId(
                         cardId = virtualCard.id,
-                        cachePolicy = cachePolicy
+                        cachePolicy = cachePolicy,
                     )
                 }
                 when (transactions) {
@@ -156,7 +156,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
                             onPositive = { listTransactions(CachePolicy.REMOTE_ONLY) },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -166,7 +166,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listTransactions(CachePolicy.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -179,7 +179,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
             withContext(Dispatchers.IO) {
                 app.sudoVirtualCardsClient.subscribeToTransactions(
                     id = subscriptionId,
-                    subscriber = transactionSubscriber
+                    subscriber = transactionSubscriber,
                 )
             }
         } catch (e: SudoVirtualCardsClient.TransactionException) {
@@ -187,7 +187,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                 titleResId = R.string.subscribe_transactions_failure,
                 message = e.localizedMessage ?: "$e",
                 negativeButtonResId = android.R.string.ok,
-                onNegative = {}
+                onNegative = {},
             )
         }
     }
@@ -200,7 +200,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                         titleResId = R.string.subscribe_transactions_failure,
                         messageResId = R.string.subscribe_lost_connection,
                         positiveButtonResId = android.R.string.ok,
-                        onPositive = {}
+                        onPositive = {},
                     )
                 }
             }
@@ -277,8 +277,8 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                 navController.navigate(
                     VirtualCardDetailFragmentDirections.actionVirtualCardDetailFragmentToTransactionDetailFragment(
                         virtualCard,
-                        transaction
-                    )
+                        transaction,
+                    ),
                 )
             }
         binding.transactionRecyclerView.adapter = adapter

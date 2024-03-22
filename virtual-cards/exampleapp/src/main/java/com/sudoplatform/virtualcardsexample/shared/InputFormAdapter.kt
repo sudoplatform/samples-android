@@ -22,10 +22,10 @@ class InputFormAdapter(private val items: List<InputFormCell>, private val onInp
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): InputFormViewHolder {
         return InputFormViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

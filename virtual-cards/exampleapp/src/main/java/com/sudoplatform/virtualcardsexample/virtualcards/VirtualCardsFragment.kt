@@ -89,7 +89,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentVirtualCardsBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -107,7 +107,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
 
         binding.createVirtualCardButton.setOnClickListener {
             navController.navigate(
-                VirtualCardsFragmentDirections.actionVirtualCardsFragmentToCreateVirtualCardFragment(sudo)
+                VirtualCardsFragmentDirections.actionVirtualCardsFragmentToCreateVirtualCardFragment(sudo),
             )
         }
 
@@ -152,7 +152,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
                             onPositive = { listCards(CachePolicy.REMOTE_ONLY) },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -162,7 +162,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listCards(CachePolicy.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -188,7 +188,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                         hideCancelAlert()
                         showAlertDialog(
                             titleResId = R.string.success,
-                            positiveButtonResId = android.R.string.ok
+                            positiveButtonResId = android.R.string.ok,
                         )
                     }
                     is SingleAPIResult.Partial -> {
@@ -197,7 +197,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                         showAlertDialog(
                             titleResId = R.string.cancel_virtual_card_failure,
                             message = cause.localizedMessage ?: "$cause",
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -206,7 +206,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.cancel_virtual_card_failure,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -221,7 +221,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
             VirtualCardAdapter(virtualCardList) { virtualCard ->
                 navController.navigate(
                     VirtualCardsFragmentDirections
-                        .actionVirtualCardsFragmentToVirtualCardDetailFragment(virtualCard)
+                        .actionVirtualCardsFragmentToVirtualCardDetailFragment(virtualCard),
                 )
             }
         binding.virtualCardRecyclerView.adapter = adapter

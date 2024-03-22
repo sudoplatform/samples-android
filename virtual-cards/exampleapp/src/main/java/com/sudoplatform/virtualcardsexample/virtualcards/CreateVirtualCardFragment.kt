@@ -102,7 +102,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         "Salt Lake City",
         "UT",
         "84044",
-        "US"
+        "US",
     )
 
     /** Fragment arguments handled by Navigation Library safe args */
@@ -126,7 +126,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentCreateVirtualCardBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -160,7 +160,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         listActiveFundingSources()
         fundingSourcesSpinnerAdapter = FundingSourceSpinnerAdapter(
             requireContext(),
-            fundingSourcesList
+            fundingSourcesList,
         )
         fundingSourcesSpinnerAdapter.notifyDataSetChanged()
         binding.fundingSourcesSpinner.adapter = fundingSourcesSpinnerAdapter
@@ -187,7 +187,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         if (validateFormData()) {
             showAlertDialog(
                 titleResId = R.string.validate_fields,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -197,7 +197,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
             city = enteredInput[4] ?: "",
             state = enteredInput[5] ?: "",
             postalCode = enteredInput[6] ?: "",
-            country = enteredInput[7] ?: ""
+            country = enteredInput[7] ?: "",
         )
         val cardLabel = JsonValue.JsonString(enteredInput[1] ?: "")
         val input = ProvisionVirtualCardInput(
@@ -206,7 +206,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
             cardHolder = enteredInput[0] ?: "",
             metadata = cardLabel,
             billingAddress = billingAddress,
-            currency = "USD"
+            currency = "USD",
         )
         launch {
             try {
@@ -228,10 +228,10 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
                                 navController.navigate(
                                     CreateVirtualCardFragmentDirections
                                         .actionCreateVirtualCardFragmentToVirtualCardDetailFragment(
-                                            provisionalCard.card
-                                        )
+                                            provisionalCard.card,
+                                        ),
                                 )
-                            }
+                            },
                         )
                         break
                     }
@@ -243,7 +243,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { createVirtualCard() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -269,7 +269,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
                         showAlertDialog(
                             titleResId = R.string.list_funding_sources_failure,
                             message = e.localizedMessage ?: "$e",
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -290,7 +290,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
                 showAlertDialog(
                     titleResId = R.string.ownership_proof_error,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }

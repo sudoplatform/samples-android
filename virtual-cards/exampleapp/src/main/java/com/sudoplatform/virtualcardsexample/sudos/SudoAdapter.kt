@@ -21,7 +21,7 @@ class SudoAdapter(private val items: List<Sudo>, private val itemSelectedListene
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SudoViewHolder {
         return SudoViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

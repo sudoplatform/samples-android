@@ -102,9 +102,9 @@ class CreateFundingSourceRobot : BaseRobot() {
         replaceText(
             CoreMatchers.allOf(
                 withId(R.id.inputField),
-                withHint("Enter $cellTitle")
+                withHint("Enter $cellTitle"),
             ),
-            inputText
+            inputText,
         )
     }
 
@@ -114,9 +114,9 @@ class CreateFundingSourceRobot : BaseRobot() {
             hasDescendant(
                 CoreMatchers.allOf(
                     withId(R.id.title),
-                    withText(title)
-                )
-            )
+                    withText(title),
+                ),
+            ),
         )
     }
 

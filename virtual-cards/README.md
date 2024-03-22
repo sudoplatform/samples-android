@@ -6,9 +6,9 @@ This project provides examples of how to use the Sudo Virtual Cards Android SDK.
 
 ## Supported Android Versions
 
-This app supports Android 7 (API level 24) or newer, built with Kotlin version 1.6.
+This app supports Android 8 (API level 26) or newer, built with Kotlin version 1.8.
 
-If you are using Android Studio, version 4.0 or newer is required.
+If you are using Android Studio, Hedgehog or newer is required.
 
 ## Getting Started
 

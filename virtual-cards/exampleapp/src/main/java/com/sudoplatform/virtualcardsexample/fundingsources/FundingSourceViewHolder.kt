@@ -16,7 +16,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
 import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
+import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.FundingSourceFlags
 import com.sudoplatform.sudovirtualcards.types.FundingSourceState
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.databinding.LayoutFundingSourceCellBinding
@@ -36,10 +38,10 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
         fun inflate(parent: ViewGroup): FundingSourceViewHolder {
             val binding = LayoutFundingSourceCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return FundingSourceViewHolder(binding)
         }
@@ -54,7 +56,7 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                 } else {
                     binding.name.text = binding.root.context.getString(
                         R.string.funding_source_credit_card_label,
-                        fundingSource.network
+                        fundingSource.network,
                     )
                 }
                 binding.description.text = binding.root.context.getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.cardType)
@@ -78,7 +80,9 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                         binding.refreshButton.visibility = View.GONE
                     }
                 }
-                binding.description.text = binding.root.context.getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType)
+
+                val unfundedSuffix = if (fundingSource.flags.contains(FundingSourceFlags.UNFUNDED)) " ***UNFUNDED*** ${this.formatCurrencyAmount(fundingSource.unfundedAmount)}" else ""
+                binding.description.text = binding.root.context.getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType, unfundedSuffix)
                 if (fundingSource.institutionLogo != null) {
                     val decoded = Base64.decode(fundingSource.institutionLogo?.data, Base64.DEFAULT)
                     val bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
@@ -88,6 +92,14 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                 }
             }
         }
+    }
+
+    private fun formatCurrencyAmount(amount: CurrencyAmount?): String {
+        if (amount == null) {
+            return ""
+        }
+        val centsAmount = String.format("%.2f", amount.amount / 100.0)
+        return "$$centsAmount ${amount.currency}"
     }
 
     fun getRefreshButton(): Button {

@@ -28,10 +28,10 @@ class InputFormViewHolder(private val binding: LayoutFormCellBinding) : Recycler
         fun inflate(parent: ViewGroup): InputFormViewHolder {
             val binding = LayoutFormCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return InputFormViewHolder(binding)
         }

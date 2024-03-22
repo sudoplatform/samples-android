@@ -91,7 +91,7 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentRefreshBankAccountFundingSourceBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -157,7 +157,7 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { startRefreshFundingSource() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -173,13 +173,13 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val refreshData = CheckoutBankAccountProviderRefreshData(
                         accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = authorizationText[0]
+                        authorizationText = authorizationText[0],
                     )
                     val input = RefreshFundingSourceInput(
                         fundingSourceId,
                         refreshData,
                         ClientApplicationData("androidApplication"),
-                        authorizationText[0].language
+                        authorizationText[0].language,
                     )
                     app.sudoVirtualCardsClient.refreshFundingSource(input)
                 }
@@ -189,9 +189,9 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             RefreshBankAccountFundingSourceFragmentDirections
-                                .actionRefreshBankAccountFundingSourceFragmentToFundingSourcesFragment()
+                                .actionRefreshBankAccountFundingSourceFragmentToFundingSourcesFragment(),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
                 showAlertDialog(
@@ -199,7 +199,7 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { refreshFundingSource() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -233,7 +233,7 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.create_funding_source_failure,
                     message = it.error?.displayMessage ?: getString(R.string.plaid_link_error),
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -271,7 +271,7 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         binding.accountNameLabel.text = linkSuccess.metadata.accounts[0].name
         binding.accountNumberEndingLabel.text = getString(
             R.string.account_number_ending_label,
-            linkSuccess.metadata.accounts[0].mask
+            linkSuccess.metadata.accounts[0].mask,
         )
     }
 
@@ -293,11 +293,11 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         binding.launchPlaidLinkButton.isEnabled = isEnabled
         if (isEnabled) {
             binding.launchPlaidLinkButton.setBackgroundColor(
-                resources.getColor(R.color.colorPrimary, null)
+                resources.getColor(R.color.colorPrimary, null),
             )
         } else {
             binding.launchPlaidLinkButton.setBackgroundColor(
-                resources.getColor(R.color.colorGrey, null)
+                resources.getColor(R.color.colorGrey, null),
             )
         }
     }

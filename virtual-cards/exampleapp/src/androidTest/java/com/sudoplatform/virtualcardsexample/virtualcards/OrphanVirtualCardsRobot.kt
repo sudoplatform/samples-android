@@ -37,8 +37,8 @@ class OrphanVirtualCardsRobot : BaseRobot() {
         onView(orphanCardRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<VirtualCardViewHolder>(
                 position,
-                click()
-            )
+                click(),
+            ),
         )
     }
 }

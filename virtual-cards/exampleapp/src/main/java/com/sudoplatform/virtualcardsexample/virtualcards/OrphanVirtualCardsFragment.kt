@@ -78,7 +78,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentOrphanVirtualCardsBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -136,7 +136,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
                             onPositive = { listOrphanVirtualCards(CachePolicy.REMOTE_ONLY) },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
@@ -146,7 +146,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listOrphanVirtualCards(CachePolicy.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -171,7 +171,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listSudos(ListOption.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
@@ -187,8 +187,8 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                 navController.navigate(
                     OrphanVirtualCardsFragmentDirections
                         .actionOrphanVirtualCardsFragmentToVirtualCardDetailFragment(
-                            virtualCard
-                        )
+                            virtualCard,
+                        ),
                 )
             }
         binding.orphanVirtualCardRecyclerView.adapter = adapter

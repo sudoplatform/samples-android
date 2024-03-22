@@ -17,5 +17,5 @@ package com.sudoplatform.virtualcardsexample.transactions.transactiondetail
 class TransactionDetailCell(
     val titleLabel: String,
     val subtitleLabel: String,
-    val valueLabel: String
+    val valueLabel: String,
 )

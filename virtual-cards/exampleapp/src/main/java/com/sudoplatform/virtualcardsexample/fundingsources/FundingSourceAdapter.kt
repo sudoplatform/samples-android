@@ -20,7 +20,7 @@ class FundingSourceAdapter(private val items: List<FundingSource>, private val b
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FundingSourceViewHolder {
         return FundingSourceViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

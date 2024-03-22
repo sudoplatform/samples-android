@@ -85,7 +85,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentMainMenuBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -99,7 +99,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                             messageResId = R.string.deregister_confirmation,
                             positiveButtonResId = R.string.deregister,
                             onPositive = { deregister() },
-                            negativeButtonResId = android.R.string.cancel
+                            negativeButtonResId = android.R.string.cancel,
                         )
                     }
                     R.id.info -> {
@@ -108,7 +108,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                             messageResId = R.string.virtual_card_explanation,
                             positiveButtonResId = android.R.string.ok,
                             negativeButtonResId = R.string.learn_more,
-                            onNegative = { learnMore() }
+                            onNegative = { learnMore() },
                         )
                     }
                 }
@@ -126,22 +126,22 @@ class MainMenuFragment : Fragment(), CoroutineScope {
 
         binding.secureIdVerificationButton.setOnClickListener {
             navController.navigate(
-                MainMenuFragmentDirections.actionMainMenuFragmentToIdentityVerificationFragment()
+                MainMenuFragmentDirections.actionMainMenuFragmentToIdentityVerificationFragment(),
             )
         }
         binding.fundingSourcesButton.setOnClickListener {
             navController.navigate(
-                MainMenuFragmentDirections.actionMainMenuFragmentToFundingSourcesFragment()
+                MainMenuFragmentDirections.actionMainMenuFragmentToFundingSourcesFragment(),
             )
         }
         binding.sudosButton.setOnClickListener {
             navController.navigate(
-                MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment()
+                MainMenuFragmentDirections.actionMainMenuFragmentToSudosFragment(),
             )
         }
         binding.orphanVirtualCardsButton.setOnClickListener {
             navController.navigate(
-                MainMenuFragmentDirections.actionMainMenuFragmentToOrphanVirtualCardsFragment()
+                MainMenuFragmentDirections.actionMainMenuFragmentToOrphanVirtualCardsFragment(),
             )
         }
     }
@@ -167,7 +167,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                 }
                 hideLoading()
                 navController.navigate(
-                    MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment()
+                    MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment(),
                 )
             } catch (e: RegisterException) {
                 Toast.makeText(requireContext(), getString(R.string.deregister_failure, e.localizedMessage), Toast.LENGTH_LONG).show()

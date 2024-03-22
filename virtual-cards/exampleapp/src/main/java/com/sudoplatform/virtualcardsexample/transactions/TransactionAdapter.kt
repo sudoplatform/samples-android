@@ -21,7 +21,7 @@ class TransactionAdapter(private val items: List<Transaction>, private val itemS
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         return TransactionViewHolder.inflate(
-            parent
+            parent,
         )
     }
 

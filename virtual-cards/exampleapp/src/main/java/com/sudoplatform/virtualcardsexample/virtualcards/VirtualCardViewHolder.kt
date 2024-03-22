@@ -29,10 +29,10 @@ class VirtualCardViewHolder(private val binding: LayoutItemCellBinding) : Recycl
         fun inflate(parent: ViewGroup): VirtualCardViewHolder {
             val binding = LayoutItemCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return VirtualCardViewHolder(binding)
         }

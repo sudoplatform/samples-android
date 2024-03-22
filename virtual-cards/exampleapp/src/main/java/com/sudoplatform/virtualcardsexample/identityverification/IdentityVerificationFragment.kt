@@ -81,13 +81,13 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     enum class VerificationStatus(val status: Int) {
         VERIFIED(R.string.verified),
         UNVERIFIED(R.string.not_verified),
-        UNKNOWN(R.string.unknown)
+        UNKNOWN(R.string.unknown),
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentIdentityVerificationBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -135,7 +135,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         if (validateFormData()) {
             showAlertDialog(
                 titleResId = R.string.validate_fields,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -153,7 +153,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
             state = "",
             postalCode = enteredInput[4] ?: "",
             country = enteredInput[5] ?: "",
-            dateOfBirth = enteredInput[6] ?: ""
+            dateOfBirth = enteredInput[6] ?: "",
         )
         launch {
             try {
@@ -164,7 +164,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
                     showAlertDialog(
                         titleResId = R.string.verification_complete,
                         messageResId = R.string.identity_verified,
-                        positiveButtonResId = android.R.string.ok
+                        positiveButtonResId = android.R.string.ok,
                     )
                     binding.statusLabel.text = getString(VerificationStatus.VERIFIED.status)
                     toolbarMenu.getItem(0)?.isEnabled = false
@@ -172,7 +172,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
                     showAlertDialog(
                         titleResId = R.string.verification_complete,
                         messageResId = R.string.identity_not_verified,
-                        positiveButtonResId = android.R.string.ok
+                        positiveButtonResId = android.R.string.ok,
                     )
                     binding.statusLabel.text = getString(VerificationStatus.UNVERIFIED.status)
                 }
@@ -182,7 +182,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { verifyUser() },
-                    negativeButtonResId = android.R.string.ok
+                    negativeButtonResId = android.R.string.ok,
                 )
             }
             hideLoading()
@@ -232,7 +232,7 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
             val hint = if (labels[i].contains(getString(R.string.address_line_2))) {
                 getString(
                     R.string.enter_optional_input,
-                    labels[i]
+                    labels[i],
                 )
             } else {
                 getString(R.string.enter_non_optional_input, labels[i])

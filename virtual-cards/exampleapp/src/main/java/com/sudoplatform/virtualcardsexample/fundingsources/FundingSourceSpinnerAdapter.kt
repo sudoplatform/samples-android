@@ -42,7 +42,7 @@ class FundingSourceSpinnerAdapter(val context: Context, private val items: List<
                     context.getString(
                         R.string.funding_source_credit_card_description,
                         fundingSource.last4,
-                        fundingSource.cardType
+                        fundingSource.cardType,
                     )
             }
             is BankAccountFundingSource -> {
@@ -50,7 +50,8 @@ class FundingSourceSpinnerAdapter(val context: Context, private val items: List<
                     context.getString(
                         R.string.funding_source_bank_account_description,
                         fundingSource.last4,
-                        fundingSource.bankAccountType
+                        fundingSource.bankAccountType,
+                        "",
                     )
             }
         }

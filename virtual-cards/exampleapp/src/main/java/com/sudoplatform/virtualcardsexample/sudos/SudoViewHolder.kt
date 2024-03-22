@@ -27,10 +27,10 @@ class SudoViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.
         fun inflate(parent: ViewGroup): SudoViewHolder {
             val binding = LayoutItemCellBinding.inflate(
                 LayoutInflater.from(
-                    parent.context
+                    parent.context,
                 ),
                 parent,
-                false
+                false,
             )
             return SudoViewHolder(binding)
         }

@@ -54,8 +54,8 @@ class FundingSourcesRobot : BaseRobot() {
         onView(fundingSourceRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<FundingSourceViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 }
