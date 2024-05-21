@@ -19,12 +19,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
+import com.sudoplatform.sudovirtualcards.extensions.isUnfunded
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderRefreshData
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountRefreshUserInteractionData
 import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
 import com.sudoplatform.sudovirtualcards.types.FundingSource
-import com.sudoplatform.sudovirtualcards.types.FundingSourceFlags
 import com.sudoplatform.sudovirtualcards.types.inputs.RefreshFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
@@ -338,7 +338,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
 
     private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val fundingSource = fundingSourceList[viewHolder.adapterPosition]
-        if (fundingSource.flags.contains(FundingSourceFlags.UNFUNDED)) {
+        if (fundingSource.isUnfunded()) {
             reviewFundingSource(fundingSource.id) { reviewedFundingSource ->
                 val position = viewHolder.adapterPosition
                 fundingSourceList.removeAt(position)

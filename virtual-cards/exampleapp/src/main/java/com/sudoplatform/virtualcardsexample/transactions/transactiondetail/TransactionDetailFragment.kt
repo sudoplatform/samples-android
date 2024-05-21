@@ -20,12 +20,12 @@ import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
+import com.sudoplatform.sudovirtualcards.extensions.isUnfunded
 import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
 import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
-import com.sudoplatform.sudovirtualcards.types.FundingSourceFlags
 import com.sudoplatform.sudovirtualcards.types.Transaction
 import com.sudoplatform.sudovirtualcards.types.TransactionType
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
@@ -133,7 +133,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
                         binding.fundingSourceLabel.text = getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.network)
                     }
                     is BankAccountFundingSource -> {
-                        val unfundedSuffix = if (fundingSource.flags.contains(FundingSourceFlags.UNFUNDED)) " ***UNFUNDED***" else ""
+                        val unfundedSuffix = if (fundingSource.isUnfunded()) " ***UNFUNDED***" else ""
                         binding.fundingSourceLabel.text = getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType, unfundedSuffix)
                     }
                     else -> { /* Nothing to do here */ }

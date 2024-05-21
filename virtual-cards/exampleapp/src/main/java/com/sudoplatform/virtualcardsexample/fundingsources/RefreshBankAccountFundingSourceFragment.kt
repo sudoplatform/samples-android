@@ -46,8 +46,8 @@ import kotlin.coroutines.CoroutineContext
  * bank account based [FundingSource] that has expired or has been reset.
  *
  * - Links From:
- *  - [FundingSourcesFragment]: A user taps the "Refresh" button on a funding source that is in a
- *   REFRESH state.
+ *  - [FundingSourcesFragment]: A user taps the "Refresh" button on a funding source that has the
+ *   REFRESH flag set.
  *
  * - Links To:
  *  - [FundingSourcesFragment]: If a user successfully refreshes a funding source, they will be returned

@@ -23,6 +23,14 @@ android {
         debug {
             testCoverageEnabled true
         }
+        create("minifiedDebug") {
+            initWith(getByName("debug"))
+            minifyEnabled true
+            versionNameSuffix = " MINIFIED DEBUG"
+            matchingFallbacks.add("debug")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -44,8 +52,8 @@ dependencies {
     implementation 'com.sudoplatform:sudouser:18.0.0'
     implementation 'com.sudoplatform:sudoidentityverification:13.0.0'
     implementation 'com.sudoplatform:sudoprofiles:14.0.0'
-    implementation 'com.sudoplatform:sudoentitlements:9.0.0'
-    implementation 'com.sudoplatform:sudovirtualcards:13.2.0'
+    implementation 'com.sudoplatform:sudoentitlements:10.0.0'
+    implementation 'com.sudoplatform:sudovirtualcards:14.0.3'
 
     // Stripe
     implementation "com.stripe:stripe-android:20.5.0"
@@ -54,7 +62,7 @@ dependencies {
     implementation "com.github.checkout:frames-android:3.1.2"
 
     // Plaid
-    implementation "com.plaid.link:sdk-core:3.10.2"
+    implementation "com.plaid.link:sdk-core:4.3.1"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.nimbusds:nimbus-jose-jwt:9.31"
