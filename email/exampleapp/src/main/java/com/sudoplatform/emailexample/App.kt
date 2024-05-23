@@ -8,13 +8,18 @@ package com.sudoplatform.emailexample
 
 import android.app.Application
 import android.net.Uri
+import com.sudoplatform.emailexample.notifications.EmailExampleNotificationHandler
 import com.sudoplatform.sudoemail.SudoEmailClient
+import com.sudoplatform.sudoemail.SudoEmailNotifiableClient
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudokeymanager.KeyManager
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
+import com.sudoplatform.sudonotification.DefaultNotificationDeviceInputProvider
+import com.sudoplatform.sudonotification.SudoNotificationClient
+import com.sudoplatform.sudonotification.types.NotificationConfiguration
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
@@ -36,6 +41,8 @@ class App : Application(), CoroutineScope {
         const val FSSO_USED_PREFERENCE = "usedFSSO"
 
         const val version = "5.0.0"
+
+        internal lateinit var instance: App
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -44,7 +51,16 @@ class App : Application(), CoroutineScope {
     lateinit var sudoProfilesClient: SudoProfilesClient
     lateinit var sudoEntitlementsClient: SudoEntitlementsClient
     lateinit var sudoEmailClient: SudoEmailClient
+    lateinit var sudoEmailNotifiableClient: SudoEmailNotifiableClient
+    lateinit var sudoNotificationClient: SudoNotificationClient
+    lateinit var notificationHandler: EmailExampleNotificationHandler
+    lateinit var deviceInfo: DefaultNotificationDeviceInputProvider
+    lateinit var notificationConfiguration: NotificationConfiguration
     lateinit var logger: Logger
+
+    init {
+        instance = this
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -81,6 +97,20 @@ class App : Application(), CoroutineScope {
         sudoEmailClient = SudoEmailClient.builder()
             .setContext(this)
             .setSudoUserClient(sudoUserClient)
+            .build()
+
+        notificationHandler = EmailExampleNotificationHandler()
+
+        sudoEmailNotifiableClient = SudoEmailNotifiableClient.builder()
+            .setContext(this)
+            .setNotificationHandler(notificationHandler)
+            .build()
+
+        sudoNotificationClient = SudoNotificationClient.builder()
+            .setContext(this)
+            .setSudoUserClient(sudoUserClient)
+            .setLogger(logger)
+            .setNotifiableClients(listOf(sudoEmailNotifiableClient))
             .build()
     }
 

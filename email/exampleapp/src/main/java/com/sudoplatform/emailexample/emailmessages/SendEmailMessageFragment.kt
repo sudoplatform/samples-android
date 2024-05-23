@@ -6,6 +6,10 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
+import android.app.Activity.RESULT_OK
+import android.content.ContentResolver
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,23 +17,33 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
 import com.sudoplatform.emailexample.databinding.FragmentSendEmailMessageBinding
+import com.sudoplatform.emailexample.emailmessages.emailAttachments.EmailAttachmentAdapter
 import com.sudoplatform.emailexample.showAlertDialog
+import com.sudoplatform.emailexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageFactory
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
+import com.sudoplatform.sudoemail.types.EmailAttachment
 import com.sudoplatform.sudoemail.types.EmailMessage
+import com.sudoplatform.sudoemail.types.InternetMessageFormatHeader
 import com.sudoplatform.sudoemail.types.inputs.CreateDraftEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.LookupEmailAddressesPublicInfoInput
 import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
@@ -40,8 +54,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
+import java.util.UUID
 import java.util.regex.Pattern
 import kotlin.coroutines.CoroutineContext
 
@@ -88,6 +106,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: SendEmailMessageFragmentArgs by navArgs()
 
+    /** A reference to the [RecyclerView.Adapter] handling [EmailAttachment] data. */
+    private lateinit var attachmentsAdapter: EmailAttachmentAdapter
+
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
 
@@ -107,6 +128,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         "bcc" to null,
     )
 
+    /** A mutable list of [EmailAttachment]s. */
+    private val emailAttachmentList: MutableList<EmailAttachment> = mutableListOf()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -115,7 +139,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         bindingDelegate.attach(FragmentSendEmailMessageBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.compose_email_message)
-            inflateMenu(R.menu.nav_menu_with_send_button)
+            inflateMenu(R.menu.nav_menu_with_send_save_attachment_buttons)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.send -> {
@@ -123,6 +147,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     }
                     R.id.save -> {
                         saveDraftEmailMessage()
+                    }
+                    R.id.attachment -> {
+                        launchFilePicker()
                     }
                 }
                 true
@@ -137,6 +164,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        configureRecyclerView()
         configureFieldListener(binding.toTextView, "to")
         configureFieldListener(binding.bccTextView, "cc")
         configureFieldListener(binding.ccTextView, "bcc")
@@ -165,31 +193,6 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         super.onDestroy()
     }
 
-    private fun configureFieldListener(textView: TextView, fieldName: String) {
-        textView.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) { /* no-op */ }
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { /* no-op */ }
-            var timer = Timer()
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                hideEncryptedIndicatorView()
-                timer.cancel()
-                timer = Timer()
-                timer.schedule(
-                    object : TimerTask() {
-                        override fun run() {
-                            handleEncryptedIndicatorView(
-                                addresses = s?.toString() ?: "",
-                                fieldName = fieldName,
-                            )
-                        }
-                    },
-                    CHECK_DELAY,
-                )
-                encryptedEmailAddressLookupTimer = timer
-            }
-        })
-    }
-
     /** Sends an email message from the [SudoEmailClient]. */
     private fun sendEmailMessage() {
         if (validateFormData()) {
@@ -203,17 +206,19 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.sending)
                 withContext(Dispatchers.IO) {
-                    val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
-                        from = emailAddress,
-                        to = addressesToArray(binding.toTextView.text.toString()),
-                        cc = addressesToArray(binding.ccTextView.text.toString()),
-                        bcc = addressesToArray(binding.bccTextView.text.toString()),
+                    val emailMessageHeader = InternetMessageFormatHeader(
+                        from = EmailMessage.EmailAddress(emailAddress),
+                        to = if (binding.toTextView.text.isNotEmpty()) addressesToArray(binding.toTextView.text.toString()) else emptyList(),
+                        cc = if (binding.ccTextView.text.isNotEmpty()) addressesToArray(binding.ccTextView.text.toString()) else emptyList(),
+                        bcc = if (binding.bccTextView.text.isNotEmpty()) addressesToArray(binding.bccTextView.text.toString()) else emptyList(),
+                        replyTo = emptyList(),
                         subject = binding.subjectTextView.text.toString(),
-                        body = binding.contentBody.text.toString(),
                     )
                     val input = SendEmailMessageInput(
-                        rfc822Data = rfc822Data,
                         senderEmailAddressId = emailAddressId,
+                        emailMessageHeader = emailMessageHeader,
+                        body = binding.contentBody.text.toString(),
+                        attachments = emailAttachmentList,
                     )
                     app.sudoEmailClient.sendEmailMessage(input)
                 }
@@ -226,7 +231,6 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                                 .actionSendEmailMessageFragmentToEmailMessagesFragment(
                                     emailAddress,
                                     emailAddressId,
-                                    args.sudo,
                                 ),
                         )
                     },
@@ -252,9 +256,12 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
                         from = emailAddress,
-                        to = addressesToArray(binding.toTextView.text.toString()),
-                        cc = addressesToArray(binding.ccTextView.text.toString()),
-                        bcc = addressesToArray(binding.bccTextView.text.toString()),
+                        to = addressesToArray(binding.toTextView.text.toString())
+                            .map { it.emailAddress },
+                        cc = addressesToArray(binding.ccTextView.text.toString())
+                            .map { it.emailAddress },
+                        bcc = addressesToArray(binding.bccTextView.text.toString())
+                            .map { it.emailAddress },
                         subject = binding.subjectTextView.text.toString(),
                         body = binding.contentBody.text.toString(),
                     )
@@ -283,7 +290,6 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                                 .actionSendEmailMessageFragmentToEmailMessagesFragment(
                                     emailAddress,
                                     emailAddressId,
-                                    args.sudo,
                                 ),
                         )
                     },
@@ -301,8 +307,15 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
     }
 
+    /** Validates submitted input form data. */
+    private fun validateFormData(): Boolean {
+        return binding.toTextView.text.isBlank()
+    }
+
     /**
      * Validates that an email address string is correctly formatted.
+     *
+     * @param address [String] The email address to validate.
      */
     private fun validateEmailAddress(address: String): Boolean {
         val addressSpecPattern = Pattern.compile("^.+@[^.].*\\.[a-z]{2,}$")
@@ -316,12 +329,14 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Transforms a string of comma-separated email addresses in a mutable list of email
-     * address strings.
+     * Transforms a string of comma-separated email addresses in a mutable list of
+     * [EmailMessage.EmailAddress].
+     *
+     * @param addresses [String] The comma-separated email addresses to transform.
      */
-    private fun addressesToArray(addresses: String): MutableList<String> {
-        val result: MutableList<String> = mutableListOf()
-        val split = addresses.split(",").map { it.trim() }
+    private fun addressesToArray(addresses: String): MutableList<EmailMessage.EmailAddress> {
+        val result: MutableList<EmailMessage.EmailAddress> = mutableListOf()
+        val split = addresses.split(",").map { EmailMessage.EmailAddress(it.trim()) }
         result.addAll(split)
         return result
     }
@@ -329,11 +344,13 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /**
      * Validates that a list of email addresses (in comma-separated string format) are
      * correctly formatted.
+     *
+     * @param addresses [String] The comma-separated email addresses to validate.
      */
     private fun validateEmailAddressList(addresses: String): Boolean {
         val addressesArray = addressesToArray(addresses)
         for (address in addressesArray) {
-            if (!validateEmailAddress(address)) {
+            if (!validateEmailAddress(address.emailAddress)) {
                 return false
             }
         }
@@ -341,12 +358,17 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         return true
     }
 
-    private suspend fun validateEncryptedEmailAddresses(addressesInput: String): Boolean {
-        if (!validateEmailAddressList(addressesInput)) {
+    /**
+     * Validates whether the input email address exist within the platform.
+     *
+     * @param addresses [String] The comma-separated email addresses to validate.
+     */
+    private suspend fun validateEncryptedEmailAddresses(addresses: String): Boolean {
+        if (!validateEmailAddressList(addresses)) {
             return false
         }
 
-        val emailAddresses = addressesToArray(addressesInput)
+        val emailAddresses = addressesToArray(addresses).map { it.emailAddress }
         val input = LookupEmailAddressesPublicInfoInput(emailAddresses)
 
         val emailAddressesPublicInfo = withContext(Dispatchers.IO) {
@@ -359,6 +381,34 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
 
         return result
+    }
+
+    /**
+     * Configures a listener on the recipient input fields.
+     */
+    private fun configureFieldListener(textView: TextView, fieldName: String) {
+        textView.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) { /* no-op */ }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { /* no-op */ }
+            var timer = Timer()
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                hideEncryptedIndicatorView()
+                timer.cancel()
+                timer = Timer()
+                timer.schedule(
+                    object : TimerTask() {
+                        override fun run() {
+                            handleEncryptedIndicatorView(
+                                addresses = s?.toString() ?: "",
+                                fieldName = fieldName,
+                            )
+                        }
+                    },
+                    CHECK_DELAY,
+                )
+                encryptedEmailAddressLookupTimer = timer
+            }
+        })
     }
 
     /**
@@ -396,23 +446,143 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
     }
 
-    /** Shows the encrypted indicator view. */
-    private fun showEncryptedIndicatorView() {
-        if (binding.encryptedIndicator.visibility == View.GONE) {
-            binding.encryptedIndicator.visibility = View.VISIBLE
+    /** Launches the Android Storage access to select a file for an attachment. */
+    private fun launchFilePicker() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+        filePicker.launch(intent)
+    }
+
+    private val filePicker = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            data?.data?.let { uri ->
+                val contentId = UUID.randomUUID().toString()
+                val fileName = getAttachmentFileName(uri)
+                val mimeType = getAttachmentMimeType(uri)
+                val attachmentData = getAttachmentData(uri)
+
+                val attachment = EmailAttachment(
+                    fileName = fileName,
+                    contentId = contentId,
+                    mimeType = mimeType,
+                    inlineAttachment = false,
+                    data = attachmentData,
+                )
+                emailAttachmentList.add(attachment)
+                attachmentsAdapter.notifyDataSetChanged()
+            }
         }
     }
 
-    /** Hides the encrypted indicator view. */
-    private fun hideEncryptedIndicatorView() {
-        if (binding.encryptedIndicator.visibility == View.VISIBLE) {
-            binding.encryptedIndicator.visibility = View.GONE
+    /**
+     * Returns the name of the file selected from the file picker.
+     *
+     * @param uri [Uri] The URI of the selected file.
+     */
+    private fun getAttachmentFileName(uri: Uri): String {
+        var result: String? = null
+        if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            context?.contentResolver?.query(
+                uri,
+                null,
+                null,
+                null,
+                null,
+            )?.use {
+                if (it.moveToFirst()) {
+                    result = it.getString(it.getColumnIndexOrThrow("_display_name"))
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != -1) {
+                result = result?.substring(cut!! + 1)
+            }
+        }
+        return result ?: "unknown"
+    }
+
+    /**
+     * Returns the MIME type of the file selected from the file picker.
+     *
+     * @param uri [Uri] The URI of the selected file.
+     */
+    private fun getAttachmentMimeType(uri: Uri): String {
+        return if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            context?.contentResolver?.getType(uri) ?: ""
+        } else {
+            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString())
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                fileExtension.lowercase(Locale.ROOT),
+            ) ?: ""
         }
     }
 
-    /** Validates submitted input form data. */
-    private fun validateFormData(): Boolean {
-        return binding.toTextView.text.isBlank()
+    /**
+     * Returns the data of the file selected from the file picker in bytes.
+     *
+     * @param uri [Uri] The URI of the selected file.
+     */
+    private fun getAttachmentData(uri: Uri): ByteArray {
+        var bytes: ByteArray = byteArrayOf()
+        val inputStream = context?.contentResolver?.openInputStream(uri)
+        inputStream?.use {
+            bytes = it.readBytes()
+        }
+        return bytes
+    }
+
+    /**
+     * Configures the [RecyclerView] used to display the listed [EmailAttachment] items and listens
+     * to item select events to launch the Android file viewer.
+     */
+    private fun configureRecyclerView() {
+        attachmentsAdapter = EmailAttachmentAdapter(emailAttachmentList) { emailAttachment ->
+            val fileName = emailAttachment.fileName
+            val mimeType = emailAttachment.mimeType
+            val data = emailAttachment.data
+
+            val file = File.createTempFile(fileName, null)
+            FileOutputStream(file).use { it.write(data) }
+
+            val contentUri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().packageName + ".fileprovider",
+                file,
+            )
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                setDataAndType(contentUri, mimeType)
+            }
+            startActivity(intent)
+        }
+
+        binding.emailAttachmentRecyclerView.adapter = attachmentsAdapter
+        binding.emailAttachmentRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        configureSwipeToDelete()
+    }
+
+    /**
+     * Configures the swipe to delete action by listening to [RecyclerView.ViewHolder] swipe events
+     * and drawing the swipe view and delete icon.
+     *
+     * Swiping in from the left will perform a delete operation and remove the item from the view.
+     */
+    private fun configureSwipeToDelete() {
+        val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onSwiped)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.emailAttachmentRecyclerView)
+    }
+
+    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        emailAttachmentList.removeAt(viewHolder.adapterPosition)
+        attachmentsAdapter.notifyItemRemoved(viewHolder.adapterPosition)
     }
 
     /**
@@ -465,6 +635,20 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         binding.bccTextView.isEnabled = isEnabled
         binding.subjectTextView.isEnabled = isEnabled
         binding.contentBody.isEnabled = isEnabled
+    }
+
+    /** Shows the encrypted indicator view. */
+    private fun showEncryptedIndicatorView() {
+        if (binding.encryptedIndicator.visibility == View.GONE) {
+            binding.encryptedIndicator.visibility = View.VISIBLE
+        }
+    }
+
+    /** Hides the encrypted indicator view. */
+    private fun hideEncryptedIndicatorView() {
+        if (binding.encryptedIndicator.visibility == View.VISIBLE) {
+            binding.encryptedIndicator.visibility = View.GONE
+        }
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

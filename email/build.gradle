@@ -1,11 +1,12 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+
 buildscript {
     ext {
-        agp_version = '8.1.1'
+        agp_version = "8.2.2"
     }
     ext.kotlin_version = "1.8.20"
-    ext.nav_version = "2.5.3"
+    ext.nav_version = "2.6.0"
     repositories {
         maven { url = "https://plugins.gradle.org/m2" }
         google()
@@ -16,6 +17,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jmailen.gradle:kotlinter-gradle:3.16.0"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+        classpath "com.google.gms:google-services:4.4.1"
         if (project.file("${rootProject.projectDir}/util/vulnerability-scan.gradle").exists()) {
             classpath "org.owasp:dependency-check-gradle:8.2.1"
         }
@@ -27,6 +29,21 @@ buildscript {
     }
 }
 
+plugins {
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.9.23"
+}
+
+if (project.hasProperty("ossIndexUsername")) {
+    ext["ossIndexUsername"] = "$ossIndexUsername"
+} else {
+    ext["ossIndexUsername"] = ""
+}
+
+if (project.hasProperty("ossIndexPassword")) {
+    ext["ossIndexPassword"] = "$ossIndexPassword"
+} else {
+    ext["ossIndexPassword"] = ""
+}
 allprojects {
     repositories {
         google()
@@ -50,6 +67,6 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

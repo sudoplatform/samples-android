@@ -15,6 +15,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
+import com.sudoplatform.emailexample.emailaddressblocklist.emailAddressBlocklist
 
 fun emailMessages(func: EmailMessagesRobot.() -> Unit) = EmailMessagesRobot().apply { func() }
 
@@ -74,6 +75,15 @@ class EmailMessagesRobot : BaseRobot() {
     fun clickEmailFolderSpinner(folderName: String) {
         clickOnView(dropdownSpinner)
         onView(withText(folderName)).perform(click())
+    }
+
+    fun navigateToBlocklistScreen() {
+        Thread.sleep(1_000L)
+        clickEmailFolderSpinner("BLOCKLIST")
+        emailAddressBlocklist {
+            waitForLoading()
+            checkEmailAddressBlocklistItemsDisplayed()
+        }
     }
 
     fun swipeLeftToDelete(position: Int) {

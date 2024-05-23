@@ -87,15 +87,20 @@
     <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
     <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
 
+    <!-- EmailAddressSettingsFragment.kt -->
+    <string name="loading_email_address_settings">Loading settings</string>
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="email_address_settings">Email Address Settings</string>
+    <string name="load_email_address_settings_failure">Failed to load email address settings</string>
+
     <!-- BlockedAddressesFragment.kt -->
     <string name="blocked_addresses">Blocked Addresses</string>
+    <string name="loading_address_blocklist">Loading Email Address Blocklist</string>
     <string name="list_blocked_addresses_failure">Failed to list blocked addresses</string>
-    <string name="blocking_address">Blocking email address</string>
+    <string name="blocking_address">Blocking email address&#8230;</string>
     <string name="unblocking_addresses">Unblocking email address(es)</string>
     <string name="unblock_addresses_failure">Failed to unblock addresses</string>
     <string name="block_address_failure">Failed to block address</string>
-    <string name="block_address_success">Address Blocked!</string>
-    <string name="continue_message">Continue</string>
 
     <!-- SendEmailMessageFragment.kt -->
     <string name="to">To:&#xA0;&#xA0;</string>
@@ -116,6 +121,7 @@
     <string name="reply_body">\n\n---------------\n\n%1$s</string>
     <string name="encrypted_indicator_label">🔒 End-to-end encrypted</string>
     <string name="encrypted_email_address_lookup_failure">Failed to lookup email address encryption status</string>
+    <string name="file_size">%1$s KB</string>
 
     <!-- ReadEmailMessageFragment.kt -->
     <string name="read_email_message">Read Email Message</string>

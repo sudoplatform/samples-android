@@ -6,26 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".addressblocklist.AddressBlocklistFragment">
+    tools:context=".emailaddressblocklist.EmailAddressBlocklistFragment">
 
     <include
         android:id="@+id/toolbar"
         layout="@layout/layout_toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <RelativeLayout
-        android:id="@+id/filter"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@android:color/white"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
-
-    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -43,7 +30,7 @@
         android:id="@+id/progressText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/blocked_addresses"
+        android:text="@string/loading_address_blocklist"
         android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:visibility="gone"
@@ -60,7 +47,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filter">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/blockedAddressesRecyclerView"

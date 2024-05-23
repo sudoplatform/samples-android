@@ -55,7 +55,7 @@ class SwipeLeftActionHelper(
         )
 
         val itemView = viewHolder.itemView
-        val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_delete_black_36dp)!!
+        val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_delete_36px)!!
         val background = ColorDrawable(Color.RED)
 
         background.setBounds(

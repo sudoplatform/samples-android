@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 
 android {
     compileSdk 34
@@ -12,7 +14,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 33
         versionCode 1
-        versionName "6.0.0"
+        versionName "8.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -53,31 +55,36 @@ android {
 
 dependencies {
 
-    implementation 'com.sudoplatform:sudouser:18.0.0'
+    implementation 'com.sudoplatform:sudouser:18.0.1'
     implementation 'com.sudoplatform:sudoprofiles:14.0.0'
     implementation 'com.sudoplatform:sudoentitlements:10.0.0'
-    implementation 'com.sudoplatform:sudoemail:9.1.0'
+    implementation 'com.sudoplatform:sudonotification:2.0.0'
+    implementation 'com.sudoplatform:sudoemail:14.0.0'
+
+    implementation platform('com.google.firebase:firebase-bom:32.8.1')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
 
-    def coroutine_version = '1.7.3'
+    def coroutine_version = '1.8.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    def fragment_version = "1.5.5"
+    def fragment_version = "1.6.2"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.google.android.material:material:1.6.1'
 
     implementation 'com.sun.mail:jakarta.mail:2.0.1'
     implementation 'com.sun.activation:jakarta.activation:2.0.1'
+    implementation 'org.jsoup:jsoup:1.15.4'
 
     def androidxTest = '1.5.0'
     def espresso = "3.3.0"

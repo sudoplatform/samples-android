@@ -143,7 +143,15 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                                 .actionEmailMessagesFragmentToSendEmailMessageFragment(
                                     emailAddress,
                                     emailAddressId,
-                                    args.sudo,
+                                ),
+                        )
+                    }
+                    R.id.settings -> {
+                        navController.navigate(
+                            EmailMessagesFragmentDirections
+                                .actionEmailMessagesFragmentToEmailAddressSettingsFragment(
+                                    emailAddress,
+                                    emailAddressId,
                                 ),
                         )
                     }
@@ -182,6 +190,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
 
     override fun onResume() {
         super.onResume()
+        binding.foldersSpinner.setSelection(0)
         subscribeToEmailMessages()
     }
 
@@ -219,7 +228,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
-            binding.filter.visibility = View.VISIBLE
+            if (bindingDelegate.isAttached()) {
+                binding.filter.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -490,7 +501,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToSendEmailMessageFragment(
                         emailAddress,
                         emailAddressId,
-                        args.sudo,
                         emailMessage,
                         emailMessageWithBody = draftEmailMessageList.find { it.id === emailMessage.id },
                     ),
@@ -501,7 +511,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                         emailAddress,
                         emailAddressId,
                         emailMessage,
-                        args.sudo,
                     ),
                 )
             }
@@ -580,33 +589,35 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
 
     /** Sets the selected folder type. */
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        val item = parent.getItemAtPosition(pos)
-        if (item == FolderTypes.BLOCKLIST.toString()) {
-            navController.navigate(
-                EmailMessagesFragmentDirections
-                    .actionEmailMessagesFragmentToAddressBlocklistFragment(
-                        args.sudo,
-                        emailAddressId,
-                        emailAddress,
-                    ),
-            )
-        } else if (item == FolderTypes.DRAFTS.toString()) {
-            selectedEmailFolder = EmailFolder(
-                id = "DRAFT_FOLDER",
-                owner = "draftEmailOwnerId",
-                owners = listOf(Owner("draftOwnerEmailId", "DRAFT")),
-                emailAddressId = emailAddressId,
-                folderName = FolderTypes.DRAFTS.toString(),
-                size = 1.0,
-                unseenCount = 1,
-                version = 1,
-                createdAt = Date(),
-                updatedAt = Date(),
-            )
-            listEmailMessages(item.toString(), CachePolicy.CACHE_ONLY)
-        } else {
-            selectedEmailFolder = emailFoldersList.find { it.folderName == item.toString() }!!
-            listEmailMessages(selectedEmailFolder.id, CachePolicy.REMOTE_ONLY)
+        when (val item = parent.getItemAtPosition(pos)) {
+            FolderTypes.BLOCKLIST.toString() -> {
+                navController.navigate(
+                    EmailMessagesFragmentDirections
+                        .actionEmailMessagesFragmentToAddressBlocklistFragment(
+                            emailAddressId,
+                            emailAddress,
+                        ),
+                )
+            }
+            FolderTypes.DRAFTS.toString() -> {
+                selectedEmailFolder = EmailFolder(
+                    id = "DRAFT_FOLDER",
+                    owner = "draftEmailOwnerId",
+                    owners = listOf(Owner("draftOwnerEmailId", "DRAFT")),
+                    emailAddressId = emailAddressId,
+                    folderName = FolderTypes.DRAFTS.toString(),
+                    size = 1.0,
+                    unseenCount = 1,
+                    version = 1,
+                    createdAt = Date(),
+                    updatedAt = Date(),
+                )
+                listEmailMessages(item.toString(), CachePolicy.CACHE_ONLY)
+            }
+            else -> {
+                selectedEmailFolder = emailFoldersList.find { it.folderName == item.toString() }!!
+                listEmailMessages(selectedEmailFolder.id, CachePolicy.REMOTE_ONLY)
+            }
         }
     }
 
@@ -617,7 +628,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     /** Retrieves the list of [DraftEmailMessageMetadata] for the email address */
     private suspend fun retrieveDraftEmailMessages(): List<DraftEmailMessageWithContent> {
         val draftEmailMessagesMetadata =
-            app.sudoEmailClient.listDraftEmailMessageMetadata(emailAddressId)
+            app.sudoEmailClient.listDraftEmailMessageMetadataForEmailAddressId(emailAddressId)
 
         return draftEmailMessagesMetadata.map { draftMetadata ->
             app.sudoEmailClient.getDraftEmailMessage(

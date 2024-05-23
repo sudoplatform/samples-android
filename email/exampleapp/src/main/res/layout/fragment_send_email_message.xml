@@ -184,6 +184,14 @@
 
         </EditText>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/emailAttachmentRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

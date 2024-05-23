@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.addressblocklist
+package com.sudoplatform.emailexample.emailaddressblocklist
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,17 +18,17 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
-import com.sudoplatform.emailexample.databinding.FragmentAddressBlocklistBinding
+import com.sudoplatform.emailexample.databinding.FragmentEmailAddressBlocklistBinding
+import com.sudoplatform.emailexample.emailmessages.EmailMessagesFragment
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoapiclient.sudoApiClientLogger
 import com.sudoplatform.sudoemail.SudoEmailClient
-import com.sudoplatform.sudoemail.types.BatchOperationResult
 import com.sudoplatform.sudoemail.types.BatchOperationStatus
 import com.sudoplatform.sudoemail.types.UnsealedBlockedAddressStatus
-import com.sudoplatform.sudoprofiles.Sudo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -37,7 +37,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-class AddressBlocklistFragment : Fragment(), CoroutineScope {
+/**
+ * This [EmailAddressBlocklistFragment] presents a list of blocked email addresses.
+ *
+ * - Links From:
+ *  - [EmailMessagesFragment]: A user chooses selects the "Blocklist" option in the drop down menu.
+ */
+class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
+
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -47,53 +54,47 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentAddressBlocklistBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentEmailAddressBlocklistBinding>()
     private val binding by bindingDelegate
 
-    /** Toolbar [Menu] displaying title and block and reply buttons. */
+    /** Toolbar [Menu] displaying title and delete button. */
     private lateinit var toolbarMenu: Menu
+
+    /** A reference to the [RecyclerView.Adapter] handling blocked email address data. */
+    private lateinit var adaptor: EmailAddressBlocklistAdaptor
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
     private var loading: AlertDialog? = null
 
-    private lateinit var adaptor: AddressBlocklistAdaptor
-
+    /** A mutable list of blocked email addresses. */
     private var blockedAddressesList = mutableListOf<String>()
 
+    /** A mutable list of the selected blocked email addresses. */
     private var selectedBlockedAddresses = mutableListOf<String>()
 
-    private val args: AddressBlocklistFragmentArgs by navArgs()
+    /** Fragment arguments handled by Navigation Library safe args */
+    private val args: EmailAddressBlocklistFragmentArgs by navArgs()
 
-    private lateinit var sudo: Sudo
-
+    /** Email address identifier belonging to the blocked email address. */
     private lateinit var emailAddressId: String
 
+    /** Reference to a blocked email address. */
     private lateinit var emailAddress: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
-        bindingDelegate.attach(FragmentAddressBlocklistBinding.inflate(inflater, container, false))
+    ): View {
+        bindingDelegate.attach(FragmentEmailAddressBlocklistBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.blocked_addresses)
-            inflateMenu(R.menu.nav_menu_with_back_delete_buttons)
+            inflateMenu(R.menu.nav_menu_with_delete_button)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.delete -> {
                         // Unblock selected addresses
                         unblockEmailAddresses(selectedBlockedAddresses)
-                    }
-                    R.id.back -> {
-                        navController.navigate(
-                            AddressBlocklistFragmentDirections
-                                .actionAddressBlocklistFragmentToEmailMessagesFragment(
-                                    emailAddress,
-                                    emailAddressId,
-                                    sudo,
-                                ),
-                        )
                     }
                 }
                 true
@@ -101,7 +102,6 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
             toolbarMenu = menu
         }
         app = requireActivity().application as App
-        sudo = args.sudo
         emailAddressId = args.emailAddressId
         emailAddress = args.emailAddress
         return binding.root
@@ -112,7 +112,7 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
         configureRecyclerView()
         navController = Navigation.findNavController(view)
 
-        listBlockedEmails()
+        listBlockedEmailAddresses()
     }
 
     override fun onDestroy() {
@@ -123,19 +123,14 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
         super.onDestroy()
     }
 
-    /**
-     * List blocked email addresses from the [SudoEmailClient]
-     */
-    private fun listBlockedEmails() {
-        sudoApiClientLogger.debug("listBlockedEmails init. List $blockedAddressesList has ${blockedAddressesList.size} items")
+    /** List blocked email addresses from the [SudoEmailClient]. */
+    private fun listBlockedEmailAddresses() {
         launch {
-            showLoading()
-
             try {
+                showLoading()
                 val blockedAddresses = withContext(Dispatchers.IO) {
                     app.sudoEmailClient.getEmailAddressBlocklist()
                 }
-                sudoApiClientLogger.debug("Returned ${blockedAddresses.size} items")
                 blockedAddressesList.clear()
                 val cleartextAddresses = mutableListOf<String>()
                 for (blockedAddress in blockedAddresses) {
@@ -153,38 +148,35 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.list_blocked_addresses_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listBlockedEmails() },
+                    onPositive = { listBlockedEmailAddresses() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
-            binding.filter.visibility = View.VISIBLE
             hideLoading()
-            sudoApiClientLogger.debug("listBlockedEmails finish. List $blockedAddressesList has ${blockedAddressesList.size} items")
         }
     }
 
     /**
-     * Unblocks the given email addresses
+     * Unblocks the given email addresses from the [SudoEmailClient].
+     *
+     * @param addresses [List<String>] The list of email addresses to unblock.
      */
     private fun unblockEmailAddresses(addresses: List<String>) {
         launch {
             showLoading(R.string.unblocking_addresses)
             try {
-                when (val response = app.sudoEmailClient.unblockEmailAddresses(addresses)) {
-                    is BatchOperationResult.SuccessOrFailureResult -> {
-                        if (response.status === BatchOperationStatus.SUCCESS) {
-                            blockedAddressesList.removeAll(addresses)
-                        } else {
-                            showAlertDialog(
-                                titleResId = R.string.unblock_addresses_failure,
-                                message = "Something went wrong.",
-                                positiveButtonResId = R.string.try_again,
-                                onPositive = { unblockEmailAddresses(addresses) },
-                                negativeButtonResId = android.R.string.cancel,
-                            )
-                        }
-                    } is BatchOperationResult.PartialResult -> {
-                        blockedAddressesList.removeAll(response.successValues)
+                val response = app.sudoEmailClient.unblockEmailAddresses(addresses)
+                when (response.status) {
+                    BatchOperationStatus.SUCCESS -> blockedAddressesList.removeAll(addresses)
+                    BatchOperationStatus.PARTIAL -> response.successValues?.let { blockedAddressesList.removeAll(it) }
+                    else -> {
+                        showAlertDialog(
+                            titleResId = R.string.unblock_addresses_failure,
+                            message = getString(R.string.something_wrong),
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { unblockEmailAddresses(addresses) },
+                            negativeButtonResId = android.R.string.cancel,
+                        )
                     }
                 }
                 adaptor.notifyDataSetChanged()
@@ -193,13 +185,12 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.unblock_addresses_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listBlockedEmails() },
+                    onPositive = { unblockEmailAddresses(addresses) },
                     negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideLoading()
             }
-            binding.filter.visibility = View.VISIBLE
         }
     }
 
@@ -234,8 +225,12 @@ class AddressBlocklistFragment : Fragment(), CoroutineScope {
         binding.blockedAddressesRecyclerView.isEnabled = isEnabled
     }
 
+    /**
+     * Configures the [RecyclerView] used to display the listed blocked email address items and
+     * listens to item select events.
+     */
     private fun configureRecyclerView() {
-        adaptor = AddressBlocklistAdaptor(blockedAddressesList) { selected, address ->
+        adaptor = EmailAddressBlocklistAdaptor(blockedAddressesList) { selected, address ->
             if (selected) {
                 selectedBlockedAddresses.add(address)
             } else {

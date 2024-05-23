@@ -6,6 +6,7 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.LayoutInflater
@@ -14,31 +15,35 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
 import com.sudoplatform.emailexample.databinding.FragmentReadEmailMessageBinding
+import com.sudoplatform.emailexample.emailmessages.emailAttachments.EmailAttachmentAdapter
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.util.ObjectDelegate
-import com.sudoplatform.emailexample.util.Rfc822MessageParser
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
-import com.sudoplatform.sudoapiclient.sudoApiClientLogger
 import com.sudoplatform.sudoemail.SudoEmailClient
-import com.sudoplatform.sudoemail.types.BatchOperationResult
 import com.sudoplatform.sudoemail.types.BatchOperationStatus
+import com.sudoplatform.sudoemail.types.EmailAttachment
 import com.sudoplatform.sudoemail.types.EmailMessage
-import com.sudoplatform.sudoemail.types.inputs.GetEmailMessageRfc822DataInput
-import com.sudoplatform.sudoprofiles.Sudo
+import com.sudoplatform.sudoemail.types.inputs.GetEmailMessageWithBodyInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jsoup.Jsoup
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Date
 import kotlin.coroutines.CoroutineContext
 
@@ -68,7 +73,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     private val bindingDelegate = ObjectDelegate<FragmentReadEmailMessageBinding>()
     private val binding by bindingDelegate
 
-    /** Toolbar [Menu] displaying title and block and reply buttons. */
+    /** Toolbar [Menu] displaying title, block and reply buttons. */
     private lateinit var toolbarMenu: Menu
 
     /** An [AlertDialog] used to indicate that an operation is occurring. */
@@ -76,6 +81,9 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
 
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: ReadEmailMessageFragmentArgs by navArgs()
+
+    /** A reference to the [RecyclerView.Adapter] handling [EmailAttachment] data. */
+    private lateinit var attachmentsAdapter: EmailAttachmentAdapter
 
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
@@ -89,7 +97,8 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /** The simplified email message containing the body. */
     private lateinit var emailMessageWithBody: SimplifiedEmailMessage
 
-    private lateinit var sudo: Sudo
+    /** A mutable list of [EmailAttachment]s. */
+    private val emailAttachmentList: MutableList<EmailAttachment> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,14 +117,12 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                                 .actionReadEmailMessageFragmentToSendEmailMessageFragment(
                                     emailAddress,
                                     emailAddressId,
-                                    args.sudo,
                                     emailMessage,
                                     emailMessageWithBody,
                                 ),
                         )
                     }
                     R.id.block -> {
-                        sudoApiClientLogger.info("Block clicked")
                         blockEmailAddress(emailMessage.from[0].emailAddress)
                     }
                 }
@@ -127,7 +134,6 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         emailAddress = args.emailAddress
         emailAddressId = args.emailAddressId
         emailMessage = args.emailMessage
-        sudo = args.sudo
         return binding.root
     }
 
@@ -151,15 +157,29 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading(R.string.reading)
-                val input = GetEmailMessageRfc822DataInput(
+                val input = GetEmailMessageWithBodyInput(
                     id = emailMessage.id,
                     emailAddressId = emailAddressId,
                 )
-                val rfc822Data = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.getEmailMessageRfc822Data(input)
+                val body = withContext(Dispatchers.IO) {
+                    app.sudoEmailClient.getEmailMessageWithBody(input)
                 }
-                if (rfc822Data != null) {
-                    emailMessageWithBody = Rfc822MessageParser.parseRfc822Data(rfc822Data.rfc822Data)
+                if (body != null) {
+                    val renderedBody = if (body.isHtml) {
+                        Jsoup.parse(body.body).text()
+                    } else {
+                        body.body
+                    }
+                    emailMessageWithBody = SimplifiedEmailMessage(
+                        id = body.id,
+                        from = emailMessage.from.map { it.toString() },
+                        to = emailMessage.to.map { it.toString() },
+                        cc = emailMessage.cc.map { it.toString() },
+                        bcc = emailMessage.bcc.map { it.toString() },
+                        subject = emailMessage.subject ?: "<No subject>",
+                        body = renderedBody,
+                    )
+                    emailAttachmentList.addAll(body.attachments)
                     configureEmailMessageContents(emailMessage)
                 }
             } catch (e: SudoEmailClient.EmailMessageException) {
@@ -175,40 +195,35 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         }
     }
 
-    /**
-     *
-     */
+    /** Blocks the current recipient email address from the [SudoEmailClient]. */
     private fun blockEmailAddress(address: String) {
         launch {
             try {
                 showLoading(R.string.blocking_address)
-                when (val response = app.sudoEmailClient.blockEmailAddresses(listOf(address))) {
-                    is BatchOperationResult.SuccessOrFailureResult -> {
-                        if (response.status === BatchOperationStatus.SUCCESS) {
-                            showAlertDialog(
-                                titleResId = R.string.block_address_success,
-                                positiveButtonResId = R.string.continue_message,
-                                onPositive = {
-                                    navController.navigate(
-                                        ReadEmailMessageFragmentDirections.actionReadEmailMessageFragmentToEmailMessagesFragment(
-                                            emailAddress,
-                                            emailAddressId,
-                                            sudo,
-                                        ),
-                                    )
-                                },
-                            )
-                        } else {
-                            showAlertDialog(
-                                titleResId = R.string.block_address_failure,
-                                message = "Something went wrong.",
-                                positiveButtonResId = R.string.try_again,
-                                onPositive = { blockEmailAddress(address) },
-                                negativeButtonResId = android.R.string.cancel,
-                            )
-                        }
-                    } is BatchOperationResult.PartialResult -> {
-                        // no-op
+                val response = app.sudoEmailClient.blockEmailAddresses(listOf(address))
+                when (response.status) {
+                    BatchOperationStatus.SUCCESS -> {
+                        showAlertDialog(
+                            titleResId = R.string.success,
+                            positiveButtonResId = android.R.string.ok,
+                            onPositive = {
+                                navController.navigate(
+                                    ReadEmailMessageFragmentDirections.actionReadEmailMessageFragmentToEmailMessagesFragment(
+                                        emailAddress,
+                                        emailAddressId,
+                                    ),
+                                )
+                            },
+                        )
+                    }
+                    else -> {
+                        showAlertDialog(
+                            titleResId = R.string.block_address_failure,
+                            message = getString(R.string.something_wrong),
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { blockEmailAddress(address) },
+                            negativeButtonResId = android.R.string.cancel,
+                        )
                     }
                 }
             } catch (e: SudoEmailClient.EmailBlocklistException) {
@@ -231,12 +246,42 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
      * @param emailMessage [EmailMessage] Email message to configure the view with.
      */
     private fun configureEmailMessageContents(emailMessage: EmailMessage) {
+        configureRecyclerView()
         binding.dateValue.text = formatDate(emailMessage.createdAt)
         binding.fromValue.text = if (emailMessage.from.isNotEmpty()) emailMessage.from.first().toString() else ""
         binding.toValue.text = if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") else ""
         binding.ccValue.text = if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") else ""
         binding.subject.text = emailMessage.subject
         binding.contentBody.text = emailMessageWithBody.body
+    }
+
+    /**
+     * Configures the [RecyclerView] used to display the listed [EmailAttachment] items and listens
+     * to item select events to launch the Android file viewer.
+     */
+    private fun configureRecyclerView() {
+        attachmentsAdapter = EmailAttachmentAdapter(emailAttachmentList) { emailAttachment ->
+            val fileName = emailAttachment.fileName
+            val mimeType = emailAttachment.mimeType
+            val data = emailAttachment.data
+
+            val file = File.createTempFile(fileName, null)
+            FileOutputStream(file).use { it.write(data) }
+
+            val contentUri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().packageName + ".fileprovider",
+                file,
+            )
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                setDataAndType(contentUri, mimeType)
+            }
+            startActivity(intent)
+        }
+
+        binding.emailAttachmentRecyclerView.adapter = attachmentsAdapter
+        binding.emailAttachmentRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
     /**

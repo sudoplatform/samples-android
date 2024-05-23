@@ -210,7 +210,6 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                         .actionEmailAddressesFragmentToEmailMessagesFragment(
                             emailAddress.emailAddress,
                             emailAddress.id,
-                            sudo,
                         ),
                 )
             }

@@ -142,6 +142,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             binding.buttonSignOut.setOnClickListener {
                 launch {
                     withContext(Dispatchers.IO) {
+                        app.notificationHandler.unregister()
                         if (app.sudoUserClient.isRegistered()) {
                             app.sudoUserClient.deregister()
                         }
@@ -166,6 +167,9 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                         setUsedFssoFlag(true)
                         launch {
                             redeemEntitlements()
+                            withContext(Dispatchers.IO) {
+                                app.notificationHandler.register()
+                            }
                             navController.navigate(
                                 RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                             )
@@ -180,6 +184,9 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             if (app.sudoUserClient.isSignedIn()) {
                 launch {
                     redeemEntitlements()
+                    withContext(Dispatchers.IO) {
+                        app.notificationHandler.register()
+                    }
                     navController.navigate(
                         RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                     )
@@ -247,25 +254,33 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         if (app.sudoUserClient.isSignedIn()) {
             launch {
                 redeemEntitlements()
-            }
-            return
-        }
-        launch {
-            try {
                 withContext(Dispatchers.IO) {
-                    app.sudoUserClient.signInWithKey()
+                    app.notificationHandler.register()
                 }
-                setUsedFssoFlag(false)
-                launch {
-                    redeemEntitlements()
-                    navController.navigate(
-                        RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
-                    )
+            }
+        } else {
+            launch {
+                try {
+                    withContext(Dispatchers.IO) {
+                        app.sudoUserClient.signInWithKey()
+                        app.notificationHandler.register()
+                    }
+                    setUsedFssoFlag(false)
+                    launch {
+                        redeemEntitlements()
+                        navController.navigate(
+                            RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
+                        )
+                    }
+                } catch (e: AuthenticationException) {
+                    hideLoading()
+                    setItemsEnabled(true)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.signin_failure, e.localizedMessage),
+                        Toast.LENGTH_LONG,
+                    ).show()
                 }
-            } catch (e: AuthenticationException) {
-                hideLoading()
-                setItemsEnabled(true)
-                Toast.makeText(requireContext(), getString(R.string.signin_failure, e.localizedMessage), Toast.LENGTH_LONG).show()
             }
         }
     }
