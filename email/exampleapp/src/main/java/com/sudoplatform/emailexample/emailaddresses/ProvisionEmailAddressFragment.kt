@@ -156,6 +156,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
             )
             return
         }
+        val alias = binding.aliasField.text.toString().trim()
         launch {
             try {
                 showLoading(R.string.provisioning_email_address)
@@ -164,6 +165,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                     withContext(Dispatchers.IO) {
                         val input = ProvisionEmailAddressInput(
                             emailAddress = address,
+                            alias = alias,
                             ownershipProofToken = ownershipProof,
                         )
                         app.sudoEmailClient.provisionEmailAddress(input)

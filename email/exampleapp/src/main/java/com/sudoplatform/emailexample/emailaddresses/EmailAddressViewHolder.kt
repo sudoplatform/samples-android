@@ -9,6 +9,7 @@ package com.sudoplatform.emailexample.emailaddresses
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.databinding.LayoutItemCellBinding
 import com.sudoplatform.sudoemail.types.EmailAddress
 
@@ -36,6 +37,14 @@ class EmailAddressViewHolder(private val binding: LayoutItemCellBinding) : Recyc
     }
 
     fun bind(emailAddress: EmailAddress) {
-        binding.name.text = emailAddress.emailAddress
+        if (emailAddress.alias != null) {
+            binding.name.text = binding.root.context.getString(
+                R.string.email_address_with_alias,
+                emailAddress.alias,
+                emailAddress.emailAddress,
+            )
+        } else {
+            binding.name.text = emailAddress.emailAddress
+        }
     }
 }

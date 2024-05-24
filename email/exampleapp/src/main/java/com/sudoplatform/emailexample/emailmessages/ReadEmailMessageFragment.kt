@@ -88,6 +88,9 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
 
+    /** Email alias associated with the Email Address. */
+    private lateinit var emailAlias: String
+
     /** Email Address Identifier used to compose a reply email message. */
     private lateinit var emailAddressId: String
 
@@ -115,10 +118,11 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                         navController.navigate(
                             ReadEmailMessageFragmentDirections
                                 .actionReadEmailMessageFragmentToSendEmailMessageFragment(
-                                    emailAddress,
-                                    emailAddressId,
-                                    emailMessage,
-                                    emailMessageWithBody,
+                                    emailAddress = emailAddress,
+                                    emailAlias = emailAlias,
+                                    emailAddressId = emailAddressId,
+                                    emailMessage = emailMessage,
+                                    emailMessageWithBody = emailMessageWithBody,
                                 ),
                         )
                     }
@@ -132,6 +136,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         }
         app = requireActivity().application as App
         emailAddress = args.emailAddress
+        emailAlias = args.emailAlias.toString()
         emailAddressId = args.emailAddressId
         emailMessage = args.emailMessage
         return binding.root
@@ -249,8 +254,8 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         configureRecyclerView()
         binding.dateValue.text = formatDate(emailMessage.createdAt)
         binding.fromValue.text = if (emailMessage.from.isNotEmpty()) emailMessage.from.first().toString() else ""
-        binding.toValue.text = if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") else ""
-        binding.ccValue.text = if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") else ""
+        binding.toValue.text = if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") { it.toString() } else ""
+        binding.ccValue.text = if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") { it.toString() } else ""
         binding.subject.text = emailMessage.subject
         binding.contentBody.text = emailMessageWithBody.body
     }

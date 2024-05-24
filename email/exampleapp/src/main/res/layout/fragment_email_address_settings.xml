@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".emailmessages.EmailAddressSettingsFragment">
+    tools:context=".emailmessages.settings.EmailAddressSettingsFragment">
 
     <include
         android:id="@+id/toolbar"
@@ -51,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/notifications_enabled" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

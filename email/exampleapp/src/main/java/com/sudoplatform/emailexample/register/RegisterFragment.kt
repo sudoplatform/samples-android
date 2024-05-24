@@ -156,7 +156,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             showLoading()
             launch {
                 val result = withContext(Dispatchers.IO) {
-                    suspendCoroutine<FederatedSignInResult> { cont ->
+                    suspendCoroutine { cont ->
                         app.sudoUserClient.processFederatedSignInTokens(federatedSignInUri) { result ->
                             cont.resume(result)
                         }

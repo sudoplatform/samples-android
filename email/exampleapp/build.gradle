@@ -14,7 +14,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 33
         versionCode 1
-        versionName "8.0.0"
+        versionName "15.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -59,7 +59,7 @@ dependencies {
     implementation 'com.sudoplatform:sudoprofiles:14.0.0'
     implementation 'com.sudoplatform:sudoentitlements:10.0.0'
     implementation 'com.sudoplatform:sudonotification:2.0.0'
-    implementation 'com.sudoplatform:sudoemail:14.0.0'
+    implementation 'com.sudoplatform:sudoemail:15.0.1'
 
     implementation platform('com.google.firebase:firebase-bom:32.8.1')
 

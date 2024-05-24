@@ -208,8 +208,9 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                 navController.navigate(
                     EmailAddressesFragmentDirections
                         .actionEmailAddressesFragmentToEmailMessagesFragment(
-                            emailAddress.emailAddress,
-                            emailAddress.id,
+                            emailAddress = emailAddress.emailAddress,
+                            emailAlias = emailAddress.alias,
+                            emailAddressId = emailAddress.id,
                         ),
                 )
             }

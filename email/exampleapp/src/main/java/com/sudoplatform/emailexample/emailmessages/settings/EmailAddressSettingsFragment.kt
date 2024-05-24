@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmessages
+package com.sudoplatform.emailexample.emailmessages.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,6 +21,7 @@ import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
 import com.sudoplatform.emailexample.databinding.FragmentEmailAddressSettingsBinding
+import com.sudoplatform.emailexample.emailmessages.EmailMessagesFragment
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
@@ -45,7 +46,7 @@ import kotlin.coroutines.CoroutineContext
  *
  * - Links From:
  *  - [EmailMessagesFragment]: If a user taps the "Settings" button on the top right of the toolbar,
- *   the [EmailAddressSettingsFragment] will be presented so that a user can manager their
+ *   the [EmailAddressSettingsFragment] will be presented so that a user can manage their
  *   notification settings.
  */
 class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
@@ -68,10 +69,7 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: EmailAddressSettingsFragmentArgs by navArgs()
 
-    /** Email Address used to compose a reply email message. */
-    private lateinit var emailAddress: String
-
-    /** Email Address Identifier used to compose a reply email message. */
+    /** Email Address Identifier used to identify and set the notification settings. */
     private lateinit var emailAddressId: String
 
     /** Current notification configuration */
@@ -84,11 +82,10 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
     ): View {
         bindingDelegate.attach(FragmentEmailAddressSettingsBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
-        emailAddress = args.emailAddress
         emailAddressId = args.emailAddressId
 
         val emServiceRules = app.notificationConfiguration.configs.filter { it.name == "emService" }
-        var isChecked = true
+        var isToggled = true
         if (emServiceRules.isNotEmpty()) {
             // Looking for an "==" rule where 1st arg is our emailAddressId {"==" : [ { "var" : "meta.emailAddressId" }, emailAddressId ] }
             for (rule in emServiceRules) {
@@ -102,19 +99,17 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
                     if (lhs is JsonObject && rhs is JsonPrimitive && rhs.isString) {
                         val v = lhs["var"]
                         if (v is JsonPrimitive && v.isString && v.content == "meta.emailAddressId" && rhs.content == emailAddressId) {
-                            isChecked = rule.status == NotificationConfiguration.ENABLE_STR
+                            isToggled = rule.status == NotificationConfiguration.ENABLE_STR
                             break
                         }
                     }
                 }
             }
         }
-        binding.notificationsEnabledSwitch.isChecked = isChecked
-
+        binding.notificationsEnabledSwitch.isChecked = isToggled
         binding.notificationsEnabledSwitch.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
             setNotificationsEnabledForEmailAddress(isChecked)
         }
-
         return binding.root
     }
 
@@ -133,11 +128,11 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
         super.onDestroy()
     }
 
-    /** Reads an email message from the [SudoEmailClient]. */
+    /** Reads the [NotificationConfiguration] from the [SudoEmailClient]. */
     private fun readNotificationConfiguration() {
         launch {
             try {
-                showLoading(R.string.reading)
+                showLoading(R.string.loading_email_address_settings)
 
                 notificationConfiguration = withContext(Dispatchers.IO) {
                     app.sudoNotificationClient.getNotificationConfiguration(app.deviceInfo)
@@ -155,6 +150,11 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
         }
     }
 
+    /**
+     * Sets whether the notifications are enabled for the selected email address.
+     *
+     * @param enabled [Boolean] Flag indicating whether notifications are enabled.
+     */
     private fun setNotificationsEnabledForEmailAddress(enabled: Boolean) {
         val newConfiguration =
             app.notificationConfiguration

@@ -112,6 +112,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
 
+    /** Email alias associated with the Email Address. */
+    private lateinit var emailAlias: String
+
     /** Email Address Identifier used to compose a reply email message. */
     private lateinit var emailAddressId: String
 
@@ -158,6 +161,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
         app = requireActivity().application as App
         emailAddress = args.emailAddress
+        emailAlias = args.emailAlias.toString()
         emailAddressId = args.emailAddressId
         return binding.root
     }
@@ -207,7 +211,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 showLoading(R.string.sending)
                 withContext(Dispatchers.IO) {
                     val emailMessageHeader = InternetMessageFormatHeader(
-                        from = EmailMessage.EmailAddress(emailAddress),
+                        from = EmailMessage.EmailAddress(emailAddress, emailAlias),
                         to = if (binding.toTextView.text.isNotEmpty()) addressesToArray(binding.toTextView.text.toString()) else emptyList(),
                         cc = if (binding.ccTextView.text.isNotEmpty()) addressesToArray(binding.ccTextView.text.toString()) else emptyList(),
                         bcc = if (binding.bccTextView.text.isNotEmpty()) addressesToArray(binding.bccTextView.text.toString()) else emptyList(),
@@ -257,11 +261,11 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
                         from = emailAddress,
                         to = addressesToArray(binding.toTextView.text.toString())
-                            .map { it.emailAddress },
+                            .map { it.toString() },
                         cc = addressesToArray(binding.ccTextView.text.toString())
-                            .map { it.emailAddress },
+                            .map { it.toString() },
                         bcc = addressesToArray(binding.bccTextView.text.toString())
-                            .map { it.emailAddress },
+                            .map { it.toString() },
                         subject = binding.subjectTextView.text.toString(),
                         body = binding.contentBody.text.toString(),
                     )
@@ -329,7 +333,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * Transforms a string of comma-separated email addresses in a mutable list of
+     * Transforms a string of comma-separated email addresses to a mutable list of
      * [EmailMessage.EmailAddress].
      *
      * @param addresses [String] The comma-separated email addresses to transform.
@@ -354,7 +358,6 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 return false
             }
         }
-
         return true
     }
 
@@ -596,8 +599,8 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         emailMessage: EmailMessage,
         emailMessageWithBody: SimplifiedEmailMessage,
     ) {
-        binding.toTextView.setText(if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") else "")
-        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") else "")
+        binding.toTextView.setText(if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") { it.toString() } else "")
+        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") { it.toString() } else "")
         binding.subjectTextView.setText(if (emailMessage.subject.isNullOrBlank()) "" else emailMessage.subject)
         binding.contentBody.setText(emailMessageWithBody.body)
     }
@@ -613,8 +616,8 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         emailMessage: EmailMessage,
         emailMessageWithBody: SimplifiedEmailMessage,
     ) {
-        binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString() else "")
-        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString() else "")
+        binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString { it.toString() } else "")
+        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString { it.toString() } else "")
         if (emailMessageWithBody.subject.startsWith("Re:")) {
             binding.subjectTextView.setText(emailMessage.subject)
         } else {

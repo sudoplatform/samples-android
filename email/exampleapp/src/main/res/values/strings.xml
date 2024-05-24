@@ -55,10 +55,12 @@
     <string name="list_email_addresses_failure">Failed to list email addresses</string>
     <string name="deleting_email_address">Deleting email address&#8230;</string>
     <string name="deleting_email_address_failure">Failed to delete email address</string>
+    <string name="email_address_with_alias">%1$s &#60;%2$s&#62;</string>
 
     <!-- ProvisionEmailAddressFragment -->
     <string name="provision_email_address">Create Email Address</string>
     <string name="enter_address_label">Enter local part of the email address</string>
+    <string name="optional_enter_alias_label">(Optional) Enter display name</string>
     <string name="email_address_unavailable">This email address is not available</string>
     <string name="email_address_available">This email address is available</string>
     <string name="enter_local_part">Enter the local part for your email address</string>
@@ -93,7 +95,7 @@
     <string name="email_address_settings">Email Address Settings</string>
     <string name="load_email_address_settings_failure">Failed to load email address settings</string>
 
-    <!-- BlockedAddressesFragment.kt -->
+    <!-- EmailAddressBlocklistFragment.kt -->
     <string name="blocked_addresses">Blocked Addresses</string>
     <string name="loading_address_blocklist">Loading Email Address Blocklist</string>
     <string name="list_blocked_addresses_failure">Failed to list blocked addresses</string>

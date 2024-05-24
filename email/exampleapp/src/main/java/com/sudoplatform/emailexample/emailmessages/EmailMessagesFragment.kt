@@ -117,6 +117,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     /** The selected Email address used to filter email messages. */
     private lateinit var emailAddress: String
 
+    /** The alias associated with the selected Email address. */
+    private lateinit var emailAlias: String
+
     /** The selected Email address Identifier used to filter email messages. */
     private lateinit var emailAddressId: String
 
@@ -141,8 +144,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                         navController.navigate(
                             EmailMessagesFragmentDirections
                                 .actionEmailMessagesFragmentToSendEmailMessageFragment(
-                                    emailAddress,
-                                    emailAddressId,
+                                    emailAddress = emailAddress,
+                                    emailAlias = emailAlias,
+                                    emailAddressId = emailAddressId,
                                 ),
                         )
                     }
@@ -150,7 +154,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                         navController.navigate(
                             EmailMessagesFragmentDirections
                                 .actionEmailMessagesFragmentToEmailAddressSettingsFragment(
-                                    emailAddress,
                                     emailAddressId,
                                 ),
                         )
@@ -162,6 +165,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
         }
         app = requireActivity().application as App
         emailAddress = args.emailAddress
+        emailAlias = args.emailAlias.toString()
         emailAddressId = args.emailAddressId
         return binding.root
     }
@@ -280,7 +284,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     when (emailMessages) {
                         is ListAPIResult.Success -> {
                             emailMessageList.clear()
-                            val address = EmailMessage.EmailAddress(emailAddress)
+                            val address = EmailMessage.EmailAddress(emailAddress, emailAlias)
                             for (emailMessage in emailMessages.result.items) {
                                 if (emailMessage.emailAddressId == emailAddressId ||
                                     emailMessage.to.contains(address) ||
@@ -499,18 +503,20 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             if (selectedEmailFolder.folderName == FolderTypes.DRAFTS.toString()) {
                 navController.navigate(
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToSendEmailMessageFragment(
-                        emailAddress,
-                        emailAddressId,
-                        emailMessage,
+                        emailAddress = emailAddress,
+                        emailAlias = emailAlias,
+                        emailAddressId = emailAddressId,
+                        emailMessage = emailMessage,
                         emailMessageWithBody = draftEmailMessageList.find { it.id === emailMessage.id },
                     ),
                 )
             } else {
                 navController.navigate(
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToReadEmailMessageFragment(
-                        emailAddress,
-                        emailAddressId,
-                        emailMessage,
+                        emailAddress = emailAddress,
+                        emailAlias = emailAlias,
+                        emailAddressId = emailAddressId,
+                        emailMessage = emailMessage,
                     ),
                 )
             }

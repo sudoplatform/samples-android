@@ -99,13 +99,18 @@ class App : Application(), CoroutineScope {
             .setSudoUserClient(sudoUserClient)
             .build()
 
+        // Create an instance of EmailExampleNotificationHandler to handle subscribing and
+        // unsubscribing from notifications coming from the email service.
         notificationHandler = EmailExampleNotificationHandler()
 
+        // Create an instance of SudoEmailNotifiableClient to process notifications coming from
+        // the email service.
         sudoEmailNotifiableClient = SudoEmailNotifiableClient.builder()
             .setContext(this)
             .setNotificationHandler(notificationHandler)
             .build()
 
+        // Create an instance of SudoNotificationClient to manage notification settings.
         sudoNotificationClient = SudoNotificationClient.builder()
             .setContext(this)
             .setSudoUserClient(sudoUserClient)

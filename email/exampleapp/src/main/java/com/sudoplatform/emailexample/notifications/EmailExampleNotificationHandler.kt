@@ -1,3 +1,9 @@
+/*
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.sudoplatform.emailexample.notifications
 
 import android.app.NotificationChannel
@@ -29,7 +35,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-class EmailExampleNotificationHandler() :
+/**
+ * Notification handler handling subscribing and unsubscribing from notifications from
+ * the email service.
+ */
+class EmailExampleNotificationHandler :
     FirebaseMessagingService(),
     CoroutineScope,
     SudoEmailNotificationHandler {
@@ -65,6 +75,7 @@ class EmailExampleNotificationHandler() :
         }
     }
 
+    /** Subscribe to notifications from the email service. */
     suspend fun register() {
         if (registered || !app.sudoUserClient.isSignedIn()) {
             return
@@ -82,7 +93,6 @@ class EmailExampleNotificationHandler() :
             } catch (e: SudoNotificationClient.NotificationException.NoDeviceNotificationException) {
                 app.sudoNotificationClient.registerNotification(deviceInfo)
             }
-
             val configuration =
                 try {
                     app.sudoNotificationClient
@@ -94,7 +104,6 @@ class EmailExampleNotificationHandler() :
                     NotificationConfiguration(configs = emptyList())
                         .initEmailNotifications()
                 }
-
             app.sudoNotificationClient.setNotificationConfiguration(
                 NotificationSettingsInput(
                     bundleId = deviceInfo.bundleIdentifier,
@@ -103,21 +112,19 @@ class EmailExampleNotificationHandler() :
                     filter = configuration.configs,
                 ),
             )
-
             app.notificationConfiguration = configuration
         } catch (e: Exception) {
             app.logger.outputError(Error(e))
             throw e
         }
-
         registered = true
     }
 
+    /** Unsubscribe from notifications from the email service. */
     suspend fun unregister() {
         if (!registered || !app.sudoUserClient.isSignedIn() || deviceToken == null) {
             return
         }
-
         try {
             app.sudoNotificationClient.deRegisterNotification(
                 DefaultNotificationDeviceInputProvider(app, deviceId, deviceToken!!),
@@ -128,14 +135,15 @@ class EmailExampleNotificationHandler() :
             app.logger.outputError(Error(e))
             throw e
         }
-
         registered = false
     }
 
+    /** Process notifications from the email service when email messages are received. */
     override fun onMessageReceived(message: RemoteMessage) {
         app.sudoNotificationClient.process(message)
     }
 
+    /** Emit a notification when an email message is received. */
     override fun onEmailMessageReceived(message: EmailMessageReceivedNotification) {
         val intent = Intent(app, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
