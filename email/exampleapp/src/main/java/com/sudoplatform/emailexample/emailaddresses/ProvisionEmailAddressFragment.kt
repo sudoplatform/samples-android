@@ -165,7 +165,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                     withContext(Dispatchers.IO) {
                         val input = ProvisionEmailAddressInput(
                             emailAddress = address,
-                            alias = alias,
+                            alias = alias.ifBlank { null },
                             ownershipProofToken = ownershipProof,
                         )
                         app.sudoEmailClient.provisionEmailAddress(input)

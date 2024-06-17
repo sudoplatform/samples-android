@@ -253,7 +253,15 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     private fun configureEmailMessageContents(emailMessage: EmailMessage) {
         configureRecyclerView()
         binding.dateValue.text = formatDate(emailMessage.createdAt)
-        binding.fromValue.text = if (emailMessage.from.isNotEmpty()) emailMessage.from.first().toString() else ""
+        binding.fromValue.text = if (emailMessage.from.isNotEmpty()) {
+            if (emailMessage.from.first().displayName == "null") {
+                emailMessage.from.first().emailAddress
+            } else {
+                emailMessage.from.first().toString()
+            }
+        } else {
+            ""
+        }
         binding.toValue.text = if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") { it.toString() } else ""
         binding.ccValue.text = if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") { it.toString() } else ""
         binding.subject.text = emailMessage.subject

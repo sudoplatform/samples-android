@@ -173,15 +173,15 @@ class EmailExampleNotificationHandler :
 
         val notificationManager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        notificationManager.getNotificationChannel(channelId)
-
-        val channel = NotificationChannel(
-            channelId,
-            "messageReceived",
-            // HIGH Importance for heads up notification
-            NotificationManager.IMPORTANCE_HIGH,
-        )
-        notificationManager.createNotificationChannel(channel)
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channel = NotificationChannel(
+                channelId,
+                "messageReceived",
+                // HIGH Importance for heads up notification
+                NotificationManager.IMPORTANCE_HIGH,
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
 
         notificationManager.notify(message.hashCode(), notificationBuilder.build())
     }

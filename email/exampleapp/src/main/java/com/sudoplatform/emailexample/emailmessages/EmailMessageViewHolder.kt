@@ -43,7 +43,15 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
     fun bind(emailMessage: EmailMessage) {
         val encryptionIndicator = if (emailMessage.encryptionStatus === EncryptionStatus.ENCRYPTED) "🔒 " else ""
         if (emailMessage.direction == Direction.INBOUND) {
-            binding.recipientLabel.text = binding.root.context.getString(R.string.from_recipient, emailMessage.from[0].toString(), encryptionIndicator)
+            binding.recipientLabel.text = binding.root.context.getString(
+                R.string.from_recipient,
+                if (emailMessage.from[0].displayName == "null") {
+                    emailMessage.from[0].emailAddress
+                } else {
+                    emailMessage.from[0].toString()
+                },
+                encryptionIndicator,
+            )
         } else {
             binding.recipientLabel.text = binding.root.context.getString(
                 R.string.to_recipient,
