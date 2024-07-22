@@ -156,7 +156,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val alias = binding.aliasField.text.toString().trim()
+        val displayName = binding.displayNameField.text.toString().trim()
         launch {
             try {
                 showLoading(R.string.provisioning_email_address)
@@ -165,22 +165,16 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
                     withContext(Dispatchers.IO) {
                         val input = ProvisionEmailAddressInput(
                             emailAddress = address,
-                            alias = alias.ifBlank { null },
+                            alias = displayName.ifBlank { null },
                             ownershipProofToken = ownershipProof,
                         )
                         app.sudoEmailClient.provisionEmailAddress(input)
                     }
-                    showAlertDialog(
-                        titleResId = R.string.success,
-                        positiveButtonResId = android.R.string.ok,
-                        onPositive = {
-                            navController.navigate(
-                                ProvisionEmailAddressFragmentDirections
-                                    .actionProvisionEmailAddressFragmentToEmailAddressesFragment(
-                                        sudo,
-                                    ),
-                            )
-                        },
+                    navController.navigate(
+                        ProvisionEmailAddressFragmentDirections
+                            .actionProvisionEmailAddressFragmentToEmailAddressesFragment(
+                                sudo,
+                            ),
                     )
                 }
             } catch (e: SudoEmailClient.EmailAddressException) {

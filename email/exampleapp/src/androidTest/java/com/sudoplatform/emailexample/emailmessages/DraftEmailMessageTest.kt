@@ -6,7 +6,7 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -62,7 +62,6 @@ class DraftEmailMessageTest {
             checkAvailableAddressMsg()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -75,7 +74,6 @@ class DraftEmailMessageTest {
         sendEmailMessage {
             clickOnSaveDraftEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
     }
 
@@ -97,7 +95,6 @@ class DraftEmailMessageTest {
             address = getAddressFromTextView()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -113,7 +110,6 @@ class DraftEmailMessageTest {
             setContentBodyField("This is a test of a draft email")
             clickOnSaveDraftEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()
@@ -130,25 +126,24 @@ class DraftEmailMessageTest {
             setCcField(address)
             clickOnSendEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
-            Espresso.pressBack()
+            pressBack()
         }
         emailAddresses {
             waitForLoading()
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            Espresso.pressBack()
+            pressBack()
         }
         sudos {
             waitForLoading()
             waitForRecyclerView()
             checkSudosItemsDisplayed()
-            Espresso.pressBack()
+            pressBack()
         }
     }
 
@@ -168,7 +163,6 @@ class DraftEmailMessageTest {
             checkAvailableAddressMsg()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -184,7 +178,6 @@ class DraftEmailMessageTest {
             setContentBodyField("This is a test of a draft email")
             clickOnSaveDraftEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()
@@ -197,19 +190,18 @@ class DraftEmailMessageTest {
             checkEmailMessagesItemsDisplayed()
             swipeLeftToDelete(0)
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForLoading()
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            Espresso.pressBack()
+            pressBack()
         }
         sudos {
             waitForLoading()
             waitForRecyclerView()
             checkSudosItemsDisplayed()
-            Espresso.pressBack()
+            pressBack()
         }
     }
 }

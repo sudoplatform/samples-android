@@ -9,9 +9,7 @@ package com.sudoplatform.emailexample.emailaddressblocklist
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.emailexample.BaseRobot
@@ -28,7 +26,6 @@ class EmailAddressBlocklistRobot : BaseRobot() {
     private val toolbarDeleteButton = withId(R.id.delete)
     private val blockedAddressesRecyclerView = withId(R.id.blockedAddressesRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingProgress, 5_000L)
@@ -49,18 +46,5 @@ class EmailAddressBlocklistRobot : BaseRobot() {
 
     fun clickOnDeleteButton() {
         clickOnView(toolbarDeleteButton)
-    }
-
-    fun clickOnPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
-    }
-
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        Thread.sleep(1_000L)
-        onView(positiveAlertButton)
-            .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.ok)))
     }
 }

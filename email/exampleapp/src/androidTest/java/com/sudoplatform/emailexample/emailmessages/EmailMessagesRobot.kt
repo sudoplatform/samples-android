@@ -9,7 +9,6 @@ package com.sudoplatform.emailexample.emailmessages
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -27,7 +26,6 @@ class EmailMessagesRobot : BaseRobot() {
     private val toolbarComposeButton = withId(R.id.compose)
     private val emailMessagesRecyclerView = withId(R.id.emailMessageRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
     private val dropdownSpinner = withId(R.id.foldersSpinner)
 
     fun waitForLoading() {
@@ -66,12 +64,6 @@ class EmailMessagesRobot : BaseRobot() {
         }
     }
 
-    fun clickOnPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
-    }
-
     fun clickEmailFolderSpinner(folderName: String) {
         clickOnView(dropdownSpinner)
         onView(withText(folderName)).perform(click())
@@ -94,12 +86,6 @@ class EmailMessagesRobot : BaseRobot() {
                 ViewActions.swipeLeft(),
             ),
         )
-    }
-
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        Thread.sleep(1_000L)
-        onView(positiveAlertButton).check(matches(withText(android.R.string.ok)))
     }
 
     private fun clickRecyclerViewItem(position: Int) {

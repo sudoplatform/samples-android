@@ -8,6 +8,7 @@ package com.sudoplatform.emailexample.emailmessages
 
 import android.text.format.DateFormat
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.R
@@ -42,6 +43,7 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
 
     fun bind(emailMessage: EmailMessage) {
         val encryptionIndicator = if (emailMessage.encryptionStatus === EncryptionStatus.ENCRYPTED) "🔒 " else ""
+        if (emailMessage.hasAttachments) binding.imageView.visibility = View.VISIBLE else binding.imageView.visibility = View.GONE
         if (emailMessage.direction == Direction.INBOUND) {
             binding.recipientLabel.text = binding.root.context.getString(
                 R.string.from_recipient,

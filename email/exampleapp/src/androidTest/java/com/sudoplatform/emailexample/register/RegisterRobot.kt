@@ -7,6 +7,9 @@
 package com.sudoplatform.emailexample.register
 
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 
@@ -22,5 +25,14 @@ class RegisterRobot : BaseRobot() {
     fun clickOnRegister() {
         waitForViewToDisplay(registerButton)
         clickOnView(registerButton)
+    }
+
+    // Locates the Notification permission dialogs and selects "Allow".
+    fun clickNotificationPermissionDialog() {
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        val allowPermissions = uiDevice.findObject(UiSelector().text("Allow"))
+        if (allowPermissions.exists()) {
+            allowPermissions.click()
+        }
     }
 }

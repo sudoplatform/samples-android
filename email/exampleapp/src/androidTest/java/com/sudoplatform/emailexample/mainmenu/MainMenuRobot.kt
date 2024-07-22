@@ -44,6 +44,7 @@ class MainMenuRobot : BaseRobot() {
 
     fun navigateFromLaunchToMainMenu() {
         login {
+            clickNotificationPermissionDialog()
             try {
                 clickOnRegister()
             } catch (e: NoMatchingViewException) {

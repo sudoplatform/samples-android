@@ -8,10 +8,8 @@ package com.sudoplatform.emailexample.sudos
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 
@@ -26,7 +24,6 @@ class SudosRobot : BaseRobot() {
     private val createSudoButton = withId(R.id.createSudoButton)
     private val sudoRecyclerView = withId(R.id.sudoRecyclerView)
     private val loadingDialog = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
@@ -49,12 +46,6 @@ class SudosRobot : BaseRobot() {
         }
     }
 
-    fun clickOnPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
-    }
-
     fun swipeLeftToDelete(position: Int) {
         onView(sudoRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
@@ -62,10 +53,5 @@ class SudosRobot : BaseRobot() {
                 ViewActions.swipeLeft(),
             ),
         )
-    }
-
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
-        onView(positiveAlertButton).check(matches(withText(android.R.string.ok)))
     }
 }

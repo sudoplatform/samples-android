@@ -186,10 +186,6 @@ class SudosFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     app.sudoProfilesClient.deleteSudo(sudo)
                 }
-                showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok,
-                )
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.delete_sudo_failure,

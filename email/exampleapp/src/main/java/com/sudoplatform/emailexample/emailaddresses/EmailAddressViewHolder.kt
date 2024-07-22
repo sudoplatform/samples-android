@@ -39,7 +39,7 @@ class EmailAddressViewHolder(private val binding: LayoutItemCellBinding) : Recyc
     fun bind(emailAddress: EmailAddress) {
         if (emailAddress.alias != null) {
             binding.name.text = binding.root.context.getString(
-                R.string.email_address_with_alias,
+                R.string.email_address_with_display_name,
                 emailAddress.alias,
                 emailAddress.emailAddress,
             )

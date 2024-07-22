@@ -22,13 +22,13 @@
     <string name="reset">Reset</string>
 
     <!-- MainMenuFragment -->
-    <string name="email_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email</string>
     <string name="deregister">Deregister</string>
     <string name="deregister_confirmation">Are you sure you want to deregister? All Sudos, email addresses and associated data will be deleted.</string>
     <string name="deregistering">Deregistering&#8230;</string>
     <string name="deregister_failure">Unable to deregister: %1$s</string>
 
     <!-- SudosFragment -->
+    <string name="email_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email</string>
     <string name="loading_sudos">Loading Sudos</string>
     <string name="deleting_sudos">Deleting Sudos&#8230;</string>
     <string name="list_sudos_failure">Failed to list Sudos</string>
@@ -55,12 +55,12 @@
     <string name="list_email_addresses_failure">Failed to list email addresses</string>
     <string name="deleting_email_address">Deleting email address&#8230;</string>
     <string name="deleting_email_address_failure">Failed to delete email address</string>
-    <string name="email_address_with_alias">%1$s &#60;%2$s&#62;</string>
+    <string name="email_address_with_display_name">%1$s &#60;%2$s&#62;</string>
 
     <!-- ProvisionEmailAddressFragment -->
     <string name="provision_email_address">Create Email Address</string>
     <string name="enter_address_label">Enter local part of the email address</string>
-    <string name="optional_enter_alias_label">(Optional) Enter display name</string>
+    <string name="optional_enter_display_name_label">Enter display name (Optional)</string>
     <string name="email_address_unavailable">This email address is not available</string>
     <string name="email_address_available">This email address is available</string>
     <string name="enter_local_part">Enter the local part for your email address</string>
@@ -82,8 +82,11 @@
     <string name="no_subject">No Subject</string>
     <string name="deleting_email_message">Deleting email message&#8230;</string>
     <string name="deleting_email_message_failure">Failed to delete email message</string>
+    <string name="deleting_all_email_messages">Deleting all email messages&#8230;</string>
+    <string name="deleting_all_email_messages_failure">Failed to delete all email messages</string>
     <string name="deleting_draft_email_message">Deleting draft email message&#8230;</string>
     <string name="deleting_draft_email_message_failure">Failed to delete draft email message</string>
+    <string name="deleted">Deleted!</string>
     <string name="moving_email_message_to_trash">Moving to trash&#8230;</string>
     <string name="moving_email_message_failure">Failed to move email message</string>
     <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
@@ -112,9 +115,9 @@
     <string name="email_footer">\n\nSent from Sudo Platform Email Sample App</string>
     <string name="compose_email_message">Compose Email Message</string>
     <string name="sending">Sending&#8230;</string>
-    <string name="sent">Sent</string>
+    <string name="sent">Sent!</string>
     <string name="saving">Saving Draft&#8230;</string>
-    <string name="saved">Saved</string>
+    <string name="saved">Saved!</string>
     <string name="send_email_message_failure">Failed to send email message</string>
     <string name="save_email_message_failure">Failed to save draft</string>
     <string name="get_email_address_failure">Failed to retrieve email address</string>

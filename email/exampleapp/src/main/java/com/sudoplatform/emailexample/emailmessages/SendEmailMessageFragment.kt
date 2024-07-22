@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -112,8 +113,8 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
 
-    /** Email alias associated with the Email Address. */
-    private lateinit var emailAlias: String
+    /** Email display name associated with the Email Address. */
+    private lateinit var emailDisplayName: String
 
     /** Email Address Identifier used to compose a reply email message. */
     private lateinit var emailAddressId: String
@@ -161,7 +162,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
         app = requireActivity().application as App
         emailAddress = args.emailAddress
-        emailAlias = args.emailAlias.toString()
+        emailDisplayName = args.emailDisplayName.toString()
         emailAddressId = args.emailAddressId
         return binding.root
     }
@@ -211,7 +212,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 showLoading(R.string.sending)
                 withContext(Dispatchers.IO) {
                     val emailMessageHeader = InternetMessageFormatHeader(
-                        from = EmailMessage.EmailAddress(emailAddress, emailAlias),
+                        from = EmailMessage.EmailAddress(emailAddress, emailDisplayName),
                         to = if (binding.toTextView.text.isNotEmpty()) addressesToArray(binding.toTextView.text.toString()) else emptyList(),
                         cc = if (binding.ccTextView.text.isNotEmpty()) addressesToArray(binding.ccTextView.text.toString()) else emptyList(),
                         bcc = if (binding.bccTextView.text.isNotEmpty()) addressesToArray(binding.bccTextView.text.toString()) else emptyList(),
@@ -226,18 +227,13 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     )
                     app.sudoEmailClient.sendEmailMessage(input)
                 }
-                showAlertDialog(
-                    titleResId = R.string.sent,
-                    positiveButtonResId = android.R.string.ok,
-                    onPositive = {
-                        navController.navigate(
-                            SendEmailMessageFragmentDirections
-                                .actionSendEmailMessageFragmentToEmailMessagesFragment(
-                                    emailAddress,
-                                    emailAddressId,
-                                ),
-                        )
-                    },
+                Toast.makeText(context, getString(R.string.sent), Toast.LENGTH_SHORT).show()
+                navController.navigate(
+                    SendEmailMessageFragmentDirections
+                        .actionSendEmailMessageFragmentToEmailMessagesFragment(
+                            emailAddress,
+                            emailAddressId,
+                        ),
                 )
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
@@ -285,18 +281,13 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                         app.sudoEmailClient.createDraftEmailMessage(input)
                     }
                 }
-                showAlertDialog(
-                    titleResId = R.string.saved,
-                    positiveButtonResId = android.R.string.ok,
-                    onPositive = {
-                        navController.navigate(
-                            SendEmailMessageFragmentDirections
-                                .actionSendEmailMessageFragmentToEmailMessagesFragment(
-                                    emailAddress,
-                                    emailAddressId,
-                                ),
-                        )
-                    },
+                Toast.makeText(context, getString(R.string.saved), Toast.LENGTH_SHORT).show()
+                navController.navigate(
+                    SendEmailMessageFragmentDirections
+                        .actionSendEmailMessageFragmentToEmailMessagesFragment(
+                            emailAddress,
+                            emailAddressId,
+                        ),
                 )
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
@@ -616,8 +607,8 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         emailMessage: EmailMessage,
         emailMessageWithBody: SimplifiedEmailMessage,
     ) {
-        binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString { it.toString() } else "")
-        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString { it.toString() } else "")
+        binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString { it.emailAddress } else "")
+        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString { it.emailAddress } else "")
         if (emailMessageWithBody.subject.startsWith("Re:")) {
             binding.subjectTextView.setText(emailMessage.subject)
         } else {

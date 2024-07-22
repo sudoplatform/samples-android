@@ -8,6 +8,7 @@ package com.sudoplatform.emailexample.emailmessages
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.Menu
@@ -41,7 +42,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Date
@@ -88,8 +88,8 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     /** Email Address used to compose a reply email message. */
     private lateinit var emailAddress: String
 
-    /** Email alias associated with the Email Address. */
-    private lateinit var emailAlias: String
+    /** Email display name associated with the Email Address. */
+    private lateinit var emailDisplayName: String
 
     /** Email Address Identifier used to compose a reply email message. */
     private lateinit var emailAddressId: String
@@ -119,7 +119,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                             ReadEmailMessageFragmentDirections
                                 .actionReadEmailMessageFragmentToSendEmailMessageFragment(
                                     emailAddress = emailAddress,
-                                    emailAlias = emailAlias,
+                                    emailDisplayName = emailDisplayName,
                                     emailAddressId = emailAddressId,
                                     emailMessage = emailMessage,
                                     emailMessageWithBody = emailMessageWithBody,
@@ -136,7 +136,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         }
         app = requireActivity().application as App
         emailAddress = args.emailAddress
-        emailAlias = args.emailAlias.toString()
+        emailDisplayName = args.emailDisplayName.toString()
         emailAddressId = args.emailAddressId
         emailMessage = args.emailMessage
         return binding.root
@@ -171,7 +171,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                 }
                 if (body != null) {
                     val renderedBody = if (body.isHtml) {
-                        Jsoup.parse(body.body).text()
+                        Html.fromHtml(body.body, Html.FROM_HTML_MODE_LEGACY).toString()
                     } else {
                         body.body
                     }

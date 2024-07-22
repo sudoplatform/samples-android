@@ -126,17 +126,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                 val newSudo = withContext(Dispatchers.IO) {
                     app.sudoProfilesClient.createSudo(sudo)
                 }
-
-                showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok,
-                    onPositive = {
-                        navController.navigate(
-                            CreateSudoFragmentDirections.actionCreateSudoFragmentToEmailAddressesFragment(
-                                newSudo,
-                            ),
-                        )
-                    },
+                navController.navigate(
+                    CreateSudoFragmentDirections.actionCreateSudoFragmentToEmailAddressesFragment(
+                        newSudo,
+                    ),
                 )
             } catch (e: SudoProfileException) {
                 showAlertDialog(

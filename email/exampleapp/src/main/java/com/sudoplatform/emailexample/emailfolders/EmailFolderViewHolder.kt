@@ -7,6 +7,7 @@
 package com.sudoplatform.emailexample.emailfolders
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.sudoemail.types.EmailFolder
@@ -19,4 +20,5 @@ import com.sudoplatform.sudoemail.types.EmailFolder
  */
 class EmailFolderViewHolder(private val row: View?) {
     val label: TextView = row?.findViewById(R.id.textView) as TextView
+    val imageView: ImageView = row?.findViewById(R.id.imageView) as ImageView
 }

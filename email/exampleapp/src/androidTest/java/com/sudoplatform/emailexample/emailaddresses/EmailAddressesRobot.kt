@@ -24,7 +24,6 @@ class EmailAddressesRobot : BaseRobot() {
     private val createEmailAddressButton = withId(R.id.createEmailAddressButton)
     private val emailAddressRecyclerView = withId(R.id.emailAddressRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingProgress, 5_000L)
@@ -45,12 +44,6 @@ class EmailAddressesRobot : BaseRobot() {
             waitForLoading()
             checkProvisionEmailAddressItemsDisplayed()
         }
-    }
-
-    fun clickOnPositiveAlertDialogButton() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
     }
 
     fun navigateToEmailMessagesScreen(position: Int) {

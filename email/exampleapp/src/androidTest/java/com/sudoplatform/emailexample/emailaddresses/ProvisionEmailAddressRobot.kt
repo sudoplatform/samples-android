@@ -33,7 +33,6 @@ class ProvisionEmailAddressRobot : BaseRobot() {
     private val learnMoreButton = withId(R.id.learnMoreButton)
     private val loadingDialog = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
-    private val negativeAlertButton = withId(android.R.id.button2)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L)
@@ -79,12 +78,6 @@ class ProvisionEmailAddressRobot : BaseRobot() {
         clickOnView(positiveAlertButton)
     }
 
-    fun clickOnNegativeErrorAlertDialogButton() {
-        checkErrorAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(negativeAlertButton)
-    }
-
     fun setLocalPart(localPart: String? = "") {
         var input = localPart
         if (input.isNullOrBlank()) {
@@ -118,14 +111,5 @@ class ProvisionEmailAddressRobot : BaseRobot() {
         Thread.sleep(1_000L)
         onView(positiveAlertButton)
             .check(matches(withText(android.R.string.ok)))
-    }
-
-    private fun checkErrorAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
-        waitForViewToDisplay(negativeAlertButton, 15_000L)
-        onView(positiveAlertButton)
-            .check(matches(withText(R.string.try_again)))
-        onView(negativeAlertButton)
-            .check(matches(withText(android.R.string.cancel)))
     }
 }

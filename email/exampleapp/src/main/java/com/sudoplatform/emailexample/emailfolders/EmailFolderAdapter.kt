@@ -19,7 +19,6 @@ import com.sudoplatform.sudoemail.types.EmailFolder
  */
 enum class FolderTypes {
     INBOX,
-    OUTBOX,
     SENT,
     DRAFTS,
     TRASH,
@@ -29,7 +28,7 @@ enum class FolderTypes {
 /**
  * An Adapter used to feed [EmailFolder] data to the drop down spinner list.
  */
-class EmailFolderAdapter(context: Context) : BaseAdapter() {
+class EmailFolderAdapter(val context: Context, private val onClickListener: () -> Unit) : BaseAdapter() {
 
     private val inflater =
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -38,24 +37,29 @@ class EmailFolderAdapter(context: Context) : BaseAdapter() {
         val view: View
         val emailFolderViewHolder: EmailFolderViewHolder
         if (convertView == null) {
-            view = inflater.inflate(R.layout.layout_dropdown_item, parent, false)
+            view = inflater.inflate(R.layout.layout_dropdown_folder_item, parent, false)
             emailFolderViewHolder = EmailFolderViewHolder(view)
             view?.tag = emailFolderViewHolder
         } else {
             view = convertView
             emailFolderViewHolder = view.tag as EmailFolderViewHolder
         }
-        emailFolderViewHolder.label.text = FolderTypes.values()[position].toString()
-
+        emailFolderViewHolder.label.text = FolderTypes.entries[position].toString()
+        if (FolderTypes.entries[position].toString() == "TRASH") {
+            emailFolderViewHolder.imageView.visibility = View.VISIBLE
+        }
+        emailFolderViewHolder.imageView.setOnClickListener {
+            onClickListener()
+        }
         return view
     }
 
     override fun getItem(position: Int): Any {
-        return FolderTypes.values()[position].toString()
+        return FolderTypes.entries[position].toString()
     }
 
     override fun getCount(): Int {
-        return FolderTypes.values().size
+        return FolderTypes.entries.size
     }
 
     override fun getItemId(position: Int): Long {

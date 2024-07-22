@@ -67,7 +67,6 @@ class SendEmailMessageTest {
             address = getAddressFromTextView()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -89,7 +88,6 @@ class SendEmailMessageTest {
             setContentBodyField("This is test email from an Espresso test.")
             clickOnSendEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()
@@ -102,7 +100,6 @@ class SendEmailMessageTest {
             checkEmailMessagesItemsDisplayed()
             swipeLeftToDelete(0)
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
 
             // Navigate to TRASH folder and swipe to permanently delete message
             clickEmailFolderSpinner("TRASH")
@@ -110,7 +107,6 @@ class SendEmailMessageTest {
             checkEmailMessagesItemsDisplayed()
             swipeLeftToDelete(0)
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
             pressBack()
         }
         emailAddresses {
@@ -131,7 +127,6 @@ class SendEmailMessageTest {
     fun testAttemptToSendEmailMessageWithInvalidAddress() {
         provisionEmailAddress {
             provisionEmailAddressFlow()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -186,7 +181,6 @@ class SendEmailMessageTest {
             address = getAddressFromTextView()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -203,7 +197,6 @@ class SendEmailMessageTest {
             setContentBodyField("This is test email from an Espresso test.")
             clickOnSendEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()
@@ -231,7 +224,6 @@ class SendEmailMessageTest {
             setContentBodyField("This is a reply email sent from an Espresso test.")
             clickOnSendEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()
@@ -271,7 +263,6 @@ class SendEmailMessageTest {
             address = getAddressFromTextView()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()

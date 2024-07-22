@@ -6,9 +6,6 @@
 
 package com.sudoplatform.emailexample.sudos
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
@@ -27,7 +24,6 @@ class CreateSudoRobot : BaseRobot() {
     private val learnMoreButton = withId(R.id.learnMoreButton)
     private val learnMoreTextView = withId(R.id.learnMoreTextView)
     private val loadingDialog = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
 
     fun checkCreateSudoItemsDisplayed() {
         waitForViewToDisplay(toolbarCreateButton)
@@ -54,7 +50,6 @@ class CreateSudoRobot : BaseRobot() {
             setSudoName("Shopping")
             clickOnCreateButton()
             waitForLoading()
-            clickPositiveAlertDialogButton()
         }
     }
 
@@ -66,20 +61,7 @@ class CreateSudoRobot : BaseRobot() {
         clickOnView(toolbarCreateButton)
     }
 
-    private fun clickPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
-    }
-
     private fun setTextFieldValue(inputText: String) {
         replaceText(sudoLabelEditText, inputText)
-    }
-
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        Thread.sleep(1_000L)
-        onView(positiveAlertButton)
-            .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.ok)))
     }
 }

@@ -52,14 +52,12 @@ class ProvisionEmailAddressTest {
     fun testProvisionAndDeprovisionEmailAddress() {
         provisionEmailAddress {
             provisionEmailAddressFlow()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
             swipeLeftToDelete(0)
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
             pressBack()
         }
         sudos {
@@ -87,14 +85,12 @@ class ProvisionEmailAddressTest {
             checkAvailableAddressMsg()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
             swipeLeftToDelete(0)
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
             navigateToProvisionEmailAddressScreen()
         }
         provisionEmailAddress {
@@ -115,7 +111,6 @@ class ProvisionEmailAddressTest {
     fun testProvisionEmailAddressAndDeleteSudo() {
         provisionEmailAddress {
             provisionEmailAddressFlow()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -128,7 +123,6 @@ class ProvisionEmailAddressTest {
             checkSudosItemsDisplayed()
             swipeLeftToDelete(0)
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
             pressBack()
         }
     }
@@ -137,7 +131,6 @@ class ProvisionEmailAddressTest {
     fun testProvisionMultipleEmailAddresses() {
         provisionEmailAddress {
             provisionEmailAddressFlow()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForLoading()
@@ -150,8 +143,6 @@ class ProvisionEmailAddressTest {
             checkAvailableAddressMsg()
             clickOnCreateButton()
             waitForLoading()
-            clickOnNegativeErrorAlertDialogButton()
-            pressBack()
         }
         emailAddresses {
             pressBack()

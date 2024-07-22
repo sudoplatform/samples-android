@@ -68,7 +68,6 @@ class EmailAddressBlocklistTest {
             checkAvailableAddressMsg()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -119,7 +118,6 @@ class EmailAddressBlocklistTest {
             address = getAddressFromTextView()
             clickOnCreateButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailAddresses {
             waitForRecyclerView()
@@ -135,7 +133,6 @@ class EmailAddressBlocklistTest {
             setContentBodyField("This is test email from an Espresso test.")
             clickOnSendEmailButton()
             waitForLoading()
-            clickOnPositiveAlertDialogButton()
         }
         emailMessages {
             waitForLoading()

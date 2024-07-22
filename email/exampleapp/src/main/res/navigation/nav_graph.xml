@@ -106,7 +106,7 @@
             app:argType="string"
             app:nullable="false" />
         <argument
-            android:name="emailAlias"
+            android:name="emailDisplayName"
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null"/>
@@ -147,7 +147,7 @@
             app:argType="string"
             app:nullable="false" />
         <argument
-            android:name="emailAlias"
+            android:name="emailDisplayName"
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null"/>
@@ -181,7 +181,7 @@
             app:argType="string"
             app:nullable="false" />
         <argument
-            android:name="emailAlias"
+            android:name="emailDisplayName"
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null"/>

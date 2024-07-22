@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -117,8 +118,8 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     /** The selected Email address used to filter email messages. */
     private lateinit var emailAddress: String
 
-    /** The alias associated with the selected Email address. */
-    private lateinit var emailAlias: String
+    /** The display name associated with the selected Email address. */
+    private lateinit var emailDisplayName: String
 
     /** The selected Email address Identifier used to filter email messages. */
     private lateinit var emailAddressId: String
@@ -145,7 +146,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                             EmailMessagesFragmentDirections
                                 .actionEmailMessagesFragmentToSendEmailMessageFragment(
                                     emailAddress = emailAddress,
-                                    emailAlias = emailAlias,
+                                    emailDisplayName = emailDisplayName,
                                     emailAddressId = emailAddressId,
                                 ),
                         )
@@ -163,9 +164,10 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             }
             toolbarMenu = menu
         }
+
         app = requireActivity().application as App
         emailAddress = args.emailAddress
-        emailAlias = args.emailAlias.toString()
+        emailDisplayName = args.emailDisplayName.toString()
         emailAddressId = args.emailAddressId
         return binding.root
     }
@@ -177,9 +179,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
 
         binding.foldersSpinner.onItemSelectedListener = this
         listEmailFolders(CachePolicy.REMOTE_ONLY)
-        foldersAdapter = EmailFolderAdapter(
-            requireContext(),
-        )
+        foldersAdapter = EmailFolderAdapter(requireContext()) {
+            deleteAllEmailMessages()
+        }
         foldersAdapter.notifyDataSetChanged()
         binding.foldersSpinner.adapter = foldersAdapter
     }
@@ -284,7 +286,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     when (emailMessages) {
                         is ListAPIResult.Success -> {
                             emailMessageList.clear()
-                            val address = EmailMessage.EmailAddress(emailAddress, emailAlias)
+                            val address = EmailMessage.EmailAddress(emailAddress, emailDisplayName)
                             for (emailMessage in emailMessages.result.items) {
                                 if (emailMessage.emailAddressId == emailAddressId ||
                                     emailMessage.to.contains(address) ||
@@ -355,10 +357,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 withContext(Dispatchers.IO) {
                     app.sudoEmailClient.updateEmailMessages(updateInput)
                 }
-                showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok,
-                )
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
                     titleResId = R.string.moving_email_message_failure,
@@ -382,13 +380,32 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 withContext(Dispatchers.IO) {
                     app.sudoEmailClient.deleteEmailMessage(id)
                 }
-                showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok,
-                )
+                Toast.makeText(context, getString(R.string.deleted), Toast.LENGTH_SHORT).show()
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
                     titleResId = R.string.deleting_email_message_failure,
+                    message = e.localizedMessage ?: e.toString(),
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            }
+            hideDeleteAlert()
+        }
+    }
+
+    /**
+     * Delete all [EmailMessage]s from the [SudoEmailClient].
+     */
+    private fun deleteAllEmailMessages() {
+        launch {
+            try {
+                showDeleteAlert(R.string.deleting_all_email_messages)
+                withContext(Dispatchers.IO) {
+                    app.sudoEmailClient.deleteEmailMessages(emailMessageList.map { it.id })
+                }
+                Toast.makeText(context, getString(R.string.deleted), Toast.LENGTH_SHORT).show()
+            } catch (e: SudoEmailClient.EmailMessageException) {
+                showAlertDialog(
+                    titleResId = R.string.deleting_all_email_messages_failure,
                     message = e.localizedMessage ?: e.toString(),
                     negativeButtonResId = android.R.string.cancel,
                 )
@@ -413,10 +430,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 withContext(Dispatchers.IO) {
                     app.sudoEmailClient.deleteDraftEmailMessages(input)
                 }
-                showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok,
-                )
+                Toast.makeText(context, getString(R.string.deleted), Toast.LENGTH_SHORT).show()
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
                     titleResId = R.string.deleting_draft_email_message_failure,
@@ -504,7 +518,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 navController.navigate(
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToSendEmailMessageFragment(
                         emailAddress = emailAddress,
-                        emailAlias = emailAlias,
+                        emailDisplayName = emailDisplayName,
                         emailAddressId = emailAddressId,
                         emailMessage = emailMessage,
                         emailMessageWithBody = draftEmailMessageList.find { it.id === emailMessage.id },
@@ -514,7 +528,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 navController.navigate(
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToReadEmailMessageFragment(
                         emailAddress = emailAddress,
-                        emailAlias = emailAlias,
+                        emailDisplayName = emailDisplayName,
                         emailAddressId = emailAddressId,
                         emailMessage = emailMessage,
                     ),

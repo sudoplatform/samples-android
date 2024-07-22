@@ -183,10 +183,6 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     app.sudoEmailClient.deprovisionEmailAddress(emailAddressId)
                 }
-                showAlertDialog(
-                    titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok,
-                )
             } catch (e: SudoEmailClient.EmailAddressException) {
                 showAlertDialog(
                     titleResId = R.string.deleting_email_address_failure,
@@ -209,7 +205,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                     EmailAddressesFragmentDirections
                         .actionEmailAddressesFragmentToEmailMessagesFragment(
                             emailAddress = emailAddress.emailAddress,
-                            emailAlias = emailAddress.alias,
+                            emailDisplayName = emailAddress.alias ?: "",
                             emailAddressId = emailAddress.id,
                         ),
                 )
