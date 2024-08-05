@@ -6,7 +6,7 @@ This project provides examples of how to use the Sudo Decentralized Identity Rel
 
 ## Supported Android Versions
 
-This app supports Android 8 (API level 26) or newer, built with Kotlin version 1.8.
+This app supports Android 8 (API level 26) or newer, built with Kotlin version 1.9.
 
 If you are using Android Studio, version 4.0 or newer is required.
 
