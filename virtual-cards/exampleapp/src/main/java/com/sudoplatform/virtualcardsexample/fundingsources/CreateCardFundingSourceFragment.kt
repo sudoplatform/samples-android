@@ -1,11 +1,12 @@
 /*
- * Copyright © 2023 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.sudoplatform.virtualcardsexample.fundingsources
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -34,6 +35,8 @@ import com.sudoplatform.virtualcardsexample.databinding.FragmentCreateCardFundin
 import com.sudoplatform.virtualcardsexample.shared.InputFormAdapter
 import com.sudoplatform.virtualcardsexample.shared.InputFormCell
 import com.sudoplatform.virtualcardsexample.showAlertDialog
+import com.sudoplatform.virtualcardsexample.util.ActivityResultHandler
+import com.sudoplatform.virtualcardsexample.util.DefaultActivityResultHandler
 import com.sudoplatform.virtualcardsexample.util.ObjectDelegate
 import com.sudoplatform.virtualcardsexample.util.StripeIntentWorker
 import kotlinx.coroutines.CoroutineScope
@@ -91,6 +94,8 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
         "123", "222333 Peachtree Place", null, "Atlanta", "GA", "30318", "US",
     )
 
+    private val activityResultHandler: ActivityResultHandler = DefaultActivityResultHandler()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -129,6 +134,12 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
         super.onDestroy()
     }
 
+    // Manages the callback from stripe 3DS processing and notifies our singleton handler
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        activityResultHandler.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     /**
      * Validates and creates a [FundingSource] from the
      * [SudoVirtualCardsClient] based on the submitted form inputs.
@@ -155,6 +166,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
             postalCode = enteredInput[8] ?: "",
             country = enteredInput[9] ?: "",
         )
+        val fragment = this
         launch {
             try {
                 showLoading(R.string.creating_funding_source)
@@ -166,11 +178,12 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                     val provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(setupInput)
                     // Process stripe data
                     val stripeClient = Stripe(requireContext(), configuration.first().apiKey)
-                    val stripeIntentWorker = StripeIntentWorker(requireContext(), stripeClient)
+                    val stripeIntentWorker = StripeIntentWorker(requireContext(), stripeClient, activityResultHandler)
                     val provisioningData = provisionalFundingSource.provisioningData as StripeCardProvisioningData
                     val completionData = stripeIntentWorker.confirmSetupIntent(
                         input,
                         provisioningData.clientSecret,
+                        fragment,
                     )
                     // Perform the funding source completion operation
                     val completeInput = CompleteFundingSourceInput(
