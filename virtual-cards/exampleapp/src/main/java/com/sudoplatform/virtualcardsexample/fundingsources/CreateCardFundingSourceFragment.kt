@@ -172,7 +172,7 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                 showLoading(R.string.creating_funding_source)
                 withContext(Dispatchers.IO) {
                     // Retrieve the funding source client configuration
-                    val configuration = app.sudoVirtualCardsClient.getFundingSourceClientConfiguration()
+                    val configuration = app.sudoVirtualCardsClient.getVirtualCardsConfig()!!.fundingSourceClientConfiguration
                     // Perform the funding source setup operation
                     val setupInput = SetupFundingSourceInput("USD", FundingSourceType.CREDIT_CARD, ClientApplicationData("androidApplication"))
                     val provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(setupInput)

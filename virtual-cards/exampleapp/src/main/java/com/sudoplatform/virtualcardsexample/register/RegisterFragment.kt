@@ -26,8 +26,7 @@ import com.sudoplatform.sudouser.FederatedSignInResult
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
-import com.sudoplatform.sudouser.exceptions.AuthenticationException
-import com.sudoplatform.sudouser.exceptions.RegisterException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
 import com.sudoplatform.virtualcardsexample.databinding.FragmentRegisterBinding
@@ -263,7 +262,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                         RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                     )
                 }
-            } catch (e: AuthenticationException) {
+            } catch (e: SudoUserException) {
                 hideLoading()
                 setItemsEnabled(true)
                 Toast.makeText(requireContext(), getString(R.string.signin_failure, e.localizedMessage), Toast.LENGTH_LONG).show()
@@ -309,7 +308,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                     )
                 }
                 signIn()
-            } catch (e: RegisterException) {
+            } catch (e: SudoUserException) {
                 showRegistrationFailure(e)
             }
         }

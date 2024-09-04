@@ -34,14 +34,15 @@ class InputFormAdapter(private val items: List<InputFormCell>, private val onInp
     }
 
     override fun onBindViewHolder(holder: InputFormViewHolder, position: Int) {
-        val inputFormCell = items[position]
+        val savedPosition = position
+        val inputFormCell = items[savedPosition]
         holder.bind(inputFormCell)
 
         holder.inputField.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                onInputChanged(position, p0.toString())
+                onInputChanged(savedPosition, p0.toString())
             }
         })
     }

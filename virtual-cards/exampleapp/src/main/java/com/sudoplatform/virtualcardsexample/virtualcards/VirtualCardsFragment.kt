@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
-import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.ListAPIResult
 import com.sudoplatform.sudovirtualcards.types.SingleAPIResult
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
@@ -111,7 +110,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
             )
         }
 
-        listCards(CachePolicy.REMOTE_ONLY)
+        listCards()
     }
 
     override fun onDestroy() {
@@ -124,16 +123,13 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
 
     /**
      * List [VirtualCard]s from the [SudoVirtualCardsClient].
-     *
-     * @param cachePolicy [CachePolicy] Option of either retrieving [VirtualCard] data from the
-     *  cache or network.
      */
-    private fun listCards(cachePolicy: CachePolicy) {
+    private fun listCards() {
         launch {
             try {
                 showLoading()
                 val virtualCards = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listVirtualCards(cachePolicy = cachePolicy)
+                    app.sudoVirtualCardsClient.listVirtualCards()
                 }
                 when (virtualCards) {
                     is ListAPIResult.Success -> {
@@ -151,7 +147,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                             titleResId = R.string.list_virtual_cards_failure,
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
-                            onPositive = { listCards(CachePolicy.REMOTE_ONLY) },
+                            onPositive = { listCards() },
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
@@ -161,7 +157,7 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.list_virtual_cards_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listCards(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listCards() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }

@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.subscription.TransactionSubscriber
-import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.CardState
 import com.sudoplatform.sudovirtualcards.types.ListAPIResult
 import com.sudoplatform.sudovirtualcards.types.Transaction
@@ -104,7 +103,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
         configureRecyclerView()
         navController = Navigation.findNavController(view)
 
-        listTransactions(CachePolicy.REMOTE_ONLY)
+        listTransactions()
     }
 
     override fun onDestroy() {
@@ -126,18 +125,15 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
 
     /**
      * List [Transaction]s from the [SudoVirtualCardsClient].
-     *
-     * @param cachePolicy [CachePolicy] Option of either retrieving [Transaction] data from the
-     *  cache or network.
+
      */
-    private fun listTransactions(cachePolicy: CachePolicy) {
+    private fun listTransactions() {
         launch {
             try {
                 showLoading()
                 val transactions = withContext(Dispatchers.IO) {
                     app.sudoVirtualCardsClient.listTransactionsByCardId(
                         cardId = virtualCard.id,
-                        cachePolicy = cachePolicy,
                     )
                 }
                 when (transactions) {
@@ -155,7 +151,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                             titleResId = R.string.list_transactions_failure,
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
-                            onPositive = { listTransactions(CachePolicy.REMOTE_ONLY) },
+                            onPositive = { listTransactions() },
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
@@ -165,7 +161,7 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.list_transactions_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listTransactions(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listTransactions() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }

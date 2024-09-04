@@ -26,7 +26,6 @@ import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.types.BillingAddress
-import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.FundingSourceState
 import com.sudoplatform.sudovirtualcards.types.JsonValue
@@ -255,7 +254,7 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         launch {
             try {
                 val fundingSources = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listFundingSources(cachePolicy = CachePolicy.REMOTE_ONLY)
+                    app.sudoVirtualCardsClient.listFundingSources()
                 }
                 val filtered = fundingSources.items.filter { it.state == FundingSourceState.ACTIVE }
                 fundingSourcesList.clear()

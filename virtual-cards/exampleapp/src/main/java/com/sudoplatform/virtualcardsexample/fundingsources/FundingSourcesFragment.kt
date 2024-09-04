@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.extensions.isUnfunded
-import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderRefreshData
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountRefreshUserInteractionData
 import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
@@ -103,7 +102,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
             )
         }
 
-        listFundingSources(CachePolicy.REMOTE_ONLY)
+        listFundingSources()
     }
 
     override fun onDestroy() {
@@ -116,16 +115,13 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
 
     /**
      * List [FundingSource]s from the [SudoVirtualCardsClient].
-     *
-     * @param cachePolicy [CachePolicy] Option of either retrieving [FundingSource] data from the
-     *  cache or network.
      */
-    private fun listFundingSources(cachePolicy: CachePolicy) {
+    private fun listFundingSources() {
         launch {
             try {
                 showLoading()
                 val fundingSources = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listFundingSources(cachePolicy = cachePolicy)
+                    app.sudoVirtualCardsClient.listFundingSources()
                 }
                 fundingSourceList.clear()
                 for (fundingSource in fundingSources.items) {
@@ -137,7 +133,7 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.list_funding_sources_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listFundingSources(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listFundingSources() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }

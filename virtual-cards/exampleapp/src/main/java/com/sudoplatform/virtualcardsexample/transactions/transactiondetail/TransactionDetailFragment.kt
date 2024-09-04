@@ -22,7 +22,6 @@ import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.extensions.isUnfunded
 import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
-import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
@@ -126,7 +125,7 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 val fundingSource = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.getFundingSource(virtualCard.fundingSourceId, cachePolicy = CachePolicy.REMOTE_ONLY)
+                    app.sudoVirtualCardsClient.getFundingSource(virtualCard.fundingSourceId)
                 }
                 when (fundingSource) {
                     is CreditCardFundingSource -> {

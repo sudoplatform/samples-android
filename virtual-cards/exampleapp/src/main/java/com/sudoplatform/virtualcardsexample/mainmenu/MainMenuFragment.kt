@@ -21,7 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudouser.SudoUserClient
-import com.sudoplatform.sudouser.exceptions.RegisterException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
@@ -169,7 +169,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                 navController.navigate(
                     MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment(),
                 )
-            } catch (e: RegisterException) {
+            } catch (e: SudoUserException) {
                 Toast.makeText(requireContext(), getString(R.string.deregister_failure, e.localizedMessage), Toast.LENGTH_LONG).show()
             }
         }

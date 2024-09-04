@@ -21,7 +21,6 @@ import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
-import com.sudoplatform.sudovirtualcards.types.CachePolicy
 import com.sudoplatform.sudovirtualcards.types.ListAPIResult
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
@@ -94,7 +93,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
         navController = Navigation.findNavController(view)
 
         listSudos(ListOption.REMOTE_ONLY)
-        listOrphanVirtualCards(CachePolicy.REMOTE_ONLY)
+        listOrphanVirtualCards()
     }
 
     override fun onDestroy() {
@@ -106,16 +105,13 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
 
     /**
      * List orphan [VirtualCard]s from the [SudoVirtualCardsClient].
-     *
-     * @param cachePolicy [CachePolicy] Option of either retrieving [VirtualCard] data from the
-     *  cache or network.
      */
-    private fun listOrphanVirtualCards(cachePolicy: CachePolicy) {
+    private fun listOrphanVirtualCards() {
         launch {
             try {
                 showLoading()
                 val orphanVirtualCards = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listVirtualCards(cachePolicy = cachePolicy)
+                    app.sudoVirtualCardsClient.listVirtualCards()
                 }
                 when (orphanVirtualCards) {
                     is ListAPIResult.Success -> {
@@ -135,7 +131,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                             titleResId = R.string.list_orphan_virtual_cards_failure,
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
-                            onPositive = { listOrphanVirtualCards(CachePolicy.REMOTE_ONLY) },
+                            onPositive = { listOrphanVirtualCards() },
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
@@ -145,7 +141,7 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.list_orphan_virtual_cards_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listOrphanVirtualCards(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listOrphanVirtualCards() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
