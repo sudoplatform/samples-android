@@ -31,8 +31,7 @@ import com.sudoplatform.sudouser.FederatedSignInResult
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
-import com.sudoplatform.sudouser.exceptions.AuthenticationException
-import com.sudoplatform.sudouser.exceptions.RegisterException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -272,7 +271,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                             RegisterFragmentDirections.actionRegisterFragmentToMainMenuFragment(),
                         )
                     }
-                } catch (e: AuthenticationException) {
+                } catch (e: SudoUserException) {
                     hideLoading()
                     setItemsEnabled(true)
                     Toast.makeText(
@@ -323,7 +322,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                     )
                 }
                 signIn()
-            } catch (e: RegisterException) {
+            } catch (e: SudoUserException) {
                 showRegistrationFailure(e)
             }
         }

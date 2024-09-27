@@ -91,7 +91,12 @@ class EmailExampleNotificationHandler :
             try {
                 app.sudoNotificationClient.updateNotificationRegistration(deviceInfo)
             } catch (e: SudoNotificationClient.NotificationException.NoDeviceNotificationException) {
-                app.sudoNotificationClient.registerNotification(deviceInfo)
+                try {
+                    app.sudoNotificationClient.registerNotification(deviceInfo)
+                } catch (e: SudoNotificationClient.NotificationException.AlreadyRegisteredNotificationException) {
+                    // Sometimes we have two threads racing through - its OK if one wins.
+                    // The remainder of this method is idempotent.
+                }
             }
             val configuration =
                 try {

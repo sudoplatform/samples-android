@@ -35,10 +35,10 @@ import com.sudoplatform.emailexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageParser
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
+import com.sudoplatform.sudoapiclient.sudoApiClientLogger
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.subscription.EmailMessageSubscriber
 import com.sudoplatform.sudoemail.subscription.Subscriber
-import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.Direction
 import com.sudoplatform.sudoemail.types.DraftEmailMessageMetadata
 import com.sudoplatform.sudoemail.types.DraftEmailMessageWithContent
@@ -178,7 +178,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
         navController = Navigation.findNavController(view)
 
         binding.foldersSpinner.onItemSelectedListener = this
-        listEmailFolders(CachePolicy.REMOTE_ONLY)
+        listEmailFolders()
         foldersAdapter = EmailFolderAdapter(requireContext()) {
             deleteAllEmailMessages()
         }
@@ -208,17 +208,14 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     /**
      * List [EmailFolder]s from the [SudoEmailClient].
      *
-     * @param cachePolicy [CachePolicy] Option of either retrieving [EmailFolder] data from the
-     *  cache or network.
      */
-    private fun listEmailFolders(cachePolicy: CachePolicy) {
+    private fun listEmailFolders() {
         launch {
             showLoading()
             try {
                 val emailFolders = withContext(Dispatchers.IO) {
                     val input = ListEmailFoldersForEmailAddressIdInput(
                         emailAddressId = emailAddressId,
-                        cachePolicy = cachePolicy,
                     )
                     app.sudoEmailClient.listEmailFoldersForEmailAddressId(input)
                 }
@@ -230,7 +227,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     titleResId = R.string.list_email_folders_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listEmailFolders(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listEmailFolders() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -245,10 +242,8 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
      *
      * @param emailFolderId [String] The identifier of the email folder assigned to the email
      *  messages to retrieve.
-     * @param cachePolicy [CachePolicy] Option of either retrieving [EmailMessage] data from the
-     *  cache or network.
      */
-    private fun listEmailMessages(emailFolderId: String, cachePolicy: CachePolicy) {
+    private fun listEmailMessages(emailFolderId: String) {
         launch {
             try {
                 showLoading()
@@ -278,7 +273,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                         val input = ListEmailMessagesForEmailFolderIdInput(
                             emailFolderId,
                             null,
-                            cachePolicy,
                         )
                         app.sudoEmailClient.listEmailMessagesForEmailFolderId(input)
                     }
@@ -314,7 +308,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                                 onPositive = {
                                     listEmailMessages(
                                         selectedEmailFolder.id,
-                                        CachePolicy.REMOTE_ONLY,
                                     )
                                 },
                                 negativeButtonResId = android.R.string.cancel,
@@ -330,7 +323,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     onPositive = {
                         listEmailMessages(
                             selectedEmailFolder.id,
-                            CachePolicy.REMOTE_ONLY,
                         )
                     },
                     negativeButtonResId = android.R.string.cancel,
@@ -442,7 +434,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
         }
     }
 
-    /** Subscribe to receive live updates as [EmailMessage]s are created and deleted. */
+    /** Subscribe to receive live updates as [EmailMessage]s are created, updated and deleted. */
     private fun subscribeToEmailMessages() {
         launch {
             try {
@@ -477,21 +469,28 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             }
         }
 
-        override fun emailMessageChanged(emailMessage: EmailMessage) {
+        override fun emailMessageChanged(emailMessage: EmailMessage, type: EmailMessageSubscriber.ChangeType) {
+            sudoApiClientLogger.debug("emailMessageChanged; ${emailMessage.id}; $type")
             launch(Dispatchers.Main) {
-                addOrDeleteEmailMessage(emailMessage)
+                when (type) {
+                    EmailMessageSubscriber.ChangeType.CREATED -> {
+                        if (
+                            (emailMessage.direction == Direction.INBOUND && selectedEmailFolder.id.contains("INBOX")) ||
+                            (emailMessage.direction == Direction.OUTBOUND && selectedEmailFolder.id.contains("SENT"))
+                        ) {
+                            emailMessageList.add(emailMessage)
+                        }
+                    }
+                    EmailMessageSubscriber.ChangeType.UPDATED -> {
+                        val index = emailMessageList.indexOfFirst { it.id == emailMessage.id }
+                        emailMessageList[index] = emailMessage
+                    }
+                    EmailMessageSubscriber.ChangeType.DELETED -> {
+                        emailMessageList.remove(emailMessage)
+                    }
+                }
                 adapter.notifyDataSetChanged()
             }
-        }
-    }
-
-    /** Add to the list of email messages or remove an existing [EmailMessage]. */
-    private fun addOrDeleteEmailMessage(newEmailMessage: EmailMessage) {
-        val removeAtIndex = emailMessageList.indexOfFirst { it.id == newEmailMessage.id }
-        if (removeAtIndex == -1) {
-            emailMessageList.add(newEmailMessage)
-        } else {
-            emailMessageList.removeAt(removeAtIndex)
         }
     }
 
@@ -632,11 +631,11 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     createdAt = Date(),
                     updatedAt = Date(),
                 )
-                listEmailMessages(item.toString(), CachePolicy.CACHE_ONLY)
+                listEmailMessages(item.toString())
             }
             else -> {
                 selectedEmailFolder = emailFoldersList.find { it.folderName == item.toString() }!!
-                listEmailMessages(selectedEmailFolder.id, CachePolicy.REMOTE_ONLY)
+                listEmailMessages(selectedEmailFolder.id)
             }
         }
     }

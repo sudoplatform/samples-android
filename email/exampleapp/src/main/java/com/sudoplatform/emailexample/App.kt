@@ -23,7 +23,7 @@ import com.sudoplatform.sudonotification.types.NotificationConfiguration
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
-import com.sudoplatform.sudouser.exceptions.SignOutException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,7 +119,7 @@ class App : Application(), CoroutineScope {
             .build()
     }
 
-    @Throws(SignOutException::class)
+    @Throws(SudoUserException::class)
     suspend fun doFSSOSignout() {
         val userClient = this.sudoUserClient
         try {
@@ -134,7 +134,7 @@ class App : Application(), CoroutineScope {
                             throw e
                         } catch (e: Exception) {
                             this.logger.debug("FSSO Signout failed: " + e.localizedMessage)
-                            throw SignOutException.FailedException(e.message)
+                            throw SudoUserException.FailedException(e.message)
                         } finally {
                             userClient.clearAuthTokens()
                         }
@@ -152,7 +152,7 @@ class App : Application(), CoroutineScope {
             throw e
         } catch (e: Exception) {
             this.logger.debug("FSSO Signout failed: " + e.localizedMessage)
-            throw SignOutException.FailedException(e.message)
+            throw SudoUserException.FailedException(e.message)
         }
     }
 }

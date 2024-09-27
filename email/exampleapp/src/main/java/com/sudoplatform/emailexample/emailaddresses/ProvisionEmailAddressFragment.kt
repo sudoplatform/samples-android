@@ -32,7 +32,6 @@ import com.sudoplatform.emailexample.databinding.FragmentProvisionEmailAddressBi
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
-import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
 import com.sudoplatform.sudoemail.types.inputs.CheckEmailAddressAvailabilityInput
 import com.sudoplatform.sudoemail.types.inputs.ProvisionEmailAddressInput
@@ -199,9 +198,7 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     private fun checkEmailAddressAvailability(localParts: List<String>) {
         launch {
             try {
-                val supportedDomains = app.sudoEmailClient.getSupportedEmailDomains(
-                    CachePolicy.REMOTE_ONLY,
-                )
+                val supportedDomains = app.sudoEmailClient.getSupportedEmailDomains()
                 val emailAddresses = app.sudoEmailClient.checkEmailAddressAvailability(
                     CheckEmailAddressAvailabilityInput(
                         localParts,

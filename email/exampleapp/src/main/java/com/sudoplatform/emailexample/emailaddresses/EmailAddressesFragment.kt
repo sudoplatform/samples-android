@@ -30,7 +30,6 @@ import com.sudoplatform.emailexample.sudos.SudosFragment
 import com.sudoplatform.emailexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
-import com.sudoplatform.sudoemail.types.CachePolicy
 import com.sudoplatform.sudoemail.types.EmailAddress
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.inputs.ListEmailAddressesForSudoIdInput
@@ -113,7 +112,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
             )
         }
 
-        listEmailAddresses(CachePolicy.REMOTE_ONLY)
+        listEmailAddresses()
     }
 
     override fun onDestroy() {
@@ -127,17 +126,14 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     /**
      * List [EmailAddress]es from the [SudoEmailClient].
      *
-     * @param cachePolicy [CachePolicy] Option of either retrieving [EmailAddress] data from the
-     *  cache or network.
      */
-    private fun listEmailAddresses(cachePolicy: CachePolicy) {
+    private fun listEmailAddresses() {
         launch {
             try {
                 showLoading()
                 val emailAddresses = withContext(Dispatchers.IO) {
                     val input = ListEmailAddressesForSudoIdInput(
                         sudoId = sudo.id!!,
-                        cachePolicy = cachePolicy,
                     )
                     app.sudoEmailClient.listEmailAddressesForSudoId(input)
                 }
@@ -153,7 +149,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                             titleResId = R.string.list_email_addresses_failure,
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
-                            onPositive = { listEmailAddresses(CachePolicy.REMOTE_ONLY) },
+                            onPositive = { listEmailAddresses() },
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
@@ -163,7 +159,7 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.list_email_addresses_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { listEmailAddresses(CachePolicy.REMOTE_ONLY) },
+                    onPositive = { listEmailAddresses() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }

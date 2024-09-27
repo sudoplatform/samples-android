@@ -27,7 +27,7 @@ import com.sudoplatform.emailexample.sudos.SudosFragment
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudouser.SudoUserClient
-import com.sudoplatform.sudouser.exceptions.RegisterException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -130,7 +130,7 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                 navController.navigate(
                     MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment(),
                 )
-            } catch (e: RegisterException) {
+            } catch (e: SudoUserException) {
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.deregister_failure, e.localizedMessage),
