@@ -21,6 +21,7 @@ fun readEmailMessage(func: ReadEmailMessageRobot.() -> Unit) = ReadEmailMessageR
 class ReadEmailMessageRobot : BaseRobot() {
 
     private val toolbarReplyButton = withId(R.id.reply)
+    private val toolbarForwardButton = withId(R.id.forward)
     private val toolbarBlockEmailAddressButton = withId(R.id.block)
     private val fromValue = withId(R.id.fromValue)
     private val fromLabel = withId(R.id.fromLabel)
@@ -41,6 +42,7 @@ class ReadEmailMessageRobot : BaseRobot() {
 
     fun checkReadEmailMessageItemsDisplayed() {
         waitForViewToDisplay(toolbarReplyButton)
+        waitForViewToDisplay(toolbarForwardButton)
         waitForViewToDisplay(fromValue)
         waitForViewToDisplay(fromLabel)
         waitForViewToDisplay(dateValue)
@@ -54,6 +56,13 @@ class ReadEmailMessageRobot : BaseRobot() {
 
     fun navigateToReplyScreen() {
         clickOnView(toolbarReplyButton)
+        sendEmailMessage {
+            checkSendEmailMessageItemsDisplayed()
+        }
+    }
+
+    fun navigateToForwardScreen() {
+        clickOnView(toolbarForwardButton)
         sendEmailMessage {
             checkSendEmailMessageItemsDisplayed()
         }

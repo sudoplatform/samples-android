@@ -111,7 +111,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         bindingDelegate.attach(FragmentReadEmailMessageBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.read_email_message)
-            inflateMenu(R.menu.nav_menu_with_block_reply_buttons)
+            inflateMenu(R.menu.nav_menu_with_block_reply_forward_buttons)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.reply -> {
@@ -123,6 +123,22 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
                                     emailAddressId = emailAddressId,
                                     emailMessage = emailMessage,
                                     emailMessageWithBody = emailMessageWithBody,
+                                    replyingMessageId = emailMessage.id,
+                                    forwardingMessageId = null,
+                                ),
+                        )
+                    }
+                    R.id.forward -> {
+                        navController.navigate(
+                            ReadEmailMessageFragmentDirections
+                                .actionReadEmailMessageFragmentToSendEmailMessageFragment(
+                                    emailAddress = emailAddress,
+                                    emailDisplayName = emailDisplayName,
+                                    emailAddressId = emailAddressId,
+                                    emailMessage = emailMessage,
+                                    emailMessageWithBody = emailMessageWithBody,
+                                    replyingMessageId = null,
+                                    forwardingMessageId = emailMessage.id,
                                 ),
                         )
                     }

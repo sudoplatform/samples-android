@@ -124,6 +124,8 @@
     <string name="validate_to_address">Please ensure the to address field is filled out.</string>
     <string name="reply_message">Re: %1$s</string>
     <string name="reply_body">\n\n---------------\n\n%1$s</string>
+    <string name="forward_message">Fwd: %1$s</string>
+    <string name="forward_body">\n\n---------------\n\n%1$s</string>
     <string name="encrypted_indicator_label">🔒 End-to-end encrypted</string>
     <string name="encrypted_email_address_lookup_failure">Failed to lookup email address encryption status</string>
     <string name="file_size">%1$s KB</string>

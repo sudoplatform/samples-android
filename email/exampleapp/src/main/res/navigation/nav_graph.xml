@@ -144,8 +144,7 @@
         tools:layout="@layout/fragment_send_email_message" >
         <argument
             android:name="emailAddress"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="string" />
         <argument
             android:name="emailDisplayName"
             app:argType="string"
@@ -170,6 +169,16 @@
             app:destination="@id/emailMessagesFragment"
             app:popUpTo="@id/emailMessagesFragment"
             app:popUpToInclusive="true" />
+        <argument
+            android:name="replyingMessageId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null" />
+        <argument
+            android:name="forwardingMessageId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null" />
     </fragment>
     <fragment
         android:id="@+id/readEmailMessageFragment"

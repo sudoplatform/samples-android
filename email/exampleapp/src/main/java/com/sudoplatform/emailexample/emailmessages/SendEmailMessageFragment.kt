@@ -132,6 +132,12 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         "bcc" to null,
     )
 
+    /** Id of the email message being replied to. */
+    private var replyingMessageId: String? = null
+
+    /** Id of the email message being forwarded. */
+    private var forwardingMessageId: String? = null
+
     /** A mutable list of [EmailAttachment]s. */
     private val emailAttachmentList: MutableList<EmailAttachment> = mutableListOf()
 
@@ -183,8 +189,10 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     emailMessage,
                     emailMessageWithBody,
                 )
-            } else {
+            } else if (!(args.replyingMessageId.isNullOrBlank())) {
                 configureReplyContents(emailMessage, emailMessageWithBody)
+            } else if (!(args.forwardingMessageId.isNullOrBlank())) {
+                configureForwardContents(emailMessage, emailMessageWithBody)
             }
         }
     }
@@ -225,6 +233,12 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                         body = binding.contentBody.text.toString(),
                         attachments = emailAttachmentList,
                     )
+                    if (!(replyingMessageId.isNullOrBlank())) {
+                        input.replyingMessageId = replyingMessageId
+                    }
+                    if (!(forwardingMessageId.isNullOrBlank())) {
+                        input.replyingMessageId = replyingMessageId
+                    }
                     app.sudoEmailClient.sendEmailMessage(input)
                 }
                 Toast.makeText(context, getString(R.string.sent), Toast.LENGTH_SHORT).show()
@@ -615,6 +629,29 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             binding.subjectTextView.setText(getString(R.string.reply_message, emailMessage.subject))
         }
         binding.contentBody.setText(getString(R.string.reply_body, emailMessageWithBody.body))
+        replyingMessageId = emailMessage.id
+    }
+
+    /**
+     * Configures the view with the information required to compose a forward message.
+     *
+     * @param emailMessage [EmailMessage] Email message to configure the view with.
+     * @param emailMessageWithBody [SimplifiedEmailMessage] Email message containing the message
+     *  body to configure the view with.
+     */
+    private fun configureForwardContents(
+        emailMessage: EmailMessage,
+        emailMessageWithBody: SimplifiedEmailMessage,
+    ) {
+        binding.toTextView.setText(if (emailMessage.from.isNotEmpty()) emailMessage.from.joinToString { it.emailAddress } else "")
+        binding.ccTextView.setText(if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString { it.emailAddress } else "")
+        if (emailMessageWithBody.subject.startsWith("Fwd:")) {
+            binding.subjectTextView.setText(emailMessage.subject)
+        } else {
+            binding.subjectTextView.setText(getString(R.string.forward_message, emailMessage.subject))
+        }
+        binding.contentBody.setText(getString(R.string.forward_body, emailMessageWithBody.body))
+        forwardingMessageId = emailMessage.id
     }
 
     /**

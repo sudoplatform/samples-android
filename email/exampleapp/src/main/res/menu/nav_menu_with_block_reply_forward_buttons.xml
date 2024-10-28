@@ -14,4 +14,10 @@
         android:title=""
         app:showAsAction="ifRoom"
         />
+    <item
+        android:id="@+id/forward"
+        android:icon="@drawable/ic_baseline_forward_24px"
+        android:title=""
+        app:showAsAction="ifRoom"
+        />
 </menu>

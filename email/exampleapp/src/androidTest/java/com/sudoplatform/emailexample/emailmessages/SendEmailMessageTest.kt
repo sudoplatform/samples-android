@@ -164,6 +164,88 @@ class SendEmailMessageTest {
     }
 
     @Test
+    fun testSendReceiveForwardEmailMessage() {
+        createSudo {
+            registerAndCreateSudoFlow()
+        }
+        emailAddresses {
+            waitForLoading()
+            checkEmailAddressesItemsDisplayed()
+            navigateToProvisionEmailAddressScreen()
+        }
+        var address = ""
+        provisionEmailAddress {
+            setLocalPart()
+            waitForRootFocus()
+            checkAvailableAddressMsg()
+            address = getAddressFromTextView()
+            clickOnCreateButton()
+            waitForLoading()
+        }
+        emailAddresses {
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            navigateToEmailMessagesScreen(0)
+        }
+        emailMessages {
+            navigateToSendEmailMessageScreen()
+        }
+        sendEmailMessage {
+            // Attempt to send with fields filled out
+            setToField(address)
+            setSubjectField("Espresso Test Email")
+            setContentBodyField("This is test email from an Espresso test.")
+            clickOnSendEmailButton()
+            waitForLoading()
+        }
+        emailMessages {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            clickEmailFolderSpinner("SENT")
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            pressBack()
+        }
+        emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
+            navigateToEmailMessagesScreen(0)
+        }
+        emailMessages {
+            navigateToReadEmailMessageScreen(0)
+        }
+        readEmailMessage {
+            navigateToForwardScreen()
+        }
+        sendEmailMessage {
+            setToField(address)
+            checkSubjectFieldFilled()
+            setContentBodyField("This is a forwarded email sent from an Espresso test.")
+            clickOnSendEmailButton()
+            waitForLoading()
+        }
+        emailMessages {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            pressBack()
+        }
+        emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            pressBack()
+        }
+        sudos {
+            waitForLoading()
+            waitForRecyclerView()
+            checkSudosItemsDisplayed()
+            pressBack()
+        }
+    }
+
+    @Test
     fun testSendReceiveReplyEmailMessage() {
         createSudo {
             registerAndCreateSudoFlow()

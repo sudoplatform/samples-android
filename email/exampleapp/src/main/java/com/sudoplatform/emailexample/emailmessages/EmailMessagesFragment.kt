@@ -675,6 +675,8 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             folderId = FolderTypes.DRAFTS.toString(),
             previousFolderId = null,
             seen = true,
+            repliedTo = false,
+            forwarded = false,
             direction = Direction.OUTBOUND,
             state = State.UNDELIVERED,
             version = 1,
@@ -691,7 +693,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             sentAt = null,
             receivedAt = null,
             hasAttachments = false,
-            EncryptionStatus.UNENCRYPTED,
+            encryptionStatus = EncryptionStatus.UNENCRYPTED,
         )
     }
 
