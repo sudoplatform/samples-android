@@ -8,6 +8,7 @@
     <string name="sudos">Sudos</string>
     <string name="learn_more">Learn More</string>
     <string name="success">Success</string>
+    <string name="delete">Delete</string>
 
     <!-- RegisterFragment -->
     <string name="sample_app">Sample App</string>
@@ -47,6 +48,16 @@
     <string name="creating_sudo">Creating Sudo&#8230;</string>
     <string name="create_sudo_learn_more">Email addresses must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
     <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
+
+    <!-- CreateCustomFolderFragment -->
+    <string name="enter_custom_folder_name_label">Enter folder name</string>
+    <string name="create_custom_folder">Create Custom Folder</string>
+    <string name="enter_custom_folder_name">Enter a name for your folder</string>
+    <string name="creating_custom_folder">Creating folder&#8230;</string>
+
+    <!-- EditCustomFolderFragment -->
+    <string name="edit_custom_folder">Edit Custom Folder</string>
+    <string name="saving_custom_folder">Saving folder&#8230;</string>
 
     <!-- EmailAddressesFragment.kt -->
     <string name="email_addresses">Email Addresses</string>
@@ -91,6 +102,8 @@
     <string name="moving_email_message_failure">Failed to move email message</string>
     <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
     <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
+    <string name="confirm_delete_custom_folder_title">Delete Custom Folder</string>
+    <string name="confirm_delete_custom_folder">Delete this custom folder and all of it\'s messages?</string>
 
     <!-- EmailAddressSettingsFragment.kt -->
     <string name="loading_email_address_settings">Loading settings</string>
@@ -143,6 +156,7 @@
     <string name="folder_name">Folder Name</string>
     <string name="placeholder">-</string>
     <string name="create">Create</string>
+    <string name="save">Save</string>
     <string name="recipient_placeholder">Recipient/s</string>
     <string name="subject_placeholder">Subject</string>
     <string name="date_placeholder">Date</string>

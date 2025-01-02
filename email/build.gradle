@@ -3,7 +3,7 @@
 
 buildscript {
     ext {
-        agp_version = '8.5.0'
+        agp_version = '8.5.1'
     }
     ext.kotlin_version = "1.9.24"
     ext.nav_version = "2.7.7"

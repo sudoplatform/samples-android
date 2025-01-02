@@ -126,6 +126,12 @@
         <action
             android:id="@+id/action_emailMessagesFragment_to_addressBlocklistFragment"
             app:destination="@id/addressBlocklistFragment" />
+        <action
+            android:id="@+id/action_emailMessagesFragment_to_createCustomFolderFragment"
+            app:destination="@id/createCustomFolderFragment" />
+        <action
+            android:id="@+id/action_emailMessagesFragment_to_editCustomFolderFragment"
+            app:destination="@id/editCustomFolderFragment" />
     </fragment>
     <fragment
         android:id="@+id/emailAddressSettingsFragment"
@@ -222,5 +228,52 @@
             android:name="emailAddress"
             app:argType="string"
             app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/createCustomFolderFragment"
+        android:name="com.sudoplatform.emailexample.emailfolders.CreateCustomFolderFragment"
+        android:label="fragment_create_custom_folder"
+        tools:layout="@layout/fragment_create_custom_folder" >
+        <argument
+            android:name="emailAddressId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="emailAddress"
+            app:argType="string"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_createCustomFolderFragment_to_emailMessages"
+            app:destination="@id/emailMessagesFragment"
+            app:popUpTo="@id/createCustomFolderFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editCustomFolderFragment"
+        android:name="com.sudoplatform.emailexample.emailfolders.EditCustomFolderFragment"
+        android:label="fragment_edit_custom_folder"
+        tools:layout="@layout/fragment_edit_custom_folder" >
+        <argument
+            android:name="emailAddressId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="emailAddress"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="customFolderId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="customFolderName"
+            app:argType="string"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_editCustomFolderFragment_to_emailMessages"
+            app:destination="@id/emailMessagesFragment"
+            app:popUpTo="@id/editCustomFolderFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

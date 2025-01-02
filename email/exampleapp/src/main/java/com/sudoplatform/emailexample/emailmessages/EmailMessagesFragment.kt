@@ -1,5 +1,5 @@
 /*
- * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2025 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -29,13 +29,12 @@ import com.sudoplatform.emailexample.createLoadingAlertDialog
 import com.sudoplatform.emailexample.databinding.FragmentEmailMessagesBinding
 import com.sudoplatform.emailexample.emailaddresses.EmailAddressesFragment
 import com.sudoplatform.emailexample.emailfolders.EmailFolderAdapter
-import com.sudoplatform.emailexample.emailfolders.FolderTypes
+import com.sudoplatform.emailexample.emailfolders.SpecialFolderTabLabels
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.swipe.SwipeLeftActionHelper
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageParser
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
-import com.sudoplatform.sudoapiclient.sudoApiClientLogger
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.subscription.EmailMessageSubscriber
 import com.sudoplatform.sudoemail.subscription.Subscriber
@@ -49,6 +48,7 @@ import com.sudoplatform.sudoemail.types.EncryptionStatus
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.Owner
 import com.sudoplatform.sudoemail.types.State
+import com.sudoplatform.sudoemail.types.inputs.DeleteCustomEmailFolderInput
 import com.sudoplatform.sudoemail.types.inputs.DeleteDraftEmailMessagesInput
 import com.sudoplatform.sudoemail.types.inputs.GetDraftEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailFoldersForEmailAddressIdInput
@@ -96,6 +96,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
 
     /** A list of folders to organize email messages. */
     private var emailFoldersList = mutableListOf<EmailFolder>()
+
+    /** A list of names for folder tabs */
+    private var folderTabLabels = mutableListOf<String>()
 
     /** A reference to the [ArrayAdapter] holding the [EmailFolder] data. */
     private lateinit var foldersAdapter: EmailFolderAdapter
@@ -179,9 +182,33 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
 
         binding.foldersSpinner.onItemSelectedListener = this
         listEmailFolders()
-        foldersAdapter = EmailFolderAdapter(requireContext()) {
-            deleteAllEmailMessages()
-        }
+
+        foldersAdapter = EmailFolderAdapter(
+            requireContext(),
+            folderTabLabels,
+            onDeleteMessages = { deleteAllEmailMessages() },
+            onDeleteCustomFolder = { name ->
+                showAlertDialog(
+                    titleResId = R.string.confirm_delete_custom_folder_title,
+                    messageResId = R.string.confirm_delete_custom_folder,
+                    positiveButtonResId = android.R.string.ok,
+                    onPositive = { deleteCustomEmailFolder(name) },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            },
+            onEditCustomFolder = { name ->
+                val customFolder = emailFoldersList.find { folder -> folder.customFolderName == name }!!
+                navController.navigate(
+                    EmailMessagesFragmentDirections
+                        .actionEmailMessagesFragmentToEditCustomFolderFragment(
+                            emailAddressId,
+                            emailAddress,
+                            customFolderId = customFolder.id,
+                            customFolderName = name,
+                        ),
+                )
+            },
+        )
         foldersAdapter.notifyDataSetChanged()
         binding.foldersSpinner.adapter = foldersAdapter
     }
@@ -221,6 +248,17 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 }
                 emailFoldersList.clear()
                 emailFoldersList.addAll(emailFolders.items)
+                folderTabLabels.clear()
+                folderTabLabels.addAll(
+                    emailFolders.items.map { folder ->
+                        if (folder.customFolderName?.isNotEmpty() == true) {
+                            folder.customFolderName.toString()
+                        } else {
+                            folder.folderName
+                        }
+                    },
+                )
+                folderTabLabels.addAll(SpecialFolderTabLabels.entries.map { it.displayName })
                 foldersAdapter.notifyDataSetChanged()
             } catch (e: SudoEmailClient.EmailFolderException) {
                 showAlertDialog(
@@ -233,6 +271,36 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             }
             if (bindingDelegate.isAttached()) {
                 binding.filter.visibility = View.VISIBLE
+            }
+            hideLoading()
+        }
+    }
+
+    private fun deleteCustomEmailFolder(folderName: String) {
+        launch {
+            showLoading()
+            try {
+                val folderToDelete = emailFoldersList.find { folder -> folder.customFolderName == folderName }
+                if (folderToDelete != null) {
+                    app.sudoEmailClient.deleteCustomEmailFolder(
+                        DeleteCustomEmailFolderInput(
+                            emailAddressId = emailAddressId,
+                            emailFolderId = folderToDelete.id,
+                        ),
+                    )
+                    listEmailFolders()
+                    foldersAdapter.notifyDataSetChanged()
+                }
+            } catch (e: SudoEmailClient.EmailFolderException) {
+                showAlertDialog(
+                    titleResId = R.string.something_wrong,
+                    message = e.localizedMessage ?: e.toString(),
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { deleteEmailMessage(folderName) },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            } finally {
+                hideLoading()
             }
         }
     }
@@ -247,7 +315,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
         launch {
             try {
                 showLoading()
-                if (emailFolderId == FolderTypes.DRAFTS.toString()) {
+                if (emailFolderId == SpecialFolderTabLabels.DRAFTS.displayName) {
                     val draftMessages = withContext(Dispatchers.IO) {
                         retrieveDraftEmailMessages()
                     }
@@ -470,7 +538,6 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
         }
 
         override fun emailMessageChanged(emailMessage: EmailMessage, type: EmailMessageSubscriber.ChangeType) {
-            sudoApiClientLogger.debug("emailMessageChanged; ${emailMessage.id}; $type")
             launch(Dispatchers.Main) {
                 when (type) {
                     EmailMessageSubscriber.ChangeType.CREATED -> {
@@ -513,7 +580,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
      */
     private fun configureRecyclerView() {
         adapter = EmailMessageAdapter(emailMessageList) { emailMessage ->
-            if (selectedEmailFolder.folderName == FolderTypes.DRAFTS.toString()) {
+            if (selectedEmailFolder.folderName == SpecialFolderTabLabels.DRAFTS.displayName) {
                 navController.navigate(
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToSendEmailMessageFragment(
                         emailAddress = emailAddress,
@@ -609,7 +676,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     /** Sets the selected folder type. */
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
         when (val item = parent.getItemAtPosition(pos)) {
-            FolderTypes.BLOCKLIST.toString() -> {
+            SpecialFolderTabLabels.BLOCKLIST.displayName -> {
                 navController.navigate(
                     EmailMessagesFragmentDirections
                         .actionEmailMessagesFragmentToAddressBlocklistFragment(
@@ -618,13 +685,13 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                         ),
                 )
             }
-            FolderTypes.DRAFTS.toString() -> {
+            SpecialFolderTabLabels.DRAFTS.displayName -> {
                 selectedEmailFolder = EmailFolder(
                     id = "DRAFT_FOLDER",
                     owner = "draftEmailOwnerId",
                     owners = listOf(Owner("draftOwnerEmailId", "DRAFT")),
                     emailAddressId = emailAddressId,
-                    folderName = FolderTypes.DRAFTS.toString(),
+                    folderName = SpecialFolderTabLabels.DRAFTS.displayName,
                     size = 1.0,
                     unseenCount = 1,
                     version = 1,
@@ -633,8 +700,23 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                 )
                 listEmailMessages(item.toString())
             }
+            SpecialFolderTabLabels.CREATE.displayName -> {
+                navController.navigate(
+                    EmailMessagesFragmentDirections
+                        .actionEmailMessagesFragmentToCreateCustomFolderFragment(
+                            emailAddressId,
+                            emailAddress,
+                        ),
+                )
+            }
             else -> {
-                selectedEmailFolder = emailFoldersList.find { it.folderName == item.toString() }!!
+                selectedEmailFolder = emailFoldersList.find {
+                    if (it.customFolderName?.isNotEmpty() == true) {
+                        it.customFolderName == item.toString()
+                    } else {
+                        it.folderName == item.toString()
+                    }
+                }!!
                 listEmailMessages(selectedEmailFolder.id)
             }
         }
@@ -672,7 +754,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             owner = "draftOwnerId",
             owners = listOf(Owner(id = "draftOwnerId", issuer = "drafts")),
             emailAddressId = emailAddressId,
-            folderId = FolderTypes.DRAFTS.toString(),
+            folderId = SpecialFolderTabLabels.DRAFTS.displayName,
             previousFolderId = null,
             seen = true,
             repliedTo = false,

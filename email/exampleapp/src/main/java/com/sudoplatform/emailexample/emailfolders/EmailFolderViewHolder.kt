@@ -1,5 +1,5 @@
 /*
- * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2025 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,5 +20,6 @@ import com.sudoplatform.sudoemail.types.EmailFolder
  */
 class EmailFolderViewHolder(private val row: View?) {
     val label: TextView = row?.findViewById(R.id.textView) as TextView
-    val imageView: ImageView = row?.findViewById(R.id.imageView) as ImageView
+    val deleteImageView: ImageView = row?.findViewById(R.id.deleteImageView) as ImageView
+    val editImageView: ImageView = row?.findViewById(R.id.editImageView) as ImageView
 }

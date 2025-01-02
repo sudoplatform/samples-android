@@ -1,5 +1,5 @@
 /*
- * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2025 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -41,7 +41,7 @@ import kotlin.coroutines.CoroutineContext
  * This [EmailAddressBlocklistFragment] presents a list of blocked email addresses.
  *
  * - Links From:
- *  - [EmailMessagesFragment]: A user chooses selects the "Blocklist" option in the drop down menu.
+ *  - [EmailMessagesFragment]: A user selects the "Blocklist" option in the drop down menu.
  */
 class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
 
