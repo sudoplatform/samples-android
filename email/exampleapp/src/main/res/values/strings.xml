@@ -104,6 +104,7 @@
     <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
     <string name="confirm_delete_custom_folder_title">Delete Custom Folder</string>
     <string name="confirm_delete_custom_folder">Delete this custom folder and all of it\'s messages?</string>
+    <string name="scheduled_at">Sending at %1$s</string>
 
     <!-- EmailAddressSettingsFragment.kt -->
     <string name="loading_email_address_settings">Loading settings</string>
@@ -126,13 +127,19 @@
     <string name="bcc">Bcc:&#xA0;&#xA0;</string>
     <string name="subject">Subject:&#xA0;&#xA0;</string>
     <string name="email_footer">\n\nSent from Sudo Platform Email Sample App</string>
-    <string name="compose_email_message">Compose Email Message</string>
+    <string name="compose_email_message">Compose Message</string>
     <string name="sending">Sending&#8230;</string>
     <string name="sent">Sent!</string>
     <string name="saving">Saving Draft&#8230;</string>
     <string name="saved">Saved!</string>
+    <string name="scheduling">Scheduling...</string>
+    <string name="scheduled">Scheduled!</string>
+    <string name="cancel_scheduling">Canceling...</string>
+    <string name="canceled">Canceled!</string>
     <string name="send_email_message_failure">Failed to send email message</string>
     <string name="save_email_message_failure">Failed to save draft</string>
+    <string name="schedule_email_message_failure">Failed to schedule email message</string>
+    <string name="cancel_scheduled_message_failure">Failed to cancel scheduled message</string>
     <string name="get_email_address_failure">Failed to retrieve email address</string>
     <string name="validate_to_address">Please ensure the to address field is filled out.</string>
     <string name="reply_message">Re: %1$s</string>
@@ -160,5 +167,6 @@
     <string name="recipient_placeholder">Recipient/s</string>
     <string name="subject_placeholder">Subject</string>
     <string name="date_placeholder">Date</string>
+    <string name="scheduled_placeholder">Scheduled</string>
 
 </resources>

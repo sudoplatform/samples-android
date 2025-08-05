@@ -16,6 +16,7 @@ import kotlinx.parcelize.Parcelize
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
+import java.util.Date
 
 @Parcelize
 data class SimplifiedEmailMessage(
@@ -27,6 +28,7 @@ data class SimplifiedEmailMessage(
     val subject: String,
     val body: String,
     val isDraft: Boolean = false,
+    val sendAt: Date? = null,
 ) : Parcelable
 
 /**

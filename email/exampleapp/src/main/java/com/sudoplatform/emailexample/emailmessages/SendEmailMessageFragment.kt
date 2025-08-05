@@ -7,6 +7,8 @@
 package com.sudoplatform.emailexample.emailmessages
 
 import android.app.Activity.RESULT_OK
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
@@ -45,8 +47,10 @@ import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.EmailAttachment
 import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.InternetMessageFormatHeader
+import com.sudoplatform.sudoemail.types.inputs.CancelScheduledDraftMessageInput
 import com.sudoplatform.sudoemail.types.inputs.CreateDraftEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.LookupEmailAddressesPublicInfoInput
+import com.sudoplatform.sudoemail.types.inputs.ScheduleSendDraftMessageInput
 import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.UpdateDraftEmailMessageInput
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +61,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
@@ -149,7 +155,15 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         bindingDelegate.attach(FragmentSendEmailMessageBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
             title = getString(R.string.compose_email_message)
-            inflateMenu(R.menu.nav_menu_with_send_save_attachment_buttons)
+            if (args.emailMessageWithBody?.isDraft == true) {
+                if (args.emailMessageWithBody?.sendAt == null) {
+                    inflateMenu(R.menu.nav_menu_compose_draft)
+                } else {
+                    inflateMenu(R.menu.nav_menu_compose_scheduled_draft)
+                }
+            } else {
+                inflateMenu(R.menu.nav_menu_compose)
+            }
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.send -> {
@@ -160,6 +174,12 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     }
                     R.id.attachment -> {
                         launchFilePicker()
+                    }
+                    R.id.schedule_send -> {
+                        launchSendAtPicker()
+                    }
+                    R.id.cancel_schedule -> {
+                        cancelScheduledDraftMessage()
                     }
                 }
                 true
@@ -309,6 +329,74 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { saveDraftEmailMessage() },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            }
+            hideLoading()
+        }
+    }
+
+    private fun scheduleSendDraftMessage(id: String, sendAt: Date) {
+        launch {
+            try {
+                showLoading(R.string.scheduling)
+                withContext(Dispatchers.IO) {
+                    val input = ScheduleSendDraftMessageInput(
+                        id = id,
+                        emailAddressId = emailAddressId,
+                        sendAt = sendAt,
+                    )
+                    app.sudoEmailClient.scheduleSendDraftMessage(
+                        input = input,
+                    )
+                }
+                Toast.makeText(context, getString(R.string.scheduled), Toast.LENGTH_SHORT).show()
+                navController.navigate(
+                    SendEmailMessageFragmentDirections
+                        .actionSendEmailMessageFragmentToEmailMessagesFragment(
+                            emailAddress,
+                            emailAddressId,
+                        ),
+                )
+            } catch (e: SudoEmailClient.EmailMessageException) {
+                showAlertDialog(
+                    titleResId = R.string.schedule_email_message_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { scheduleSendDraftMessage(id, sendAt) },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            }
+            hideLoading()
+        }
+    }
+
+    private fun cancelScheduledDraftMessage() {
+        val id = args.emailMessageWithBody?.id ?: return
+        launch {
+            try {
+                showLoading(R.string.cancel_scheduling)
+                withContext(Dispatchers.IO) {
+                    val input = CancelScheduledDraftMessageInput(
+                        id = id,
+                        emailAddressId = emailAddressId,
+                    )
+                    app.sudoEmailClient.cancelScheduledDraftMessage(input)
+                }
+                Toast.makeText(context, getString(R.string.canceled), Toast.LENGTH_SHORT).show()
+                navController.navigate(
+                    SendEmailMessageFragmentDirections
+                        .actionSendEmailMessageFragmentToEmailMessagesFragment(
+                            emailAddress,
+                            emailAddressId,
+                        ),
+                )
+            } catch (e: SudoEmailClient.EmailMessageException) {
+                showAlertDialog(
+                    titleResId = R.string.cancel_scheduled_message_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { cancelScheduledDraftMessage() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -485,6 +573,39 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 attachmentsAdapter.notifyDataSetChanged()
             }
         }
+    }
+
+    private fun launchSendAtPicker() {
+        val message = args.emailMessageWithBody
+        if (message == null || !message.isDraft) {
+            return
+        }
+        val now = Calendar.getInstance()
+        val datePicker = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                val timePicker = TimePickerDialog(
+                    requireContext(),
+                    {
+                            _, hourOfDay, minute ->
+                        val cal = Calendar.getInstance()
+                        cal.set(year, month, dayOfMonth, hourOfDay, minute, 0)
+                        cal.set(Calendar.MILLISECOND, 0)
+                        scheduleSendDraftMessage(message.id, cal.time)
+                    },
+                    now.get(Calendar.HOUR_OF_DAY),
+                    now.get(Calendar.MINUTE),
+                    true,
+                )
+                timePicker.setTitle("Select time")
+                timePicker.show()
+            },
+            now.get(Calendar.YEAR),
+            now.get(Calendar.MONTH),
+            now.get(Calendar.DAY_OF_MONTH),
+        )
+        datePicker.setTitle("Select when to send the email")
+        datePicker.show()
     }
 
     /**

@@ -44,6 +44,7 @@ class CreateSudoRobot : BaseRobot() {
             navigateToSudosScreen()
         }
         sudos {
+            waitForLoading()
             navigateToCreateSudoScreen()
         }
         createSudo {

@@ -41,7 +41,7 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
         }
     }
 
-    fun bind(emailMessage: EmailMessage) {
+    fun bind(emailMessage: EmailMessage, scheduledAt: Date? = null) {
         val encryptionIndicator = if (emailMessage.encryptionStatus === EncryptionStatus.ENCRYPTED) "🔒 " else ""
         if (emailMessage.hasAttachments) binding.imageView.visibility = View.VISIBLE else binding.imageView.visibility = View.GONE
         if (emailMessage.direction == Direction.INBOUND) {
@@ -60,6 +60,14 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
                 emailMessage.to.joinToString { it.toString() }, encryptionIndicator,
             )
         }
+        if (scheduledAt != null) {
+            binding.scheduledView.visibility = View.VISIBLE
+            binding.scheduledLabel.visibility = View.VISIBLE
+            binding.scheduledLabel.text = binding.root.context.getString(R.string.scheduled_at, formatDateTime(scheduledAt))
+        } else {
+            binding.scheduledView.visibility = View.GONE
+            binding.scheduledLabel.visibility = View.GONE
+        }
         binding.subjectLabel.text = emailMessage.subject ?: binding.root.context.getString(R.string.no_subject)
         binding.dateLabel.text = formatDate(emailMessage.createdAt)
     }
@@ -72,5 +80,15 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
      */
     private fun formatDate(date: Date): String {
         return DateFormat.format("MM/dd/yyyy", date).toString()
+    }
+
+    /**
+     * Formats a [Date] to a presentable String with 24 hour formatted time.
+     *
+     * @param date [Date] The [Date] to be formatted.
+     * @return A presentable [String] containing the date.
+     */
+    private fun formatDateTime(date: Date): String {
+        return DateFormat.format("MM/dd/yyyy HH:mm", date).toString()
     }
 }

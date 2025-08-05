@@ -47,12 +47,17 @@ import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.EncryptionStatus
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.Owner
+import com.sudoplatform.sudoemail.types.ScheduledDraftMessage
+import com.sudoplatform.sudoemail.types.ScheduledDraftMessageState
 import com.sudoplatform.sudoemail.types.State
 import com.sudoplatform.sudoemail.types.inputs.DeleteCustomEmailFolderInput
 import com.sudoplatform.sudoemail.types.inputs.DeleteDraftEmailMessagesInput
 import com.sudoplatform.sudoemail.types.inputs.GetDraftEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailFoldersForEmailAddressIdInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailMessagesForEmailFolderIdInput
+import com.sudoplatform.sudoemail.types.inputs.ListScheduledDraftMessagesForEmailAddressIdInput
+import com.sudoplatform.sudoemail.types.inputs.NotEqualStateFilter
+import com.sudoplatform.sudoemail.types.inputs.ScheduledDraftMessageFilterInput
 import com.sudoplatform.sudoemail.types.inputs.UpdateEmailMessagesInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -114,6 +119,9 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
 
     /** A mutable list of [SimplifiedEmailMessage]s. */
     private var draftEmailMessageList = mutableListOf<SimplifiedEmailMessage>()
+
+    /** A mutable list of [ScheduledDraftMessage]s. */
+    private var scheduledDraftMessageList = mutableListOf<ScheduledDraftMessage>()
 
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: EmailMessagesFragmentArgs by navArgs()
@@ -319,12 +327,22 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                     val draftMessages = withContext(Dispatchers.IO) {
                         retrieveDraftEmailMessages()
                     }
+                    var scheduledDrafts: List<ScheduledDraftMessage> = emptyList()
+                    if (draftMessages.isNotEmpty()) {
+                        scheduledDrafts = withContext(Dispatchers.IO) {
+                            listScheduledDrafts()
+                        }
+                        scheduledDraftMessageList.clear()
+                        scheduledDraftMessageList.addAll(scheduledDrafts)
+                    }
                     emailMessageList.clear()
                     draftMessages.forEach { message ->
+                        val sendAt = scheduledDraftMessageList.find { it.id == message.id }?.sendAt
                         emailMessageList.add(transformDraftToEmailMessage(message))
                         draftEmailMessageList.add(
                             transformDraftToSimplifiedEmailMessage(
                                 message,
+                                sendAt,
                             ),
                         )
                     }
@@ -546,6 +564,12 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
                             (emailMessage.direction == Direction.OUTBOUND && selectedEmailFolder.id.contains("SENT"))
                         ) {
                             emailMessageList.add(emailMessage)
+                            // Check if new message was a scheduled draft. If so, remove the draft and the schedule from lists
+                            val scheduledDraft = scheduledDraftMessageList.find { it.id == emailMessage.id }
+                            if (scheduledDraft != null) {
+                                scheduledDraftMessageList.remove(scheduledDraft)
+                                draftEmailMessageList.removeIf { it.id == emailMessage.id }
+                            }
                         }
                     }
                     EmailMessageSubscriber.ChangeType.UPDATED -> {
@@ -579,7 +603,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
      * item select events to navigate to the [ReadEmailMessageFragment].
      */
     private fun configureRecyclerView() {
-        adapter = EmailMessageAdapter(emailMessageList) { emailMessage ->
+        adapter = EmailMessageAdapter(emailMessageList, scheduledDraftMessageList) { emailMessage ->
             if (selectedEmailFolder.folderName == SpecialFolderTabLabels.DRAFTS.displayName) {
                 navController.navigate(
                     EmailMessagesFragmentDirections.actionEmailMessagesFragmentToSendEmailMessageFragment(
@@ -741,6 +765,26 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
         }
     }
 
+    /** Retrieves the list of [ScheduledDraftMessage]s for the email address, getting multiple pages if needed */
+    private suspend fun listScheduledDrafts(): List<ScheduledDraftMessage> {
+        val scheduledDrafts = mutableListOf<ScheduledDraftMessage>()
+        var nextToken: String? = null
+        do {
+            val result = app.sudoEmailClient.listScheduledDraftMessagesForEmailAddressId(
+                ListScheduledDraftMessagesForEmailAddressIdInput(
+                    emailAddressId = emailAddressId,
+                    nextToken = nextToken,
+                    filter = ScheduledDraftMessageFilterInput(
+                        state = NotEqualStateFilter(notEqual = ScheduledDraftMessageState.CANCELLED),
+                    ),
+                ),
+            )
+            scheduledDrafts.addAll(result.items)
+            nextToken = result.nextToken
+        } while (nextToken != null)
+        return scheduledDrafts
+    }
+
     /**
      * Create a dummy [EmailMessage] object based on a [DraftEmailMessageWithContent].
      *
@@ -780,7 +824,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
     }
 
     /** Create a dummy [SimplifiedEmailMessage] object based on a [DraftEmailMessageWithContent] */
-    private fun transformDraftToSimplifiedEmailMessage(draft: DraftEmailMessageWithContent): SimplifiedEmailMessage {
+    private fun transformDraftToSimplifiedEmailMessage(draft: DraftEmailMessageWithContent, sendAt: Date? = null): SimplifiedEmailMessage {
         val rfc822Message = Rfc822MessageParser.parseRfc822Data(draft.rfc822Data)
         return SimplifiedEmailMessage(
             id = draft.id,
@@ -791,6 +835,7 @@ class EmailMessagesFragment : Fragment(), CoroutineScope, AdapterView.OnItemSele
             subject = rfc822Message.subject,
             body = rfc822Message.body,
             isDraft = true,
+            sendAt = sendAt,
         )
     }
 }

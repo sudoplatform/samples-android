@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="90dp"
     android:background="@android:color/white"
     android:layout_marginBottom="2dp"
     android:orientation="horizontal">
@@ -17,12 +17,11 @@
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="95dp"
-            android:layout_marginTop="25dp"
             app:srcCompat="@drawable/ic_baseline_attach_file_24px" />
 
     </RelativeLayout>
@@ -78,6 +77,34 @@
             android:text="@string/date_placeholder"
             android:textColor="@android:color/black"
             android:textSize="12sp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/scheduledLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="40dp"
+            android:layout_marginStart="30dp"
+            android:layout_alignParentBottom="true"
+            android:lines="1"
+            android:text="@string/scheduled_placeholder"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/scheduledView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="5dp"
+            app:srcCompat="@drawable/ic_baseline_access_time_blue_24px" />
 
     </RelativeLayout>
 
