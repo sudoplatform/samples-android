@@ -19,7 +19,6 @@ fun sudos(func: SudosRobot.() -> Unit) = SudosRobot().apply { func() }
  * Testing robot that manages the Sudos screen.
  */
 class SudosRobot : BaseRobot() {
-
     private val toolbar = withId(R.id.toolbar)
     private val createSudoButton = withId(R.id.createSudoButton)
     private val sudoRecyclerView = withId(R.id.sudoRecyclerView)

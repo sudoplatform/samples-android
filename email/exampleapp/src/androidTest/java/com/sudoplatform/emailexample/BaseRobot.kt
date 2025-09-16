@@ -40,9 +40,11 @@ import org.hamcrest.Matcher
  * Base class of the visual testing robots.
  */
 open class BaseRobot {
-
     // Assumes that the view is visible on screen.
-    fun replaceText(matcher: Matcher<View>, text: String) {
+    fun replaceText(
+        matcher: Matcher<View>,
+        text: String,
+    ) {
         onView(matcher)
             .perform(click())
             .perform(replaceText(text))
@@ -51,7 +53,10 @@ open class BaseRobot {
     }
 
     // Assumes that the view is visible on screen.
-    fun fillEditText(resourceId: Int, text: String) {
+    fun fillEditText(
+        resourceId: Int,
+        text: String,
+    ) {
         onView(withId(resourceId))
             .perform(click())
             .perform(typeText(text))
@@ -60,7 +65,10 @@ open class BaseRobot {
     }
 
     // Assumes that the view is visible on screen.
-    fun fillText(matcher: Matcher<View>, text: String) {
+    fun fillText(
+        matcher: Matcher<View>,
+        text: String,
+    ) {
         onView(matcher)
             .perform(click())
             .perform(typeText(text))
@@ -90,25 +98,38 @@ open class BaseRobot {
     }
 
     // Navigate via the drawer
-    fun selectNavigationDrawerDestination(matcher: Matcher<View>, resourceId: Int) {
+    fun selectNavigationDrawerDestination(
+        matcher: Matcher<View>,
+        resourceId: Int,
+    ) {
         onView(matcher)
             .perform(navigateTo(resourceId))
     }
 
     // Scroll to the View in the Recycler View
-    fun scrollToViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
+    fun scrollToViewInRecyclerView(
+        recyclerViewId: Int,
+        matcher: Matcher<View>,
+    ) {
         onView(withId(recyclerViewId))
             .perform(scrollTo<ViewHolder>(matcher))
     }
 
     // Click on the View in the Recycler View
-    fun clickViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
+    fun clickViewInRecyclerView(
+        recyclerViewId: Int,
+        matcher: Matcher<View>,
+    ) {
         onView(withId(recyclerViewId))
             .perform(actionOnItem<ViewHolder>(matcher, click()))
     }
 
     // Check that the recycler view has the minimum amount of items specified
-    fun checkRecyclerViewHasMinimumItemAmount(matcher: Matcher<View>, minimumAmount: Int, timeout: Long = 10_000L) {
+    fun checkRecyclerViewHasMinimumItemAmount(
+        matcher: Matcher<View>,
+        minimumAmount: Int,
+        timeout: Long = 10_000L,
+    ) {
         val retryInterval = 100L // 100 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -142,7 +163,10 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+    fun waitForViewToDisplay(
+        matcher: Matcher<View>,
+        timeout: Long = 10_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -161,7 +185,10 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToNotDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+    fun waitForViewToNotDisplay(
+        matcher: Matcher<View>,
+        timeout: Long = 10_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -183,21 +210,24 @@ open class BaseRobot {
     }
 
     // Perform a delay when executing an action on a view.
-    fun waitFor(delay: Long): ViewAction {
-        return object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return isRoot()
-            }
-            override fun getDescription(): String {
-                return "wait for " + delay + "milliseconds"
-            }
-            override fun perform(uiController: UiController?, view: View?) {
+    fun waitFor(delay: Long): ViewAction =
+        object : ViewAction {
+            override fun getConstraints(): Matcher<View> = isRoot()
+
+            override fun getDescription(): String = "wait for " + delay + "milliseconds"
+
+            override fun perform(
+                uiController: UiController?,
+                view: View?,
+            ) {
                 uiController?.loopMainThreadForAtLeast(delay)
             }
         }
-    }
 
-    fun pressBackUntilViewIsDisplayed(matcher: Matcher<View>, timeout: Long = 5_000L) {
+    fun pressBackUntilViewIsDisplayed(
+        matcher: Matcher<View>,
+        timeout: Long = 5_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         Thread.sleep(1_000L)
         for (x in 0..timeout step retryInterval) {
@@ -215,18 +245,21 @@ open class BaseRobot {
     // Matcher used to retrieve the text from a TextView.
     fun getTextFromTextView(matcher: ViewInteraction): String {
         var text = String()
-        matcher.perform(object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return ViewMatchers.isAssignableFrom(TextView::class.java)
-            }
-            override fun getDescription(): String {
-                return "Get text from the view"
-            }
-            override fun perform(uiController: UiController, view: View) {
-                val textView = view as TextView
-                text = textView.text.toString()
-            }
-        })
+        matcher.perform(
+            object : ViewAction {
+                override fun getConstraints(): Matcher<View> = ViewMatchers.isAssignableFrom(TextView::class.java)
+
+                override fun getDescription(): String = "Get text from the view"
+
+                override fun perform(
+                    uiController: UiController,
+                    view: View,
+                ) {
+                    val textView = view as TextView
+                    text = textView.text.toString()
+                }
+            },
+        )
         return text
     }
 }

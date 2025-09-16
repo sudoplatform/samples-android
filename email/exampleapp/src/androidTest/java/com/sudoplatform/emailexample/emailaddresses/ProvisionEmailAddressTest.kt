@@ -28,7 +28,6 @@ import java.util.UUID
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ProvisionEmailAddressTest {
-
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 

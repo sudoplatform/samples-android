@@ -21,28 +21,31 @@ import com.sudoplatform.sudoemail.types.EmailAddress
  *
  * @property binding [LayoutItemCellBinding] The [EmailAddress] item view binding component.
  */
-class EmailAddressViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class EmailAddressViewHolder(
+    private val binding: LayoutItemCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): EmailAddressViewHolder {
-            val binding = LayoutItemCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutItemCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return EmailAddressViewHolder(binding)
         }
     }
 
     fun bind(emailAddress: EmailAddress) {
         if (emailAddress.alias != null) {
-            binding.name.text = binding.root.context.getString(
-                R.string.email_address_with_display_name,
-                emailAddress.alias,
-                emailAddress.emailAddress,
-            )
+            binding.name.text =
+                binding.root.context.getString(
+                    R.string.email_address_with_display_name,
+                    emailAddress.alias,
+                    emailAddress.emailAddress,
+                )
         } else {
             binding.name.text = emailAddress.emailAddress
         }

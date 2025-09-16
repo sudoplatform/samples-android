@@ -26,39 +26,47 @@ import java.util.Date
  *
  * @property binding [LayoutEmailMessageCellBinding] The [EmailMessage] item view binding component.
  */
-class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class EmailMessageViewHolder(
+    private val binding: LayoutEmailMessageCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): EmailMessageViewHolder {
-            val binding = LayoutEmailMessageCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutEmailMessageCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return EmailMessageViewHolder(binding)
         }
     }
 
-    fun bind(emailMessage: EmailMessage, scheduledAt: Date? = null) {
+    fun bind(
+        emailMessage: EmailMessage,
+        scheduledAt: Date? = null,
+    ) {
         val encryptionIndicator = if (emailMessage.encryptionStatus === EncryptionStatus.ENCRYPTED) "🔒 " else ""
         if (emailMessage.hasAttachments) binding.imageView.visibility = View.VISIBLE else binding.imageView.visibility = View.GONE
         if (emailMessage.direction == Direction.INBOUND) {
-            binding.recipientLabel.text = binding.root.context.getString(
-                R.string.from_recipient,
-                if (emailMessage.from[0].displayName == "null") {
-                    emailMessage.from[0].emailAddress
-                } else {
-                    emailMessage.from[0].toString()
-                },
-                encryptionIndicator,
-            )
+            binding.recipientLabel.text =
+                binding.root.context.getString(
+                    R.string.from_recipient,
+                    if (emailMessage.from[0].displayName == "null") {
+                        emailMessage.from[0].emailAddress
+                    } else {
+                        emailMessage.from[0].toString()
+                    },
+                    encryptionIndicator,
+                )
         } else {
-            binding.recipientLabel.text = binding.root.context.getString(
-                R.string.to_recipient,
-                emailMessage.to.joinToString { it.toString() }, encryptionIndicator,
-            )
+            binding.recipientLabel.text =
+                binding.root.context.getString(
+                    R.string.to_recipient,
+                    emailMessage.to.joinToString { it.toString() },
+                    encryptionIndicator,
+                )
         }
         if (scheduledAt != null) {
             binding.scheduledView.visibility = View.VISIBLE
@@ -78,9 +86,7 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
      * @param date [Date] The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
-    private fun formatDate(date: Date): String {
-        return DateFormat.format("MM/dd/yyyy", date).toString()
-    }
+    private fun formatDate(date: Date): String = DateFormat.format("MM/dd/yyyy", date).toString()
 
     /**
      * Formats a [Date] to a presentable String with 24 hour formatted time.
@@ -88,7 +94,5 @@ class EmailMessageViewHolder(private val binding: LayoutEmailMessageCellBinding)
      * @param date [Date] The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
-    private fun formatDateTime(date: Date): String {
-        return DateFormat.format("MM/dd/yyyy HH:mm", date).toString()
-    }
+    private fun formatDateTime(date: Date): String = DateFormat.format("MM/dd/yyyy HH:mm", date).toString()
 }

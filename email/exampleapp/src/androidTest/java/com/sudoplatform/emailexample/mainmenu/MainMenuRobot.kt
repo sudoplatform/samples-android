@@ -22,7 +22,6 @@ fun mainMenu(func: MainMenuRobot.() -> Unit) = MainMenuRobot().apply { func() }
  * Testing robot that manages the Main Menu screen.
  */
 class MainMenuRobot : BaseRobot() {
-
     private val toolbar = withId(R.id.toolbar)
     private val toolbarDeregisterButton = withId(R.id.deregister)
     private val loadingDialog = withId(R.id.progressBar)

@@ -31,8 +31,9 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
 
-class App : Application(), CoroutineScope {
-
+class App :
+    Application(),
+    CoroutineScope {
     companion object {
         /** Name of the preference set that holds sign in information. */
         const val SIGN_IN_PREFERENCES = "SignIn"
@@ -40,7 +41,7 @@ class App : Application(), CoroutineScope {
         /** True if Federated Single On was used. */
         const val FSSO_USED_PREFERENCE = "usedFSSO"
 
-        const val version = "5.0.0"
+        const val VERSION = "5.0.0"
 
         internal lateinit var instance: App
     }
@@ -68,36 +69,43 @@ class App : Application(), CoroutineScope {
         logger = Logger("emailExample", AndroidUtilsLogDriver(LogLevel.DEBUG))
 
         // Create an instance of SudoUserClient to perform registration and sign in.
-        sudoUserClient = SudoUserClient.builder(this)
-            .setNamespace("sudo-test")
-            .setLogger(logger)
-            .build()
+        sudoUserClient =
+            SudoUserClient
+                .builder(this)
+                .setNamespace("sudo-test")
+                .setLogger(logger)
+                .build()
 
         // Create an instance of SudoProfilesClient to perform creation, deletion and modification
         // of Sudos.
         val blobURI = Uri.fromFile(cacheDir)
-        sudoProfilesClient = SudoProfilesClient
-            .builder(this, sudoUserClient, blobURI)
-            .setLogger(logger)
-            .build()
+        sudoProfilesClient =
+            SudoProfilesClient
+                .builder(this, sudoUserClient, blobURI)
+                .setLogger(logger)
+                .build()
 
         // Create an instance of KeyManager to perform key management.
         keyManager = KeyManagerFactory(this).createAndroidKeyManager() as KeyManager
 
         // Create an instance of the SudoEntitlementsClient to redeem and check what resources the
         // user is entitled to use.
-        sudoEntitlementsClient = SudoEntitlementsClient.builder()
-            .setContext(this)
-            .setSudoUserClient(sudoUserClient)
-            .setLogger(logger)
-            .build()
+        sudoEntitlementsClient =
+            SudoEntitlementsClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .setLogger(logger)
+                .build()
 
         // Create an instance of SudoEmailClient to perform email address lifecycle operations and
         // sending/receiving of email messages.
-        sudoEmailClient = SudoEmailClient.builder()
-            .setContext(this)
-            .setSudoUserClient(sudoUserClient)
-            .build()
+        sudoEmailClient =
+            SudoEmailClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .build()
 
         // Create an instance of EmailExampleNotificationHandler to handle subscribing and
         // unsubscribing from notifications coming from the email service.
@@ -105,18 +113,22 @@ class App : Application(), CoroutineScope {
 
         // Create an instance of SudoEmailNotifiableClient to process notifications coming from
         // the email service.
-        sudoEmailNotifiableClient = SudoEmailNotifiableClient.builder()
-            .setContext(this)
-            .setNotificationHandler(notificationHandler)
-            .build()
+        sudoEmailNotifiableClient =
+            SudoEmailNotifiableClient
+                .builder()
+                .setContext(this)
+                .setNotificationHandler(notificationHandler)
+                .build()
 
         // Create an instance of SudoNotificationClient to manage notification settings.
-        sudoNotificationClient = SudoNotificationClient.builder()
-            .setContext(this)
-            .setSudoUserClient(sudoUserClient)
-            .setLogger(logger)
-            .setNotifiableClients(listOf(sudoEmailNotifiableClient))
-            .build()
+        sudoNotificationClient =
+            SudoNotificationClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .setLogger(logger)
+                .setNotifiableClients(listOf(sudoEmailNotifiableClient))
+                .build()
     }
 
     @Throws(SudoUserException::class)

@@ -59,8 +59,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [SendEmailMessageFragment]: If a user taps the "Reply" button on the top right of the toolbar,
  *   the [SendEmailMessageFragment] will be presented so that a user can compose a reply email message.
  */
-class ReadEmailMessageFragment : Fragment(), CoroutineScope {
-
+class ReadEmailMessageFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -158,7 +159,10 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -178,28 +182,32 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading(R.string.reading)
-                val input = GetEmailMessageWithBodyInput(
-                    id = emailMessage.id,
-                    emailAddressId = emailAddressId,
-                )
-                val body = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.getEmailMessageWithBody(input)
-                }
-                if (body != null) {
-                    val renderedBody = if (body.isHtml) {
-                        Html.fromHtml(body.body, Html.FROM_HTML_MODE_LEGACY).toString()
-                    } else {
-                        body.body
-                    }
-                    emailMessageWithBody = SimplifiedEmailMessage(
-                        id = body.id,
-                        from = emailMessage.from.map { it.toString() },
-                        to = emailMessage.to.map { it.toString() },
-                        cc = emailMessage.cc.map { it.toString() },
-                        bcc = emailMessage.bcc.map { it.toString() },
-                        subject = emailMessage.subject ?: "<No subject>",
-                        body = renderedBody,
+                val input =
+                    GetEmailMessageWithBodyInput(
+                        id = emailMessage.id,
+                        emailAddressId = emailAddressId,
                     )
+                val body =
+                    withContext(Dispatchers.IO) {
+                        app.sudoEmailClient.getEmailMessageWithBody(input)
+                    }
+                if (body != null) {
+                    val renderedBody =
+                        if (body.isHtml) {
+                            Html.fromHtml(body.body, Html.FROM_HTML_MODE_LEGACY).toString()
+                        } else {
+                            body.body
+                        }
+                    emailMessageWithBody =
+                        SimplifiedEmailMessage(
+                            id = body.id,
+                            from = emailMessage.from.map { it.toString() },
+                            to = emailMessage.to.map { it.toString() },
+                            cc = emailMessage.cc.map { it.toString() },
+                            bcc = emailMessage.bcc.map { it.toString() },
+                            subject = emailMessage.subject ?: "<No subject>",
+                            body = renderedBody,
+                        )
                     emailAttachmentList.addAll(body.attachments)
                     configureEmailMessageContents(emailMessage)
                 }
@@ -269,15 +277,16 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     private fun configureEmailMessageContents(emailMessage: EmailMessage) {
         configureRecyclerView()
         binding.dateValue.text = formatDate(emailMessage.createdAt)
-        binding.fromValue.text = if (emailMessage.from.isNotEmpty()) {
-            if (emailMessage.from.first().displayName == "null") {
-                emailMessage.from.first().emailAddress
+        binding.fromValue.text =
+            if (emailMessage.from.isNotEmpty()) {
+                if (emailMessage.from.first().displayName == "null") {
+                    emailMessage.from.first().emailAddress
+                } else {
+                    emailMessage.from.first().toString()
+                }
             } else {
-                emailMessage.from.first().toString()
+                ""
             }
-        } else {
-            ""
-        }
         binding.toValue.text = if (emailMessage.to.isNotEmpty()) emailMessage.to.joinToString("\n") { it.toString() } else ""
         binding.ccValue.text = if (emailMessage.cc.isNotEmpty()) emailMessage.cc.joinToString("\n") { it.toString() } else ""
         binding.subject.text = emailMessage.subject
@@ -289,25 +298,28 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
      * to item select events to launch the Android file viewer.
      */
     private fun configureRecyclerView() {
-        attachmentsAdapter = EmailAttachmentAdapter(emailAttachmentList) { emailAttachment ->
-            val fileName = emailAttachment.fileName
-            val mimeType = emailAttachment.mimeType
-            val data = emailAttachment.data
+        attachmentsAdapter =
+            EmailAttachmentAdapter(emailAttachmentList) { emailAttachment ->
+                val fileName = emailAttachment.fileName
+                val mimeType = emailAttachment.mimeType
+                val data = emailAttachment.data
 
-            val file = File.createTempFile(fileName, null)
-            FileOutputStream(file).use { it.write(data) }
+                val file = File.createTempFile(fileName, null)
+                FileOutputStream(file).use { it.write(data) }
 
-            val contentUri = FileProvider.getUriForFile(
-                requireContext(),
-                requireContext().packageName + ".fileprovider",
-                file,
-            )
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                setDataAndType(contentUri, mimeType)
+                val contentUri =
+                    FileProvider.getUriForFile(
+                        requireContext(),
+                        requireContext().packageName + ".fileprovider",
+                        file,
+                    )
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        setDataAndType(contentUri, mimeType)
+                    }
+                startActivity(intent)
             }
-            startActivity(intent)
-        }
 
         binding.emailAttachmentRecyclerView.adapter = attachmentsAdapter
         binding.emailAttachmentRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -319,9 +331,7 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
      * @param date [Date] The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
-    private fun formatDate(date: Date): String {
-        return DateFormat.format("MM/dd/yyyy", date).toString()
-    }
+    private fun formatDate(date: Date): String = DateFormat.format("MM/dd/yyyy", date).toString()
 
     /**
      * Sets toolbar items to enabled/disabled.
@@ -333,7 +343,9 @@ class ReadEmailMessageFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         binding.contents.visibility = View.GONE

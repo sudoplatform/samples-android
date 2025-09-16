@@ -21,17 +21,19 @@ import com.sudoplatform.sudoprofiles.Sudo
  *
  * @property binding [LayoutItemCellBinding] The [Sudo] item view binding component.
  */
-class SudoViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class SudoViewHolder(
+    private val binding: LayoutItemCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): SudoViewHolder {
-            val binding = LayoutItemCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutItemCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return SudoViewHolder(binding)
         }
     }

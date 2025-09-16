@@ -22,7 +22,6 @@ fun emailMessages(func: EmailMessagesRobot.() -> Unit) = EmailMessagesRobot().ap
  * Testing robot that manages the email messages screen.
  */
 class EmailMessagesRobot : BaseRobot() {
-
     private val toolbarComposeButton = withId(R.id.compose)
     private val emailMessagesRecyclerView = withId(R.id.emailMessageRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)

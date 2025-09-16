@@ -24,18 +24,20 @@ class EmailMessageAdapter(
     private val scheduledMessages: List<ScheduledDraftMessage>,
     private val itemSelectedListener: (EmailMessage) -> Unit,
 ) : RecyclerView.Adapter<EmailMessageViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailMessageViewHolder {
-        return EmailMessageViewHolder.inflate(
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): EmailMessageViewHolder =
+        EmailMessageViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: EmailMessageViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: EmailMessageViewHolder,
+        position: Int,
+    ) {
         val emailMessage = items[position]
         val scheduledAt = scheduledMessages.find { it.id == emailMessage.id }?.sendAt
         holder.bind(emailMessage, scheduledAt)

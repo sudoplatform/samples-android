@@ -52,8 +52,10 @@ enum class RegistrationMethod { TEST, FSSO }
  *  - [MainMenuFragment]: If a user successfully registers or logs in, the [MainMenuFragment] will
  *   be presented so that the user can view and create a Sudo.
  */
-class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedListener {
-
+class RegisterFragment :
+    Fragment(),
+    CoroutineScope,
+    AdapterView.OnItemSelectedListener {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -88,7 +90,10 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -100,11 +105,12 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 getString(R.string.federated_signin),
             ),
         )
-        registrationMethodAdapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            registrationMethodList,
-        )
+        registrationMethodAdapter =
+            ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                registrationMethodList,
+            )
         registrationMethodAdapter.notifyDataSetChanged()
         binding.registrationMethodSpinner.adapter = registrationMethodAdapter
 
@@ -154,13 +160,14 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         if (federatedSignInUri != null) {
             showLoading()
             launch {
-                val result = withContext(Dispatchers.IO) {
-                    suspendCoroutine { cont ->
-                        app.sudoUserClient.processFederatedSignInTokens(federatedSignInUri) { result ->
-                            cont.resume(result)
+                val result =
+                    withContext(Dispatchers.IO) {
+                        suspendCoroutine { cont ->
+                            app.sudoUserClient.processFederatedSignInTokens(federatedSignInUri) { result ->
+                                cont.resume(result)
+                            }
                         }
                     }
-                }
                 when (result) {
                     is FederatedSignInResult.Success -> {
                         setUsedFssoFlag(true)
@@ -274,11 +281,12 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 } catch (e: SudoUserException) {
                     hideLoading()
                     setItemsEnabled(true)
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.signin_failure, e.localizedMessage),
-                        Toast.LENGTH_LONG,
-                    ).show()
+                    Toast
+                        .makeText(
+                            requireContext(),
+                            getString(R.string.signin_failure, e.localizedMessage),
+                            Toast.LENGTH_LONG,
+                        ).show()
                 }
             }
         }
@@ -305,13 +313,14 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             return
         }
 
-        val authProvider = TESTAuthenticationProvider(
-            "testRegisterAudience",
-            privateKey,
-            null,
-            app.keyManager,
-            keyId,
-        )
+        val authProvider =
+            TESTAuthenticationProvider(
+                "testRegisterAudience",
+                privateKey,
+                null,
+                app.keyManager,
+                keyId,
+            )
         // register with auth provider
         launch {
             try {
@@ -331,11 +340,12 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     /** Displays a Toast with a registration failure. */
     private val showRegistrationFailure = { e: Throwable ->
         hideLoading()
-        Toast.makeText(
-            requireContext(),
-            getString(R.string.register_failure, e.localizedMessage),
-            Toast.LENGTH_LONG,
-        ).show()
+        Toast
+            .makeText(
+                requireContext(),
+                getString(R.string.register_failure, e.localizedMessage),
+                Toast.LENGTH_LONG,
+            ).show()
     }
 
     /**
@@ -366,8 +376,14 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     }
 
     /** Sets the registration method */
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+    override fun onItemSelected(
+        parent: AdapterView<*>,
+        view: View?,
+        pos: Int,
+        id: Long,
+    ) {
         selectedRegistrationMethod = if (pos == 0) RegistrationMethod.TEST else RegistrationMethod.FSSO
     }
+
     override fun onNothingSelected(parent: AdapterView<*>) { /* no-op */ }
 }

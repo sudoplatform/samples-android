@@ -20,22 +20,27 @@ import com.sudoplatform.emailexample.databinding.LayoutBlockedAddressCellBinding
  * @property binding [LayoutBlockedAddressCellBinding] The blocked email address item view binding
  *  component.
  */
-class EmailAddressBlocklistViewHolder(private val binding: LayoutBlockedAddressCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class EmailAddressBlocklistViewHolder(
+    private val binding: LayoutBlockedAddressCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): EmailAddressBlocklistViewHolder {
-            val binding = LayoutBlockedAddressCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutBlockedAddressCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return EmailAddressBlocklistViewHolder(binding)
         }
     }
 
-    fun bind(address: String, setItemSelected: (Boolean) -> Unit) {
+    fun bind(
+        address: String,
+        setItemSelected: (Boolean) -> Unit,
+    ) {
         binding.name.text = address
         binding.checkbox.isChecked = false
         binding.checkbox.setOnClickListener {

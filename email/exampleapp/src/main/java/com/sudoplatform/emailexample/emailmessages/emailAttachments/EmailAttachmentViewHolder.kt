@@ -22,20 +22,21 @@ import com.sudoplatform.sudoemail.types.EmailAttachment
  * @property binding [LayoutEmailAttachmentCellBinding] The [EmailAttachment] item view binding
  *  component.
  */
-class EmailAttachmentViewHolder(private val binding: LayoutEmailAttachmentCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class EmailAttachmentViewHolder(
+    private val binding: LayoutEmailAttachmentCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
-
         const val MAX_FILE_NAME_LENGTH = 25
 
         fun inflate(parent: ViewGroup): EmailAttachmentViewHolder {
-            val binding = LayoutEmailAttachmentCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutEmailAttachmentCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return EmailAttachmentViewHolder(binding)
         }
     }
@@ -48,17 +49,20 @@ class EmailAttachmentViewHolder(private val binding: LayoutEmailAttachmentCellBi
         }
 
         val mimeType = emailAttachment.mimeType
-        val icon = when {
-            mimeType.contains("image/") -> R.drawable.ic_baseline_attachment_image_24px
-            mimeType.contains("video/") -> R.drawable.ic_baseline_attachment_media_24px
-            mimeType.contains("application/pdf") -> R.drawable.ic_baseline_attachment_pdf_24px
-            else -> R.drawable.ic_baseline_attachment_file_24px
-        }
+        val icon =
+            when {
+                mimeType.contains("image/") -> R.drawable.ic_baseline_attachment_image_24px
+                mimeType.contains("video/") -> R.drawable.ic_baseline_attachment_media_24px
+                mimeType.contains("application/pdf") -> R.drawable.ic_baseline_attachment_pdf_24px
+                else -> R.drawable.ic_baseline_attachment_file_24px
+            }
 
         binding.imageView.setImageResource(icon)
         binding.fileName.text = fileName
-        binding.fileSize.text = binding.root.context.resources.getString(
-            R.string.file_size, fileSize.toString(),
-        )
+        binding.fileSize.text =
+            binding.root.context.resources.getString(
+                R.string.file_size,
+                fileSize.toString(),
+            )
     }
 }

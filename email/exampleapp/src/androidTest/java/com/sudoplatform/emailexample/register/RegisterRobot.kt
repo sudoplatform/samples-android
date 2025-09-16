@@ -19,7 +19,6 @@ fun login(func: RegisterRobot.() -> Unit) = RegisterRobot().apply { func() }
  * Testing robot that manages the register/login screen.
  */
 class RegisterRobot : BaseRobot() {
-
     private val registerButton = withId(R.id.buttonRegister)
 
     fun clickOnRegister() {

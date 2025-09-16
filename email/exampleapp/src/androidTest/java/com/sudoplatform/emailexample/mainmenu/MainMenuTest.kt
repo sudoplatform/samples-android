@@ -25,7 +25,6 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class MainMenuTest {
-
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 

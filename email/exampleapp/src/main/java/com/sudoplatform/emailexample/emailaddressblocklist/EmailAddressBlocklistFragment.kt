@@ -43,8 +43,9 @@ import kotlin.coroutines.CoroutineContext
  * - Links From:
  *  - [EmailMessagesFragment]: A user selects the "Blocklist" option in the drop down menu.
  */
-class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
-
+class EmailAddressBlocklistFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -107,7 +108,10 @@ class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -128,9 +132,10 @@ class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val blockedAddresses = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.getEmailAddressBlocklist()
-                }
+                val blockedAddresses =
+                    withContext(Dispatchers.IO) {
+                        app.sudoEmailClient.getEmailAddressBlocklist()
+                    }
                 blockedAddressesList.clear()
                 val cleartextAddresses = mutableListOf<String>()
                 for (blockedAddress in blockedAddresses) {
@@ -195,7 +200,9 @@ class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }
@@ -230,13 +237,14 @@ class EmailAddressBlocklistFragment : Fragment(), CoroutineScope {
      * listens to item select events.
      */
     private fun configureRecyclerView() {
-        adaptor = EmailAddressBlocklistAdaptor(blockedAddressesList) { selected, address ->
-            if (selected) {
-                selectedBlockedAddresses.add(address)
-            } else {
-                selectedBlockedAddresses.remove(address)
+        adaptor =
+            EmailAddressBlocklistAdaptor(blockedAddressesList) { selected, address ->
+                if (selected) {
+                    selectedBlockedAddresses.add(address)
+                } else {
+                    selectedBlockedAddresses.remove(address)
+                }
             }
-        }
         binding.blockedAddressesRecyclerView.adapter = adaptor
         binding.blockedAddressesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }

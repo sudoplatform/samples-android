@@ -49,8 +49,9 @@ import kotlin.coroutines.CoroutineContext
  *   the [EmailAddressSettingsFragment] will be presented so that a user can manage their
  *   notification settings.
  */
-class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
-
+class EmailAddressSettingsFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -113,7 +114,10 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -134,9 +138,10 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.loading_email_address_settings)
 
-                notificationConfiguration = withContext(Dispatchers.IO) {
-                    app.sudoNotificationClient.getNotificationConfiguration(app.deviceInfo)
-                }
+                notificationConfiguration =
+                    withContext(Dispatchers.IO) {
+                        app.sudoNotificationClient.getNotificationConfiguration(app.deviceInfo)
+                    }
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
                     titleResId = R.string.load_email_address_settings_failure,
@@ -176,7 +181,9 @@ class EmailAddressSettingsFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }

@@ -17,19 +17,24 @@ import com.sudoplatform.sudoemail.types.EmailAddress
  * @property items [List<EmailMessage>] List of [EmailAddress] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
-class EmailAddressAdapter(private val items: List<EmailAddress>, private val itemSelectedListener: (EmailAddress) -> Unit) : RecyclerView.Adapter<EmailAddressViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailAddressViewHolder {
-        return EmailAddressViewHolder.inflate(
+class EmailAddressAdapter(
+    private val items: List<EmailAddress>,
+    private val itemSelectedListener: (EmailAddress) -> Unit,
+) : RecyclerView.Adapter<EmailAddressViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): EmailAddressViewHolder =
+        EmailAddressViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: EmailAddressViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: EmailAddressViewHolder,
+        position: Int,
+    ) {
         val emailAddress = items[position]
         holder.bind(emailAddress)
 

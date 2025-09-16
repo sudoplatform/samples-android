@@ -20,16 +20,17 @@ class EmailAddressBlocklistAdaptor(
     private val items: List<String>,
     private val setItemSelected: (Boolean, String) -> Unit,
 ) : RecyclerView.Adapter<EmailAddressBlocklistViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): EmailAddressBlocklistViewHolder = EmailAddressBlocklistViewHolder.inflate(parent)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailAddressBlocklistViewHolder {
-        return EmailAddressBlocklistViewHolder.inflate(parent)
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
-
-    override fun onBindViewHolder(holder: EmailAddressBlocklistViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: EmailAddressBlocklistViewHolder,
+        position: Int,
+    ) {
         val emailAddress = items[position]
 
         holder.bind(emailAddress) {

@@ -82,8 +82,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [EmailMessagesFragment]: If a user successfully sends an email message, they will be returned
  *   to this view.
  */
-class SendEmailMessageFragment : Fragment(), CoroutineScope {
-
+class SendEmailMessageFragment :
+    Fragment(),
+    CoroutineScope {
     companion object {
         /**
          * A delay between executing the address availability checks to allow a
@@ -132,11 +133,12 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
      * Encryption status for each email address ui input.
      * Used to track cases where multiple values need to be verified without stacking requests.
      */
-    private val encryptedInputStatuses: MutableMap<String, Boolean?> = mutableMapOf(
-        "to" to null,
-        "cc" to null,
-        "bcc" to null,
-    )
+    private val encryptedInputStatuses: MutableMap<String, Boolean?> =
+        mutableMapOf(
+            "to" to null,
+            "cc" to null,
+            "bcc" to null,
+        )
 
     /** Id of the email message being replied to. */
     private var replyingMessageId: String? = null
@@ -193,7 +195,10 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         configureFieldListener(binding.toTextView, "to")
@@ -239,20 +244,43 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.sending)
                 withContext(Dispatchers.IO) {
-                    val emailMessageHeader = InternetMessageFormatHeader(
-                        from = EmailMessage.EmailAddress(emailAddress, emailDisplayName),
-                        to = if (binding.toTextView.text.isNotEmpty()) addressesToArray(binding.toTextView.text.toString()) else emptyList(),
-                        cc = if (binding.ccTextView.text.isNotEmpty()) addressesToArray(binding.ccTextView.text.toString()) else emptyList(),
-                        bcc = if (binding.bccTextView.text.isNotEmpty()) addressesToArray(binding.bccTextView.text.toString()) else emptyList(),
-                        replyTo = emptyList(),
-                        subject = binding.subjectTextView.text.toString(),
-                    )
-                    val input = SendEmailMessageInput(
-                        senderEmailAddressId = emailAddressId,
-                        emailMessageHeader = emailMessageHeader,
-                        body = binding.contentBody.text.toString(),
-                        attachments = emailAttachmentList,
-                    )
+                    val emailMessageHeader =
+                        InternetMessageFormatHeader(
+                            from = EmailMessage.EmailAddress(emailAddress, emailDisplayName),
+                            to =
+                                if (binding.toTextView.text.isNotEmpty()) {
+                                    addressesToArray(
+                                        binding.toTextView.text.toString(),
+                                    )
+                                } else {
+                                    emptyList()
+                                },
+                            cc =
+                                if (binding.ccTextView.text.isNotEmpty()) {
+                                    addressesToArray(
+                                        binding.ccTextView.text.toString(),
+                                    )
+                                } else {
+                                    emptyList()
+                                },
+                            bcc =
+                                if (binding.bccTextView.text.isNotEmpty()) {
+                                    addressesToArray(
+                                        binding.bccTextView.text.toString(),
+                                    )
+                                } else {
+                                    emptyList()
+                                },
+                            replyTo = emptyList(),
+                            subject = binding.subjectTextView.text.toString(),
+                        )
+                    val input =
+                        SendEmailMessageInput(
+                            senderEmailAddressId = emailAddressId,
+                            emailMessageHeader = emailMessageHeader,
+                            body = binding.contentBody.text.toString(),
+                            attachments = emailAttachmentList,
+                        )
                     if (!(replyingMessageId.isNullOrBlank())) {
                         input.replyingMessageId = replyingMessageId
                     }
@@ -288,30 +316,36 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.saving)
                 withContext(Dispatchers.IO) {
-                    val rfc822Data = Rfc822MessageFactory.makeRfc822Data(
-                        from = emailAddress,
-                        to = addressesToArray(binding.toTextView.text.toString())
-                            .map { it.toString() },
-                        cc = addressesToArray(binding.ccTextView.text.toString())
-                            .map { it.toString() },
-                        bcc = addressesToArray(binding.bccTextView.text.toString())
-                            .map { it.toString() },
-                        subject = binding.subjectTextView.text.toString(),
-                        body = binding.contentBody.text.toString(),
-                    )
+                    val rfc822Data =
+                        Rfc822MessageFactory.makeRfc822Data(
+                            from = emailAddress,
+                            to =
+                                addressesToArray(binding.toTextView.text.toString())
+                                    .map { it.toString() },
+                            cc =
+                                addressesToArray(binding.ccTextView.text.toString())
+                                    .map { it.toString() },
+                            bcc =
+                                addressesToArray(binding.bccTextView.text.toString())
+                                    .map { it.toString() },
+                            subject = binding.subjectTextView.text.toString(),
+                            body = binding.contentBody.text.toString(),
+                        )
                     val message = args.emailMessageWithBody
                     if (message?.isDraft == true) {
-                        val input = UpdateDraftEmailMessageInput(
-                            rfc822Data = rfc822Data,
-                            senderEmailAddressId = emailAddressId,
-                            id = message.id,
-                        )
+                        val input =
+                            UpdateDraftEmailMessageInput(
+                                rfc822Data = rfc822Data,
+                                senderEmailAddressId = emailAddressId,
+                                id = message.id,
+                            )
                         app.sudoEmailClient.updateDraftEmailMessage(input)
                     } else {
-                        val input = CreateDraftEmailMessageInput(
-                            rfc822Data = rfc822Data,
-                            senderEmailAddressId = emailAddressId,
-                        )
+                        val input =
+                            CreateDraftEmailMessageInput(
+                                rfc822Data = rfc822Data,
+                                senderEmailAddressId = emailAddressId,
+                            )
                         app.sudoEmailClient.createDraftEmailMessage(input)
                     }
                 }
@@ -336,16 +370,20 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         }
     }
 
-    private fun scheduleSendDraftMessage(id: String, sendAt: Date) {
+    private fun scheduleSendDraftMessage(
+        id: String,
+        sendAt: Date,
+    ) {
         launch {
             try {
                 showLoading(R.string.scheduling)
                 withContext(Dispatchers.IO) {
-                    val input = ScheduleSendDraftMessageInput(
-                        id = id,
-                        emailAddressId = emailAddressId,
-                        sendAt = sendAt,
-                    )
+                    val input =
+                        ScheduleSendDraftMessageInput(
+                            id = id,
+                            emailAddressId = emailAddressId,
+                            sendAt = sendAt,
+                        )
                     app.sudoEmailClient.scheduleSendDraftMessage(
                         input = input,
                     )
@@ -377,10 +415,11 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.cancel_scheduling)
                 withContext(Dispatchers.IO) {
-                    val input = CancelScheduledDraftMessageInput(
-                        id = id,
-                        emailAddressId = emailAddressId,
-                    )
+                    val input =
+                        CancelScheduledDraftMessageInput(
+                            id = id,
+                            emailAddressId = emailAddressId,
+                        )
                     app.sudoEmailClient.cancelScheduledDraftMessage(input)
                 }
                 Toast.makeText(context, getString(R.string.canceled), Toast.LENGTH_SHORT).show()
@@ -405,9 +444,7 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     }
 
     /** Validates submitted input form data. */
-    private fun validateFormData(): Boolean {
-        return binding.toTextView.text.isBlank()
-    }
+    private fun validateFormData(): Boolean = binding.toTextView.text.isBlank()
 
     /**
      * Validates that an email address string is correctly formatted.
@@ -467,14 +504,16 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         val emailAddresses = addressesToArray(addresses).map { it.emailAddress }
         val input = LookupEmailAddressesPublicInfoInput(emailAddresses)
 
-        val emailAddressesPublicInfo = withContext(Dispatchers.IO) {
-            app.sudoEmailClient.lookupEmailAddressesPublicInfo(input)
-        }
+        val emailAddressesPublicInfo =
+            withContext(Dispatchers.IO) {
+                app.sudoEmailClient.lookupEmailAddressesPublicInfo(input)
+            }
 
         val resultEmailAddresses = emailAddressesPublicInfo.map { it.emailAddress }
-        val result = emailAddresses.all { emailAddress ->
-            resultEmailAddresses.contains(emailAddress)
-        }
+        val result =
+            emailAddresses.all { emailAddress ->
+                resultEmailAddresses.contains(emailAddress)
+            }
 
         return result
     }
@@ -482,36 +521,57 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     /**
      * Configures a listener on the recipient input fields.
      */
-    private fun configureFieldListener(textView: TextView, fieldName: String) {
-        textView.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) { /* no-op */ }
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { /* no-op */ }
-            var timer = Timer()
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                hideEncryptedIndicatorView()
-                timer.cancel()
-                timer = Timer()
-                timer.schedule(
-                    object : TimerTask() {
-                        override fun run() {
-                            handleEncryptedIndicatorView(
-                                addresses = s?.toString() ?: "",
-                                fieldName = fieldName,
-                            )
-                        }
-                    },
-                    CHECK_DELAY,
-                )
-                encryptedEmailAddressLookupTimer = timer
-            }
-        })
+    private fun configureFieldListener(
+        textView: TextView,
+        fieldName: String,
+    ) {
+        textView.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) { /* no-op */ }
+
+                override fun beforeTextChanged(
+                    p0: CharSequence?,
+                    p1: Int,
+                    p2: Int,
+                    p3: Int,
+                ) { /* no-op */ }
+
+                var timer = Timer()
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int,
+                ) {
+                    hideEncryptedIndicatorView()
+                    timer.cancel()
+                    timer = Timer()
+                    timer.schedule(
+                        object : TimerTask() {
+                            override fun run() {
+                                handleEncryptedIndicatorView(
+                                    addresses = s?.toString() ?: "",
+                                    fieldName = fieldName,
+                                )
+                            }
+                        },
+                        CHECK_DELAY,
+                    )
+                    encryptedEmailAddressLookupTimer = timer
+                }
+            },
+        )
     }
 
     /**
      * Callback provided to each of the text input fields that's invoked when the
      * text value is updated.
      */
-    private fun handleEncryptedIndicatorView(addresses: String, fieldName: String) {
+    private fun handleEncryptedIndicatorView(
+        addresses: String,
+        fieldName: String,
+    ) {
         launch {
             try {
                 encryptedInputStatuses[fieldName] = null
@@ -551,29 +611,31 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         filePicker.launch(intent)
     }
 
-    private val filePicker = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val data = result.data
-            data?.data?.let { uri ->
-                val contentId = UUID.randomUUID().toString()
-                val fileName = getAttachmentFileName(uri)
-                val mimeType = getAttachmentMimeType(uri)
-                val attachmentData = getAttachmentData(uri)
+    private val filePicker =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                data?.data?.let { uri ->
+                    val contentId = UUID.randomUUID().toString()
+                    val fileName = getAttachmentFileName(uri)
+                    val mimeType = getAttachmentMimeType(uri)
+                    val attachmentData = getAttachmentData(uri)
 
-                val attachment = EmailAttachment(
-                    fileName = fileName,
-                    contentId = contentId,
-                    mimeType = mimeType,
-                    inlineAttachment = false,
-                    data = attachmentData,
-                )
-                emailAttachmentList.add(attachment)
-                attachmentsAdapter.notifyDataSetChanged()
+                    val attachment =
+                        EmailAttachment(
+                            fileName = fileName,
+                            contentId = contentId,
+                            mimeType = mimeType,
+                            inlineAttachment = false,
+                            data = attachmentData,
+                        )
+                    emailAttachmentList.add(attachment)
+                    attachmentsAdapter.notifyDataSetChanged()
+                }
             }
         }
-    }
 
     private fun launchSendAtPicker() {
         val message = args.emailMessageWithBody
@@ -581,29 +643,30 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
             return
         }
         val now = Calendar.getInstance()
-        val datePicker = DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-                val timePicker = TimePickerDialog(
-                    requireContext(),
-                    {
-                            _, hourOfDay, minute ->
-                        val cal = Calendar.getInstance()
-                        cal.set(year, month, dayOfMonth, hourOfDay, minute, 0)
-                        cal.set(Calendar.MILLISECOND, 0)
-                        scheduleSendDraftMessage(message.id, cal.time)
-                    },
-                    now.get(Calendar.HOUR_OF_DAY),
-                    now.get(Calendar.MINUTE),
-                    true,
-                )
-                timePicker.setTitle("Select time")
-                timePicker.show()
-            },
-            now.get(Calendar.YEAR),
-            now.get(Calendar.MONTH),
-            now.get(Calendar.DAY_OF_MONTH),
-        )
+        val datePicker =
+            DatePickerDialog(
+                requireContext(),
+                { _, year, month, dayOfMonth ->
+                    val timePicker =
+                        TimePickerDialog(
+                            requireContext(),
+                            { _, hourOfDay, minute ->
+                                val cal = Calendar.getInstance()
+                                cal.set(year, month, dayOfMonth, hourOfDay, minute, 0)
+                                cal.set(Calendar.MILLISECOND, 0)
+                                scheduleSendDraftMessage(message.id, cal.time)
+                            },
+                            now.get(Calendar.HOUR_OF_DAY),
+                            now.get(Calendar.MINUTE),
+                            true,
+                        )
+                    timePicker.setTitle("Select time")
+                    timePicker.show()
+                },
+                now.get(Calendar.YEAR),
+                now.get(Calendar.MONTH),
+                now.get(Calendar.DAY_OF_MONTH),
+            )
         datePicker.setTitle("Select when to send the email")
         datePicker.show()
     }
@@ -616,17 +679,19 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     private fun getAttachmentFileName(uri: Uri): String {
         var result: String? = null
         if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
-            context?.contentResolver?.query(
-                uri,
-                null,
-                null,
-                null,
-                null,
-            )?.use {
-                if (it.moveToFirst()) {
-                    result = it.getString(it.getColumnIndexOrThrow("_display_name"))
+            context
+                ?.contentResolver
+                ?.query(
+                    uri,
+                    null,
+                    null,
+                    null,
+                    null,
+                )?.use {
+                    if (it.moveToFirst()) {
+                        result = it.getString(it.getColumnIndexOrThrow("_display_name"))
+                    }
                 }
-            }
         }
         if (result == null) {
             result = uri.path
@@ -643,8 +708,8 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
      *
      * @param uri [Uri] The URI of the selected file.
      */
-    private fun getAttachmentMimeType(uri: Uri): String {
-        return if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+    private fun getAttachmentMimeType(uri: Uri): String =
+        if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
             context?.contentResolver?.getType(uri) ?: ""
         } else {
             val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString())
@@ -652,7 +717,6 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
                 fileExtension.lowercase(Locale.ROOT),
             ) ?: ""
         }
-    }
 
     /**
      * Returns the data of the file selected from the file picker in bytes.
@@ -673,25 +737,28 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
      * to item select events to launch the Android file viewer.
      */
     private fun configureRecyclerView() {
-        attachmentsAdapter = EmailAttachmentAdapter(emailAttachmentList) { emailAttachment ->
-            val fileName = emailAttachment.fileName
-            val mimeType = emailAttachment.mimeType
-            val data = emailAttachment.data
+        attachmentsAdapter =
+            EmailAttachmentAdapter(emailAttachmentList) { emailAttachment ->
+                val fileName = emailAttachment.fileName
+                val mimeType = emailAttachment.mimeType
+                val data = emailAttachment.data
 
-            val file = File.createTempFile(fileName, null)
-            FileOutputStream(file).use { it.write(data) }
+                val file = File.createTempFile(fileName, null)
+                FileOutputStream(file).use { it.write(data) }
 
-            val contentUri = FileProvider.getUriForFile(
-                requireContext(),
-                requireContext().packageName + ".fileprovider",
-                file,
-            )
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                setDataAndType(contentUri, mimeType)
+                val contentUri =
+                    FileProvider.getUriForFile(
+                        requireContext(),
+                        requireContext().packageName + ".fileprovider",
+                        file,
+                    )
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        setDataAndType(contentUri, mimeType)
+                    }
+                startActivity(intent)
             }
-            startActivity(intent)
-        }
 
         binding.emailAttachmentRecyclerView.adapter = attachmentsAdapter
         binding.emailAttachmentRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -709,7 +776,10 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.emailAttachmentRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         emailAttachmentList.removeAt(viewHolder.adapterPosition)
         attachmentsAdapter.notifyItemRemoved(viewHolder.adapterPosition)
     }
@@ -804,7 +874,9 @@ class SendEmailMessageFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

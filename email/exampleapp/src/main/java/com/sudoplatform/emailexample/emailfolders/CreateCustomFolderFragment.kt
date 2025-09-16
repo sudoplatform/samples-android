@@ -39,8 +39,9 @@ import kotlin.coroutines.CoroutineContext
  * - Links From:
  *  - [EmailMessagesFragment]: A user selects the "Create Custom Folder" option in the drop down menu.
  */
-class CreateCustomFolderFragment : Fragment(), CoroutineScope {
-
+class CreateCustomFolderFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -93,7 +94,10 @@ class CreateCustomFolderFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
     }
@@ -108,7 +112,10 @@ class CreateCustomFolderFragment : Fragment(), CoroutineScope {
 
     /** Creates a custom [EmailFolder] from the [SudoEmailClient] based on form inputs. */
     private fun createCustomFolder() {
-        val folderName = binding.editText.text.toString().trim()
+        val folderName =
+            binding.editText.text
+                .toString()
+                .trim()
         if (folderName.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_custom_folder_name,
@@ -119,14 +126,15 @@ class CreateCustomFolderFragment : Fragment(), CoroutineScope {
         showLoading(R.string.creating_custom_folder)
         launch {
             try {
-                val newFolder = withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.createCustomEmailFolder(
-                        CreateCustomEmailFolderInput(
-                            emailAddressId = emailAddressId,
-                            customFolderName = folderName,
-                        ),
-                    )
-                }
+                val newFolder =
+                    withContext(Dispatchers.IO) {
+                        app.sudoEmailClient.createCustomEmailFolder(
+                            CreateCustomEmailFolderInput(
+                                emailAddressId = emailAddressId,
+                                customFolderName = folderName,
+                            ),
+                        )
+                    }
                 navController.navigate(
                     CreateCustomFolderFragmentDirections.actionCreateCustomFolderFragmentToEmailMessages(
                         emailAddressId = emailAddressId,
@@ -158,7 +166,9 @@ class CreateCustomFolderFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

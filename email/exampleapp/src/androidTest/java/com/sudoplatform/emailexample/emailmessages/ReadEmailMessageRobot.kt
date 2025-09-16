@@ -19,7 +19,6 @@ fun readEmailMessage(func: ReadEmailMessageRobot.() -> Unit) = ReadEmailMessageR
  * Testing robot that manages the read email message screen.
  */
 class ReadEmailMessageRobot : BaseRobot() {
-
     private val toolbarReplyButton = withId(R.id.reply)
     private val toolbarForwardButton = withId(R.id.forward)
     private val toolbarBlockEmailAddressButton = withId(R.id.block)
@@ -81,7 +80,8 @@ class ReadEmailMessageRobot : BaseRobot() {
     private fun checkAlertDialog() {
         waitForViewToDisplay(positiveAlertButton, 60_000L)
         Thread.sleep(1_000L)
-        Espresso.onView(positiveAlertButton)
+        Espresso
+            .onView(positiveAlertButton)
             .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.ok)))
     }
 }

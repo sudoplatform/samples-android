@@ -17,7 +17,9 @@ import com.sudoplatform.sudoemail.types.EmailFolder
 /**
  * Enumeration of special folder tab labels.
  */
-enum class SpecialFolderTabLabels(val displayName: String) {
+enum class SpecialFolderTabLabels(
+    val displayName: String,
+) {
     DRAFTS("DRAFTS"),
     BLOCKLIST("BLOCKLIST"),
     CREATE("CREATE NEW FOLDER"),
@@ -35,11 +37,14 @@ class EmailFolderAdapter(
     private val onDeleteCustomFolder: (name: String) -> Unit,
     private val onEditCustomFolder: (name: String) -> Unit,
 ) : BaseAdapter() {
-
     private val inflater =
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+    override fun getView(
+        position: Int,
+        convertView: View?,
+        parent: ViewGroup?,
+    ): View {
         val view: View
         val emailFolderViewHolder: EmailFolderViewHolder
         if (convertView == null) {
@@ -73,15 +78,9 @@ class EmailFolderAdapter(
         return view
     }
 
-    override fun getItem(position: Int): Any {
-        return folderNames[position]
-    }
+    override fun getItem(position: Int): Any = folderNames[position]
 
-    override fun getCount(): Int {
-        return folderNames.size
-    }
+    override fun getCount(): Int = folderNames.size
 
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
+    override fun getItemId(position: Int): Long = position.toLong()
 }

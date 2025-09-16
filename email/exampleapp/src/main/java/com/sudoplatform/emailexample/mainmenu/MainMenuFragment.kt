@@ -47,8 +47,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [SudosFragment]: If a user taps the "Sudos" button, the [SudosFragment] will be presented so
  *   the user can view or choose to create [Sudo]s.
  */
-class MainMenuFragment : Fragment(), CoroutineScope {
-
+class MainMenuFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -96,7 +97,10 @@ class MainMenuFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -131,11 +135,12 @@ class MainMenuFragment : Fragment(), CoroutineScope {
                     MainMenuFragmentDirections.actionMainMenuFragmentToRegisterFragment(),
                 )
             } catch (e: SudoUserException) {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.deregister_failure, e.localizedMessage),
-                    Toast.LENGTH_LONG,
-                ).show()
+                Toast
+                    .makeText(
+                        requireContext(),
+                        getString(R.string.deregister_failure, e.localizedMessage),
+                        Toast.LENGTH_LONG,
+                    ).show()
             }
         }
     }
@@ -151,7 +156,9 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

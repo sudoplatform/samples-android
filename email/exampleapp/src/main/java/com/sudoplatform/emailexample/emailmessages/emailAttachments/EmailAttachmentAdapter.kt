@@ -17,19 +17,24 @@ import com.sudoplatform.sudoemail.types.EmailAttachment
  * @property items [List<EmailAttachment>] List of [EmailAttachment] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
-class EmailAttachmentAdapter(private val items: List<EmailAttachment>, private val itemSelectedListener: (EmailAttachment) -> Unit) : RecyclerView.Adapter<EmailAttachmentViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmailAttachmentViewHolder {
-        return EmailAttachmentViewHolder.inflate(
+class EmailAttachmentAdapter(
+    private val items: List<EmailAttachment>,
+    private val itemSelectedListener: (EmailAttachment) -> Unit,
+) : RecyclerView.Adapter<EmailAttachmentViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): EmailAttachmentViewHolder =
+        EmailAttachmentViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: EmailAttachmentViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: EmailAttachmentViewHolder,
+        position: Int,
+    ) {
         val emailAttachment = items[position]
         holder.bind(emailAttachment)
 

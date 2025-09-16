@@ -22,7 +22,6 @@ fun emailAddressBlocklist(func: EmailAddressBlocklistRobot.() -> Unit) = EmailAd
  * Testing robot that manages the email address blocklist screen.
  */
 class EmailAddressBlocklistRobot : BaseRobot() {
-
     private val toolbarDeleteButton = withId(R.id.delete)
     private val blockedAddressesRecyclerView = withId(R.id.blockedAddressesRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)

@@ -55,8 +55,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [EmailAddressesFragment]: If a user chooses a [Sudo] from the list, the [EmailAddressesFragment]
  *   will be presented so the user can add a new email address to their [Sudo].
  */
-class SudosFragment : Fragment(), CoroutineScope {
-
+class SudosFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -110,7 +111,10 @@ class SudosFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -145,9 +149,10 @@ class SudosFragment : Fragment(), CoroutineScope {
         showLoading(R.string.loading_sudos)
         launch {
             try {
-                val sudos = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.listSudos(listOption)
-                }
+                val sudos =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.listSudos(listOption)
+                    }
                 sudoList.clear()
                 for (sudo in sudos) {
                     sudoList.add(sudo)
@@ -235,7 +240,9 @@ class SudosFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }
@@ -256,7 +263,9 @@ class SudosFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that a deletion operation is occurring. */
-    private fun showDeleteAlert(@StringRes textResId: Int) {
+    private fun showDeleteAlert(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }
@@ -277,7 +286,10 @@ class SudosFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.sudoRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         val sudo = sudoList[viewHolder.adapterPosition]
         deleteSudo(sudo)
         sudoList.removeAt(viewHolder.adapterPosition)

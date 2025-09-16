@@ -15,14 +15,12 @@ import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 import org.hamcrest.CoreMatchers.not
 
-fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) =
-    SendEmailMessageRobot().apply { func() }
+fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) = SendEmailMessageRobot().apply { func() }
 
 /**
  * Testing robot that manages the send email message screen.
  */
 class SendEmailMessageRobot : BaseRobot() {
-
     private val toolbarSendButton = withId(R.id.send)
     private val toolbarSaveButton = withId(R.id.save)
     private val encryptedIndicator = withId(R.id.encryptedIndicator)

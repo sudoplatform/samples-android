@@ -48,8 +48,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [EmailAddressesFragment]: If a user successfully creates a [Sudo], the [EmailAddressesFragment]
  *   will be presented so the user can create an [EmailAddress].
  */
-class CreateSudoFragment : Fragment(), CoroutineScope {
-
+class CreateSudoFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -91,7 +92,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -110,7 +114,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
 
     /** Creates a [Sudo] from the [SudoProfilesClient] based on the submitted form inputs. */
     private fun createSudo() {
-        val name = binding.editText.text.toString().trim()
+        val name =
+            binding.editText.text
+                .toString()
+                .trim()
         if (name.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_sudo_name,
@@ -123,9 +130,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
         showLoading(R.string.creating_sudo)
         launch {
             try {
-                val newSudo = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.createSudo(sudo)
-                }
+                val newSudo =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.createSudo(sudo)
+                    }
                 navController.navigate(
                     CreateSudoFragmentDirections.actionCreateSudoFragmentToEmailAddressesFragment(
                         newSudo,
@@ -163,7 +171,9 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

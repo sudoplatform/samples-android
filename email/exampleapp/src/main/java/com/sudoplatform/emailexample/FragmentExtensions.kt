@@ -11,10 +11,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 
 /**
- * Extensions of the Android Fragment.
- */
-
-/**
  * Show an [AlertDialog] with a positive and negative button.
  */
 fun Fragment.showAlertDialog(
@@ -25,7 +21,8 @@ fun Fragment.showAlertDialog(
     @StringRes negativeButtonResId: Int,
     onNegative: (() -> Unit)? = null,
 ) {
-    AlertDialog.Builder(requireContext())
+    AlertDialog
+        .Builder(requireContext())
         .setTitle(titleResId)
         .setMessage(messageResId)
         .setPositiveButton(positiveButtonResId) { _, _ -> onPositive?.invoke() }
@@ -44,7 +41,8 @@ fun Fragment.showAlertDialog(
     @StringRes negativeButtonResId: Int,
     onNegative: (() -> Unit)? = null,
 ) {
-    AlertDialog.Builder(requireContext())
+    AlertDialog
+        .Builder(requireContext())
         .setTitle(titleResId)
         .setMessage(message)
         .setPositiveButton(positiveButtonResId) { _, _ -> onPositive?.invoke() }
@@ -61,7 +59,8 @@ fun Fragment.showAlertDialog(
     @StringRes positiveButtonResId: Int,
     onPositive: (() -> Unit)? = null,
 ) {
-    AlertDialog.Builder(requireContext())
+    AlertDialog
+        .Builder(requireContext())
         .setTitle(titleResId)
         .setMessage(messageResId)
         .setPositiveButton(positiveButtonResId) { _, _ -> onPositive?.invoke() }
@@ -77,7 +76,8 @@ fun Fragment.showAlertDialog(
     @StringRes negativeButtonResId: Int,
     onNegative: (() -> Unit)? = null,
 ) {
-    AlertDialog.Builder(requireContext())
+    AlertDialog
+        .Builder(requireContext())
         .setTitle(titleResId)
         .setMessage(message)
         .setNegativeButton(negativeButtonResId) { _, _ -> onNegative?.invoke() }
@@ -92,7 +92,8 @@ fun Fragment.showAlertDialog(
     @StringRes positiveButtonResId: Int,
     onPositive: (() -> Unit)? = null,
 ) {
-    AlertDialog.Builder(requireContext())
+    AlertDialog
+        .Builder(requireContext())
         .setTitle(titleResId)
         .setPositiveButton(positiveButtonResId) { _, _ -> onPositive?.invoke() }
         .show()
@@ -101,10 +102,12 @@ fun Fragment.showAlertDialog(
 /**
  * Create an [AlertDialog] with a loading spinner and title.
  */
-fun Fragment.createLoadingAlertDialog(@StringRes titleResId: Int): AlertDialog {
-    return AlertDialog.Builder(requireContext())
+fun Fragment.createLoadingAlertDialog(
+    @StringRes titleResId: Int,
+): AlertDialog =
+    AlertDialog
+        .Builder(requireContext())
         .setTitle(titleResId)
         .setView(layoutInflater.inflate(R.layout.layout_loading_dialog, null))
         .setCancelable(false)
         .create()
-}

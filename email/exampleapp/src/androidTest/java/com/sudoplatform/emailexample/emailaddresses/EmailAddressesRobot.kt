@@ -20,7 +20,6 @@ fun emailAddresses(func: EmailAddressesRobot.() -> Unit) = EmailAddressesRobot()
  * Testing robot that manages the email addresses screen.
  */
 class EmailAddressesRobot : BaseRobot() {
-
     private val createEmailAddressButton = withId(R.id.createEmailAddressButton)
     private val emailAddressRecyclerView = withId(R.id.emailAddressRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)

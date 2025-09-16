@@ -22,7 +22,6 @@ import java.io.IOException
  * standard which supersedes RFC 822.
  */
 internal object Rfc822MessageFactory {
-
     /**
      * Construct an RFC 822 compatible mail message that has a subject and text body.
      */

@@ -55,8 +55,9 @@ import kotlin.coroutines.CoroutineContext
  *   [ProvisionEmailAddressFragment] will be presented so that the user can add a new [EmailAddress]
  *   to their [Sudo].
  */
-class EmailAddressesFragment : Fragment(), CoroutineScope {
-
+class EmailAddressesFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -98,7 +99,10 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -131,12 +135,14 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val emailAddresses = withContext(Dispatchers.IO) {
-                    val input = ListEmailAddressesForSudoIdInput(
-                        sudoId = sudo.id!!,
-                    )
-                    app.sudoEmailClient.listEmailAddressesForSudoId(input)
-                }
+                val emailAddresses =
+                    withContext(Dispatchers.IO) {
+                        val input =
+                            ListEmailAddressesForSudoIdInput(
+                                sudoId = sudo.id!!,
+                            )
+                        app.sudoEmailClient.listEmailAddressesForSudoId(input)
+                    }
                 when (emailAddresses) {
                     is ListAPIResult.Success -> {
                         emailAddressList.clear()
@@ -144,7 +150,10 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
                         adapter.notifyDataSetChanged()
                     }
                     is ListAPIResult.Partial -> {
-                        val cause = emailAddresses.result.failed.first().cause
+                        val cause =
+                            emailAddresses.result.failed
+                                .first()
+                                .cause
                         showAlertDialog(
                             titleResId = R.string.list_email_addresses_failure,
                             message = cause.localizedMessage ?: "$cause",
@@ -223,7 +232,9 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }
@@ -244,7 +255,9 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that a deletion operation is occurring. */
-    private fun showDeleteAlert(@StringRes textResId: Int) {
+    private fun showDeleteAlert(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }
@@ -265,7 +278,10 @@ class EmailAddressesFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.emailAddressRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         val emailAddress = emailAddressList[viewHolder.adapterPosition]
         deprovisionEmailAddress(emailAddress.id)
         emailAddressList.removeAt(viewHolder.adapterPosition)

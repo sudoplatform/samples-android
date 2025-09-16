@@ -17,19 +17,24 @@ import com.sudoplatform.sudoprofiles.Sudo
  * @property items [List<Sudo>] List of [Sudo] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
-class SudoAdapter(private val items: List<Sudo>, private val itemSelectedListener: (Sudo) -> Unit) : RecyclerView.Adapter<SudoViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SudoViewHolder {
-        return SudoViewHolder.inflate(
+class SudoAdapter(
+    private val items: List<Sudo>,
+    private val itemSelectedListener: (Sudo) -> Unit,
+) : RecyclerView.Adapter<SudoViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): SudoViewHolder =
+        SudoViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: SudoViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: SudoViewHolder,
+        position: Int,
+    ) {
         val sudo = items[position]
         sudo.label?.let { holder.bind(it) }
 

@@ -43,7 +43,6 @@ class EmailExampleNotificationHandler :
     FirebaseMessagingService(),
     CoroutineScope,
     SudoEmailNotificationHandler {
-
     private val deviceId: String
     private var deviceToken: String? = null
     private var registered = false
@@ -56,11 +55,13 @@ class EmailExampleNotificationHandler :
     }
 
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-            if (throwable !is CancellationException) {
-                app.logger.error("Error in EmailExampleNotificationHandler coroutine")
-            }
-        }
+        get() =
+            Dispatchers.IO +
+                CoroutineExceptionHandler { _, throwable ->
+                    if (throwable !is CancellationException) {
+                        app.logger.error("Error in EmailExampleNotificationHandler coroutine")
+                    }
+                }
 
     override fun onNewToken(token: String) {
         app.logger.info("FCM onNewToken")
@@ -152,39 +153,42 @@ class EmailExampleNotificationHandler :
     override fun onEmailMessageReceived(message: EmailMessageReceivedNotification) {
         val intent = Intent(app, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        val pendingIntent = PendingIntent.getActivity(
-            app,
-            0, // Request code
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(
+                app,
+                0, // Request code
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
 
         val channelId = "messageReceived"
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val notificationBuilder = NotificationCompat.Builder(
-            app,
-            channelId,
-        )
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(message.from.toString())
-            .setContentText(message.subject)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setAutoCancel(true)
-            .setSound(defaultSoundUri)
-            .setContentIntent(pendingIntent)
-            .setDefaults(android.app.Notification.DEFAULT_ALL)
-            .setFullScreenIntent(pendingIntent, true)
+        val notificationBuilder =
+            NotificationCompat
+                .Builder(
+                    app,
+                    channelId,
+                ).setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(message.from.toString())
+                .setContentText(message.subject)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent)
+                .setDefaults(android.app.Notification.DEFAULT_ALL)
+                .setFullScreenIntent(pendingIntent, true)
 
         val notificationManager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channel = NotificationChannel(
-                channelId,
-                "messageReceived",
-                // HIGH Importance for heads up notification
-                NotificationManager.IMPORTANCE_HIGH,
-            )
+            val channel =
+                NotificationChannel(
+                    channelId,
+                    "messageReceived",
+                    // HIGH Importance for heads up notification
+                    NotificationManager.IMPORTANCE_HIGH,
+                )
             notificationManager.createNotificationChannel(channel)
         }
 

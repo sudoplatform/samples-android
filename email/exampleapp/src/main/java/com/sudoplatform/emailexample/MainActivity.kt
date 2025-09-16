@@ -21,29 +21,29 @@ import androidx.core.content.ContextCompat
  * It acts as the host to the navigation graph.
  */
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         askNotificationPermission()
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            Log.w("Main", "Granted notification permission")
-            // FCM SDK (and your app) can post notifications.
-        } else {
-            AlertDialog.Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
-                .setTitle("Alert")
-                .setMessage("Notifications will not be displayed")
-                .setNeutralButton("Dismiss") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                Log.w("Main", "Granted notification permission")
+                // FCM SDK (and your app) can post notifications.
+            } else {
+                AlertDialog
+                    .Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
+                    .setTitle("Alert")
+                    .setMessage("Notifications will not be displayed")
+                    .setNeutralButton("Dismiss") { dialog, _ ->
+                        dialog.dismiss()
+                    }.show()
+            }
         }
-    }
 
     private fun askNotificationPermission() {
         // This is only necessary for API level >= 33 (TIRAMISU)
@@ -54,15 +54,15 @@ class MainActivity : AppCompatActivity() {
                 // FCM SDK (and your app) can post notifications.
                 Log.w("Main", "notification permission granted")
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                AlertDialog.Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
+                AlertDialog
+                    .Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
                     .setTitle("Alert")
                     .setMessage("This App requires Push Notification permission.")
                     .setPositiveButton("Allow") { _, _ ->
                         if (Build.VERSION.SDK_INT >= 33) {
                             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
-                    }
-                    .setNegativeButton("Do not allow", null)
+                    }.setNegativeButton("Do not allow", null)
                     .show()
             } else {
                 // Directly ask for the permission

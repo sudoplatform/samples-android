@@ -23,7 +23,6 @@ fun provisionEmailAddress(func: ProvisionEmailAddressRobot.() -> Unit) = Provisi
  * Testing robot that manages the provision email address screen.
  */
 class ProvisionEmailAddressRobot : BaseRobot() {
-
     private val toolbarCreateButton = withId(R.id.create)
     private val addressEditText = withId(R.id.addressField)
     private val addressHolder = withId(R.id.addressHolder)
@@ -51,9 +50,7 @@ class ProvisionEmailAddressRobot : BaseRobot() {
         waitForViewToDisplay(learnMoreButton)
     }
 
-    fun getAddressFromTextView(): String {
-        return getTextFromTextView(onView(addressHolder))
-    }
+    fun getAddressFromTextView(): String = getTextFromTextView(onView(addressHolder))
 
     fun checkAvailableAddressMsg() {
         onView(availabilityLabel).check(matches(withText("This email address is available")))

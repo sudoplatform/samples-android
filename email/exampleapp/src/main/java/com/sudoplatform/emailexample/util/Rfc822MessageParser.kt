@@ -35,12 +35,12 @@ data class SimplifiedEmailMessage(
  * A parser of RFC 822 compatible email message content.
  */
 internal object Rfc822MessageParser {
-
     private val session = Session.getDefaultInstance(System.getProperties(), null)
 
-    private class LocalMimeMessage(session: Session, rfc822Ins: InputStream) :
-        MimeMessage(session, rfc822Ins) {
-
+    private class LocalMimeMessage(
+        session: Session,
+        rfc822Ins: InputStream,
+    ) : MimeMessage(session, rfc822Ins) {
         override fun toString(): String {
             val sender = from?.map { it.toString() } ?: emptyList()
             val toRecipients =
@@ -112,22 +112,23 @@ internal object Rfc822MessageParser {
             body = buildString { append(message) }
         } else {
             val multipart = MimeMultipart(message.dataHandler.dataSource)
-            body = buildString {
-                for (i in 0 until multipart.count) {
-                    val bodyPart = multipart.getBodyPart(i)
-                    if (bodyPart.isMimeType("text/plain")) {
-                        append(bodyPart.content)
-                    } else if (bodyPart.isMimeType("multipart/*")) {
-                        val mimeMultipart = bodyPart.content as MimeMultipart
-                        for (j in 0 until mimeMultipart.count) {
-                            val mimeBodyPart = mimeMultipart.getBodyPart(j)
-                            if (mimeBodyPart.isMimeType("text/plain")) {
-                                append(mimeBodyPart.content)
+            body =
+                buildString {
+                    for (i in 0 until multipart.count) {
+                        val bodyPart = multipart.getBodyPart(i)
+                        if (bodyPart.isMimeType("text/plain")) {
+                            append(bodyPart.content)
+                        } else if (bodyPart.isMimeType("multipart/*")) {
+                            val mimeMultipart = bodyPart.content as MimeMultipart
+                            for (j in 0 until mimeMultipart.count) {
+                                val mimeBodyPart = mimeMultipart.getBodyPart(j)
+                                if (mimeBodyPart.isMimeType("text/plain")) {
+                                    append(mimeBodyPart.content)
+                                }
                             }
                         }
                     }
                 }
-            }
         }
 
         return SimplifiedEmailMessage(

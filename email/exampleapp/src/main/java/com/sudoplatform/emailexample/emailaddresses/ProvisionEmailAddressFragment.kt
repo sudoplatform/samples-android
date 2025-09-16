@@ -58,8 +58,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [EmailAddressesFragment]: If a user successfully provisions an [EmailAddress], they will be
  *   returned to this view.
  */
-class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
-
+class ProvisionEmailAddressFragment :
+    Fragment(),
+    CoroutineScope {
     companion object {
         /**
          * A delay between executing the address availability checks to allow a
@@ -125,7 +126,10 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureAddressFieldListener()
         setSudoLabelText()
@@ -147,7 +151,10 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
 
     /** Provisions an [EmailAddress] from the [SudoEmailClient] based on the selected address. */
     private fun provisionEmailAddress() {
-        val localPart = binding.addressField.text.toString().trim()
+        val localPart =
+            binding.addressField.text
+                .toString()
+                .trim()
         if (localPart.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_local_part,
@@ -155,18 +162,22 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
             )
             return
         }
-        val displayName = binding.displayNameField.text.toString().trim()
+        val displayName =
+            binding.displayNameField.text
+                .toString()
+                .trim()
         launch {
             try {
                 showLoading(R.string.provisioning_email_address)
                 if (availableAddresses.isNotEmpty()) {
                     val address = availableAddresses.first()
                     withContext(Dispatchers.IO) {
-                        val input = ProvisionEmailAddressInput(
-                            emailAddress = address,
-                            alias = displayName.ifBlank { null },
-                            ownershipProofToken = ownershipProof,
-                        )
+                        val input =
+                            ProvisionEmailAddressInput(
+                                emailAddress = address,
+                                alias = displayName.ifBlank { null },
+                                ownershipProofToken = ownershipProof,
+                            )
                         app.sudoEmailClient.provisionEmailAddress(input)
                     }
                     navController.navigate(
@@ -199,12 +210,13 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 val supportedDomains = app.sudoEmailClient.getSupportedEmailDomains()
-                val emailAddresses = app.sudoEmailClient.checkEmailAddressAvailability(
-                    CheckEmailAddressAvailabilityInput(
-                        localParts,
-                        supportedDomains,
-                    ),
-                )
+                val emailAddresses =
+                    app.sudoEmailClient.checkEmailAddressAvailability(
+                        CheckEmailAddressAvailabilityInput(
+                            localParts,
+                            supportedDomains,
+                        ),
+                    )
                 availableAddresses.clear()
                 availableAddresses.addAll(emailAddresses)
                 if (availableAddresses.isEmpty()) {
@@ -236,9 +248,10 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     private fun getOwnershipProof() {
         launch {
             try {
-                ownershipProof = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.getOwnershipProof(sudo, EMAIL_AUDIENCE)
-                }
+                ownershipProof =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.getOwnershipProof(sudo, EMAIL_AUDIENCE)
+                    }
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.ownership_proof_error,
@@ -262,25 +275,40 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
      */
     private fun configureAddressFieldListener() {
         binding.availabilityLabel.isVisible = false
-        binding.addressField.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) { /* no-op */ }
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) { /* no-op */ }
-            var timer = Timer()
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                binding.availabilityLabel.isVisible = false
-                toolbarMenu.getItem(0)?.isEnabled = false
-                timer.cancel()
-                timer = Timer()
-                timer.schedule(
-                    object : TimerTask() {
-                        override fun run() {
-                            checkEmailAddressAvailability(listOf(p0.toString()))
-                        }
-                    },
-                    CHECK_DELAY,
-                )
-            }
-        })
+        binding.addressField.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) { /* no-op */ }
+
+                override fun beforeTextChanged(
+                    p0: CharSequence?,
+                    p1: Int,
+                    p2: Int,
+                    p3: Int,
+                ) { /* no-op */ }
+
+                var timer = Timer()
+
+                override fun onTextChanged(
+                    p0: CharSequence?,
+                    p1: Int,
+                    p2: Int,
+                    p3: Int,
+                ) {
+                    binding.availabilityLabel.isVisible = false
+                    toolbarMenu.getItem(0)?.isEnabled = false
+                    timer.cancel()
+                    timer = Timer()
+                    timer.schedule(
+                        object : TimerTask() {
+                            override fun run() {
+                                checkEmailAddressAvailability(listOf(p0.toString()))
+                            }
+                        },
+                        CHECK_DELAY,
+                    )
+                }
+            },
+        )
     }
 
     /**
@@ -317,7 +345,9 @@ class ProvisionEmailAddressFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

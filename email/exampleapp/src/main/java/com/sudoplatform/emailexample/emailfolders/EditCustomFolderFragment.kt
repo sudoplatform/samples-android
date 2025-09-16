@@ -39,8 +39,9 @@ import kotlin.coroutines.CoroutineContext
  * - Links From:
  *  - [EmailMessagesFragment]: A user selects the "Edit Custom Folder" button.
  */
-class EditCustomFolderFragment : Fragment(), CoroutineScope {
-
+class EditCustomFolderFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -107,7 +108,10 @@ class EditCustomFolderFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         binding.editText.setText(customFolderName)
         navController = Navigation.findNavController(view)
@@ -123,7 +127,10 @@ class EditCustomFolderFragment : Fragment(), CoroutineScope {
 
     /** Edits a custom [EmailFolder] from the [SudoEmailClient] based on form inputs. */
     private fun editCustomFolder() {
-        val folderName = binding.editText.text.toString().trim()
+        val folderName =
+            binding.editText.text
+                .toString()
+                .trim()
         if (folderName.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_custom_folder_name,
@@ -174,7 +181,9 @@ class EditCustomFolderFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)
