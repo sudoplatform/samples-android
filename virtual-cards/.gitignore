@@ -15,6 +15,7 @@
 .cxx
 register_key*
 sudoplatformconfig.json
+google-services.json
 secret.properties
 .vscode/
 exampleapp/src/main/assets

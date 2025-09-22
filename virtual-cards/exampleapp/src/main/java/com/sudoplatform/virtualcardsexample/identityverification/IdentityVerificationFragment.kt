@@ -18,7 +18,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sudoplatform.sudoidentityverification.QueryOption
 import com.sudoplatform.sudoidentityverification.SudoIdentityVerificationClient
 import com.sudoplatform.sudoidentityverification.SudoIdentityVerificationException
 import com.sudoplatform.sudoidentityverification.types.inputs.VerifyIdentityInput
@@ -47,8 +46,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [MainMenuFragment]: A user chooses the "Secure ID Verification" option from the main menu which
  *   will show this view allowing the user to perform Secure ID Verification.
  */
-class IdentityVerificationFragment : Fragment(), CoroutineScope {
-
+class IdentityVerificationFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** The [App] that holds references to the APIs this fragment needs. */
@@ -78,7 +78,9 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         arrayOf("John", "Smith", "222333 Peachtree Place", null, "30318", "USA", "1975-02-28")
 
     /** Types of verification statuses. */
-    enum class VerificationStatus(val status: Int) {
+    enum class VerificationStatus(
+        val status: Int,
+    ) {
         VERIFIED(R.string.verified),
         UNVERIFIED(R.string.not_verified),
         UNKNOWN(R.string.unknown),
@@ -107,7 +109,10 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         configureFormCells()
@@ -145,21 +150,23 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         if (!addressLine2.isNullOrEmpty()) {
             addressLine1 = "$addressLine1 $addressLine2"
         }
-        val input = VerifyIdentityInput(
-            firstName = enteredInput[0] ?: "",
-            lastName = enteredInput[1] ?: "",
-            address = addressLine1 ?: "",
-            city = "",
-            state = "",
-            postalCode = enteredInput[4] ?: "",
-            country = enteredInput[5] ?: "",
-            dateOfBirth = enteredInput[6] ?: "",
-        )
+        val input =
+            VerifyIdentityInput(
+                firstName = enteredInput[0] ?: "",
+                lastName = enteredInput[1] ?: "",
+                address = addressLine1 ?: "",
+                city = "",
+                state = "",
+                postalCode = enteredInput[4] ?: "",
+                country = enteredInput[5] ?: "",
+                dateOfBirth = enteredInput[6] ?: "",
+            )
         launch {
             try {
-                val verifiedIdentity = withContext(Dispatchers.IO) {
-                    app.identityVerificationClient.verifyIdentity(input)
-                }
+                val verifiedIdentity =
+                    withContext(Dispatchers.IO) {
+                        app.identityVerificationClient.verifyIdentity(input)
+                    }
                 if (verifiedIdentity.verified) {
                     showAlertDialog(
                         titleResId = R.string.verification_complete,
@@ -194,9 +201,10 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
         showLoading(R.string.checking_status)
         launch {
             try {
-                val verifiedIdentity = withContext(Dispatchers.IO) {
-                    app.identityVerificationClient.checkIdentityVerification(QueryOption.REMOTE_ONLY)
-                }
+                val verifiedIdentity =
+                    withContext(Dispatchers.IO) {
+                        app.identityVerificationClient.checkIdentityVerification()
+                    }
 
                 if (verifiedIdentity.verified) {
                     binding.statusLabel.text = getString(VerificationStatus.VERIFIED.status)
@@ -216,9 +224,10 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
      * change events to capture user input.
      */
     private fun configureRecyclerView() {
-        adapter = InputFormAdapter(inputFormCells) { position, charSeq ->
-            enteredInput[position] = charSeq
-        }
+        adapter =
+            InputFormAdapter(inputFormCells) { position, charSeq ->
+                enteredInput[position] = charSeq
+            }
 
         binding.formRecyclerView.setHasFixedSize(true)
         binding.formRecyclerView.adapter = adapter
@@ -229,14 +238,15 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     private fun configureFormCells() {
         labels = resources.getStringArray(R.array.identity_verification_labels)
         for (i in labels.indices) {
-            val hint = if (labels[i].contains(getString(R.string.address_line_2))) {
-                getString(
-                    R.string.enter_optional_input,
-                    labels[i],
-                )
-            } else {
-                getString(R.string.enter_non_optional_input, labels[i])
-            }
+            val hint =
+                if (labels[i].contains(getString(R.string.address_line_2))) {
+                    getString(
+                        R.string.enter_optional_input,
+                        labels[i],
+                    )
+                } else {
+                    getString(R.string.enter_non_optional_input, labels[i])
+                }
             inputFormCells.add(InputFormCell(labels[i], enteredInput[i] ?: "", hint))
         }
     }
@@ -256,7 +266,9 @@ class IdentityVerificationFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }

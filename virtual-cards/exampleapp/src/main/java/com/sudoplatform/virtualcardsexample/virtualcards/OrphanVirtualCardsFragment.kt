@@ -51,8 +51,9 @@ import kotlin.coroutines.CoroutineContext
  *   [VirtualCardDetailFragment] will be presented so the user can view virtual card details and
  *   transactions.
  */
-class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
-
+class OrphanVirtualCardsFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -87,7 +88,10 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -110,9 +114,10 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val orphanVirtualCards = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listVirtualCards()
-                }
+                val orphanVirtualCards =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.listVirtualCards()
+                    }
                 when (orphanVirtualCards) {
                     is ListAPIResult.Success -> {
                         orphanCardList.clear()
@@ -126,7 +131,10 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
                         adapter.notifyDataSetChanged()
                     }
                     is ListAPIResult.Partial -> {
-                        val cause = orphanVirtualCards.result.failed.first().cause
+                        val cause =
+                            orphanVirtualCards.result.failed
+                                .first()
+                                .cause
                         showAlertDialog(
                             titleResId = R.string.list_orphan_virtual_cards_failure,
                             message = cause.localizedMessage ?: "$cause",
@@ -158,9 +166,10 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     private fun listSudos(listOption: ListOption) {
         launch {
             try {
-                sudoList = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.listSudos(listOption)
-                }.toMutableList()
+                sudoList =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.listSudos(listOption)
+                    }.toMutableList()
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.list_sudos_failure,
@@ -212,7 +221,9 @@ class OrphanVirtualCardsFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }

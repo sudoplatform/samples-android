@@ -59,8 +59,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [FundingSourcesFragment]: If a user successfully creates a funding source, they will be returned
  *   to this form.
  */
-class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
-
+class CreateCardFundingSourceFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -89,10 +90,19 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
     private var labels = emptyArray<String>()
 
     /** An array of the default text populated for each [InputFormCell]. */
-    private val enteredInput = arrayOf(
-        "4242424242424242", "10", expirationYear(),
-        "123", "222333 Peachtree Place", null, "Atlanta", "GA", "30318", "US",
-    )
+    private val enteredInput =
+        arrayOf(
+            "4242424242424242",
+            "10",
+            expirationYear(),
+            "123",
+            "222333 Peachtree Place",
+            null,
+            "Atlanta",
+            "GA",
+            "30318",
+            "US",
+        )
 
     private val activityResultHandler: ActivityResultHandler = DefaultActivityResultHandler()
 
@@ -119,7 +129,10 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         configureFormCells()
@@ -135,7 +148,11 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
     }
 
     // Manages the callback from stripe 3DS processing and notifies our singleton handler
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
         activityResultHandler.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -154,18 +171,19 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
         }
         val expMonth = (enteredInput[1] ?: "0")
         val expYear = (enteredInput[2] ?: "0")
-        val input = CreditCardFundingSourceInput(
-            cardNumber = enteredInput[0] ?: "",
-            expirationMonth = if (expMonth.matches("-?\\d+(\\.\\d+)?".toRegex())) expMonth.toInt() else 0,
-            expirationYear = if (expYear.matches("-?\\d+(\\.\\d+)?".toRegex())) expYear.toInt() else 0,
-            securityCode = enteredInput[3] ?: "",
-            addressLine1 = enteredInput[4] ?: "",
-            addressLine2 = enteredInput[5] ?: "",
-            city = enteredInput[6] ?: "",
-            state = enteredInput[7] ?: "",
-            postalCode = enteredInput[8] ?: "",
-            country = enteredInput[9] ?: "",
-        )
+        val input =
+            CreditCardFundingSourceInput(
+                cardNumber = enteredInput[0] ?: "",
+                expirationMonth = if (expMonth.matches("-?\\d+(\\.\\d+)?".toRegex())) expMonth.toInt() else 0,
+                expirationYear = if (expYear.matches("-?\\d+(\\.\\d+)?".toRegex())) expYear.toInt() else 0,
+                securityCode = enteredInput[3] ?: "",
+                addressLine1 = enteredInput[4] ?: "",
+                addressLine2 = enteredInput[5] ?: "",
+                city = enteredInput[6] ?: "",
+                state = enteredInput[7] ?: "",
+                postalCode = enteredInput[8] ?: "",
+                country = enteredInput[9] ?: "",
+            )
         val fragment = this
         launch {
             try {
@@ -174,23 +192,26 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
                     // Retrieve the funding source client configuration
                     val configuration = app.sudoVirtualCardsClient.getVirtualCardsConfig()!!.fundingSourceClientConfiguration
                     // Perform the funding source setup operation
-                    val setupInput = SetupFundingSourceInput("USD", FundingSourceType.CREDIT_CARD, ClientApplicationData("androidApplication"))
+                    val setupInput =
+                        SetupFundingSourceInput("USD", FundingSourceType.CREDIT_CARD, ClientApplicationData("androidApplication"))
                     val provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(setupInput)
                     // Process stripe data
                     val stripeClient = Stripe(requireContext(), configuration.first().apiKey)
                     val stripeIntentWorker = StripeIntentWorker(requireContext(), stripeClient, activityResultHandler)
                     val provisioningData = provisionalFundingSource.provisioningData as StripeCardProvisioningData
-                    val completionData = stripeIntentWorker.confirmSetupIntent(
-                        input,
-                        provisioningData.clientSecret,
-                        fragment,
-                    )
+                    val completionData =
+                        stripeIntentWorker.confirmSetupIntent(
+                            input,
+                            provisioningData.clientSecret,
+                            fragment,
+                        )
                     // Perform the funding source completion operation
-                    val completeInput = CompleteFundingSourceInput(
-                        provisionalFundingSource.id,
-                        completionData,
-                        null,
-                    )
+                    val completeInput =
+                        CompleteFundingSourceInput(
+                            provisionalFundingSource.id,
+                            completionData,
+                            null,
+                        )
                     app.sudoVirtualCardsClient.completeFundingSource(completeInput)
                 }
                 showAlertDialog(
@@ -221,9 +242,10 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
      * change events to capture user input.
      */
     private fun configureRecyclerView() {
-        adapter = InputFormAdapter(inputFormCells) { position, charSeq ->
-            enteredInput[position] = charSeq
-        }
+        adapter =
+            InputFormAdapter(inputFormCells) { position, charSeq ->
+                enteredInput[position] = charSeq
+            }
 
         binding.formRecyclerView.setHasFixedSize(true)
         binding.formRecyclerView.adapter = adapter
@@ -234,7 +256,15 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
     private fun configureFormCells() {
         labels = resources.getStringArray(R.array.create_funding_source_labels)
         for (i in labels.indices) {
-            val hint = if (labels[i].contains(getString(R.string.address_line_2))) getString(R.string.enter_optional_input, labels[i]) else getString(R.string.enter_non_optional_input, labels[i])
+            val hint =
+                if (labels[i].contains(
+                        getString(R.string.address_line_2),
+                    )
+                ) {
+                    getString(R.string.enter_optional_input, labels[i])
+                } else {
+                    getString(R.string.enter_non_optional_input, labels[i])
+                }
             inputFormCells.add(InputFormCell(labels[i], enteredInput[i] ?: "", hint))
         }
     }
@@ -263,7 +293,9 @@ class CreateCardFundingSourceFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

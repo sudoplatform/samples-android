@@ -15,22 +15,23 @@ import androidx.recyclerview.widget.RecyclerView
  *
  * @property items List of [TransactionDetailCell] data items to display.
  */
-class TransactionDetailAdapter(private val items: List<TransactionDetailCell>) : RecyclerView.Adapter<TransactionDetailViewHolder>() {
-
+class TransactionDetailAdapter(
+    private val items: List<TransactionDetailCell>,
+) : RecyclerView.Adapter<TransactionDetailViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): TransactionDetailViewHolder {
-        return TransactionDetailViewHolder.inflate(
+    ): TransactionDetailViewHolder =
+        TransactionDetailViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: TransactionDetailViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: TransactionDetailViewHolder,
+        position: Int,
+    ) {
         val transactionDetailCell = items[position]
         holder.bind(transactionDetailCell)
     }

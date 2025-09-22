@@ -23,17 +23,19 @@ import com.sudoplatform.virtualcardsexample.databinding.LayoutItemCellBinding
  *
  * @property binding The [VirtualCard] item view binding component.
  */
-class VirtualCardViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class VirtualCardViewHolder(
+    private val binding: LayoutItemCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): VirtualCardViewHolder {
-            val binding = LayoutItemCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutItemCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return VirtualCardViewHolder(binding)
         }
     }

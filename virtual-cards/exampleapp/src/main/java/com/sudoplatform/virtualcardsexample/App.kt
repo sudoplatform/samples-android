@@ -15,19 +15,25 @@ import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
+import com.sudoplatform.sudonotification.DefaultNotificationDeviceInputProvider
+import com.sudoplatform.sudonotification.SudoNotificationClient
+import com.sudoplatform.sudonotification.types.NotificationConfiguration
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.SudoUserException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
+import com.sudoplatform.sudovirtualcards.SudoVirtualCardsNotifiableClient
+import com.sudoplatform.virtualcardsexample.notifications.VirtualCardsExampleNotificationHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.CancellationException
 import kotlin.coroutines.CoroutineContext
 
-class App : Application(), CoroutineScope {
-
+class App :
+    Application(),
+    CoroutineScope {
     companion object {
         /** Name of the preference set that holds sign in information. */
         const val SIGN_IN_PREFERENCES = "SignIn"
@@ -35,7 +41,9 @@ class App : Application(), CoroutineScope {
         /** True if Federated Single Sign On was used. */
         const val FSSO_USED_PREFERENCE = "usedFSSO"
 
-        const val version = "8.0.0"
+        private val version: String = "17.0.0"
+
+        internal lateinit var instance: App
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -45,7 +53,16 @@ class App : Application(), CoroutineScope {
     lateinit var sudoEntitlementsClient: SudoEntitlementsClient
     lateinit var identityVerificationClient: SudoIdentityVerificationClient
     lateinit var sudoVirtualCardsClient: SudoVirtualCardsClient
+    lateinit var sudoVirtualCardsNotifiableClient: SudoVirtualCardsNotifiableClient
+    lateinit var sudoNotificationClient: SudoNotificationClient
+    lateinit var notificationHandler: VirtualCardsExampleNotificationHandler
+    lateinit var deviceInfo: DefaultNotificationDeviceInputProvider
+    lateinit var notificationConfiguration: NotificationConfiguration
     lateinit var logger: Logger
+
+    init {
+        instance = this
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -53,40 +70,65 @@ class App : Application(), CoroutineScope {
         logger = Logger("virtualCardsExample", AndroidUtilsLogDriver(LogLevel.DEBUG))
 
         // Create an instance of SudoUserClient to perform registration and sign in.
-        sudoUserClient = SudoUserClient.builder(this)
-            .setNamespace("sudo-test")
-            .setLogger(logger)
-            .build()
+        sudoUserClient =
+            SudoUserClient
+                .builder(this)
+                .setNamespace("sudo-test")
+                .setLogger(logger)
+                .build()
 
         // Create an instance of SudoProfilesClient to perform creation, deletion and modification
         // of Sudos.
         val blobURI = Uri.fromFile(cacheDir)
 
-        sudoProfilesClient = SudoProfilesClient
-            .builder(this, sudoUserClient, blobURI)
-            .setLogger(logger)
-            .build()
+        sudoProfilesClient =
+            SudoProfilesClient
+                .builder(this, sudoUserClient, blobURI)
+                .setLogger(logger)
+                .build()
 
         // Create an instance of KeyManager to perform key management.
         keyManager = KeyManagerFactory(this).createAndroidKeyManager() as KeyManager
 
         // Create an instance of the SudoEntitlementsClient to redeem and check what resources the
         // user is entitled to use.
-        sudoEntitlementsClient = SudoEntitlementsClient.builder()
-            .setContext(this)
-            .setSudoUserClient(sudoUserClient)
-            .setLogger(logger)
-            .build()
+        sudoEntitlementsClient =
+            SudoEntitlementsClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .setLogger(logger)
+                .build()
 
         // Create an instance of SudoIdentityVerificationClient to perform secure id verification.
         identityVerificationClient = SudoIdentityVerificationClient.builder(this, sudoUserClient).build()
 
         // Create an instance of SudoVirtualCardsClient to perform funding source and card lifecycle
         // operations and access transactions.
-        sudoVirtualCardsClient = SudoVirtualCardsClient.builder()
-            .setContext(this)
-            .setSudoUserClient(sudoUserClient)
-            .build()
+        sudoVirtualCardsClient =
+            SudoVirtualCardsClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .build()
+
+        notificationHandler = VirtualCardsExampleNotificationHandler()
+
+        sudoVirtualCardsNotifiableClient =
+            SudoVirtualCardsNotifiableClient
+                .builder()
+                .setContext(this)
+                .setNotificationHandler(notificationHandler)
+                .build()
+
+        sudoNotificationClient =
+            SudoNotificationClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .setLogger(logger)
+                .setNotifiableClients(listOf(sudoVirtualCardsNotifiableClient))
+                .build()
     }
 
     @Throws(SudoUserException::class)

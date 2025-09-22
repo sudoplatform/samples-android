@@ -54,8 +54,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [TransactionDetailFragment]: If a user selects a [Transaction] from the list, the
  *   [TransactionDetailFragment] will be presented so that the user can view transaction details.
  */
-class VirtualCardDetailFragment : Fragment(), CoroutineScope {
-
+class VirtualCardDetailFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -97,7 +98,10 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureVirtualCardView()
         configureRecyclerView()
@@ -131,11 +135,12 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val transactions = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listTransactionsByCardId(
-                        cardId = virtualCard.id,
-                    )
-                }
+                val transactions =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.listTransactionsByCardId(
+                            cardId = virtualCard.id,
+                        )
+                    }
                 when (transactions) {
                     is ListAPIResult.Success -> {
                         transactionList.clear()
@@ -146,7 +151,10 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
                         setEmptyTransactionsLabel()
                     }
                     is ListAPIResult.Partial -> {
-                        val cause = transactions.result.failed.first().cause
+                        val cause =
+                            transactions.result.failed
+                                .first()
+                                .cause
                         showAlertDialog(
                             titleResId = R.string.list_transactions_failure,
                             message = cause.localizedMessage ?: "$cause",
@@ -170,67 +178,81 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
     }
 
     /** Subscribe to receive live updates as [Transaction]s are created and updated. */
-    private fun subscribeToTransactions() = launch {
-        try {
-            withContext(Dispatchers.IO) {
-                app.sudoVirtualCardsClient.subscribeToTransactions(
-                    id = subscriptionId,
-                    subscriber = transactionSubscriber,
+    private fun subscribeToTransactions() =
+        launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.subscribeToTransactions(
+                        id = subscriptionId,
+                        subscriber = transactionSubscriber,
+                    )
+                }
+            } catch (e: SudoVirtualCardsClient.TransactionException) {
+                showAlertDialog(
+                    titleResId = R.string.subscribe_transactions_failure,
+                    message = e.localizedMessage ?: "$e",
+                    negativeButtonResId = android.R.string.ok,
+                    onNegative = {},
                 )
             }
-        } catch (e: SudoVirtualCardsClient.TransactionException) {
-            showAlertDialog(
-                titleResId = R.string.subscribe_transactions_failure,
-                message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.ok,
-                onNegative = {},
-            )
         }
-    }
 
-    private val transactionSubscriber = object : TransactionSubscriber {
-        override fun connectionStatusChanged(state: TransactionSubscriber.ConnectionState) {
-            if (state == TransactionSubscriber.ConnectionState.DISCONNECTED) {
+    private val transactionSubscriber =
+        object : TransactionSubscriber {
+            override fun connectionStatusChanged(state: TransactionSubscriber.ConnectionState) {
+                if (state == TransactionSubscriber.ConnectionState.DISCONNECTED) {
+                    launch(Dispatchers.Main) {
+                        showAlertDialog(
+                            titleResId = R.string.subscribe_transactions_failure,
+                            messageResId = R.string.subscribe_lost_connection,
+                            positiveButtonResId = android.R.string.ok,
+                            onPositive = {},
+                        )
+                    }
+                }
+            }
+
+            override fun transactionChanged(
+                transaction: Transaction,
+                changeType: TransactionSubscriber.ChangeType,
+            ) {
                 launch(Dispatchers.Main) {
-                    showAlertDialog(
-                        titleResId = R.string.subscribe_transactions_failure,
-                        messageResId = R.string.subscribe_lost_connection,
-                        positiveButtonResId = android.R.string.ok,
-                        onPositive = {},
-                    )
+                    when (changeType) {
+                        TransactionSubscriber.ChangeType.UPSERTED -> addOrUpdateTransaction(transaction)
+                        TransactionSubscriber.ChangeType.DELETED -> deleteTransaction(transaction)
+                    }
+                    adapter.notifyDataSetChanged()
+                    setEmptyTransactionsLabel()
                 }
             }
         }
-
-        override fun transactionChanged(transaction: Transaction) {
-            launch(Dispatchers.Main) {
-                addOrUpdateTransaction(transaction)
-                adapter.notifyDataSetChanged()
-                setEmptyTransactionsLabel()
-            }
-        }
-    }
 
     /** Add to the list of transactions or replace an existing [Transaction]. */
     private fun addOrUpdateTransaction(newTransaction: Transaction) {
         val replaceAtIndex = transactionList.indexOfFirst { it.id == newTransaction.id }
         if (replaceAtIndex == -1) {
-            transactionList.add(newTransaction)
+            transactionList.add(0, newTransaction)
         } else {
             transactionList[replaceAtIndex] = newTransaction
         }
     }
 
-    /** Unsubscribe from live [Transaction] updates. */
-    private fun unsubscribeFromTransactions() = launch {
-        try {
-            withContext(Dispatchers.IO) {
-                app.sudoVirtualCardsClient.unsubscribeFromTransactions(subscriptionId)
-            }
-        } catch (e: SudoVirtualCardsClient.TransactionException) {
-            app.logger.error("Failed to unsubscribe: $e")
-        }
+    /** Remove the provided transaction from the list of transactions. */
+    private fun deleteTransaction(transaction: Transaction) {
+        transactionList.removeAll { it.id == transaction.id }
     }
+
+    /** Unsubscribe from live [Transaction] updates. */
+    private fun unsubscribeFromTransactions() =
+        launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    app.sudoVirtualCardsClient.unsubscribeFromTransactions(subscriptionId)
+                }
+            } catch (e: SudoVirtualCardsClient.TransactionException) {
+                app.logger.error("Failed to unsubscribe: $e")
+            }
+        }
 
     /**
      * Configures each field with the various virtual card details on the graphical representation
@@ -302,7 +324,9 @@ class VirtualCardDetailFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }

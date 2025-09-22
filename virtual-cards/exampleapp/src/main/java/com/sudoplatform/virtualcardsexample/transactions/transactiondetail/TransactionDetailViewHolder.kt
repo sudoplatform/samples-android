@@ -20,17 +20,19 @@ import com.sudoplatform.virtualcardsexample.databinding.LayoutTransactionDetailC
  *
  * @property binding The transaction detail item view binding component.
  */
-class TransactionDetailViewHolder(private val binding: LayoutTransactionDetailCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class TransactionDetailViewHolder(
+    private val binding: LayoutTransactionDetailCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): TransactionDetailViewHolder {
-            val binding = LayoutTransactionDetailCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutTransactionDetailCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return TransactionDetailViewHolder(binding)
         }
     }

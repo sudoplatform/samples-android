@@ -26,7 +26,6 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class CreateCreditCardFundingSourceTest {
-
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 

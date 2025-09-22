@@ -53,8 +53,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [FundingSourcesFragment]: If a user successfully refreshes a funding source, they will be returned
  *   to this form.
  */
-class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
-
+class RefreshBankAccountFundingSourceFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -114,7 +115,10 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -171,16 +175,18 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                 showLoading(R.string.refreshing_funding_source)
                 app.sudoVirtualCardsClient.createKeysIfAbsent()
                 withContext(Dispatchers.IO) {
-                    val refreshData = CheckoutBankAccountProviderRefreshData(
-                        accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = authorizationText[0],
-                    )
-                    val input = RefreshFundingSourceInput(
-                        fundingSourceId,
-                        refreshData,
-                        ClientApplicationData("androidApplication"),
-                        authorizationText[0].language,
-                    )
+                    val refreshData =
+                        CheckoutBankAccountProviderRefreshData(
+                            accountId = linkSuccess.metadata.accounts[0].id,
+                            authorizationText = authorizationText[0],
+                        )
+                    val input =
+                        RefreshFundingSourceInput(
+                            fundingSourceId,
+                            refreshData,
+                            ClientApplicationData("androidApplication"),
+                            authorizationText[0].language,
+                        )
                     app.sudoVirtualCardsClient.refreshFundingSource(input)
                 }
                 showAlertDialog(
@@ -214,30 +220,33 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
      * @param linkToken [String] Link token required to launch Plaid Link.
      */
     private fun launchPlaidLink(linkToken: String) {
-        val tokenConfiguration = LinkTokenConfiguration.Builder()
-            .token(linkToken)
-            .build()
+        val tokenConfiguration =
+            LinkTokenConfiguration
+                .Builder()
+                .token(linkToken)
+                .build()
         linkAccountToPlaid.launch(tokenConfiguration)
     }
 
     /** Callback used to register and launch the activity result from Plaid Link. */
-    private val linkAccountToPlaid = registerForActivityResult(OpenPlaidLink()) {
-        when (it) {
-            is LinkSuccess -> {
-                linkSuccess = it
-                setItemsEnabled(false)
-                configureBankAccountInformationTextView(it)
-                showAuthorizationScrollView()
-            }
-            is LinkExit -> {
-                showAlertDialog(
-                    titleResId = R.string.create_funding_source_failure,
-                    message = it.error?.displayMessage ?: getString(R.string.plaid_link_error),
-                    negativeButtonResId = android.R.string.cancel,
-                )
+    private val linkAccountToPlaid =
+        registerForActivityResult(OpenPlaidLink()) {
+            when (it) {
+                is LinkSuccess -> {
+                    linkSuccess = it
+                    setItemsEnabled(false)
+                    configureBankAccountInformationTextView(it)
+                    showAuthorizationScrollView()
+                }
+                is LinkExit -> {
+                    showAlertDialog(
+                        titleResId = R.string.create_funding_source_failure,
+                        message = it.error?.displayMessage ?: getString(R.string.plaid_link_error),
+                        negativeButtonResId = android.R.string.cancel,
+                    )
+                }
             }
         }
-    }
 
     /**
      * Configures the web view used to hold the authorization text.
@@ -245,15 +254,17 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
      * @param authorizationText [List<AuthorizationText>] The authorization text to display.
      */
     private fun configureAuthorizationWebView(authorizationText: List<AuthorizationText>) {
-        var authorizationTextHtml = authorizationText.find {
-                a ->
-            a.contentType == "text/html"
-        }?.content
+        var authorizationTextHtml =
+            authorizationText
+                .find { a ->
+                    a.contentType == "text/html"
+                }?.content
         if (authorizationTextHtml == null) {
-            val authorizationTextPlain = authorizationText.find {
-                    a ->
-                a.contentType == "text/plain"
-            }?.content ?: ""
+            val authorizationTextPlain =
+                authorizationText
+                    .find { a ->
+                        a.contentType == "text/plain"
+                    }?.content ?: ""
             authorizationTextHtml = "<p>$authorizationTextPlain</p>"
         }
         binding.agreementText.loadData(authorizationTextHtml, null, null)
@@ -267,12 +278,15 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
      */
     private fun configureBankAccountInformationTextView(linkSuccess: LinkSuccess) {
         binding.institutionLabel.text = linkSuccess.metadata.institution?.name
-        binding.accountTypeLabel.text = linkSuccess.metadata.accounts[0].subtype.json
+        binding.accountTypeLabel.text =
+            linkSuccess.metadata.accounts[0]
+                .subtype.json
         binding.accountNameLabel.text = linkSuccess.metadata.accounts[0].name
-        binding.accountNumberEndingLabel.text = getString(
-            R.string.account_number_ending_label,
-            linkSuccess.metadata.accounts[0].mask,
-        )
+        binding.accountNumberEndingLabel.text =
+            getString(
+                R.string.account_number_ending_label,
+                linkSuccess.metadata.accounts[0].mask,
+            )
     }
 
     /**
@@ -313,7 +327,9 @@ class RefreshBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setToolbarItemsEnabled(false)

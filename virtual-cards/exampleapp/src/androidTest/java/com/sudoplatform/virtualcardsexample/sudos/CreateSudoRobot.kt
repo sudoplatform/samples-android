@@ -19,7 +19,6 @@ fun createSudo(func: CreateSudoRobot.() -> Unit) = CreateSudoRobot().apply { fun
  * Testing robot that manages the Create Sudo screen.
  */
 class CreateSudoRobot : BaseRobot() {
-
     private val toolbarCreateButton = withId(R.id.create)
     private val sudoLabelEditText = withId(R.id.editText)
     private val detailTextView = withId(R.id.textView)
@@ -49,6 +48,7 @@ class CreateSudoRobot : BaseRobot() {
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L, true)
         waitForViewToNotDisplay(loadingDialog, 60_000L)
+        Thread.sleep(1000)
     }
 
     fun setSudoName(name: String) {

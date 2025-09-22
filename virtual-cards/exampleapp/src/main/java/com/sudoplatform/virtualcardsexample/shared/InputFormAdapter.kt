@@ -18,32 +18,48 @@ import androidx.recyclerview.widget.RecyclerView
  * @property items List of [InputFormCell] data items to display.
  * @property onInputChanged Callback which listens for changes to input fields.
  */
-class InputFormAdapter(private val items: List<InputFormCell>, private val onInputChanged: (Int, String) -> Unit) : RecyclerView.Adapter<InputFormViewHolder>() {
-
+class InputFormAdapter(
+    private val items: List<InputFormCell>,
+    private val onInputChanged: (Int, String) -> Unit,
+) : RecyclerView.Adapter<InputFormViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): InputFormViewHolder {
-        return InputFormViewHolder.inflate(
+    ): InputFormViewHolder =
+        InputFormViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: InputFormViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: InputFormViewHolder,
+        position: Int,
+    ) {
         val savedPosition = position
         val inputFormCell = items[savedPosition]
         holder.bind(inputFormCell)
 
-        holder.inputField.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                onInputChanged(savedPosition, p0.toString())
-            }
-        })
+        holder.inputField.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {}
+
+                override fun beforeTextChanged(
+                    p0: CharSequence?,
+                    p1: Int,
+                    p2: Int,
+                    p3: Int,
+                ) {}
+
+                override fun onTextChanged(
+                    p0: CharSequence?,
+                    p1: Int,
+                    p2: Int,
+                    p3: Int,
+                ) {
+                    onInputChanged(savedPosition, p0.toString())
+                }
+            },
+        )
     }
 }

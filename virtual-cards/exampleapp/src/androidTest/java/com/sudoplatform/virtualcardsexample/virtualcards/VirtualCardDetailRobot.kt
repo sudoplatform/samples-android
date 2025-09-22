@@ -16,7 +16,6 @@ fun virtualCardDetail(func: VirtualCardDetailRobot.() -> Unit) = VirtualCardDeta
  * Testing robot that manages the Virtual Card Detail screen.
  */
 class VirtualCardDetailRobot : BaseRobot() {
-
     private val cardView = withId(R.id.cardView)
     private val transactionTextView = withId(R.id.transactionTitle)
 

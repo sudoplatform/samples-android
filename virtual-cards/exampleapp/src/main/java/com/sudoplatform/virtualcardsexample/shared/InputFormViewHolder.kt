@@ -20,19 +20,21 @@ import com.sudoplatform.virtualcardsexample.databinding.LayoutFormCellBinding
  *
  * @property binding The input form item view binding component.
  */
-class InputFormViewHolder(private val binding: LayoutFormCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class InputFormViewHolder(
+    private val binding: LayoutFormCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     val inputField: EditText = binding.inputField
 
     companion object {
         fun inflate(parent: ViewGroup): InputFormViewHolder {
-            val binding = LayoutFormCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutFormCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return InputFormViewHolder(binding)
         }
     }

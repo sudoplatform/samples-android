@@ -54,25 +54,29 @@ internal class StripeIntentWorker(
         callingFragment: Fragment,
     ): ProviderCompletionData {
         // Build card details
-        val cardDetails = PaymentMethodCreateParams.Card.Builder()
-            .setNumber(input.cardNumber)
-            .setExpiryMonth(input.expirationMonth)
-            .setExpiryYear(input.expirationYear)
-            .setCvc(input.securityCode)
-            .build()
+        val cardDetails =
+            PaymentMethodCreateParams.Card
+                .Builder()
+                .setNumber(input.cardNumber)
+                .setExpiryMonth(input.expirationMonth)
+                .setExpiryYear(input.expirationYear)
+                .setCvc(input.securityCode)
+                .build()
         // Build billing details
-        val billingDetails = PaymentMethod.BillingDetails.Builder()
-            .setAddress(
-                Address.Builder()
-                    .setLine1(input.addressLine1)
-                    .setLine2(input.addressLine2)
-                    .setCity(input.city)
-                    .setState(input.state)
-                    .setPostalCode(input.postalCode)
-                    .setCountry(ensureAlpha2CountryCode(context, input.country))
-                    .build(),
-            )
-            .build()
+        val billingDetails =
+            PaymentMethod.BillingDetails
+                .Builder()
+                .setAddress(
+                    Address
+                        .Builder()
+                        .setLine1(input.addressLine1)
+                        .setLine2(input.addressLine2)
+                        .setCity(input.city)
+                        .setState(input.state)
+                        .setPostalCode(input.postalCode)
+                        .setCountry(ensureAlpha2CountryCode(context, input.country))
+                        .build(),
+                ).build()
         // Confirm setup
         val cardParams = PaymentMethodCreateParams.create(cardDetails, billingDetails)
         val confirmParams = ConfirmSetupIntentParams.create(cardParams, clientSecret)
@@ -98,7 +102,10 @@ internal class StripeIntentWorker(
      *
      * @param countryCode [String] The country code to parse.
      */
-    private fun ensureAlpha2CountryCode(context: Context, countryCode: String): String {
+    private fun ensureAlpha2CountryCode(
+        context: Context,
+        countryCode: String,
+    ): String {
         if (countryCode.trim().length != 3) {
             return countryCode.trim()
         }
@@ -125,42 +132,55 @@ internal class StripeIntentWorker(
             // Wrap our activity result handle in a suspending coroutine and wait for a result.
             // Note: The calling fragment that kicked off this core layer work should override onActivityResult and notify
             // the handler of any received results.
-            val setupIntentResult: SetupIntentResult = suspendCoroutine {
-                activityResultHandler.addListener(
-                    intentResultKey,
-                    object : ActivityResultHandler.ActivityResultListener {
-                        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-                            val isSetupResult = stripeClient.isSetupResult(requestCode, data)
-                            if (isSetupResult) {
-                                stripeClient.onSetupResult(
-                                    requestCode,
-                                    data,
-                                    object : ApiResultCallback<SetupIntentResult> {
-                                        override fun onError(e: Exception) {
-                                            it.resumeWithException(e)
-                                        }
+            val setupIntentResult: SetupIntentResult =
+                suspendCoroutine {
+                    activityResultHandler.addListener(
+                        intentResultKey,
+                        object : ActivityResultHandler.ActivityResultListener {
+                            override fun onActivityResult(
+                                requestCode: Int,
+                                resultCode: Int,
+                                data: Intent?,
+                            ) {
+                                val isSetupResult = stripeClient.isSetupResult(requestCode, data)
+                                if (isSetupResult) {
+                                    stripeClient.onSetupResult(
+                                        requestCode,
+                                        data,
+                                        object : ApiResultCallback<SetupIntentResult> {
+                                            override fun onError(e: Exception) {
+                                                it.resumeWithException(e)
+                                            }
 
-                                        override fun onSuccess(result: SetupIntentResult) {
-                                            // Close, Success and Failed will all result in this being called.
-                                            when (result.intent.status) {
-                                                StripeIntent.Status.Succeeded -> {
-                                                    it.resume(result)
-                                                }
-                                                StripeIntent.Status.RequiresAction -> {
-                                                    it.resumeWithException(SudoVirtualCardsClient.FundingSourceException.FailedException("User cancelled 3DS flow"))
-                                                }
-                                                else -> {
-                                                    it.resumeWithException(SudoVirtualCardsClient.FundingSourceException.FailedException("3DS flow was unsuccessful"))
+                                            override fun onSuccess(result: SetupIntentResult) {
+                                                // Close, Success and Failed will all result in this being called.
+                                                when (result.intent.status) {
+                                                    StripeIntent.Status.Succeeded -> {
+                                                        it.resume(result)
+                                                    }
+                                                    StripeIntent.Status.RequiresAction -> {
+                                                        it.resumeWithException(
+                                                            SudoVirtualCardsClient.FundingSourceException.FailedException(
+                                                                "User cancelled 3DS flow",
+                                                            ),
+                                                        )
+                                                    }
+                                                    else -> {
+                                                        it.resumeWithException(
+                                                            SudoVirtualCardsClient.FundingSourceException.FailedException(
+                                                                "3DS flow was unsuccessful",
+                                                            ),
+                                                        )
+                                                    }
                                                 }
                                             }
-                                        }
-                                    },
-                                )
+                                        },
+                                    )
+                                }
                             }
-                        }
-                    },
-                )
-            }
+                        },
+                    )
+                }
             return setupIntentResult.intent
         } finally {
             // Clean up the activity result handler by removing the listener

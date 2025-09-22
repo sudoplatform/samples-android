@@ -59,8 +59,10 @@ import kotlin.coroutines.CoroutineContext
  *  - [VirtualCardDetailFragment]: If a user successfully creates a virtual card, the
  *   [VirtualCardDetailFragment] will be presented so the user can view card details and transactions.
  */
-class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedListener {
-
+class CreateVirtualCardFragment :
+    Fragment(),
+    CoroutineScope,
+    AdapterView.OnItemSelectedListener {
     companion object {
         const val VIRTUAL_CARD_AUDIENCE = "sudoplatform.virtual-cards.virtual-card"
     }
@@ -93,16 +95,17 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     private var labels = emptyArray<String>()
 
     /** An array of the default text populated for each [InputFormCell]. */
-    private val enteredInput = arrayOf(
-        "Unlimited Cards",
-        "Shopping",
-        "123 Street Rd",
-        null,
-        "Salt Lake City",
-        "UT",
-        "84044",
-        "US",
-    )
+    private val enteredInput =
+        arrayOf(
+            "Unlimited Cards",
+            "Shopping",
+            "123 Street Rd",
+            null,
+            "Salt Lake City",
+            "UT",
+            "84044",
+            "US",
+        )
 
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: CreateVirtualCardFragmentArgs by navArgs()
@@ -146,7 +149,10 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         configureFormCells()
@@ -157,10 +163,11 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
 
         binding.fundingSourcesSpinner.onItemSelectedListener = this
         listActiveFundingSources()
-        fundingSourcesSpinnerAdapter = FundingSourceSpinnerAdapter(
-            requireContext(),
-            fundingSourcesList,
-        )
+        fundingSourcesSpinnerAdapter =
+            FundingSourceSpinnerAdapter(
+                requireContext(),
+                fundingSourcesList,
+            )
         fundingSourcesSpinnerAdapter.notifyDataSetChanged()
         binding.fundingSourcesSpinner.adapter = fundingSourcesSpinnerAdapter
 
@@ -190,35 +197,39 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
             )
             return
         }
-        val billingAddress = BillingAddress(
-            addressLine1 = enteredInput[2] ?: "",
-            addressLine2 = enteredInput[3],
-            city = enteredInput[4] ?: "",
-            state = enteredInput[5] ?: "",
-            postalCode = enteredInput[6] ?: "",
-            country = enteredInput[7] ?: "",
-        )
+        val billingAddress =
+            BillingAddress(
+                addressLine1 = enteredInput[2] ?: "",
+                addressLine2 = enteredInput[3],
+                city = enteredInput[4] ?: "",
+                state = enteredInput[5] ?: "",
+                postalCode = enteredInput[6] ?: "",
+                country = enteredInput[7] ?: "",
+            )
         val cardLabel = JsonValue.JsonString(enteredInput[1] ?: "")
-        val input = ProvisionVirtualCardInput(
-            ownershipProofs = listOf(ownershipProof),
-            fundingSourceId = selectedFundingSource.id,
-            cardHolder = enteredInput[0] ?: "",
-            metadata = cardLabel,
-            billingAddress = billingAddress,
-            currency = "USD",
-        )
+        val input =
+            ProvisionVirtualCardInput(
+                ownershipProofs = listOf(ownershipProof),
+                fundingSourceId = selectedFundingSource.id,
+                cardHolder = enteredInput[0] ?: "",
+                metadata = cardLabel,
+                billingAddress = billingAddress,
+                currency = "USD",
+            )
         launch {
             try {
                 showLoading(R.string.creating_virtual_card)
                 app.sudoVirtualCardsClient.createKeysIfAbsent()
-                val initialProvisionalVirtualCard = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.provisionVirtualCard(input)
-                }
+                val initialProvisionalVirtualCard =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.provisionVirtualCard(input)
+                    }
                 var state = initialProvisionalVirtualCard.provisioningState
                 while (state == ProvisionalVirtualCard.ProvisioningState.PROVISIONING) {
-                    val provisionalCard = withContext(Dispatchers.IO) {
-                        app.sudoVirtualCardsClient.getProvisionalCard(initialProvisionalVirtualCard.id)
-                    }
+                    val provisionalCard =
+                        withContext(Dispatchers.IO) {
+                            app.sudoVirtualCardsClient.getProvisionalCard(initialProvisionalVirtualCard.id)
+                        }
                     if (provisionalCard?.provisioningState == ProvisionalVirtualCard.ProvisioningState.COMPLETED) {
                         showAlertDialog(
                             titleResId = R.string.success,
@@ -253,9 +264,10 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     private fun listActiveFundingSources() {
         launch {
             try {
-                val fundingSources = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listFundingSources()
-                }
+                val fundingSources =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.listFundingSources()
+                    }
                 val filtered = fundingSources.items.filter { it.state == FundingSourceState.ACTIVE }
                 fundingSourcesList.clear()
                 fundingSourcesList.addAll(filtered)
@@ -282,9 +294,10 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     private fun getOwnershipProof() {
         launch {
             try {
-                ownershipProof = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.getOwnershipProof(sudo, VIRTUAL_CARD_AUDIENCE)
-                }
+                ownershipProof =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.getOwnershipProof(sudo, VIRTUAL_CARD_AUDIENCE)
+                    }
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.ownership_proof_error,
@@ -300,9 +313,10 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
      * change events to capture user input.
      */
     private fun configureRecyclerView() {
-        adapter = InputFormAdapter(inputFormCells) { position, charSeq ->
-            enteredInput[position] = charSeq
-        }
+        adapter =
+            InputFormAdapter(inputFormCells) { position, charSeq ->
+                enteredInput[position] = charSeq
+            }
 
         binding.formRecyclerView.setHasFixedSize(true)
         binding.formRecyclerView.adapter = adapter
@@ -313,7 +327,15 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     private fun configureFormCells() {
         labels = resources.getStringArray(R.array.create_card_labels)
         for (i in labels.indices) {
-            val hint = if (labels[i].contains(getString(R.string.address_line_2))) getString(R.string.enter_optional_input, labels[i]) else getString(R.string.enter_non_optional_input, labels[i])
+            val hint =
+                if (labels[i].contains(
+                        getString(R.string.address_line_2),
+                    )
+                ) {
+                    getString(R.string.enter_optional_input, labels[i])
+                } else {
+                    getString(R.string.enter_non_optional_input, labels[i])
+                }
             inputFormCells.add(InputFormCell(labels[i], enteredInput[i] ?: "", hint))
         }
     }
@@ -361,7 +383,9 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)
@@ -376,9 +400,15 @@ class CreateVirtualCardFragment : Fragment(), CoroutineScope, AdapterView.OnItem
     }
 
     /** Sets the selected funding source. */
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+    override fun onItemSelected(
+        parent: AdapterView<*>,
+        view: View?,
+        pos: Int,
+        id: Long,
+    ) {
         selectedFundingSource = parent.getItemAtPosition(pos) as FundingSource
         setItemsEnabled(true)
     }
+
     override fun onNothingSelected(parent: AdapterView<*>) { /* no-op */ }
 }

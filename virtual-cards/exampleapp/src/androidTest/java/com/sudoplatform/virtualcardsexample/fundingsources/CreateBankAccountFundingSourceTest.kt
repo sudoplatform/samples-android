@@ -20,7 +20,6 @@ import timber.log.Timber
  * Test the bank account funding source creation flow.
  */
 class CreateBankAccountFundingSourceTest {
-
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 

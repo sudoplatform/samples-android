@@ -31,7 +31,6 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class CreateVirtualCardTest {
-
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 

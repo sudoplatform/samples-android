@@ -17,6 +17,8 @@ import com.sudoplatform.virtualcardsexample.R
  *
  * @property row [View] The view which contains the [FundingSource] item.
  */
-class FundingSourceSpinnerViewHolder(private val row: View?) {
+class FundingSourceSpinnerViewHolder(
+    private val row: View?,
+) {
     val label: TextView = row?.findViewById(R.id.textView) as TextView
 }

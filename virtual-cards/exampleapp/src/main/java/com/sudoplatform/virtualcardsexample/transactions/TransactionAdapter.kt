@@ -17,19 +17,24 @@ import com.sudoplatform.sudovirtualcards.types.Transaction
  * @property items List of [Transaction] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
-class TransactionAdapter(private val items: List<Transaction>, private val itemSelectedListener: (Transaction) -> Unit) : RecyclerView.Adapter<TransactionViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
-        return TransactionViewHolder.inflate(
+class TransactionAdapter(
+    private val items: List<Transaction>,
+    private val itemSelectedListener: (Transaction) -> Unit,
+) : RecyclerView.Adapter<TransactionViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): TransactionViewHolder =
+        TransactionViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: TransactionViewHolder,
+        position: Int,
+    ) {
         val transaction = items[position]
         holder.bind(transaction)
 

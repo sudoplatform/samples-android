@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.sudoplatform.virtualcardsexample">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name="com.sudoplatform.virtualcardsexample.App"
@@ -10,6 +11,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
         <activity
@@ -31,6 +33,14 @@
             android:name="com.plaid.internal.LinkRedirectActivity"
             android:theme="@style/Theme.AppCompat"
             tools:replace="android:theme" />
+        <service
+            android:name=".notifications.VirtualCardsExampleNotificationHandler"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

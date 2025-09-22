@@ -56,8 +56,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [VirtualCardDetailFragment]: If a user selects a [VirtualCard] from the list, the [VirtualCardDetailFragment]
  *   will be presented so that the user can view virtual card details and transactions.
  */
-class VirtualCardsFragment : Fragment(), CoroutineScope {
-
+class VirtualCardsFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -99,7 +100,10 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -128,9 +132,10 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val virtualCards = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listVirtualCards()
-                }
+                val virtualCards =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.listVirtualCards()
+                    }
                 when (virtualCards) {
                     is ListAPIResult.Success -> {
                         virtualCardList.clear()
@@ -142,7 +147,10 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
                         adapter.notifyDataSetChanged()
                     }
                     is ListAPIResult.Partial -> {
-                        val cause = virtualCards.result.failed.first().cause
+                        val cause =
+                            virtualCards.result.failed
+                                .first()
+                                .cause
                         showAlertDialog(
                             titleResId = R.string.list_virtual_cards_failure,
                             message = cause.localizedMessage ?: "$cause",
@@ -171,13 +179,17 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
      * @param id [String] The identifier of the [VirtualCard] to cancel.
      * @param completion Callback which executes when the operation is completed.
      */
-    private fun cancelVirtualCard(id: String, completion: (VirtualCard) -> Unit) {
+    private fun cancelVirtualCard(
+        id: String,
+        completion: (VirtualCard) -> Unit,
+    ) {
         launch {
             try {
                 showCancelAlert(R.string.cancelling_virtual_card)
-                val virtualCard = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.cancelVirtualCard(id)
-                }
+                val virtualCard =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.cancelVirtualCard(id)
+                    }
                 when (virtualCard) {
                     is SingleAPIResult.Success -> {
                         completion(virtualCard.result)
@@ -236,7 +248,9 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }
@@ -257,7 +271,9 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that a cancel operation is occurring. */
-    private fun showCancelAlert(@StringRes textResId: Int) {
+    private fun showCancelAlert(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }
@@ -279,7 +295,10 @@ class VirtualCardsFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.virtualCardRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         val card = virtualCardList[viewHolder.adapterPosition]
         cancelVirtualCard(card.id) { cancelledCard ->
             val position = viewHolder.adapterPosition

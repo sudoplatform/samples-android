@@ -164,6 +164,7 @@
     <string name="fee_placeholder">Fee</string>
     <string name="loading_transactions">Loading Transactions</string>
     <string name="declined_transaction_desc">%1$s (Declined)</string>
+    <string name="pending_transaction_desc">%1$s (Pending)</string>
     <string name="refunded_transaction_desc">%1$s (Refunded)</string>
     <string name="subscribe_transactions_failure">Failed to subscribe to transaction updates</string>
     <string name="subscribe_lost_connection">The subscription for transaction updates has disconnected</string>
@@ -178,12 +179,12 @@
     <string name="merchant_amount">Merchant Amount</string>
     <string name="service_fee">Service fee</string>
     <string name="funding_source_charge_amount">Funding Source Charge Amount</string>
-    <string name="date_charged">Date charged</string>
+    <string name="date_transacted">Date transacted</string>
     <string name="date_settled">Date settled</string>
-    <string name="date_refunded">Date refunded</string>
-    <string name="date_declined">Date declined</string>
     <string name="decline_reason">Decline reason</string>
     <string name="charge_status">Charge status</string>
+    <string name="charge_transacted">Charge transacted</string>
+    <string name="charge_settled">Charge settled</string>
 
     <!-- OrphanVirtualCardsFragment -->
     <string name="loading_orphan_virtual_cards">Loading Orphan Virtual Cards</string>

@@ -54,8 +54,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [FundingSourcesFragment]: If a user successfully creates a funding source, they will be returned
  *   to this form.
  */
-class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
-
+class CreateBankAccountFundingSourceFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -106,7 +107,10 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -140,11 +144,12 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.launching_plaid_link)
                 withContext(Dispatchers.IO) {
-                    val input = SetupFundingSourceInput(
-                        "USD",
-                        FundingSourceType.BANK_ACCOUNT,
-                        ClientApplicationData("androidApplication"),
-                    )
+                    val input =
+                        SetupFundingSourceInput(
+                            "USD",
+                            FundingSourceType.BANK_ACCOUNT,
+                            ClientApplicationData("androidApplication"),
+                        )
                     provisionalFundingSource = app.sudoVirtualCardsClient.setupFundingSource(input)
                     provisioningData = provisionalFundingSource.provisioningData as CheckoutBankAccountProvisioningData
                     val linkToken = provisioningData.linkToken.linkToken
@@ -173,17 +178,19 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
                 showLoading(R.string.creating_funding_source)
                 app.sudoVirtualCardsClient.createKeysIfAbsent()
                 withContext(Dispatchers.IO) {
-                    val completionData = CheckoutBankAccountProviderCompletionData(
-                        publicToken = linkSuccess.publicToken,
-                        institutionId = linkSuccess.metadata.institution?.id ?: "",
-                        accountId = linkSuccess.metadata.accounts[0].id,
-                        authorizationText = provisioningData.authorizationText[0],
-                    )
-                    val input = CompleteFundingSourceInput(
-                        provisionalFundingSource.id,
-                        completionData,
-                        null,
-                    )
+                    val completionData =
+                        CheckoutBankAccountProviderCompletionData(
+                            publicToken = linkSuccess.publicToken,
+                            institutionId = linkSuccess.metadata.institution?.id ?: "",
+                            accountId = linkSuccess.metadata.accounts[0].id,
+                            authorizationText = provisioningData.authorizationText[0],
+                        )
+                    val input =
+                        CompleteFundingSourceInput(
+                            provisionalFundingSource.id,
+                            completionData,
+                            null,
+                        )
                     app.sudoVirtualCardsClient.completeFundingSource(input)
                 }
                 showAlertDialog(
@@ -217,30 +224,33 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
      * @param linkToken [String] Link token required to launch Plaid Link.
      */
     private fun launchPlaidLink(linkToken: String) {
-        val tokenConfiguration = LinkTokenConfiguration.Builder()
-            .token(linkToken)
-            .build()
+        val tokenConfiguration =
+            LinkTokenConfiguration
+                .Builder()
+                .token(linkToken)
+                .build()
         linkAccountToPlaid.launch(tokenConfiguration)
     }
 
     /** Callback used to register and launch the activity result from Plaid Link. */
-    private val linkAccountToPlaid = registerForActivityResult(OpenPlaidLink()) {
-        when (it) {
-            is LinkSuccess -> {
-                linkSuccess = it
-                setItemsEnabled(false)
-                configureBankAccountInformationTextView(it)
-                showAuthorizationScrollView()
-            }
-            is LinkExit -> {
-                showAlertDialog(
-                    titleResId = R.string.create_funding_source_failure,
-                    message = it.error?.displayMessage ?: getString(R.string.plaid_link_error),
-                    negativeButtonResId = android.R.string.cancel,
-                )
+    private val linkAccountToPlaid =
+        registerForActivityResult(OpenPlaidLink()) {
+            when (it) {
+                is LinkSuccess -> {
+                    linkSuccess = it
+                    setItemsEnabled(false)
+                    configureBankAccountInformationTextView(it)
+                    showAuthorizationScrollView()
+                }
+                is LinkExit -> {
+                    showAlertDialog(
+                        titleResId = R.string.create_funding_source_failure,
+                        message = it.error?.displayMessage ?: getString(R.string.plaid_link_error),
+                        negativeButtonResId = android.R.string.cancel,
+                    )
+                }
             }
         }
-    }
 
     /**
      * Configures the web view used to hold the authorization text.
@@ -249,15 +259,17 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
      *  the authorization text.
      */
     private fun configureAuthorizationWebView(provisioningData: CheckoutBankAccountProvisioningData) {
-        var authorizationTextHtml = provisioningData.authorizationText.find {
-                a ->
-            a.contentType == "text/html"
-        }?.content
+        var authorizationTextHtml =
+            provisioningData.authorizationText
+                .find { a ->
+                    a.contentType == "text/html"
+                }?.content
         if (authorizationTextHtml == null) {
-            val authorizationTextPlain = provisioningData.authorizationText.find {
-                    a ->
-                a.contentType == "text/plain"
-            }?.content ?: ""
+            val authorizationTextPlain =
+                provisioningData.authorizationText
+                    .find { a ->
+                        a.contentType == "text/plain"
+                    }?.content ?: ""
             authorizationTextHtml = "<p>$authorizationTextPlain</p>"
         }
         binding.agreementText.loadData(authorizationTextHtml, null, null)
@@ -271,12 +283,15 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
      */
     private fun configureBankAccountInformationTextView(linkSuccess: LinkSuccess) {
         binding.institutionLabel.text = linkSuccess.metadata.institution?.name
-        binding.accountTypeLabel.text = linkSuccess.metadata.accounts[0].subtype.json
+        binding.accountTypeLabel.text =
+            linkSuccess.metadata.accounts[0]
+                .subtype.json
         binding.accountNameLabel.text = linkSuccess.metadata.accounts[0].name
-        binding.accountNumberEndingLabel.text = getString(
-            R.string.account_number_ending_label,
-            linkSuccess.metadata.accounts[0].mask,
-        )
+        binding.accountNumberEndingLabel.text =
+            getString(
+                R.string.account_number_ending_label,
+                linkSuccess.metadata.accounts[0].mask,
+            )
     }
 
     /**
@@ -317,7 +332,9 @@ class CreateBankAccountFundingSourceFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setToolbarItemsEnabled(false)

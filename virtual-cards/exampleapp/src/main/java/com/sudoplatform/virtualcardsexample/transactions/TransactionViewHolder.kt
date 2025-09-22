@@ -30,27 +30,31 @@ import java.util.Date
  *
  * @property binding The [Transaction] item view binding component.
  */
-class TransactionViewHolder(private val binding: LayoutTransactionCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class TransactionViewHolder(
+    private val binding: LayoutTransactionCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): TransactionViewHolder {
-            val binding = LayoutTransactionCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutTransactionCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return TransactionViewHolder(binding)
         }
     }
 
     fun bind(transaction: Transaction) {
-        val description = when (transaction.type) {
-            TransactionType.DECLINE -> binding.root.context.getString(R.string.declined_transaction_desc, transaction.description)
-            TransactionType.REFUND -> binding.root.context.getString(R.string.refunded_transaction_desc, transaction.description)
-            else -> transaction.description
-        }
+        val description =
+            when (transaction.type) {
+                TransactionType.DECLINE -> binding.root.context.getString(R.string.declined_transaction_desc, transaction.description)
+                TransactionType.REFUND -> binding.root.context.getString(R.string.refunded_transaction_desc, transaction.description)
+                TransactionType.PENDING -> binding.root.context.getString(R.string.pending_transaction_desc, transaction.description)
+                else -> transaction.description
+            }
         binding.descriptionLabel.text = description
         binding.dateLabel.text = formatDate(transaction.transactedAt)
         binding.amountLabel.text = formatCurrencyAmount(transaction.billedAmount)
@@ -74,7 +78,5 @@ class TransactionViewHolder(private val binding: LayoutTransactionCellBinding) :
      * @param date The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
-    private fun formatDate(date: Date): String {
-        return DateFormat.format("MM/dd/yyyy", date).toString()
-    }
+    private fun formatDate(date: Date): String = DateFormat.format("MM/dd/yyyy", date).toString()
 }

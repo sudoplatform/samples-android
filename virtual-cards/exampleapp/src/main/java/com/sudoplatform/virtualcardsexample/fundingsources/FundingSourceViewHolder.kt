@@ -33,17 +33,19 @@ import com.sudoplatform.virtualcardsexample.databinding.LayoutFundingSourceCellB
  *
  * @property binding The [FundingSource] item view binding component.
  */
-class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class FundingSourceViewHolder(
+    private val binding: LayoutFundingSourceCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): FundingSourceViewHolder {
-            val binding = LayoutFundingSourceCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context,
-                ),
-                parent,
-                false,
-            )
+            val binding =
+                LayoutFundingSourceCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return FundingSourceViewHolder(binding)
         }
     }
@@ -55,12 +57,18 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                     binding.name.text =
                         binding.root.context.getString(R.string.funding_source_credit_card_cancelled_label, fundingSource.network)
                 } else {
-                    binding.name.text = binding.root.context.getString(
-                        R.string.funding_source_credit_card_label,
-                        fundingSource.network,
-                    )
+                    binding.name.text =
+                        binding.root.context.getString(
+                            R.string.funding_source_credit_card_label,
+                            fundingSource.network,
+                        )
                 }
-                binding.description.text = binding.root.context.getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.cardType)
+                binding.description.text =
+                    binding.root.context.getString(
+                        R.string.funding_source_credit_card_description,
+                        fundingSource.last4,
+                        fundingSource.cardType,
+                    )
                 setCardNetwork(fundingSource.network)
             }
             is BankAccountFundingSource -> {
@@ -73,8 +81,21 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
                 }
                 binding.refreshButton.visibility = if (fundingSource.needsRefresh()) View.VISIBLE else View.GONE
 
-                val unfundedSuffix = if (fundingSource.isUnfunded()) " ***UNFUNDED*** ${this.formatCurrencyAmount(fundingSource.unfundedAmount)}" else ""
-                binding.description.text = binding.root.context.getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType, unfundedSuffix)
+                val unfundedSuffix =
+                    if (fundingSource.isUnfunded()) {
+                        " ***UNFUNDED*** ${this.formatCurrencyAmount(
+                            fundingSource.unfundedAmount,
+                        )}"
+                    } else {
+                        ""
+                    }
+                binding.description.text =
+                    binding.root.context.getString(
+                        R.string.funding_source_bank_account_description,
+                        fundingSource.last4,
+                        fundingSource.bankAccountType,
+                        unfundedSuffix,
+                    )
                 if (fundingSource.institutionLogo != null) {
                     val decoded = Base64.decode(fundingSource.institutionLogo?.data, Base64.DEFAULT)
                     val bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
@@ -94,9 +115,7 @@ class FundingSourceViewHolder(private val binding: LayoutFundingSourceCellBindin
         return "$$centsAmount ${amount.currency}"
     }
 
-    fun getRefreshButton(): Button {
-        return binding.refreshButton
-    }
+    fun getRefreshButton(): Button = binding.refreshButton
 
     private fun setCardNetwork(network: CreditCardFundingSource.CreditCardNetwork) {
         when (network) {

@@ -19,7 +19,6 @@ fun virtualCards(func: VirtualCardsRobot.() -> Unit) = VirtualCardsRobot().apply
  * Testing robot that manages the Virtual Cards screen.
  */
 class VirtualCardsRobot : BaseRobot() {
-
     private val createVirtualCardButton = withId(R.id.createVirtualCardButton)
     private val virtualCardRecyclerView = withId(R.id.virtualCardRecyclerView)
     private val loadingDialog = withId(R.id.progressBar)

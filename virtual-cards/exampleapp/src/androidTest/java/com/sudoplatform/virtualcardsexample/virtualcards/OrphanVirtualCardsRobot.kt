@@ -19,7 +19,6 @@ fun orphanVirtualCards(func: OrphanVirtualCardsRobot.() -> Unit) = OrphanVirtual
  * Testing robot that manages the Orphan Virtual Cards screen.
  */
 class OrphanVirtualCardsRobot : BaseRobot() {
-
     private val orphanCardRecyclerView = withId(R.id.orphanVirtualCardRecyclerView)
 
     fun waitForRecyclerView() {

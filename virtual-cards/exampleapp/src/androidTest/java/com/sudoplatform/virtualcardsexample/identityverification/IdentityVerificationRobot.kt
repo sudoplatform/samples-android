@@ -56,13 +56,14 @@ class IdentityVerificationRobot : BaseRobot() {
     fun isVerified(): Boolean {
         var verified = true
         try {
-            onView(statusLabel).check(
-                matches(
-                    withText("Verified"),
-                ),
-            ).withFailureHandler { _, _ ->
-                verified = false
-            }
+            onView(statusLabel)
+                .check(
+                    matches(
+                        withText("Verified"),
+                    ),
+                ).withFailureHandler { _, _ ->
+                    verified = false
+                }
         } catch (e: NoMatchingViewException) {
             println("NoMatchingViewException Exception")
             verified = false

@@ -16,7 +16,6 @@ fun createFundingSourceMenu(func: CreateFundingSourceMenuRobot.() -> Unit) = Cre
  * Testing robot that manages the Create Funding Source Menu screen.
  */
 class CreateFundingSourceMenuRobot : BaseRobot() {
-
     private val addStripeCreditCardButton = withId(R.id.createStripeCardButton)
     private val addCheckoutBankAccountButton = withId(R.id.createCheckoutBankAccountButton)
     private val learnMoreTextView = withId(R.id.learnMoreTextView)

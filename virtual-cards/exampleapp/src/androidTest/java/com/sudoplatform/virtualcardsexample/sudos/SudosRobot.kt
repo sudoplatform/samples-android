@@ -22,7 +22,6 @@ fun sudos(func: SudosRobot.() -> Unit) = SudosRobot().apply { func() }
  * Testing robot that manages the Sudos screen.
  */
 class SudosRobot : BaseRobot() {
-
     private val toolbarInfoButton = withId(R.id.info)
     private val createSudoButton = withId(R.id.createSudoButton)
     private val sudoRecyclerView = withId(R.id.sudoRecyclerView)
@@ -33,6 +32,7 @@ class SudosRobot : BaseRobot() {
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L, true)
         waitForViewToNotDisplay(loadingDialog, 10_000L)
+        Thread.sleep(1000)
     }
 
     fun waitForRecyclerView() {
@@ -42,6 +42,7 @@ class SudosRobot : BaseRobot() {
     fun checkSudosItemsDisplayed() {
         waitForViewToDisplay(toolbarInfoButton)
         waitForViewToDisplay(createSudoButton)
+        Thread.sleep(1000)
     }
 
     fun navigateToCreateSudoScreen() {
@@ -101,6 +102,7 @@ class SudosRobot : BaseRobot() {
 
     private fun checkAlertDialog() {
         waitForViewToDisplay(positiveAlertButton, 60_000L)
+        Thread.sleep(1000)
         onView(positiveAlertButton).check(matches(withText(android.R.string.ok)))
     }
 }

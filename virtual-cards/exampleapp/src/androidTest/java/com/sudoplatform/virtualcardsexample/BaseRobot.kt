@@ -33,9 +33,11 @@ import org.hamcrest.core.IsNot.not
  * Base class of the visual testing robots.
  */
 open class BaseRobot {
-
     // Assumes that the view is visible on screen.
-    fun replaceText(matcher: Matcher<View>, text: String) {
+    fun replaceText(
+        matcher: Matcher<View>,
+        text: String,
+    ) {
         onView(matcher)
             .perform(click())
             .perform(replaceText(text))
@@ -44,7 +46,10 @@ open class BaseRobot {
     }
 
     // Assumes that the view is visible on screen.
-    fun fillEditText(resourceId: Int, text: String) {
+    fun fillEditText(
+        resourceId: Int,
+        text: String,
+    ) {
         onView(withId(resourceId))
             .perform(click())
             .perform(typeText(text))
@@ -53,7 +58,10 @@ open class BaseRobot {
     }
 
     // Assumes that the view is visible on screen.
-    fun fillText(matcher: Matcher<View>, text: String) {
+    fun fillText(
+        matcher: Matcher<View>,
+        text: String,
+    ) {
         onView(matcher)
             .perform(click())
             .perform(typeText(text))
@@ -83,19 +91,28 @@ open class BaseRobot {
     }
 
     // Navigate via the drawer
-    fun selectNavigationDrawerDestination(matcher: Matcher<View>, resourceId: Int) {
+    fun selectNavigationDrawerDestination(
+        matcher: Matcher<View>,
+        resourceId: Int,
+    ) {
         onView(matcher)
             .perform(navigateTo(resourceId))
     }
 
     // Scroll to the View in the Recycler View
-    fun scrollToViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
+    fun scrollToViewInRecyclerView(
+        recyclerViewId: Int,
+        matcher: Matcher<View>,
+    ) {
         onView(withId(recyclerViewId))
             .perform(scrollTo<ViewHolder>(matcher))
     }
 
     // Click on the View in the Recycler View
-    fun clickViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
+    fun clickViewInRecyclerView(
+        recyclerViewId: Int,
+        matcher: Matcher<View>,
+    ) {
         onView(withId(recyclerViewId))
             .perform(actionOnItem<ViewHolder>(matcher, click()))
     }
@@ -118,31 +135,64 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 10_000L, mayMissDisplay: Boolean = false) {
-        val retryInterval = 250L // 250 ms between retries var attempts = 1
-        for (x in 0..timeout step retryInterval) {
+    fun waitForViewToDisplay(
+        matcher: Matcher<View>,
+        timeout: Long = 10_000L,
+        mayMissDisplay: Boolean = false,
+    ) {
+        val retryInterval = 250L // 250 ms between retries
+        val endTime = System.currentTimeMillis() + timeout
+
+        while (System.currentTimeMillis() < endTime) {
             try {
-                onView(matcher)
-                    .check(matches(isDisplayed()))
-                break
+                onView(matcher).check(matches(isDisplayed()))
+                return // Success - view is displayed
             } catch (e: NoMatchingViewException) {
-                println("NoMatchingViewException Exception")
-                Thread.sleep(retryInterval)
+                // View not found yet, wait and retry
+                try {
+                    Thread.sleep(retryInterval)
+                } catch (ie: InterruptedException) {
+                    // Thread was interrupted, break the loop
+                    break
+                }
             } catch (e: AssertionFailedError) {
-                println("AssertionFailedError Exception")
-                Thread.sleep(retryInterval)
+                // View found but not displayed yet, wait and retry
+                try {
+                    Thread.sleep(retryInterval)
+                } catch (ie: InterruptedException) {
+                    // Thread was interrupted, break the loop
+                    break
+                }
+            } catch (e: Exception) {
+                // Any other exception (including activity not resumed)
+                if (!mayMissDisplay) {
+                    // Only rethrow if view must be displayed
+                    throw e
+                }
+                try {
+                    Thread.sleep(retryInterval)
+                } catch (ie: InterruptedException) {
+                    break
+                }
             }
         }
 
+        // Timeout occurred, perform final check if view must be displayed
         if (!mayMissDisplay) {
-            onView(matcher)
-                .check(matches(isDisplayed()))
+            try {
+                onView(matcher).check(matches(isDisplayed()))
+            } catch (e: NoMatchingViewException) {
+                throw AssertionError("View with matcher $matcher not found after waiting $timeout ms", e)
+            }
         }
     }
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToNotDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+    fun waitForViewToNotDisplay(
+        matcher: Matcher<View>,
+        timeout: Long = 10_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -164,7 +214,10 @@ open class BaseRobot {
         }
     }
 
-    fun pressBackUntilViewIsDisplayed(matcher: Matcher<View>, timeout: Long = 5000) {
+    fun pressBackUntilViewIsDisplayed(
+        matcher: Matcher<View>,
+        timeout: Long = 5000,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         Thread.sleep(1000)
         for (x in 0..timeout step retryInterval) {

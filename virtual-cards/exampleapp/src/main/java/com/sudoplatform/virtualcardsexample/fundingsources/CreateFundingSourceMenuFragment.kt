@@ -40,8 +40,9 @@ import kotlin.coroutines.CoroutineContext
  *   button, the [CreateBankAccountFundingSourceFragment] will be presented so the user can create
  *   a Checkout bank account based funding source.
  */
-class CreateFundingSourceMenuFragment : Fragment(), CoroutineScope {
-
+class CreateFundingSourceMenuFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -67,7 +68,10 @@ class CreateFundingSourceMenuFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 

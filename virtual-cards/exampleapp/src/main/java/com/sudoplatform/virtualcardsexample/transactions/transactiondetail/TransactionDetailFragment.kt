@@ -26,6 +26,7 @@ import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.sudovirtualcards.types.Transaction
+import com.sudoplatform.sudovirtualcards.types.TransactionDetailCharge
 import com.sudoplatform.sudovirtualcards.types.TransactionType
 import com.sudoplatform.sudovirtualcards.types.VirtualCard
 import com.sudoplatform.virtualcardsexample.App
@@ -48,8 +49,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [VirtualCardDetailFragment]: A user selects a [Transaction] from the list which will show this
  *    view with the list of transaction details.
  */
-class TransactionDetailFragment : Fragment(), CoroutineScope {
-
+class TransactionDetailFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** The [App] that holds references to the APIs this fragment needs. */
@@ -81,7 +83,10 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         val transaction = args.transaction!!
         val card = args.virtualCard!!
@@ -98,9 +103,10 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     private fun retrieveAssociatedSudo(virtualCard: VirtualCard) {
         launch {
             try {
-                val sudoList = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.listSudos(ListOption.REMOTE_ONLY)
-                }.toMutableList()
+                val sudoList =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.listSudos(ListOption.REMOTE_ONLY)
+                    }.toMutableList()
                 val sudo = sudoList.firstOrNull { sudo -> virtualCard.owners.all { it.id == sudo.id } }
                 if (sudo != null) {
                     binding.sudoLabel.text = sudo.label
@@ -124,16 +130,24 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
     private fun retrieveAssociatedFundingSource(virtualCard: VirtualCard) {
         launch {
             try {
-                val fundingSource = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.getFundingSource(virtualCard.fundingSourceId)
-                }
+                val fundingSource =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.getFundingSource(virtualCard.fundingSourceId)
+                    }
                 when (fundingSource) {
                     is CreditCardFundingSource -> {
-                        binding.fundingSourceLabel.text = getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.network)
+                        binding.fundingSourceLabel.text =
+                            getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.network)
                     }
                     is BankAccountFundingSource -> {
                         val unfundedSuffix = if (fundingSource.isUnfunded()) " ***UNFUNDED***" else ""
-                        binding.fundingSourceLabel.text = getString(R.string.funding_source_bank_account_description, fundingSource.last4, fundingSource.bankAccountType, unfundedSuffix)
+                        binding.fundingSourceLabel.text =
+                            getString(
+                                R.string.funding_source_bank_account_description,
+                                fundingSource.last4,
+                                fundingSource.bankAccountType,
+                                unfundedSuffix,
+                            )
                     }
                     else -> { /* Nothing to do here */ }
                 }
@@ -163,21 +177,37 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
         val merchantCell = TransactionDetailCell(getString(R.string.merchant), "", transaction.description)
         val statusCell = TransactionDetailCell(getString(R.string.status), "", transaction.type.name)
         if (transaction.type == TransactionType.DECLINE) {
-            val declineReasonCell = TransactionDetailCell(getString(R.string.decline_reason), "", transaction.declineReason?.description(requireContext()) ?: getString(R.string.dr_declined))
+            val declineReasonCell =
+                TransactionDetailCell(
+                    getString(R.string.decline_reason),
+                    "",
+                    transaction.declineReason?.description(requireContext()) ?: getString(R.string.dr_declined),
+                )
             transactionDetailCells.add(declineReasonCell)
         }
         transactionDetailCells.addAll(arrayListOf(merchantCell, statusCell))
         configureTransactionDateCells(transaction)
         for (transactionDetail in transaction.details) {
-            val amountCell = TransactionDetailCell(getString(R.string.merchant_amount), "", formatCurrencyAmount(transactionDetail.virtualCardAmount))
+            val amountCell =
+                TransactionDetailCell(getString(R.string.merchant_amount), "", formatCurrencyAmount(transactionDetail.virtualCardAmount))
             transactionDetailCells.add(amountCell)
             when (transaction.type) {
                 TransactionType.PENDING, TransactionType.COMPLETE -> {
                     val feePercentStr = "%.2f%%".format((transactionDetail.markup.percent / 1000.0))
                     val feeFlatStr = "$%.2f".format((transactionDetail.markup.flat / 100.0))
                     val serviceFeeSubtitle = "$feePercentStr + $feeFlatStr"
-                    val serviceFeeCell = TransactionDetailCell(getString(R.string.service_fee), serviceFeeSubtitle, formatCurrencyAmount(transactionDetail.markupAmount))
-                    val totalFeeCell = TransactionDetailCell(getString(R.string.funding_source_charge_amount), "", formatCurrencyAmount(transactionDetail.fundingSourceAmount))
+                    val serviceFeeCell =
+                        TransactionDetailCell(
+                            getString(R.string.service_fee),
+                            serviceFeeSubtitle,
+                            formatCurrencyAmount(transactionDetail.markupAmount),
+                        )
+                    val totalFeeCell =
+                        TransactionDetailCell(
+                            getString(R.string.funding_source_charge_amount),
+                            "",
+                            formatCurrencyAmount(transactionDetail.fundingSourceAmount),
+                        )
                     transactionDetailCells.addAll(arrayListOf(serviceFeeCell, totalFeeCell))
                 }
                 else -> {}
@@ -185,33 +215,38 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
             val chargeStatus = transactionDetail.state
             val chargeStatusCell = TransactionDetailCell(getString(R.string.charge_status), "", chargeStatus.name)
             transactionDetailCells.add(chargeStatusCell)
+            configureTransactionDetailDateCells(transactionDetail)
         }
     }
 
     /**
-     * Configures the transaction detail date labels and value text.
+     * Adds cells to display the timestamps contained in the transaction.
      *
      * @param transaction The selected [Transaction] to display its details.
      */
     private fun configureTransactionDateCells(transaction: Transaction) {
-        when (transaction.type) {
-            TransactionType.PENDING -> {
-                val dateChargedCell = TransactionDetailCell(getString(R.string.date_charged), "", formatDate(transaction.transactedAt))
-                transactionDetailCells.add(dateChargedCell)
-            }
-            TransactionType.COMPLETE -> {
-                val dateSettledCell = TransactionDetailCell(getString(R.string.date_settled), "", formatDate(transaction.transactedAt))
-                transactionDetailCells.add(dateSettledCell)
-            }
-            TransactionType.REFUND -> {
-                val dateRefundedCell = TransactionDetailCell(getString(R.string.date_refunded), "", formatDate(transaction.transactedAt))
-                transactionDetailCells.add(dateRefundedCell)
-            }
-            TransactionType.DECLINE -> {
-                val dateDeclinedCell = TransactionDetailCell(getString(R.string.date_declined), "", formatDate(transaction.transactedAt))
-                transactionDetailCells.add(dateDeclinedCell)
-            }
-            else -> {}
+        val dateChargedCell = TransactionDetailCell(getString(R.string.date_transacted), "", formatDate(transaction.transactedAt))
+        transactionDetailCells.add(dateChargedCell)
+        transaction.settledAt?.let {
+            val dateSettledCell = TransactionDetailCell(getString(R.string.date_settled), "", formatDate(transaction.settledAt!!))
+            transactionDetailCells.add(dateSettledCell)
+        }
+    }
+
+    /**
+     * Adds cells to display the timestamps contained in the transaction detail.
+     *
+     * @param transactionDetail Charge detail that contains the transacted and settled timestamps.
+     */
+    private fun configureTransactionDetailDateCells(transactionDetail: TransactionDetailCharge) {
+        transactionDetail.transactedAt?.let {
+            val dateChargedCell =
+                TransactionDetailCell(getString(R.string.charge_transacted), "", formatDate(transactionDetail.transactedAt!!))
+            transactionDetailCells.add(dateChargedCell)
+        }
+        transactionDetail.settledAt?.let {
+            val dateSettledCell = TransactionDetailCell(getString(R.string.charge_settled), "", formatDate(transactionDetail.settledAt!!))
+            transactionDetailCells.add(dateSettledCell)
         }
     }
 
@@ -243,7 +278,5 @@ class TransactionDetailFragment : Fragment(), CoroutineScope {
      * @param date The [Date] to be formatted.
      * @return A presentable [String] containing the date.
      */
-    private fun formatDate(date: Date): String {
-        return DateFormat.format("MMM dd, yyyy", date).toString()
-    }
+    private fun formatDate(date: Date): String = DateFormat.format("hh:mm a, MM/dd/yy", date).toString()
 }

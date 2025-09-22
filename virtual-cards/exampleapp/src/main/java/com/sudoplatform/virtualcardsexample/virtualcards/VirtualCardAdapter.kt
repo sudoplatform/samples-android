@@ -17,19 +17,24 @@ import com.sudoplatform.sudovirtualcards.types.VirtualCard
  * @property items List of [VirtualCard] data items to display.
  * @property itemSelectedListener Callback which listens for list item select events.
  */
-class VirtualCardAdapter(private val items: List<VirtualCard>, private val itemSelectedListener: (VirtualCard) -> Unit) : RecyclerView.Adapter<VirtualCardViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VirtualCardViewHolder {
-        return VirtualCardViewHolder.inflate(
+class VirtualCardAdapter(
+    private val items: List<VirtualCard>,
+    private val itemSelectedListener: (VirtualCard) -> Unit,
+) : RecyclerView.Adapter<VirtualCardViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): VirtualCardViewHolder =
+        VirtualCardViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: VirtualCardViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: VirtualCardViewHolder,
+        position: Int,
+    ) {
         val virtualCard = items[position]
         holder.bind(virtualCard)
 

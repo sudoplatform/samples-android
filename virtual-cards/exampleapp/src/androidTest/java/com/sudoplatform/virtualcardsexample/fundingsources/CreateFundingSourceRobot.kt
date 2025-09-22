@@ -22,7 +22,6 @@ fun createFundingSource(func: CreateFundingSourceRobot.() -> Unit) = CreateFundi
  * Testing robot that manages the Create Funding Source screen.
  */
 class CreateFundingSourceRobot : BaseRobot() {
-
     private val inputForm = R.id.formRecyclerView
     private val toolbarCreateButton = withId(R.id.create)
     private val loadingDialog = withId(R.id.progressBar)
@@ -97,7 +96,10 @@ class CreateFundingSourceRobot : BaseRobot() {
         setCellValue("Country", country)
     }
 
-    private fun setCellValue(cellTitle: String, inputText: String) {
+    private fun setCellValue(
+        cellTitle: String,
+        inputText: String,
+    ) {
         scrollToCellWithTitle(cellTitle)
         replaceText(
             CoreMatchers.allOf(

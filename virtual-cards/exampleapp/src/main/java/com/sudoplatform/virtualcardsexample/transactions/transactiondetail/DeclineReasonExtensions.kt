@@ -13,12 +13,13 @@ import com.sudoplatform.virtualcardsexample.R
 /**
  * Extension mapping [DeclineReason] name to a description.
  */
-fun DeclineReason.description(context: Context): String {
-    return when (this) {
+fun DeclineReason.description(context: Context): String =
+    when (this) {
         DeclineReason.INSUFFICIENT_FUNDS -> context.getString(R.string.dr_insufficient_funds)
-        DeclineReason.INSUFFICIENT_ENTITLEMENTS -> context.getString(
-            R.string.dr_insufficient_entitlements,
-        )
+        DeclineReason.INSUFFICIENT_ENTITLEMENTS ->
+            context.getString(
+                R.string.dr_insufficient_entitlements,
+            )
         DeclineReason.SUSPICIOUS -> context.getString(R.string.dr_suspcious)
         DeclineReason.CARD_STOPPED -> context.getString(R.string.dr_card_stopped)
         DeclineReason.CARD_EXPIRED -> context.getString(R.string.dr_card_expired)
@@ -36,4 +37,3 @@ fun DeclineReason.description(context: Context): String {
         DeclineReason.SERVICE_UNAVAILABLE -> context.getString(R.string.dr_service_unavailable)
         DeclineReason.UNKNOWN -> this.name
     }
-}

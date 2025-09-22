@@ -21,11 +21,17 @@ import com.sudoplatform.virtualcardsexample.R
  *
  * @property items [List<FundingSource>] List of [FundingSource] data items to display.
  */
-class FundingSourceSpinnerAdapter(val context: Context, private val items: List<FundingSource>) : BaseAdapter() {
-
+class FundingSourceSpinnerAdapter(
+    val context: Context,
+    private val items: List<FundingSource>,
+) : BaseAdapter() {
     private val inflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+    override fun getView(
+        position: Int,
+        convertView: View?,
+        parent: ViewGroup?,
+    ): View {
         val view: View
         val fundingSourceSpinnerViewHolder: FundingSourceSpinnerViewHolder
         if (convertView == null) {
@@ -58,15 +64,9 @@ class FundingSourceSpinnerAdapter(val context: Context, private val items: List<
         return view
     }
 
-    override fun getItem(position: Int): Any {
-        return items[position]
-    }
+    override fun getItem(position: Int): Any = items[position]
 
-    override fun getCount(): Int {
-        return items.count()
-    }
+    override fun getCount(): Int = items.count()
 
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
+    override fun getItemId(position: Int): Long = position.toLong()
 }

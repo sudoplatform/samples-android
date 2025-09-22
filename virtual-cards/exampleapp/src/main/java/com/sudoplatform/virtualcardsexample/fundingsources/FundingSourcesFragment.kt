@@ -18,12 +18,16 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.sudoplatform.sudonotification.SudoNotificationClient
+import com.sudoplatform.sudonotification.types.NotificationSettingsInput
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
 import com.sudoplatform.sudovirtualcards.extensions.isUnfunded
+import com.sudoplatform.sudovirtualcards.setVirtualCardsNotificationsForFundingSource
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountProviderRefreshData
 import com.sudoplatform.sudovirtualcards.types.CheckoutBankAccountRefreshUserInteractionData
 import com.sudoplatform.sudovirtualcards.types.ClientApplicationData
 import com.sudoplatform.sudovirtualcards.types.FundingSource
+import com.sudoplatform.sudovirtualcards.types.FundingSourceState
 import com.sudoplatform.sudovirtualcards.types.inputs.RefreshFundingSourceInput
 import com.sudoplatform.virtualcardsexample.App
 import com.sudoplatform.virtualcardsexample.R
@@ -54,8 +58,9 @@ import kotlin.coroutines.CoroutineContext
  *   [CreateFundingSourceMenuFragment] will be presented so the user can select a funding source to
  *   create.
  */
-class FundingSourcesFragment : Fragment(), CoroutineScope {
-
+class FundingSourcesFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -90,7 +95,10 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -120,12 +128,15 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
         launch {
             try {
                 showLoading()
-                val fundingSources = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.listFundingSources()
-                }
+                val fundingSources =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.listFundingSources()
+                    }
                 fundingSourceList.clear()
                 for (fundingSource in fundingSources.items) {
                     fundingSourceList.add(fundingSource)
+                    // register for notifications for this funding source
+                    setNotificationsEnabledForFundingSource(fundingSource, fundingSource.state == FundingSourceState.ACTIVE)
                 }
                 adapter.notifyDataSetChanged()
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
@@ -142,20 +153,60 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     }
 
     /**
+     * Sets whether the notifications are enabled for the provided funding source.
+     *
+     * @param fundingSource [FundingSource] Funding source for which notifications should be set
+     * @param enabled [Boolean] Flag indicating whether notifications are enabled.
+     */
+    private fun setNotificationsEnabledForFundingSource(
+        fundingSource: FundingSource,
+        enabled: Boolean,
+    ) {
+        val newConfiguration =
+            app.notificationConfiguration
+                .setVirtualCardsNotificationsForFundingSource(fundingSource.id, enabled)
+
+        launch {
+            withContext(Dispatchers.IO) {
+                // Need to protect against failure to set configuration
+                try {
+                    app.sudoNotificationClient.setNotificationConfiguration(
+                        NotificationSettingsInput(
+                            bundleId = app.deviceInfo.bundleIdentifier,
+                            deviceId = app.deviceInfo.deviceIdentifier,
+                            services = listOf(app.sudoVirtualCardsNotifiableClient.getSchema()),
+                            filter = newConfiguration.configs,
+                        ),
+                    )
+                } catch (_: SudoNotificationClient.NotificationException.NoDeviceNotificationException) {
+                    // Ignore, we don't mind for the purposes of this test whether notifications are
+                    // received or not
+                }
+            }
+        }
+        app.notificationConfiguration = newConfiguration
+    }
+
+    /**
      * Cancel a [FundingSource] from the [SudoVirtualCardsClient] based on the input [id].
      *
      * @param id [String] The identifier of the [FundingSource] to cancel.
      * @param completion Callback which executes when the operation is completed.
      */
-    private fun cancelFundingSource(id: String, completion: (FundingSource) -> Unit) {
+    private fun cancelFundingSource(
+        id: String,
+        completion: (FundingSource) -> Unit,
+    ) {
         launch {
             try {
                 showWorkingAlert(R.string.cancelling_funding_source)
-                val fundingSource = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.cancelFundingSource(id)
-                }
+                val fundingSource =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.cancelFundingSource(id)
+                    }
                 hideWorkingAlert()
                 completion(fundingSource)
+                setNotificationsEnabledForFundingSource(fundingSource, false)
                 showAlertDialog(
                     titleResId = R.string.success,
                     positiveButtonResId = android.R.string.ok,
@@ -177,13 +228,17 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      * @param id [String] The identifier of the [FundingSource] to cancel.
      * @param completion Callback which executes when the operation is completed.
      */
-    private fun reviewFundingSource(id: String, completion: (FundingSource) -> Unit) {
+    private fun reviewFundingSource(
+        id: String,
+        completion: (FundingSource) -> Unit,
+    ) {
         launch {
             try {
                 showWorkingAlert(R.string.reviewing_funding_source)
-                val fundingSource = withContext(Dispatchers.IO) {
-                    app.sudoVirtualCardsClient.reviewUnfundedFundingSource(id)
-                }
+                val fundingSource =
+                    withContext(Dispatchers.IO) {
+                        app.sudoVirtualCardsClient.reviewUnfundedFundingSource(id)
+                    }
                 hideWorkingAlert()
                 completion(fundingSource)
                 showAlertDialog(
@@ -211,16 +266,18 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
             try {
                 showLoading(R.string.refreshing_funding_source)
                 withContext(Dispatchers.IO) {
-                    val refreshData = CheckoutBankAccountProviderRefreshData(
-                        accountId = null,
-                        authorizationText = null,
-                    )
-                    val input = RefreshFundingSourceInput(
-                        id,
-                        refreshData,
-                        ClientApplicationData("androidApplication"),
-                        language = "en-US",
-                    )
+                    val refreshData =
+                        CheckoutBankAccountProviderRefreshData(
+                            accountId = null,
+                            authorizationText = null,
+                        )
+                    val input =
+                        RefreshFundingSourceInput(
+                            id,
+                            refreshData,
+                            ClientApplicationData("androidApplication"),
+                            language = "en-US",
+                        )
                     app.sudoVirtualCardsClient.refreshFundingSource(input)
                 }
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
@@ -270,9 +327,10 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
      * Configures the [RecyclerView] used to display the listed [FundingSource] items.
      */
     private fun configureRecyclerView() {
-        adapter = FundingSourceAdapter(fundingSourceList) { fundingSource ->
-            refreshFundingSource(fundingSource.id)
-        }
+        adapter =
+            FundingSourceAdapter(fundingSourceList) { fundingSource ->
+                refreshFundingSource(fundingSource.id)
+            }
         binding.fundingSourceRecyclerView.adapter = adapter
         binding.fundingSourceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         configureSwipeToCancel()
@@ -289,7 +347,9 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }
@@ -310,7 +370,9 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that a cancel operation is occurring. */
-    private fun showWorkingAlert(@StringRes textResId: Int) {
+    private fun showWorkingAlert(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }
@@ -332,7 +394,10 @@ class FundingSourcesFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.fundingSourceRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         val fundingSource = fundingSourceList[viewHolder.adapterPosition]
         if (fundingSource.isUnfunded()) {
             reviewFundingSource(fundingSource.id) { reviewedFundingSource ->

@@ -62,8 +62,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [RegisterFragment]: If a user taps the "Deregister" button, the [RegisterFragment] will be
  *   presented so the user can perform registration again.
  */
-class MainMenuFragment : Fragment(), CoroutineScope {
-
+class MainMenuFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -120,7 +121,10 @@ class MainMenuFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -197,7 +201,9 @@ class MainMenuFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

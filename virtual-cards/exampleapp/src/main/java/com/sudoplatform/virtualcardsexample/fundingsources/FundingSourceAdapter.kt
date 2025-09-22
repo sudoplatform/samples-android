@@ -16,19 +16,24 @@ import com.sudoplatform.sudovirtualcards.types.FundingSource
  *
  * @property items List of [FundingSource] data items to display.
  */
-class FundingSourceAdapter(private val items: List<FundingSource>, private val buttonClickedListener: (FundingSource) -> Unit) : RecyclerView.Adapter<FundingSourceViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FundingSourceViewHolder {
-        return FundingSourceViewHolder.inflate(
+class FundingSourceAdapter(
+    private val items: List<FundingSource>,
+    private val buttonClickedListener: (FundingSource) -> Unit,
+) : RecyclerView.Adapter<FundingSourceViewHolder>() {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): FundingSourceViewHolder =
+        FundingSourceViewHolder.inflate(
             parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: FundingSourceViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: FundingSourceViewHolder,
+        position: Int,
+    ) {
         val fundingSource = items[position]
         holder.bind(fundingSource)
 

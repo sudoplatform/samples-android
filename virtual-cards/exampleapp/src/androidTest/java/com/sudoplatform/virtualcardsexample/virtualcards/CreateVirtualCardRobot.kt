@@ -19,7 +19,6 @@ fun createVirtualCard(func: CreateVirtualCardRobot.() -> Unit) = CreateVirtualCa
  * Testing robot that manages the Create Virtual Card screen.
  */
 class CreateVirtualCardRobot : BaseRobot() {
-
     private val inputForm = R.id.formRecyclerView
     private val toolbarCreateButton = withId(R.id.create)
     private val sudoTextView = withId(R.id.sudoText)
