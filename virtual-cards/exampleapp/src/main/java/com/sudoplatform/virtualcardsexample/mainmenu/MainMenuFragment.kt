@@ -133,6 +133,11 @@ class MainMenuFragment :
                 MainMenuFragmentDirections.actionMainMenuFragmentToIdentityVerificationFragment(),
             )
         }
+        binding.secureIdVerificationConsentButton.setOnClickListener {
+            navController.navigate(
+                MainMenuFragmentDirections.actionMainMenuFragmentToIdentityVerificationConsentFragment(),
+            )
+        }
         binding.fundingSourcesButton.setOnClickListener {
             navController.navigate(
                 MainMenuFragmentDirections.actionMainMenuFragmentToFundingSourcesFragment(),
@@ -195,6 +200,7 @@ class MainMenuFragment :
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
         toolbarMenu.getItem(1)?.isEnabled = isEnabled
         binding.secureIdVerificationButton.isEnabled = isEnabled
+        binding.secureIdVerificationConsentButton.isEnabled = isEnabled
         binding.fundingSourcesButton.isEnabled = isEnabled
         binding.sudosButton.isEnabled = isEnabled
         binding.orphanVirtualCardsButton.isEnabled = isEnabled

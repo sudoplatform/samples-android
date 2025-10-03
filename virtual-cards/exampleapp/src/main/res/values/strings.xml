@@ -17,6 +17,7 @@
 
     <!-- RegisterFragment -->
     <string name="sample_app">Sample App</string>
+    <string name="secure_id_verification_consent">Secure ID Verification Consent</string>
     <string name="registration_method">Registration Method</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
@@ -72,6 +73,41 @@
     <string name="verified">Verified</string>
     <string name="not_verified">Not verified</string>
     <string name="unknown">Unknown</string>
+
+    <!-- IdentityVerificationConsentFragment -->
+    <string name="identity_verification_consent_learn_more">ID verification consent management allows you to control how your identity verification data is used and stored. You can review and update your consent preferences at any time.</string>
+    <string name="consent_requirement_status">Consent Requirement Status</string>
+    <string name="checking_consent_requirement">Checking if consent is required...</string>
+    <string name="consent_required">Consent is required in this environment</string>
+    <string name="consent_not_required">Consent is not required in this environment</string>
+    <string name="consent_requirement_error">Error checking consent requirement</string>
+    <string name="consent_requirement_unknown_error">Unknown error occurred</string>
+    <string name="consent_text_label">Identity Data Processing Consent</string>
+    <string name="retrieve_consent_text">Retrieve Consent Text</string>
+    <string name="retrieving_consent_text">Retrieving consent text...</string>
+    <string name="consent_text_error">Error retrieving consent text</string>
+    <string name="consent_text_api_error">Error calling consent API: %1$s</string>
+    <string name="provide_consent">Provide Consent</string>
+    <string name="providing_consent">Providing consent...</string>
+    <string name="consent_retrieve_first_error">Please retrieve consent text first before providing consent</string>
+    <string name="consent_provided_success">Consent provided successfully</string>
+    <string name="consent_provided_success_message">Your consent has been successfully provided</string>
+    <string name="consent_provide_error">Error providing consent</string>
+    <string name="consent_provide_unknown_error">Unknown error occurred while providing consent</string>
+    <string name="consent_provide_api_error">Error providing consent: %1$s</string>
+    <string name="withdraw_consent">Withdraw Consent</string>
+    <string name="withdrawing_consent">Withdrawing consent...</string>
+    <string name="consent_withdrawn_success">Consent withdrawn successfully</string>
+    <string name="consent_withdrawn_success_message">Your consent has been successfully withdrawn</string>
+    <string name="consent_withdraw_error">Error withdrawing consent</string>
+    <string name="consent_withdraw_unknown_error">Unknown error occurred while withdrawing consent</string>
+    <string name="consent_withdraw_api_error">Error withdrawing consent: %1$s</string>
+    <string name="consent_granted">Consent provided</string>
+    <string name="consent_not_granted">Consent not provided</string>
+    <string name="consent_status_error">Error retrieving consent status</string>
+    <string name="consent_status">Consent Status</string>
+    <string name="consent_status_placeholder">Current consent status will be displayed here</string>
+
 
     <!-- FundingSourcesFragment -->
     <string name="loading_funding_sources">Loading Funding Sources</string>
