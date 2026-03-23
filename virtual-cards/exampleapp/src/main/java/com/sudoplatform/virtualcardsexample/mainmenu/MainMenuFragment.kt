@@ -103,6 +103,7 @@ class MainMenuFragment :
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
+
                     R.id.info -> {
                         showAlertDialog(
                             titleResId = R.string.what_is_a_virtual_card,

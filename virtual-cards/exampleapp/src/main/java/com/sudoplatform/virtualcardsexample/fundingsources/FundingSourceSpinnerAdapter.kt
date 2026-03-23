@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
 import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.FundingSource
 import com.sudoplatform.virtualcardsexample.R
@@ -49,15 +48,6 @@ class FundingSourceSpinnerAdapter(
                         R.string.funding_source_credit_card_description,
                         fundingSource.last4,
                         fundingSource.cardType,
-                    )
-            }
-            is BankAccountFundingSource -> {
-                fundingSourceSpinnerViewHolder.label.text =
-                    context.getString(
-                        R.string.funding_source_bank_account_description,
-                        fundingSource.last4,
-                        fundingSource.bankAccountType,
-                        "",
                     )
             }
         }

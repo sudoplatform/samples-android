@@ -27,7 +27,6 @@ class CreateFundingSourceRobot : BaseRobot() {
     private val loadingDialog = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
     private val negativeAlertButton = withId(android.R.id.button2)
-    private val launchPlaidLinkButton = withId(R.id.launchPlaidLinkButton)
 
     fun waitForLoading() {
         waitForViewToDisplay(loadingDialog, 5_000L, true)
@@ -36,11 +35,6 @@ class CreateFundingSourceRobot : BaseRobot() {
 
     fun checkCreateCreditCardFundingSourceItemsDisplayed() {
         waitForViewToDisplay(withId(inputForm))
-        waitForViewToDisplay(toolbarCreateButton)
-    }
-
-    fun checkCreateBankAccountFundingSourceItemsDisplayed() {
-        waitForViewToDisplay(launchPlaidLinkButton)
         waitForViewToDisplay(toolbarCreateButton)
     }
 

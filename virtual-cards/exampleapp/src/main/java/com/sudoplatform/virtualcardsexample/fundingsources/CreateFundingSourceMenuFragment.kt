@@ -36,9 +36,6 @@ import kotlin.coroutines.CoroutineContext
  *  - [CreateCardFundingSourceFragment]: If a user taps the "Add Stripe Credit Card" button, the
  *   [CreateCardFundingSourceFragment] will be presented so the user can create a Stripe credit
  *   card based funding source.
- *  - [CreateBankAccountFundingSourceFragment]: If a user taps the "Add Checkout Bank Account"
- *   button, the [CreateBankAccountFundingSourceFragment] will be presented so the user can create
- *   a Checkout bank account based funding source.
  */
 class CreateFundingSourceMenuFragment :
     Fragment(),
@@ -79,12 +76,6 @@ class CreateFundingSourceMenuFragment :
             navController.navigate(
                 CreateFundingSourceMenuFragmentDirections
                     .actionCreateFundingSourceMenuFragmentToCreateCardFundingSourceFragment(),
-            )
-        }
-        binding.createCheckoutBankAccountButton.setOnClickListener {
-            navController.navigate(
-                CreateFundingSourceMenuFragmentDirections
-                    .actionCreateFundingSourceMenuFragmentToCreateCheckoutBankAccountFundingSourceFragment(),
             )
         }
         binding.learnMoreButton.setOnClickListener {

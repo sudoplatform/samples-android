@@ -158,6 +158,7 @@ internal class StripeIntentWorker(
                                                     StripeIntent.Status.Succeeded -> {
                                                         it.resume(result)
                                                     }
+
                                                     StripeIntent.Status.RequiresAction -> {
                                                         it.resumeWithException(
                                                             SudoVirtualCardsClient.FundingSourceException.FailedException(
@@ -165,6 +166,7 @@ internal class StripeIntentWorker(
                                                             ),
                                                         )
                                                     }
+
                                                     else -> {
                                                         it.resumeWithException(
                                                             SudoVirtualCardsClient.FundingSourceException.FailedException(

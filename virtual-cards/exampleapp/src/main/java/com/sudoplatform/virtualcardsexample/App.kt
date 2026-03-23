@@ -151,6 +151,7 @@ class App :
                             userClient.clearAuthTokens()
                         }
                     }
+
                     is ApiResult.Failure -> {
                         launch {
                             // If global sign out fails we still want to complete the sign out locally, otherwise we can be left in a bad

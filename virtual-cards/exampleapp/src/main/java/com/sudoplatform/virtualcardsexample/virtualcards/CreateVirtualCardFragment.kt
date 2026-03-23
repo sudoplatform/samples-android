@@ -274,7 +274,10 @@ class CreateVirtualCardFragment :
                 fundingSourcesSpinnerAdapter.notifyDataSetChanged()
             } catch (e: Exception) {
                 when (e) {
-                    is NoSuchElementException -> setErrorLabelHidden(false)
+                    is NoSuchElementException -> {
+                        setErrorLabelHidden(false)
+                    }
+
                     else -> {
                         setItemsEnabled(false)
                         showAlertDialog(

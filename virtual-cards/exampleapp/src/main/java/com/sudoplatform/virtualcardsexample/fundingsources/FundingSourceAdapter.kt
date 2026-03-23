@@ -18,7 +18,6 @@ import com.sudoplatform.sudovirtualcards.types.FundingSource
  */
 class FundingSourceAdapter(
     private val items: List<FundingSource>,
-    private val buttonClickedListener: (FundingSource) -> Unit,
 ) : RecyclerView.Adapter<FundingSourceViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -36,9 +35,5 @@ class FundingSourceAdapter(
     ) {
         val fundingSource = items[position]
         holder.bind(fundingSource)
-
-        holder.getRefreshButton().setOnClickListener {
-            buttonClickedListener(fundingSource)
-        }
     }
 }

@@ -130,6 +130,7 @@ class OrphanVirtualCardsFragment :
                         setEmptyOrphanVirtualCardsLabel()
                         adapter.notifyDataSetChanged()
                     }
+
                     is ListAPIResult.Partial -> {
                         val cause =
                             orphanVirtualCards.result.failed

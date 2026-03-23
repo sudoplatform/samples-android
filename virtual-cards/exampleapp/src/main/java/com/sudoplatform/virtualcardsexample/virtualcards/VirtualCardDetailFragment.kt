@@ -150,6 +150,7 @@ class VirtualCardDetailFragment :
                         adapter.notifyDataSetChanged()
                         setEmptyTransactionsLabel()
                     }
+
                     is ListAPIResult.Partial -> {
                         val cause =
                             transactions.result.failed

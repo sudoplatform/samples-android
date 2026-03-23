@@ -146,6 +146,7 @@ class VirtualCardsFragment :
                         }
                         adapter.notifyDataSetChanged()
                     }
+
                     is ListAPIResult.Partial -> {
                         val cause =
                             virtualCards.result.failed
@@ -199,6 +200,7 @@ class VirtualCardsFragment :
                             positiveButtonResId = android.R.string.ok,
                         )
                     }
+
                     is SingleAPIResult.Partial -> {
                         val cause = virtualCard.result.cause
                         hideCancelAlert()

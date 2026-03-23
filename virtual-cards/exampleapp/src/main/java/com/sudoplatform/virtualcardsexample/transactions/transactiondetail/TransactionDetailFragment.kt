@@ -20,8 +20,6 @@ import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudovirtualcards.SudoVirtualCardsClient
-import com.sudoplatform.sudovirtualcards.extensions.isUnfunded
-import com.sudoplatform.sudovirtualcards.types.BankAccountFundingSource
 import com.sudoplatform.sudovirtualcards.types.CreditCardFundingSource
 import com.sudoplatform.sudovirtualcards.types.CurrencyAmount
 import com.sudoplatform.sudovirtualcards.types.FundingSource
@@ -139,16 +137,7 @@ class TransactionDetailFragment :
                         binding.fundingSourceLabel.text =
                             getString(R.string.funding_source_credit_card_description, fundingSource.last4, fundingSource.network)
                     }
-                    is BankAccountFundingSource -> {
-                        val unfundedSuffix = if (fundingSource.isUnfunded()) " ***UNFUNDED***" else ""
-                        binding.fundingSourceLabel.text =
-                            getString(
-                                R.string.funding_source_bank_account_description,
-                                fundingSource.last4,
-                                fundingSource.bankAccountType,
-                                unfundedSuffix,
-                            )
-                    }
+
                     else -> { /* Nothing to do here */ }
                 }
             } catch (e: SudoVirtualCardsClient.FundingSourceException) {
@@ -210,6 +199,7 @@ class TransactionDetailFragment :
                         )
                     transactionDetailCells.addAll(arrayListOf(serviceFeeCell, totalFeeCell))
                 }
+
                 else -> {}
             }
             val chargeStatus = transactionDetail.state

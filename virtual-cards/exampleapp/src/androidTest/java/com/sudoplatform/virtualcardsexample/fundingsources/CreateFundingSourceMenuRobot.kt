@@ -17,13 +17,11 @@ fun createFundingSourceMenu(func: CreateFundingSourceMenuRobot.() -> Unit) = Cre
  */
 class CreateFundingSourceMenuRobot : BaseRobot() {
     private val addStripeCreditCardButton = withId(R.id.createStripeCardButton)
-    private val addCheckoutBankAccountButton = withId(R.id.createCheckoutBankAccountButton)
     private val learnMoreTextView = withId(R.id.learnMoreTextView)
     private val learnMoreButton = withId(R.id.learnMoreButton)
 
     fun checkMenuItemsDisplayed(timeout: Long = 1000L) {
         waitForViewToDisplay(addStripeCreditCardButton, timeout)
-        waitForViewToDisplay(addCheckoutBankAccountButton, timeout)
         waitForViewToDisplay(learnMoreButton, timeout)
         waitForViewToDisplay(learnMoreTextView, timeout)
     }
@@ -32,13 +30,6 @@ class CreateFundingSourceMenuRobot : BaseRobot() {
         clickOnView(addStripeCreditCardButton)
         createFundingSource {
             checkCreateCreditCardFundingSourceItemsDisplayed()
-        }
-    }
-
-    fun navigateToAddCheckoutBankAccountScreen() {
-        clickOnView(addCheckoutBankAccountButton)
-        createFundingSource {
-            checkCreateBankAccountFundingSourceItemsDisplayed()
         }
     }
 }

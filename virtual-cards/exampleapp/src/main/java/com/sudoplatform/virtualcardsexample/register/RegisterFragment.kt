@@ -182,6 +182,7 @@ class RegisterFragment :
                             )
                         }
                     }
+
                     is FederatedSignInResult.Failure -> {
                         showRegistrationFailure(result.error)
                     }
@@ -240,6 +241,7 @@ class RegisterFragment :
                             )
                         }
                     }
+
                     is SignInResult.Failure -> {
                         showRegistrationFailure(result.error)
                     }

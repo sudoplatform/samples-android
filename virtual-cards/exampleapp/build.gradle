@@ -53,33 +53,31 @@ android {
 }
 
 dependencies {
-    implementation 'com.sudoplatform:sudouser:21.0.0'
-    implementation 'com.sudoplatform:sudoidentityverification:21.0.0'
-    implementation 'com.sudoplatform:sudoprofiles:17.0.0'
+    implementation 'com.sudoplatform:sudouser:21.1.0'
+    implementation 'com.sudoplatform:sudoidentityverification:21.2.0'
+    implementation 'com.sudoplatform:sudoprofiles:18.0.0'
     implementation 'com.sudoplatform:sudoentitlements:13.0.0'
     implementation 'com.sudoplatform:sudonotification:5.0.1'
-    implementation 'com.sudoplatform:sudovirtualcards:19.0.0'
+    implementation 'com.sudoplatform:sudovirtualcards:20.0.0'
 
     // Force the latest Bouncy Castle versions to address vulnerabilities
-    implementation 'org.bouncycastle:bcpkix-jdk15to18:1.81'
+    implementation 'org.bouncycastle:bcpkix-jdk15to18:1.83'
     // Add the desugaring library
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.81'
-    implementation 'org.bouncycastle:bcutil-jdk15to18:1.81'
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.83'
+    implementation 'org.bouncycastle:bcutil-jdk15to18:1.83'
 
     // Notifications
-    implementation platform('com.google.firebase:firebase-bom:34.2.0')
+    implementation platform('com.google.firebase:firebase-bom:34.10.0')
     implementation 'com.google.firebase:firebase-messaging-ktx:24.1.2'
 
     // Stripe
     implementation "com.stripe:stripe-android:21.25.0"
 
-    // Plaid
-    implementation "com.plaid.link:sdk-core:4.5.1"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.nimbusds:nimbus-jose-jwt:10.5"
+    implementation "com.nimbusds:nimbus-jose-jwt:10.8"
 
     def coroutine_version = "1.10.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
@@ -96,10 +94,10 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'com.google.android.material:material:1.13.0'
     constraints {
-        implementation("com.google.android.gms:play-services-basement:18.7.1") {
+        implementation("com.google.android.gms:play-services-basement:18.10.0") {
             because("Versions < 18.1.0 have CVE-2022-1799")
         }
     }
@@ -125,10 +123,15 @@ dependencies {
 
 configurations.all {
     resolutionStrategy {
-        dependencySubstitution {
-            // Don't get too far ahead
-            substitute module("androidx.fragment:fragment-ktx") using module("androidx.fragment:fragment-ktx:1.2.5")
-        }
+        // Force androidx.core to 1.16.0 to prevent transitive upgrades
+        force 'androidx.core:core:1.16.0'
+        force 'androidx.core:core-ktx:1.16.0'
+        // Force androidx.activity to 1.9.3, the newest version supporting Android API 35
+        force 'androidx.activity:activity:1.9.3'
+        force 'androidx.activity:activity-ktx:1.9.3'
+        // Force androidx.browser to 1.8.0, the newest version supporting Android API 35
+        force 'androidx.browser:browser:1.8.0'
+
     }
 }
 // Kotlin Lint
