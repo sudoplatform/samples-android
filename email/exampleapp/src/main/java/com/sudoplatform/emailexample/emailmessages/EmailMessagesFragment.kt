@@ -53,6 +53,7 @@ import com.sudoplatform.sudoemail.types.State
 import com.sudoplatform.sudoemail.types.inputs.DeleteCustomEmailFolderInput
 import com.sudoplatform.sudoemail.types.inputs.DeleteDraftEmailMessagesInput
 import com.sudoplatform.sudoemail.types.inputs.GetDraftEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.ListDraftEmailMessageMetadataForEmailAddressIdInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailFoldersForEmailAddressIdInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailMessagesForEmailFolderIdInput
 import com.sudoplatform.sudoemail.types.inputs.ListScheduledDraftMessagesForEmailAddressIdInput
@@ -563,6 +564,7 @@ class EmailMessagesFragment :
             override fun connectionStatusChanged(state: Subscriber.ConnectionState) {
                 if (state == Subscriber.ConnectionState.DISCONNECTED) {
                     launch(Dispatchers.Main) {
+                        if (!isAdded || context == null) return@launch
                         showAlertDialog(
                             titleResId = R.string.subscribe_email_messages_failure,
                             messageResId = R.string.subscribe_lost_connection,
@@ -581,8 +583,11 @@ class EmailMessagesFragment :
                     when (type) {
                         EmailMessageSubscriber.ChangeType.CREATED -> {
                             if (
-                                (emailMessage.direction == Direction.INBOUND && selectedEmailFolder.id.contains("INBOX")) ||
-                                (emailMessage.direction == Direction.OUTBOUND && selectedEmailFolder.id.contains("SENT"))
+                                emailMessage.emailAddressId == emailAddressId &&
+                                (
+                                    (emailMessage.direction == Direction.INBOUND && selectedEmailFolder.id.contains("INBOX")) ||
+                                        (emailMessage.direction == Direction.OUTBOUND && selectedEmailFolder.id.contains("SENT"))
+                                )
                             ) {
                                 emailMessageList.add(emailMessage)
                                 // Check if new message was a scheduled draft. If so, remove the draft and the schedule from lists
@@ -788,17 +793,28 @@ class EmailMessagesFragment :
 
     /** Retrieves the list of [DraftEmailMessageMetadata] for the email address */
     private suspend fun retrieveDraftEmailMessages(): List<DraftEmailMessageWithContent> {
-        val draftEmailMessagesMetadata =
-            app.sudoEmailClient.listDraftEmailMessageMetadataForEmailAddressId(emailAddressId)
+        val draftEmailMessages = mutableListOf<DraftEmailMessageWithContent>()
+        var nextToken: String? = null
+        do {
+            val draftEmailMessagesMetadata =
+                app.sudoEmailClient.listDraftEmailMessageMetadataForEmailAddressId(
+                    ListDraftEmailMessageMetadataForEmailAddressIdInput(emailAddressId, 5, nextToken),
+                )
 
-        return draftEmailMessagesMetadata.map { draftMetadata ->
-            app.sudoEmailClient.getDraftEmailMessage(
-                GetDraftEmailMessageInput(
-                    draftMetadata.id,
-                    emailAddressId,
-                ),
-            )
-        }
+            val drafts =
+                draftEmailMessagesMetadata.items.map { draftMetadata ->
+                    app.sudoEmailClient.getDraftEmailMessage(
+                        GetDraftEmailMessageInput(
+                            draftMetadata.id,
+                            emailAddressId,
+                        ),
+                    )
+                }
+            draftEmailMessages.addAll(drafts)
+            nextToken = draftEmailMessagesMetadata.nextToken
+        } while (nextToken != null)
+
+        return draftEmailMessages
     }
 
     /** Retrieves the list of [ScheduledDraftMessage]s for the email address, getting multiple pages if needed */

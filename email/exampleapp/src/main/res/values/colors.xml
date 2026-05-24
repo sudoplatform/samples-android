@@ -6,4 +6,5 @@
     <color name="colorBackground">#EDEDED</color>
     <color name="colorPositiveMsg">#ff669900</color>
     <color name="colorNegativeMsg">#ffcc0000</color>
+    <color name="colorWarningMsg">#ffff8800</color>
 </resources>

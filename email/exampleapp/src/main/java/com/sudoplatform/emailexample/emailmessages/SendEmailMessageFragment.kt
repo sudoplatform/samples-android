@@ -20,6 +20,8 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,13 +47,18 @@ import com.sudoplatform.emailexample.util.Rfc822MessageFactory
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.EmailAttachment
+import com.sudoplatform.sudoemail.types.EmailMask
+import com.sudoplatform.sudoemail.types.EmailMaskStatus
 import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.InternetMessageFormatHeader
+import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.inputs.CancelScheduledDraftMessageInput
 import com.sudoplatform.sudoemail.types.inputs.CreateDraftEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.ListEmailMasksForOwnerInput
 import com.sudoplatform.sudoemail.types.inputs.LookupEmailAddressesPublicInfoInput
 import com.sudoplatform.sudoemail.types.inputs.ScheduleSendDraftMessageInput
 import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.SendMaskedEmailMessageInput
 import com.sudoplatform.sudoemail.types.inputs.UpdateDraftEmailMessageInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -149,6 +156,12 @@ class SendEmailMessageFragment :
     /** A mutable list of [EmailAttachment]s. */
     private val emailAttachmentList: MutableList<EmailAttachment> = mutableListOf()
 
+    /** List of filtered email masks available for the current email address. */
+    private var emailMaskList = mutableListOf<EmailMask>()
+
+    /** The currently selected email mask, or null if "None" is selected. */
+    private var selectedEmailMask: EmailMask? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -220,6 +233,8 @@ class SendEmailMessageFragment :
                 configureForwardContents(emailMessage, emailMessageWithBody)
             }
         }
+
+        loadEmailMasks()
     }
 
     override fun onDestroy() {
@@ -238,6 +253,10 @@ class SendEmailMessageFragment :
                 titleResId = R.string.validate_to_address,
                 positiveButtonResId = android.R.string.ok,
             )
+            return
+        }
+        if (selectedEmailMask != null) {
+            sendMaskedEmailMessage()
             return
         }
         launch {
@@ -290,13 +309,7 @@ class SendEmailMessageFragment :
                     app.sudoEmailClient.sendEmailMessage(input)
                 }
                 Toast.makeText(context, getString(R.string.sent), Toast.LENGTH_SHORT).show()
-                navController.navigate(
-                    SendEmailMessageFragmentDirections
-                        .actionSendEmailMessageFragmentToEmailMessagesFragment(
-                            emailAddress,
-                            emailAddressId,
-                        ),
-                )
+                navController.popBackStack()
             } catch (e: SudoEmailClient.EmailMessageException) {
                 showAlertDialog(
                     titleResId = R.string.send_email_message_failure,
@@ -308,6 +321,147 @@ class SendEmailMessageFragment :
             }
             hideLoading()
         }
+    }
+
+    /** Sends a masked email message using the selected email mask. */
+    private fun sendMaskedEmailMessage() {
+        val mask = selectedEmailMask ?: return
+        launch {
+            try {
+                showLoading(R.string.sending)
+                withContext(Dispatchers.IO) {
+                    val emailMessageHeader =
+                        InternetMessageFormatHeader(
+                            from = EmailMessage.EmailAddress(mask.maskAddress),
+                            to =
+                                if (binding.toTextView.text.isNotEmpty()) {
+                                    addressesToArray(
+                                        binding.toTextView.text.toString(),
+                                    )
+                                } else {
+                                    emptyList()
+                                },
+                            cc =
+                                if (binding.ccTextView.text.isNotEmpty()) {
+                                    addressesToArray(
+                                        binding.ccTextView.text.toString(),
+                                    )
+                                } else {
+                                    emptyList()
+                                },
+                            bcc =
+                                if (binding.bccTextView.text.isNotEmpty()) {
+                                    addressesToArray(
+                                        binding.bccTextView.text.toString(),
+                                    )
+                                } else {
+                                    emptyList()
+                                },
+                            replyTo = emptyList(),
+                            subject = binding.subjectTextView.text.toString(),
+                        )
+                    val input =
+                        SendMaskedEmailMessageInput(
+                            senderEmailMaskId = mask.id,
+                            emailMessageHeader = emailMessageHeader,
+                            body = binding.contentBody.text.toString(),
+                            attachments = emailAttachmentList,
+                        )
+                    app.sudoEmailClient.sendMaskedEmailMessage(input)
+                }
+                Toast.makeText(context, getString(R.string.sent), Toast.LENGTH_SHORT).show()
+                navController.popBackStack()
+            } catch (e: SudoEmailClient.EmailMessageException) {
+                showAlertDialog(
+                    titleResId = R.string.send_email_message_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { sendMaskedEmailMessage() },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            }
+            hideLoading()
+        }
+    }
+
+    /** Loads email masks and populates the spinner with filtered results. */
+    private fun loadEmailMasks() {
+        launch {
+            try {
+                val emailMasks =
+                    withContext(Dispatchers.IO) {
+                        app.sudoEmailClient.listEmailMasksForOwner(ListEmailMasksForOwnerInput())
+                    }
+                when (emailMasks) {
+                    is ListAPIResult.Success -> {
+                        emailMaskList.clear()
+                        emailMaskList.addAll(
+                            emailMasks.result.items.filter { mask ->
+                                mask.realAddress == emailAddress && mask.status == EmailMaskStatus.ENABLED
+                            },
+                        )
+                        populateEmailMaskSpinner()
+                    }
+                    is ListAPIResult.Partial -> {
+                        val cause =
+                            emailMasks.result.failed
+                                .first()
+                                .cause
+                        showAlertDialog(
+                            titleResId = R.string.list_email_masks_failure,
+                            message = cause.localizedMessage ?: "$cause",
+                            positiveButtonResId = R.string.try_again,
+                            onPositive = { loadEmailMasks() },
+                            negativeButtonResId = android.R.string.cancel,
+                        )
+                    }
+                }
+            } catch (e: SudoEmailClient.EmailAddressException) {
+                showAlertDialog(
+                    titleResId = R.string.list_email_masks_failure,
+                    message = e.localizedMessage ?: "$e",
+                    positiveButtonResId = R.string.try_again,
+                    onPositive = { loadEmailMasks() },
+                    negativeButtonResId = android.R.string.cancel,
+                )
+            }
+        }
+    }
+
+    /** Populates the email mask spinner with the filtered mask list. */
+    private fun populateEmailMaskSpinner() {
+        val spinnerItems = mutableListOf(getString(R.string.send_masked_email_none_option))
+        spinnerItems.addAll(emailMaskList.map { it.maskAddress })
+
+        val adapter =
+            ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                spinnerItems,
+            )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.emailMaskSpinner.adapter = adapter
+
+        binding.emailMaskSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    selectedEmailMask =
+                        if (position == 0) {
+                            null
+                        } else {
+                            emailMaskList[position - 1]
+                        }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    selectedEmailMask = null
+                }
+            }
     }
 
     /** Saves a draft email message from the [SudoEmailClient]. */
@@ -509,10 +663,9 @@ class SendEmailMessageFragment :
                 app.sudoEmailClient.lookupEmailAddressesPublicInfo(input)
             }
 
-        val resultEmailAddresses = emailAddressesPublicInfo.map { it.emailAddress }
         val result =
             emailAddresses.all { emailAddress ->
-                resultEmailAddresses.contains(emailAddress)
+                emailAddressesPublicInfo.any { it.emailAddress == emailAddress && it.enableEncryption }
             }
 
         return result

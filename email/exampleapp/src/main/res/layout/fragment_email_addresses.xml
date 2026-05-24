@@ -36,37 +36,123 @@
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar" />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/emailAddressRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/createEmailAddressButton"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:height="55dp"
-            android:background="#FFFFFF"
-            android:drawableTint="#FFFFFF"
-            android:gravity="center|start"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:text="@string/create_email_address_button"
-            android:textColor="@color/colorPrimary" />
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <!-- Email Addresses Section -->
+            <TextView
+                android:id="@+id/emailAddressesSectionLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/email_addresses_section_title"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/emailAddressRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <Button
+                android:id="@+id/createEmailAddressButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:height="55dp"
+                android:background="#FFFFFF"
+                android:drawableTint="#FFFFFF"
+                android:gravity="center|start"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="@string/create_email_address_button"
+                android:textColor="@color/colorPrimary" />
+
+            <!-- Divider between Email Addresses and Email Masks -->
+            <View
+                android:id="@+id/sectionDivider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@android:color/darker_gray" />
+
+            <!-- Email Masks Section -->
+            <TextView
+                android:id="@+id/emailMasksSectionLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/email_masks_section_title"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/internalExternalSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/external_email_masks_switch_label"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/masksDisabledText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/email_masks_disabled_message"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/masksRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:id="@+id/emptyMasksStateText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/no_email_masks"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/createEmailMaskButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:height="55dp"
+                android:background="#FFFFFF"
+                android:drawableTint="#FFFFFF"
+                android:gravity="center|start"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="@string/create_email_mask_button"
+                android:textColor="@color/colorPrimary" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

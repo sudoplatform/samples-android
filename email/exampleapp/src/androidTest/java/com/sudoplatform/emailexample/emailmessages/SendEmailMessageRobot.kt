@@ -100,7 +100,15 @@ class SendEmailMessageRobot : BaseRobot() {
     }
 
     fun checkSubjectFieldFilled() {
+        onView(withId(subjectField)).check(matches(not(withText(""))))
+    }
+
+    fun checkSubjectFieldContainsReply() {
         onView(withId(subjectField)).check(matches(withSubstring("Re:")))
+    }
+
+    fun checkSubjectFieldContainsForward() {
+        onView(withId(subjectField)).check(matches(withSubstring("Fwd:")))
     }
 
     private fun checkAlertDialog() {

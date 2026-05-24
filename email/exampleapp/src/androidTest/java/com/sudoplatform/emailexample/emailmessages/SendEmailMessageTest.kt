@@ -13,6 +13,8 @@ import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
+import com.sudoplatform.emailexample.emailmasks.externalEmailMasks
+import com.sudoplatform.emailexample.emailmasks.provisionExternalEmailMask
 import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
@@ -89,7 +91,6 @@ class SendEmailMessageTest {
             waitForLoading()
         }
         emailMessages {
-            waitForLoading()
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
 
@@ -198,7 +199,6 @@ class SendEmailMessageTest {
             waitForLoading()
         }
         emailMessages {
-            waitForLoading()
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
             clickEmailFolderSpinner("SENT")
@@ -219,13 +219,12 @@ class SendEmailMessageTest {
         }
         sendEmailMessage {
             setToField(address)
-            checkSubjectFieldFilled()
+            checkSubjectFieldContainsForward()
             setContentBodyField("This is a forwarded email sent from an Espresso test.")
             clickOnSendEmailButton()
             waitForLoading()
         }
         emailMessages {
-            waitForLoading()
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
             pressBack()
@@ -280,7 +279,6 @@ class SendEmailMessageTest {
             waitForLoading()
         }
         emailMessages {
-            waitForLoading()
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
             clickEmailFolderSpinner("SENT")
@@ -301,13 +299,12 @@ class SendEmailMessageTest {
         }
         sendEmailMessage {
             checkToFieldFilled()
-            checkSubjectFieldFilled()
+            checkSubjectFieldContainsReply()
             setContentBodyField("This is a reply email sent from an Espresso test.")
             clickOnSendEmailButton()
             waitForLoading()
         }
         emailMessages {
-            waitForLoading()
             waitForRecyclerView()
             checkEmailMessagesItemsDisplayed()
             pressBack()
@@ -360,6 +357,91 @@ class SendEmailMessageTest {
             setCcField(address)
             checkEncryptedIndicatorVisible()
             setToField("not-an-address")
+            checkEncryptedIndicatorNotVisible()
+            pressBack()
+        }
+        emailMessages {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
+            pressBack()
+        }
+        emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            pressBack()
+        }
+        sudos {
+            waitForLoading()
+            waitForRecyclerView()
+            checkSudosItemsDisplayed()
+            pressBack()
+        }
+    }
+
+    @Test
+    fun testExternalMaskAddressDoesNotShowEncryptedIndicator() {
+        createSudo {
+            registerAndCreateSudoFlow()
+        }
+        emailAddresses {
+            waitForLoading()
+            checkEmailAddressesItemsDisplayed()
+            navigateToProvisionEmailAddressScreen()
+        }
+        var address = ""
+        provisionEmailAddress {
+            setLocalPart()
+            waitForRootFocus()
+            checkAvailableAddressMsg()
+            address = getAddressFromTextView()
+            clickOnCreateButton()
+            waitForLoading()
+        }
+        emailAddresses {
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+        }
+        // Provision an external email mask
+        var externalMaskAddress = ""
+        externalEmailMasks {
+            checkSwitchDisplayed()
+            toggleSwitch()
+            checkCreateButtonTextExternal()
+            clickOnCreateButton()
+        }
+        provisionExternalEmailMask {
+            checkProvisionExternalEmailMaskItemsDisplayed()
+            enterExternalEmail("testuser@gmail.com")
+            setLocalPart()
+            waitForRootFocus()
+            checkAvailableAddressMsg()
+            externalMaskAddress = "testuser@gmail.com"
+            clickOnCreateButton()
+            waitForLoading()
+        }
+        emailAddresses {
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            navigateToEmailMessagesScreen(0)
+        }
+        emailMessages {
+            navigateToSendEmailMessageScreen()
+        }
+        sendEmailMessage {
+            // External mask address should NOT show encrypted indicator
+            // because enableEncryption is false for external masks
+            checkEncryptedIndicatorNotVisible()
+            setToField(externalMaskAddress)
+            checkEncryptedIndicatorNotVisible()
+
+            // Internal platform address should still show encrypted indicator
+            setToField(address)
+            checkEncryptedIndicatorVisible()
+
+            // Mixing internal and external should NOT show encrypted indicator
+            setToField("$address,$externalMaskAddress")
             checkEncryptedIndicatorNotVisible()
             pressBack()
         }

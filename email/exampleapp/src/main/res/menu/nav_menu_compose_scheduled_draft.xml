@@ -24,6 +24,6 @@
         android:id="@+id/send"
         android:icon="@drawable/ic_baseline_send_24px"
         android:title=""
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         />
 </menu>

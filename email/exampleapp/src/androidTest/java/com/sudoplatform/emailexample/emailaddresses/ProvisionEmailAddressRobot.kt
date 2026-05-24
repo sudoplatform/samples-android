@@ -65,8 +65,24 @@ class ProvisionEmailAddressRobot : BaseRobot() {
     }
 
     fun clickOnCreateButton() {
-        onView(toolbarCreateButton).check(matches(isEnabled()))
+        waitForViewToBeEnabled(toolbarCreateButton, 5_000L)
         clickOnView(toolbarCreateButton)
+    }
+
+    private fun waitForViewToBeEnabled(
+        matcher: org.hamcrest.Matcher<android.view.View>,
+        timeout: Long,
+    ) {
+        val retryInterval = 250L
+        for (x in 0..timeout step retryInterval) {
+            try {
+                onView(matcher).check(matches(isEnabled()))
+                return
+            } catch (e: junit.framework.AssertionFailedError) {
+                Thread.sleep(retryInterval)
+            }
+        }
+        onView(matcher).check(matches(isEnabled()))
     }
 
     fun clickOnPositiveAlertDialogButton() {

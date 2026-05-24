@@ -61,6 +61,8 @@
 
     <!-- EmailAddressesFragment.kt -->
     <string name="email_addresses">Email Addresses</string>
+    <string name="email_addresses_section_title">Email Addresses</string>
+    <string name="email_masks_section_title">Email Masks</string>
     <string name="create_email_address_button">+ Create Email Address</string>
     <string name="loading_email_addresses">Loading Email Addresses</string>
     <string name="list_email_addresses_failure">Failed to list email addresses</string>
@@ -122,6 +124,8 @@
     <string name="block_address_failure">Failed to block address</string>
 
     <!-- SendEmailMessageFragment.kt -->
+    <string name="email_mask">Email Mask</string>
+    <string name="send_masked_email_none_option">None (send from email address)</string>
     <string name="to">To:&#xA0;&#xA0;</string>
     <string name="cc">Cc:&#xA0;&#xA0;</string>
     <string name="bcc">Bcc:&#xA0;&#xA0;</string>
@@ -168,5 +172,69 @@
     <string name="subject_placeholder">Subject</string>
     <string name="date_placeholder">Date</string>
     <string name="scheduled_placeholder">Scheduled</string>
+
+    <!-- EmailMasksFragment -->
+    <string name="email_masks">Email Masks</string>
+    <string name="loading_email_masks">Loading email masks&#8230;</string>
+    <string name="list_email_masks_failure">Failed to list email masks</string>
+    <string name="no_email_masks">No email masks have been created yet</string>
+    <string name="email_mask_status_enabled">ENABLED</string>
+    <string name="email_mask_status_disabled">DISABLED</string>
+    <string name="email_mask_status_locked">LOCKED</string>
+    <string name="email_mask_status_pending">PENDING</string>
+    <string name="email_mask_status_unknown">UNKNOWN</string>
+    <string name="deleting_email_mask">Deleting email mask</string>
+    <string name="delete_email_mask_failure">Failed to delete email mask</string>
+    <string name="enabling_email_mask">Enabling email mask</string>
+    <string name="enable_email_mask_failure">Failed to enable email mask</string>
+    <string name="disabling_email_mask">Disabling email mask</string>
+    <string name="disable_email_mask_failure">Failed to disable email mask</string>
+    <string name="no_actions_available">No actions available for this status</string>
+    <string name="enable">Enable</string>
+    <string name="disable">Disable</string>
+    <string name="update">Update</string>
+    <string name="updating_email_mask">Updating email mask</string>
+    <string name="update_email_mask_failure">Failed to update email mask</string>
+    <string name="metadata_json_label">Metadata (JSON)</string>
+    <string name="metadata_json_hint">{ "prop1": "abc", "prop2": 123 }</string>
+    <string name="set_expiration">Expires:</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="clear_date">Clear</string>
+    <string name="invalid_json_error">Invalid JSON format</string>
+
+    <!-- ProvisionEmailMaskFragment -->
+    <string name="provision_email_mask">Create Email Mask</string>
+    <string name="create_email_mask_button">+ Create Email Mask</string>
+    <string name="real_email_address_label">Real Email Address</string>
+    <string name="choose_email_address">Choose the email address</string>
+    <string name="mask_local_part_label">Enter local part of the mask address</string>
+    <string name="mask_domain_label">Mask Domain</string>
+    <string name="provisioning_email_mask">Provisioning email mask&#8230;</string>
+    <string name="provision_email_mask_failure">Failed to provision an email mask</string>
+    <string name="no_email_addresses_for_mask">At least one provisioned email address is required to create a mask</string>
+    <string name="no_mask_domains_available">No mask domains are available</string>
+    <string name="enter_mask_local_part">Enter the local part for your email mask</string>
+    <string name="load_email_addresses_failure">Failed to load email addresses</string>
+    <string name="load_mask_domains_failure">Failed to load mask domains</string>
+
+    <!-- External Email Masks -->
+    <string name="external_email_masks_switch_label">External</string>
+    <string name="create_external_email_mask_button">+ Create External Email Mask</string>
+    <string name="provision_external_email_mask">Create External Email Mask</string>
+    <string name="external_email_address_label">External Email Address</string>
+    <string name="enter_external_email_address">Enter an external email address</string>
+    <string name="invalid_email_format">Please enter a valid email address (e.g., user@example.com)</string>
+    <string name="email_masks_disabled_message">Email masks are not enabled for this account</string>
+    <string name="no_internal_masks">No internal email masks have been created</string>
+    <string name="no_external_masks">No external email masks have been created</string>
+    <string name="verify">Verify</string>
+    <string name="verifying_email">Verifying email address&#8230;</string>
+    <string name="verification_code_prompt">Enter the verification code sent to your email</string>
+    <string name="verification_code_required">A verification code must be entered</string>
+    <string name="verification_success">Email address verified successfully</string>
+    <string name="verification_initiation_failure">Failed to initiate email verification</string>
+    <string name="verification_completion_failure">Failed to verify email address</string>
+    <string name="loading_configuration">Loading configuration&#8230;</string>
+    <string name="configuration_load_failure">Failed to load configuration</string>
 
 </resources>
