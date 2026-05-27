@@ -28,7 +28,6 @@ fun postbox(func: PostboxRobot.() -> Unit) = PostboxRobot().apply { func() }
  * @since 2021-06-29
  */
 class PostboxRobot : BaseRobot() {
-
     private val toolbar = withId(R.id.toolbar)
     private val toolbarDeregisterButton = withId(R.id.deregister)
     private val positiveAlertButton = withId(android.R.id.button1)
@@ -128,8 +127,8 @@ class PostboxRobot : BaseRobot() {
         onView(messageList).perform(
             RecyclerViewActions.actionOnItemAtPosition<MessageViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 
@@ -137,8 +136,8 @@ class PostboxRobot : BaseRobot() {
         onView(messageList).perform(
             RecyclerViewActions.actionOnItemAtPosition<MessageViewHolder>(
                 position,
-                ViewActions.click()
-            )
+                ViewActions.click(),
+            ),
         )
     }
 

@@ -19,20 +19,22 @@ import com.sudoplatform.sudodirelay.types.Postbox
  */
 class PostboxAdapter(
     private val items: List<Postbox>,
-    private val itemSelectedListener: (Postbox) -> Unit
+    private val itemSelectedListener: (Postbox) -> Unit,
 ) : RecyclerView.Adapter<PostboxViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostboxViewHolder {
-        return PostboxViewHolder.inflate(
-            parent
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): PostboxViewHolder =
+        PostboxViewHolder.inflate(
+            parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: PostboxViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: PostboxViewHolder,
+        position: Int,
+    ) {
         val postbox = items[position]
         holder.bind(postbox)
 

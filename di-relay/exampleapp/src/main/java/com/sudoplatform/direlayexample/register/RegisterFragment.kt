@@ -29,12 +29,10 @@ import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudouser.FederatedSignInResult
-import com.sudoplatform.sudouser.RegistrationChallengeType
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
-import com.sudoplatform.sudouser.exceptions.AuthenticationException
-import com.sudoplatform.sudouser.exceptions.RegisterException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -55,8 +53,10 @@ enum class RegistrationMethod { TEST, FSSO }
  *  - [PostboxesFragment]: When the "register" button is clicked, registration and sign in will be attempted,
  *   on completion, the [PostboxesFragment] will be presented so that the user can view and create Postboxes.
  */
-class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedListener {
-
+class RegisterFragment :
+    Fragment(),
+    CoroutineScope,
+    AdapterView.OnItemSelectedListener {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -84,13 +84,16 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentRegisterBinding.inflate(inflater, container, false))
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -98,17 +101,15 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
 
         // get registration options
         binding.registrationMethodSpinner.onItemSelectedListener = this
-        val challengeTypes = app.sudoUserClient.getSupportedRegistrationChallengeType()
         registrationMethodList.clear()
         registrationMethodList.add(getString(R.string.test_registration))
-        if (challengeTypes.contains(RegistrationChallengeType.FSSO)) {
-            registrationMethodList.add(getString(R.string.federated_signin))
-        }
-        registrationMethodAdapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            registrationMethodList
-        )
+        registrationMethodList.add(getString(R.string.federated_signin))
+        registrationMethodAdapter =
+            ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                registrationMethodList,
+            )
         registrationMethodAdapter.notifyDataSetChanged()
         binding.registrationMethodSpinner.adapter = registrationMethodAdapter
 
@@ -135,13 +136,14 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
         showLoading()
         setItemsEnabled(false)
         launch {
-            val result = withContext(Dispatchers.IO) {
-                suspendCoroutine<FederatedSignInResult> { cont ->
-                    app.sudoUserClient.processFederatedSignInTokens(federatedSignInUri) { result ->
-                        cont.resume(result)
+            val result =
+                withContext(Dispatchers.IO) {
+                    suspendCoroutine<FederatedSignInResult> { cont ->
+                        app.sudoUserClient.processFederatedSignInTokens(federatedSignInUri) { result ->
+                            cont.resume(result)
+                        }
                     }
                 }
-            }
             when (result) {
                 is FederatedSignInResult.Success -> {
                     setUsedFssoFlag(true)
@@ -150,6 +152,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                         navigateToSudos()
                     }
                 }
+
                 is FederatedSignInResult.Failure -> {
                     showRegistrationFailure(result.error)
                 }
@@ -200,9 +203,11 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                 "/signin" -> {
                     handleFSSOSignInRedirect(federatedSignInUri)
                 }
+
                 "/signout" -> {
                     handleFSSOSignOutRedirect()
                 }
+
                 else -> {
                     if (app.sudoUserClient.isSignedIn()) {
                         navigateToSudos()
@@ -259,6 +264,7 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                             navigateToSudos()
                         }
                     }
+
                     is SignInResult.Failure -> {
                         showRegistrationFailure(result.error)
                     }
@@ -297,14 +303,15 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
                     app.sudoUserClient.signInWithKey()
                 }
                 navigateToSudos()
-            } catch (e: AuthenticationException) {
+            } catch (e: SudoUserException) {
                 hideLoading()
                 setItemsEnabled(true)
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.signin_failure, e.localizedMessage),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast
+                    .makeText(
+                        requireContext(),
+                        getString(R.string.signin_failure, e.localizedMessage),
+                        Toast.LENGTH_LONG,
+                    ).show()
             }
         }
     }
@@ -332,24 +339,25 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
             return
         }
 
-        val authProvider = TESTAuthenticationProvider(
-            "testRegisterAudience",
-            privateKey,
-            null,
-            app.keyManager,
-            keyId
-        )
+        val authProvider =
+            TESTAuthenticationProvider(
+                "testRegisterAudience",
+                privateKey,
+                null,
+                app.keyManager,
+                keyId,
+            )
         // register with auth provider
         launch {
             try {
                 withContext(Dispatchers.IO) {
                     app.sudoUserClient.registerWithAuthenticationProvider(
                         authProvider,
-                        "dummy_rid"
+                        "dummy_rid",
                     )
                 }
                 signIn()
-            } catch (e: RegisterException) {
+            } catch (e: SudoUserException) {
                 showRegistrationFailure(e)
             }
         }
@@ -359,27 +367,29 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     private val showRegistrationFailure = { e: Throwable ->
         hideLoading()
         setItemsEnabled(true)
-        Toast.makeText(
-            requireContext(),
-            getString(R.string.register_failure, e.localizedMessage),
-            Toast.LENGTH_LONG
-        ).show()
+        Toast
+            .makeText(
+                requireContext(),
+                getString(R.string.register_failure, e.localizedMessage),
+                Toast.LENGTH_LONG,
+            ).show()
     }
 
     /** Display a Toast with a progress update on the state of registration/sign in */
     private val showProgressUpdateToast = { msg: String ->
-        Toast.makeText(
-            requireContext(),
-            msg,
-            Toast.LENGTH_LONG
-        ).show()
+        Toast
+            .makeText(
+                requireContext(),
+                msg,
+                Toast.LENGTH_LONG,
+            ).show()
     }
 
     /** Navigate to sudos screen and redeem entitlements */
     private suspend fun navigateToSudos() {
         redeemEntitlements()
         navController.navigate(
-            RegisterFragmentDirections.actionRegisterFragmentToSudosFragment()
+            RegisterFragmentDirections.actionRegisterFragmentToSudosFragment(),
         )
     }
 
@@ -409,13 +419,19 @@ class RegisterFragment : Fragment(), CoroutineScope, AdapterView.OnItemSelectedL
     }
 
     /** Sets the registration method */
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        selectedRegistrationMethod = when (registrationMethodList[pos]) {
-            getString(R.string.federated_signin) -> RegistrationMethod.FSSO
-            else -> RegistrationMethod.TEST
-        }
+    override fun onItemSelected(
+        parent: AdapterView<*>,
+        view: View?,
+        pos: Int,
+        id: Long,
+    ) {
+        selectedRegistrationMethod =
+            when (registrationMethodList[pos]) {
+                getString(R.string.federated_signin) -> RegistrationMethod.FSSO
+                else -> RegistrationMethod.TEST
+            }
     }
 
-    override fun onNothingSelected(parent: AdapterView<*>) { /* no-op */
+    override fun onNothingSelected(parent: AdapterView<*>) { // no-op
     }
 }

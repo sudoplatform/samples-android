@@ -47,8 +47,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [PostboxesFragment]: If a user successfully creates a [Sudo], the [PostboxesFragment] will be
  *   presented so the user can create postboxes with that [Sudo].
  */
-class CreateSudoFragment : Fragment(), CoroutineScope {
-
+class CreateSudoFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -70,7 +71,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentCreateSudoBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -90,7 +91,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -109,11 +113,14 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
 
     /** Creates a [Sudo] from the [SudoProfilesClient] based on the submitted form inputs. */
     private fun createSudo() {
-        val name = binding.editText.text.toString().trim()
+        val name =
+            binding.editText.text
+                .toString()
+                .trim()
         if (name.isEmpty()) {
             showAlertDialog(
                 titleResId = R.string.enter_sudo_name,
-                positiveButtonResId = android.R.string.ok
+                positiveButtonResId = android.R.string.ok,
             )
             return
         }
@@ -122,9 +129,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
         showLoading(R.string.creating_sudo)
         launch {
             try {
-                val newSudo = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.createSudo(sudo)
-                }
+                val newSudo =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.createSudo(sudo)
+                    }
 
                 showAlertDialog(
                     titleResId = R.string.success,
@@ -132,10 +140,10 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     onPositive = {
                         navController.navigate(
                             CreateSudoFragmentDirections.actionCreateSudoFragmentToPostboxesFragment(
-                                newSudo
-                            )
+                                newSudo,
+                            ),
                         )
-                    }
+                    },
                 )
             } catch (e: SudoProfileException) {
                 showAlertDialog(
@@ -143,7 +151,7 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { createSudo() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideLoading()
@@ -169,7 +177,9 @@ class CreateSudoFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int) {
+    private fun showLoading(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
         setItemsEnabled(false)

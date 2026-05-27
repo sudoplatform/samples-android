@@ -20,17 +20,19 @@ import com.sudoplatform.sudodirelay.types.Message
  *
  * @property binding The Message item view binding component.
  */
-class MessageViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class MessageViewHolder(
+    private val binding: LayoutItemCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): MessageViewHolder {
-            val binding = LayoutItemCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context
-                ),
-                parent,
-                false
-            )
+            val binding =
+                LayoutItemCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return MessageViewHolder(binding)
         }
     }

@@ -17,11 +17,9 @@ import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudouser.SudoUserClient
-import com.sudoplatform.sudouser.exceptions.SignOutException
-import java.lang.Exception
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 
 class App : Application() {
-
     companion object {
         /** Name of the preference set that holds sign in information. */
         const val SIGN_IN_PREFERENCES = "SignIn"
@@ -43,26 +41,31 @@ class App : Application() {
         logger = Logger("decentralizedIdentityExample", AndroidUtilsLogDriver(LogLevel.DEBUG))
 
         // Create an instance of SudoUserClient to perform registration and sign in.
-        sudoUserClient = SudoUserClient.builder(this)
-            .setNamespace("sudo-test")
-            .setLogger(logger)
-            .build()
+        sudoUserClient =
+            SudoUserClient
+                .builder(this)
+                .setNamespace("sudo-test")
+                .setLogger(logger)
+                .build()
         // Create an instance of SudoProfilesClient to perform creation, deletion and modification
         // of Sudos.
         val blobURI = Uri.fromFile(cacheDir)
 
-        sudoProfilesClient = SudoProfilesClient
-            .builder(this, sudoUserClient, blobURI)
-            .setLogger(logger)
-            .build()
+        sudoProfilesClient =
+            SudoProfilesClient
+                .builder(this, sudoUserClient, blobURI)
+                .setLogger(logger)
+                .build()
 
         // Create an instance of the SudoEntitlementsClient to redeem and check what resources the
         // user is entitled to use.
-        sudoEntitlementsClient = SudoEntitlementsClient.builder()
-            .setContext(this)
-            .setSudoUserClient(sudoUserClient)
-            .setLogger(logger)
-            .build()
+        sudoEntitlementsClient =
+            SudoEntitlementsClient
+                .builder()
+                .setContext(this)
+                .setSudoUserClient(sudoUserClient)
+                .setLogger(logger)
+                .build()
 
         // Create an instance of KeyManager to perform key management.
         keyManager = KeyManagerFactory(this).createAndroidKeyManager() as KeyManager
@@ -70,21 +73,22 @@ class App : Application() {
         // Create an instance of SudoDIRelayClient to perform relay postbox
         // lifecycle operations and sending/receiving of relay messages.
         diRelayClient =
-            SudoDIRelayClient.builder()
+            SudoDIRelayClient
+                .builder()
                 .setContext(this)
                 .setLogger(logger)
                 .setSudoUserClient(sudoUserClient)
                 .build()
     }
 
-    @Throws(SignOutException::class)
+    @Throws(SudoUserException::class)
     fun doFSSOSignout() {
         val userClient = this.sudoUserClient
         try {
             userClient.presentFederatedSignOutUI { }
         } catch (e: Exception) {
             this.logger.debug("FSSO Signout failed: " + e.localizedMessage)
-            throw SignOutException.FailedException(e.message)
+            throw SudoUserException.FailedException(e.message)
         }
     }
 }

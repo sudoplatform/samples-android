@@ -21,7 +21,6 @@ fun createSudo(func: CreateSudoRobot.() -> Unit) = CreateSudoRobot().apply { fun
  * @since 2022-05-03
  */
 class CreateSudoRobot : BaseRobot() {
-
     private val toolbarCreateButton = withId(R.id.create)
     private val sudoLabelEditText = withId(R.id.editText)
     private val detailTextView = withId(R.id.textView)

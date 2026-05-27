@@ -46,9 +46,11 @@ import org.hamcrest.core.IsNot.not
  * @since 2021-06-29
  */
 open class BaseRobot {
-
     // Assumes that the view is visible on screen.
-    fun replaceText(matcher: Matcher<View>, text: String) {
+    fun replaceText(
+        matcher: Matcher<View>,
+        text: String,
+    ) {
         onView(matcher)
             .perform(click())
             .perform(replaceText(text))
@@ -57,7 +59,10 @@ open class BaseRobot {
     }
 
     // Assumes that the view is visible on screen.
-    fun fillText(matcher: Matcher<View>, text: String) {
+    fun fillText(
+        matcher: Matcher<View>,
+        text: String,
+    ) {
         onView(matcher)
             .perform(click())
             .perform(typeText(text))
@@ -68,18 +73,21 @@ open class BaseRobot {
     // Matcher used to retrieve the text from a EditText.
     fun getTextFromEditTextView(matcher: ViewInteraction): String {
         var text = String()
-        matcher.perform(object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return ViewMatchers.isAssignableFrom(EditText::class.java)
-            }
-            override fun getDescription(): String {
-                return "Get text from the view"
-            }
-            override fun perform(uiController: UiController, view: View) {
-                val editText = view as EditText
-                text = editText.text.toString()
-            }
-        })
+        matcher.perform(
+            object : ViewAction {
+                override fun getConstraints(): Matcher<View> = ViewMatchers.isAssignableFrom(EditText::class.java)
+
+                override fun getDescription(): String = "Get text from the view"
+
+                override fun perform(
+                    uiController: UiController,
+                    view: View,
+                ) {
+                    val editText = view as EditText
+                    text = editText.text.toString()
+                }
+            },
+        )
         return text
     }
 
@@ -88,7 +96,10 @@ open class BaseRobot {
             .perform(click())
     }
 
-    fun setSwitch(matcher: Matcher<View>, checked: Boolean) {
+    fun setSwitch(
+        matcher: Matcher<View>,
+        checked: Boolean,
+    ) {
         onView(matcher)
             .perform(setChecked(checked))
     }
@@ -104,13 +115,19 @@ open class BaseRobot {
     }
 
     // Scroll to the View in the Recycler View
-    fun scrollToViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
+    fun scrollToViewInRecyclerView(
+        recyclerViewId: Int,
+        matcher: Matcher<View>,
+    ) {
         onView(withId(recyclerViewId))
             .perform(scrollTo<ViewHolder>(matcher))
     }
 
     // Click on the View in the Recycler View
-    fun clickViewInRecyclerView(recyclerViewId: Int, matcher: Matcher<View>) {
+    fun clickViewInRecyclerView(
+        recyclerViewId: Int,
+        matcher: Matcher<View>,
+    ) {
         onView(withId(recyclerViewId))
             .perform(actionOnItem<ViewHolder>(matcher, click()))
     }
@@ -133,7 +150,11 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToDisplay(matcher: Matcher<View>, timeout: Long = 10_000L, mayMissDisplay: Boolean = false) {
+    fun waitForViewToDisplay(
+        matcher: Matcher<View>,
+        timeout: Long = 10_000L,
+        mayMissDisplay: Boolean = false,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -146,6 +167,11 @@ open class BaseRobot {
             } catch (e: AssertionFailedError) {
                 println("AssertionFailedError Exception")
                 Thread.sleep(retryInterval)
+            } catch (e: RuntimeException) {
+                // RootViewPicker.RootViewWithoutFocusException: the window isn't yet focused/idle
+                // (e.g. IME or loading-dialog churn). Retry within our timeout instead of failing.
+                println("RuntimeException (root not ready): ${e.message}")
+                Thread.sleep(retryInterval)
             }
         }
 
@@ -157,7 +183,10 @@ open class BaseRobot {
 
     // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
     // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToNotDisplay(matcher: Matcher<View>, timeout: Long = 10_000L) {
+    fun waitForViewToNotDisplay(
+        matcher: Matcher<View>,
+        timeout: Long = 10_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -169,6 +198,11 @@ open class BaseRobot {
             } catch (e: AssertionFailedError) {
                 println("AssertionFailedError Exception")
                 Thread.sleep(retryInterval)
+            } catch (e: RuntimeException) {
+                // RootViewPicker.RootViewWithoutFocusException: the window isn't yet focused/idle
+                // (e.g. IME or loading-dialog churn). Retry within our timeout instead of failing.
+                println("RuntimeException (root not ready): ${e.message}")
+                Thread.sleep(retryInterval)
             }
         }
         try {
@@ -178,7 +212,11 @@ open class BaseRobot {
         }
     }
 
-    fun waitForViewToHaveItems(matcher: Matcher<View>, itemCount: Int, timeout: Long = 10_000L) {
+    fun waitForViewToHaveItems(
+        matcher: Matcher<View>,
+        itemCount: Int,
+        timeout: Long = 10_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         for (x in 0..timeout step retryInterval) {
             try {
@@ -195,21 +233,24 @@ open class BaseRobot {
     }
 
     // Perform a delay when executing an action on a view.
-    fun waitFor(delay: Long): ViewAction {
-        return object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return isRoot()
-            }
-            override fun getDescription(): String {
-                return "wait for " + delay + "milliseconds"
-            }
-            override fun perform(uiController: UiController?, view: View?) {
+    fun waitFor(delay: Long): ViewAction =
+        object : ViewAction {
+            override fun getConstraints(): Matcher<View> = isRoot()
+
+            override fun getDescription(): String = "wait for " + delay + "milliseconds"
+
+            override fun perform(
+                uiController: UiController?,
+                view: View?,
+            ) {
                 uiController?.loopMainThreadForAtLeast(delay)
             }
         }
-    }
 
-    fun pressBackUntilViewIsDisplayed(matcher: Matcher<View>, timeout: Long = 5_000L) {
+    fun pressBackUntilViewIsDisplayed(
+        matcher: Matcher<View>,
+        timeout: Long = 5_000L,
+    ) {
         val retryInterval = 250L // 250 ms between retries var attempts = 1
         Thread.sleep(1_000L)
         for (x in 0..timeout step retryInterval) {
@@ -227,46 +268,55 @@ open class BaseRobot {
     // Matcher used to retrieve the text from a TextView.
     fun getTextFromTextView(matcher: ViewInteraction): String {
         var text = String()
-        matcher.perform(object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return ViewMatchers.isAssignableFrom(TextView::class.java)
-            }
-            override fun getDescription(): String {
-                return "Get text from the view"
-            }
-            override fun perform(uiController: UiController, view: View) {
-                val textView = view as TextView
-                text = textView.text.toString()
-            }
-        })
+        matcher.perform(
+            object : ViewAction {
+                override fun getConstraints(): Matcher<View> = ViewMatchers.isAssignableFrom(TextView::class.java)
+
+                override fun getDescription(): String = "Get text from the view"
+
+                override fun perform(
+                    uiController: UiController,
+                    view: View,
+                ) {
+                    val textView = view as TextView
+                    text = textView.text.toString()
+                }
+            },
+        )
         return text
     }
 
     // Custom matchers
-    fun setChecked(checked: Boolean) = object : ViewAction {
-        val checkableViewMatcher = object : BaseMatcher<View>() {
-            override fun matches(item: Any?): Boolean = isA(Checkable::class.java).matches(item)
-            override fun describeTo(description: Description?) {
-                description?.appendText("is Checkable instance with correct value ")
+    fun setChecked(checked: Boolean) =
+        object : ViewAction {
+            val checkableViewMatcher =
+                object : BaseMatcher<View>() {
+                    override fun matches(item: Any?): Boolean = isA(Checkable::class.java).matches(item)
+
+                    override fun describeTo(description: Description?) {
+                        description?.appendText("is Checkable instance with correct value ")
+                    }
+                }
+
+            override fun getConstraints(): BaseMatcher<View> = checkableViewMatcher
+
+            override fun getDescription(): String? = null
+
+            override fun perform(
+                uiController: UiController?,
+                view: View,
+            ) {
+                val checkableView: Checkable = view as Checkable
+                checkableView.isChecked = checked
             }
         }
 
-        override fun getConstraints(): BaseMatcher<View> = checkableViewMatcher
-        override fun getDescription(): String? = null
-        override fun perform(uiController: UiController?, view: View) {
-            val checkableView: Checkable = view as Checkable
-            checkableView.isChecked = checked
-        }
-    }
-    fun recyclerViewSizeMatcher(matcherSize: Int): Matcher<View?> {
-        return object : BoundedMatcher<View?, RecyclerView>(RecyclerView::class.java) {
+    fun recyclerViewSizeMatcher(matcherSize: Int): Matcher<View?> =
+        object : BoundedMatcher<View?, RecyclerView>(RecyclerView::class.java) {
             override fun describeTo(description: Description) {
                 description.appendText("with list size: $matcherSize")
             }
 
-            override fun matchesSafely(recyclerView: RecyclerView): Boolean {
-                return matcherSize == recyclerView.adapter!!.itemCount
-            }
+            override fun matchesSafely(recyclerView: RecyclerView): Boolean = matcherSize == recyclerView.adapter!!.itemCount
         }
-    }
 }

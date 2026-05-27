@@ -25,7 +25,6 @@ fun sudos(func: SudosRobot.() -> Unit) = SudosRobot().apply { func() }
  * @since 2022-05-03
  */
 class SudosRobot : BaseRobot() {
-
     private val toolbarInfoButton = withId(R.id.info)
     private val createSudoButton = withId(R.id.createSudoButton)
     private val sudoRecyclerView = withId(R.id.sudoRecyclerView)
@@ -81,8 +80,8 @@ class SudosRobot : BaseRobot() {
         onView(sudoRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
                 position,
-                ViewActions.click()
-            )
+                ViewActions.click(),
+            ),
         )
     }
 
@@ -90,8 +89,8 @@ class SudosRobot : BaseRobot() {
         onView(sudoRecyclerView).perform(
             RecyclerViewActions.actionOnItemAtPosition<SudoViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 

@@ -33,7 +33,6 @@ fun postboxes(func: PostboxesRobot.() -> Unit) = PostboxesRobot().apply { func()
  * @since 2021-06-29
  */
 class PostboxesRobot : BaseRobot() {
-
     private val toolbar = withId(R.id.toolbar)
     private val toolbarDeregisterButton = withId(R.id.deregister)
     private val positiveAlertButton = withId(android.R.id.button1)
@@ -110,27 +109,28 @@ class PostboxesRobot : BaseRobot() {
     }
 
     fun getPostboxId(position: Int): String {
-        val storeTextViewAction = object : ViewAction {
-            lateinit var result: String
-            override fun getConstraints(): Matcher<View>? {
-                return null
-            }
+        val storeTextViewAction =
+            object : ViewAction {
+                lateinit var result: String
 
-            override fun getDescription(): String {
-                return "get Contents"
-            }
+                override fun getConstraints(): Matcher<View>? = null
 
-            override fun perform(uiController: UiController?, view: View) {
-                val v = view.findViewById<TextView>(R.id.name)
-                result = v.text.toString()
+                override fun getDescription(): String = "get Contents"
+
+                override fun perform(
+                    uiController: UiController?,
+                    view: View,
+                ) {
+                    val v = view.findViewById<TextView>(R.id.name)
+                    result = v.text.toString()
+                }
             }
-        }
         onView(withId(R.id.messageRecyclerView))
             .perform(
                 RecyclerViewActions.actionOnItemAtPosition<ViewHolder>(
                     position,
-                    storeTextViewAction
-                )
+                    storeTextViewAction,
+                ),
             )
         return storeTextViewAction.result
     }
@@ -139,8 +139,8 @@ class PostboxesRobot : BaseRobot() {
         onView(postboxList).perform(
             RecyclerViewActions.actionOnItemAtPosition<PostboxViewHolder>(
                 position,
-                ViewActions.swipeLeft()
-            )
+                ViewActions.swipeLeft(),
+            ),
         )
     }
 
@@ -148,8 +148,8 @@ class PostboxesRobot : BaseRobot() {
         onView(postboxList).perform(
             RecyclerViewActions.actionOnItemAtPosition<PostboxViewHolder>(
                 position,
-                ViewActions.click()
-            )
+                ViewActions.click(),
+            ),
         )
     }
 

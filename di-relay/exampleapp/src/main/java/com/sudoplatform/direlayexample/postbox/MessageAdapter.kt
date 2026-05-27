@@ -19,20 +19,22 @@ import com.sudoplatform.sudodirelay.types.Message
  */
 class MessageAdapter(
     private val items: List<Message>,
-    private val itemSelectedListener: (Message) -> Unit
+    private val itemSelectedListener: (Message) -> Unit,
 ) : RecyclerView.Adapter<MessageViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
-        return MessageViewHolder.inflate(
-            parent
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): MessageViewHolder =
+        MessageViewHolder.inflate(
+            parent,
         )
-    }
 
-    override fun getItemCount(): Int {
-        return items.count()
-    }
+    override fun getItemCount(): Int = items.count()
 
-    override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: MessageViewHolder,
+        position: Int,
+    ) {
         val message = items[position]
         holder.bind(message)
 

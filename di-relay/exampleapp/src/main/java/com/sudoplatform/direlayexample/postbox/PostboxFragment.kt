@@ -54,7 +54,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @Parcelize
 data class MessageWrapper(
-    val message: @RawValue Message
+    val message: @RawValue Message,
 ) : Parcelable
 
 /**
@@ -69,8 +69,9 @@ data class MessageWrapper(
  *   connection. The [MessageFragment] will be presented to allow the user to interact with
  *   the chosen postbox's connection.
  */
-class PostboxFragment : Fragment(), CoroutineScope {
-
+class PostboxFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -104,7 +105,7 @@ class PostboxFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentPostboxBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
@@ -113,7 +114,10 @@ class PostboxFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -197,8 +201,8 @@ class PostboxFragment : Fragment(), CoroutineScope {
     private fun navigateToMessageDisplay(message: Message) {
         navController.navigate(
             PostboxFragmentDirections.actionPostboxFragmentToMessageFragment(
-                message = MessageWrapper(message)
-            )
+                message = MessageWrapper(message),
+            ),
         )
     }
 
@@ -230,17 +234,20 @@ class PostboxFragment : Fragment(), CoroutineScope {
             showLoading(R.string.sending_message)
             try {
                 val messageVal = binding.messageText.getText()?.toString() ?: ""
-                val postRequest = Request.Builder()
-                    .url(postbox.serviceEndpoint)
-                    .post(messageVal.toRequestBody("application/json".toMediaTypeOrNull()))
-                    .build()
+                val postRequest =
+                    Request
+                        .Builder()
+                        .url(postbox.serviceEndpoint)
+                        .post(messageVal.toRequestBody("application/json".toMediaTypeOrNull()))
+                        .build()
                 val client = OkHttpClient()
-                val response = withContext(Dispatchers.IO) {
-                    client.newCall(postRequest).execute()
-                }
+                val response =
+                    withContext(Dispatchers.IO) {
+                        client.newCall(postRequest).execute()
+                    }
                 showAlertDialog(
                     titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok
+                    positiveButtonResId = android.R.string.ok,
                 )
                 binding.messageText.setText("")
             } catch (e: SudoDIRelayClient.DIRelayException) {
@@ -249,7 +256,7 @@ class PostboxFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { sendMessage() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -263,15 +270,17 @@ class PostboxFragment : Fragment(), CoroutineScope {
         messageList.clear()
         try {
             messageList.addAll(
-                app.diRelayClient.listMessages(100).items
-                    .filter { it.postboxId == postbox.id }
+                app.diRelayClient
+                    .listMessages(100)
+                    .items
+                    .filter { it.postboxId == postbox.id },
             )
             adapter.notifyDataSetChanged()
         } catch (e: Exception) {
             showAlertDialog(
                 titleResId = R.string.fetch_messages_failure,
                 message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.ok
+                negativeButtonResId = android.R.string.ok,
             )
         }
     }
@@ -286,7 +295,7 @@ class PostboxFragment : Fragment(), CoroutineScope {
             showAlertDialog(
                 titleResId = R.string.update_postbox_failure,
                 message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.ok
+                negativeButtonResId = android.R.string.ok,
             )
         }
     }
@@ -302,7 +311,10 @@ class PostboxFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.messageRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         launch {
             val message = messageList[viewHolder.adapterPosition]
             deleteMessage(message.id)
@@ -324,7 +336,7 @@ class PostboxFragment : Fragment(), CoroutineScope {
             showAlertDialog(
                 titleResId = R.string.message_delete_failed,
                 message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.ok
+                negativeButtonResId = android.R.string.ok,
             )
         }
         hideLoading()
@@ -340,7 +352,9 @@ class PostboxFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         binding.sendMessageProgressText.setText(textResId)
         binding.progressBar3.visibility = View.VISIBLE
         binding.sendMessageProgressText.visibility = View.VISIBLE
@@ -366,7 +380,7 @@ class PostboxFragment : Fragment(), CoroutineScope {
                 withContext(Dispatchers.IO) {
                     app.diRelayClient.subscribeToRelayEvents(
                         subscriberId = postbox.id,
-                        subscriber = relaySubscriber
+                        subscriber = relaySubscriber,
                     )
                 }
             } catch (e: SudoDIRelayClient.DIRelayException) {
@@ -374,7 +388,7 @@ class PostboxFragment : Fragment(), CoroutineScope {
                     titleResId = R.string.subscription_failed,
                     message = e.localizedMessage ?: "$e",
                     negativeButtonResId = android.R.string.ok,
-                    onNegative = {}
+                    onNegative = {},
                 )
             }
         }
@@ -383,19 +397,20 @@ class PostboxFragment : Fragment(), CoroutineScope {
     /**
      * A [Subscriber] object which notifies the view that a new message is available.
      */
-    private val relaySubscriber = object : MessageSubscriber {
-        override fun messageCreated(message: Message) {
-            launch {
-                // This could be managed by explicitly adding the new message to the postbox display
-                // but for now we are 'simply' asking for a full refresh if the message is for us.
-                if (message.postboxId == postbox.id) {
-                    updateMessagesForPostbox()
+    private val relaySubscriber =
+        object : MessageSubscriber {
+            override fun messageCreated(message: Message) {
+                launch {
+                    // This could be managed by explicitly adding the new message to the postbox display
+                    // but for now we are 'simply' asking for a full refresh if the message is for us.
+                    if (message.postboxId == postbox.id) {
+                        updateMessagesForPostbox()
+                    }
                 }
             }
-        }
 
-        override fun connectionStatusChanged(state: Subscriber.ConnectionState) {}
-    }
+            override fun connectionStatusChanged(state: Subscriber.ConnectionState) {}
+        }
 
     /**
      * Use the relay client to unsubscribe from live RelayService events.

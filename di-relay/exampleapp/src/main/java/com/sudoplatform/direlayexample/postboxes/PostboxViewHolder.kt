@@ -20,17 +20,19 @@ import com.sudoplatform.sudodirelay.types.Postbox
  *
  * @property binding The Postbox item view binding component.
  */
-class PostboxViewHolder(private val binding: LayoutItemCellBinding) : RecyclerView.ViewHolder(binding.root) {
-
+class PostboxViewHolder(
+    private val binding: LayoutItemCellBinding,
+) : RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun inflate(parent: ViewGroup): PostboxViewHolder {
-            val binding = LayoutItemCellBinding.inflate(
-                LayoutInflater.from(
-                    parent.context
-                ),
-                parent,
-                false
-            )
+            val binding =
+                LayoutItemCellBinding.inflate(
+                    LayoutInflater.from(
+                        parent.context,
+                    ),
+                    parent,
+                    false,
+                )
             return PostboxViewHolder(binding)
         }
     }

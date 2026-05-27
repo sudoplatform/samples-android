@@ -37,8 +37,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [PostboxFragment]: A user chooses a message from the list which will show this view with the
  *  [Message] details
  */
-class MessageFragment : Fragment(), CoroutineScope {
-
+class MessageFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -66,7 +67,7 @@ class MessageFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         message = args.message.message
         bindingDelegate.attach(FragmentMessageDetailsBinding.inflate(inflater, container, false))
@@ -78,7 +79,10 @@ class MessageFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
@@ -115,7 +119,7 @@ class MessageFragment : Fragment(), CoroutineScope {
                 showAlertDialog(
                     titleResId = R.string.message_details_failed,
                     message = e.localizedMessage ?: "$e",
-                    negativeButtonResId = android.R.string.ok
+                    negativeButtonResId = android.R.string.ok,
                 )
             }
         }

@@ -22,7 +22,7 @@ To build this app you first need to obtain an SDK configuration file.
    
    If the application does not already have an assets folder, create one under `exampleapp/src/main/assets/` or in Android Studio, right click on the application module and select `New > Folder > Assets Folder`. Then drag the files to that folder.
 
-3. Apply the steps relevant to your registration method (FSSO, TEST, or SafetyNet) (see below).
+3. Apply the steps relevant to your registration method (FSSO or TEST) (see below).
 
 4. Build the app
 
@@ -44,17 +44,6 @@ To build and use this app with TEST registration, you will need a TEST registrat
 ### FSSO Authentication Set Up
 
 To build and use this app with FSSO for authentication, the SDK configuration file should contain all required fields to support the desired FSSO environment. No further set up should be required.
-
-### SafetyNet Registration Set Up
-
-To build and use this app with SafetyNet for registration, some additional set up is required:
-
-1. Obtain a SafetyNet API key via the Google console and place it in a file at `/var/anonyome_key/safetynet_api_dev.key`.
-   
-2. Obtain your app signing certificate's fingerprint and provide it to the identity team to be whitelisted. To obtain this fingerprint, run the following command:
-   ```
-   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA256 | tr -d : | awk '{print($2)}' | xxd -r -p | base64
-   ```
 
 ## More Documentation
 

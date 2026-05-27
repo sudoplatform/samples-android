@@ -36,7 +36,7 @@ import com.sudoplatform.sudodirelay.types.Postbox
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import com.sudoplatform.sudouser.SudoUserClient
-import com.sudoplatform.sudouser.exceptions.RegisterException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -54,7 +54,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @Parcelize
 data class PostboxWrapper(
-    val postbox: @RawValue Postbox
+    val postbox: @RawValue Postbox,
 ) : Parcelable
 
 /**
@@ -67,8 +67,9 @@ data class PostboxWrapper(
  * Links To:
  *  - [PostboxFragment]: Details about a postbox, including messages.
  */
-class PostboxesFragment : Fragment(), CoroutineScope {
-
+class PostboxesFragment :
+    Fragment(),
+    CoroutineScope {
     companion object {
         const val POSTBOX_CREATE_AUDIENCE = "sudoplatform.relay.postbox"
     }
@@ -109,7 +110,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentPostboxesBinding.inflate(inflater, container, false))
         app = requireActivity().application as App
@@ -117,7 +118,10 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
@@ -147,14 +151,15 @@ class PostboxesFragment : Fragment(), CoroutineScope {
      */
     private suspend fun getOwnershipProof() {
         try {
-            ownershipProof = withContext(Dispatchers.IO) {
-                app.sudoProfilesClient.getOwnershipProof(sudo, POSTBOX_CREATE_AUDIENCE)
-            }
+            ownershipProof =
+                withContext(Dispatchers.IO) {
+                    app.sudoProfilesClient.getOwnershipProof(sudo, POSTBOX_CREATE_AUDIENCE)
+                }
         } catch (e: SudoProfileException) {
             showAlertDialog(
                 titleResId = R.string.ownership_proof_error,
                 message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.cancel
+                negativeButtonResId = android.R.string.cancel,
             )
         }
     }
@@ -185,8 +190,8 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     private fun navigateToMessages(postbox: Postbox) {
         navController.navigate(
             PostboxesFragmentDirections.actionPostboxesFragmentToPostboxFragment(
-                postbox = PostboxWrapper(postbox)
-            )
+                postbox = PostboxWrapper(postbox),
+            ),
         )
     }
 
@@ -209,14 +214,15 @@ class PostboxesFragment : Fragment(), CoroutineScope {
                 }
                 hideLoading()
                 navController.navigate(
-                    PostboxesFragmentDirections.actionPostboxesFragmentToRegisterFragment()
+                    PostboxesFragmentDirections.actionPostboxesFragmentToRegisterFragment(),
                 )
-            } catch (e: RegisterException) {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.deregister_failure, e.localizedMessage),
-                    Toast.LENGTH_LONG
-                ).show()
+            } catch (e: SudoUserException) {
+                Toast
+                    .makeText(
+                        requireContext(),
+                        getString(R.string.deregister_failure, e.localizedMessage),
+                        Toast.LENGTH_LONG,
+                    ).show()
             }
         }
     }
@@ -244,7 +250,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
                                 messageResId = R.string.deregister_confirmation,
                                 positiveButtonResId = R.string.deregister,
                                 onPositive = { deregister() },
-                                negativeButtonResId = android.R.string.cancel
+                                negativeButtonResId = android.R.string.cancel,
                             )
                         }
                     }
@@ -275,7 +281,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
                     onPositive = { createPostbox() },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             }
             hideLoading()
@@ -289,15 +295,17 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         postboxList.clear()
         try {
             postboxList.addAll(
-                app.diRelayClient.listPostboxes().items
-                    .filter { it.sudoId == sudo.id }
+                app.diRelayClient
+                    .listPostboxes()
+                    .items
+                    .filter { it.sudoId == sudo.id },
             )
             adapter.notifyDataSetChanged()
         } catch (e: Exception) {
             showAlertDialog(
                 titleResId = R.string.fetch_postboxes_failure,
                 message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.ok
+                negativeButtonResId = android.R.string.ok,
             )
         }
     }
@@ -313,7 +321,10 @@ class PostboxesFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.postboxRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         launch {
             val postbox = postboxList[viewHolder.adapterPosition]
             deletePostbox(postbox.id)
@@ -336,7 +347,7 @@ class PostboxesFragment : Fragment(), CoroutineScope {
             showAlertDialog(
                 titleResId = R.string.postbox_delete_failed,
                 message = e.localizedMessage ?: "$e",
-                negativeButtonResId = android.R.string.ok
+                negativeButtonResId = android.R.string.ok,
             )
         }
         hideLoading()
@@ -352,7 +363,9 @@ class PostboxesFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         binding.progressText2.setText(textResId)
         binding.progressBar3.visibility = View.VISIBLE
         binding.progressText2.visibility = View.VISIBLE

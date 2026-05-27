@@ -25,7 +25,6 @@ fun login(func: RegisterRobot.() -> Unit) = RegisterRobot().apply { func() }
  * @since 2021-06-29
  */
 class RegisterRobot : BaseRobot() {
-
     private val registerButton = withId(R.id.buttonRegister)
     private val resetButton = withId(R.id.buttonSignOut)
     private val registrationSpinner = withId(R.id.registrationMethodSpinner)

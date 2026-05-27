@@ -27,7 +27,6 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class PostboxTest {
-
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule<MainActivity>(MainActivity::class.java)
 

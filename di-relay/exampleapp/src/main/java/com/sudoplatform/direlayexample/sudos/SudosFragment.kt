@@ -55,8 +55,9 @@ import kotlin.coroutines.CoroutineContext
  *  - [PostboxesFragment]: If a user chooses a [Sudo] from the list, the [PostboxesFragment]
  *   will be presented so the user can create postboxes for their [Sudo].
  */
-class SudosFragment : Fragment(), CoroutineScope {
-
+class SudosFragment :
+    Fragment(),
+    CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /** Navigation controller used to manage app navigation. */
@@ -84,7 +85,7 @@ class SudosFragment : Fragment(), CoroutineScope {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         bindingDelegate.attach(FragmentSudosBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
@@ -98,7 +99,7 @@ class SudosFragment : Fragment(), CoroutineScope {
                             messageResId = R.string.sudo_explanation,
                             positiveButtonResId = android.R.string.ok,
                             negativeButtonResId = R.string.learn_more,
-                            onNegative = { learnMore() }
+                            onNegative = { learnMore() },
                         )
                     }
                 }
@@ -110,14 +111,17 @@ class SudosFragment : Fragment(), CoroutineScope {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
         navController = Navigation.findNavController(view)
 
         binding.createSudoButton.setOnClickListener {
             navController.navigate(
-                SudosFragmentDirections.actionSudosFragmentToCreateSudoFragment()
+                SudosFragmentDirections.actionSudosFragmentToCreateSudoFragment(),
             )
         }
 
@@ -146,9 +150,10 @@ class SudosFragment : Fragment(), CoroutineScope {
         showLoading(R.string.loading_sudos)
         launch {
             try {
-                val sudos = withContext(Dispatchers.IO) {
-                    app.sudoProfilesClient.listSudos(listOption)
-                }
+                val sudos =
+                    withContext(Dispatchers.IO) {
+                        app.sudoProfilesClient.listSudos(listOption)
+                    }
                 sudoList.clear()
                 for (sudo in sudos) {
                     sudoList.add(sudo)
@@ -167,7 +172,7 @@ class SudosFragment : Fragment(), CoroutineScope {
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
                     onPositive = { listSudos(ListOption.REMOTE_ONLY) },
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideLoading()
@@ -189,13 +194,13 @@ class SudosFragment : Fragment(), CoroutineScope {
                 }
                 showAlertDialog(
                     titleResId = R.string.success,
-                    positiveButtonResId = android.R.string.ok
+                    positiveButtonResId = android.R.string.ok,
                 )
             } catch (e: SudoProfileException) {
                 showAlertDialog(
                     titleResId = R.string.delete_sudo_failure,
                     message = e.localizedMessage ?: e.toString(),
-                    negativeButtonResId = android.R.string.cancel
+                    negativeButtonResId = android.R.string.cancel,
                 )
             } finally {
                 hideDeleteAlert()
@@ -212,8 +217,8 @@ class SudosFragment : Fragment(), CoroutineScope {
             SudoAdapter(sudoList) { sudo ->
                 navController.navigate(
                     SudosFragmentDirections.actionSudosFragmentToPostboxesFragment(
-                        sudo
-                    )
+                        sudo,
+                    ),
                 )
             }
         binding.sudoRecyclerView.adapter = adapter
@@ -240,7 +245,9 @@ class SudosFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the progress bar spinner indicating that an operation is occurring. */
-    private fun showLoading(@StringRes textResId: Int = 0) {
+    private fun showLoading(
+        @StringRes textResId: Int = 0,
+    ) {
         if (textResId != 0) {
             binding.progressText.text = getString(textResId)
         }
@@ -261,7 +268,9 @@ class SudosFragment : Fragment(), CoroutineScope {
     }
 
     /** Displays the loading [AlertDialog] indicating that a deletion operation is occurring. */
-    private fun showDeleteAlert(@StringRes textResId: Int) {
+    private fun showDeleteAlert(
+        @StringRes textResId: Int,
+    ) {
         loading = createLoadingAlertDialog(textResId)
         loading?.show()
     }
@@ -282,7 +291,10 @@ class SudosFragment : Fragment(), CoroutineScope {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.sudoRecyclerView)
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+    private fun onSwiped(
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int,
+    ) {
         val sudo = sudoList[viewHolder.adapterPosition]
         deleteSudo(sudo)
         sudoList.removeAt(viewHolder.adapterPosition)

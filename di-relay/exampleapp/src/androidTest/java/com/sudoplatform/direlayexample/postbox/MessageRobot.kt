@@ -18,7 +18,6 @@ fun message(func: MessageRobot.() -> Unit) = MessageRobot().apply { func() }
  * @since 2021-06-29
  */
 class MessageRobot : BaseRobot() {
-
     private val toolbar = withId(R.id.toolbar)
 
     private val messageId = withId(R.id.messageId)
