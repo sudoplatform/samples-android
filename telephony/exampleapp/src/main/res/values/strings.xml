@@ -1,0 +1,223 @@
+<resources>
+
+    <!-- App -->
+    <string name="app_name">Telephony Sample</string>
+
+    <!-- Common -->
+    <string name="telephony">Telephony</string>
+    <string name="try_again">Try Again</string>
+    <string name="learn_more">Learn More</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="navigate_back">Navigate up</string>
+    <string name="telephony_doc_url" translatable="false">https://docs.sudoplatform.com/guides/telephony</string>
+    <string name="sudo_heading">Sudo: %1$s</string>
+
+    <!-- RegisterScreen -->
+    <string name="sample_app">Sample App</string>
+    <string name="registration_method">Registration Method</string>
+    <string name="register_login">Register / Login</string>
+    <string name="register_failure">Failed to register: %1$s</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="session_expired">Your session has expired. Sign in again.</string>
+    <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
+    <string name="fsso_not_configured">This environment does not support federated sign in. Use TEST registration.</string>
+    <string name="configuration_failure">Unable to initialise the Sudo Platform clients. Check that sudoplatformconfig.json is in the app assets.\n\n%1$s</string>
+    <string name="test_registration">TEST Registration</string>
+    <string name="federated_signin">Federated SignIn</string>
+    <string name="reset">Reset</string>
+
+    <!-- MainMenuScreen -->
+    <string name="deregister">Deregister</string>
+    <string name="deregister_confirmation">Are you sure you want to deregister? All Sudos and associated data will be deleted.</string>
+    <string name="deregistering">Deregistering&#8230;</string>
+    <string name="deregister_failure">Unable to deregister: %1$s</string>
+
+    <!-- SudosScreen -->
+    <string name="sudos">Sudos</string>
+    <string name="sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
+    <string name="deleting_sudos">Deleting Sudos&#8230;</string>
+    <string name="list_sudos_failure">Failed to list Sudos</string>
+    <string name="delete_sudo_failure">Failed to delete Sudo</string>
+    <string name="what_is_a_sudo">What is a Sudo?</string>
+    <string name="sudo_explanation">Phone numbers must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
+    <string name="sudos_need_key_import">Your Sudos were created on another device or before this device\'s data was removed, so it doesn\'t have the keys to read them. Import your keys from Import/Export Keys below.</string>
+    <string name="key_backup_needs_fsso_title">Key Backup Needs Federated Sign In</string>
+    <string name="key_backup_needs_fsso">A TEST registration is tied to this device, so another device that registers with a TEST key becomes a different user and can\'t see these Sudos. Sign in with Federated Sign In to back up your keys.</string>
+    <string name="no_sudos">No Sudos yet. Create one to get started.</string>
+    <string name="create_sudo_button">+ Create Sudo</string>
+    <string name="edit_sudo_label">Edit %1$s</string>
+    <string name="delete">Delete</string>
+    <string name="delete_sudo_title">Delete Sudo?</string>
+    <string name="delete_sudo_confirmation">Deleting %1$s also deletes its phone numbers, along with all of their SMS messages and call records. This cannot be undone.</string>
+
+    <!-- CreateSudoScreen, EditSudoScreen -->
+    <string name="create_sudo">Create Sudo</string>
+    <string name="create">Create</string>
+    <string name="edit_sudo">Edit Sudo</string>
+    <string name="save">Save</string>
+    <string name="enter_sudo_name">Enter a name for your Sudo</string>
+    <string name="sudo_label">Sudo label</string>
+    <string name="something_wrong">Something went wrong</string>
+    <string name="choose_label_detail">Choose any label you would like for your Sudo: Shopping, Dating, etc.</string>
+    <string name="creating_sudo">Creating Sudo&#8230;</string>
+    <string name="saving_sudo">Saving Sudo&#8230;</string>
+    <string name="loading_sudo">Loading Sudo&#8230;</string>
+    <string name="load_sudo_failure">Failed to load Sudo</string>
+    <string name="create_sudo_learn_more">Phone numbers must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
+
+    <!-- PhoneNumbersScreen -->
+    <string name="phone_numbers">Phone Numbers</string>
+    <string name="list_phone_numbers_failure">Failed to list phone numbers</string>
+    <string name="no_phone_numbers">No phone numbers yet. Get one to get started.</string>
+    <string name="provision_phone_number_button">+ Get a Number</string>
+    <string name="what_is_a_phone_number">What is a phone number?</string>
+    <string name="phone_number_explanation">A phone number belongs to a Sudo and receives text messages. Messages are sealed with a key held on the device that provisioned the number, so they can only be read there, or on a device that imports its key backup.</string>
+    <string name="provisioning">Provisioning&#8230;</string>
+    <string name="suspended">Suspended</string>
+    <string name="suspended_until">Suspended until %1$s</string>
+    <string name="release">Release</string>
+    <string name="release_phone_number_title">Release phone number?</string>
+    <string name="release_phone_number_confirmation">%1$s goes back to the carrier. Its messages and call records will be lost.</string>
+    <string name="releasing_phone_number">Releasing phone number&#8230;</string>
+    <string name="release_phone_number_failure">Failed to release phone number</string>
+    <string name="failed_number_unavailable">Failed: number unavailable</string>
+    <string name="failed_carrier_error">Failed: carrier error</string>
+    <string name="failed">Failed</string>
+    <string name="unowned_phone_numbers_note">Numbers provisioned without a Sudo appear under every Sudo.</string>
+    <plurals name="unread_messages">
+        <item quantity="one">%1$d unread message</item>
+        <item quantity="other">%1$d unread messages</item>
+    </plurals>
+
+    <!-- ProvisionPhoneNumberScreen -->
+    <string name="provision_phone_number">Get a Number</string>
+    <string name="search">Search</string>
+    <string name="loading_supported_countries">Loading Supported Countries</string>
+    <string name="list_supported_countries_failure">Failed to load supported countries</string>
+    <string name="country">Country</string>
+    <string name="country_cell">%1$s (%2$s)</string>
+    <string name="area_code">Area code</string>
+    <string name="area_code_hint">Three digits, for example 650</string>
+    <string name="area_code_required">Enter a three-digit area code</string>
+    <string name="area_code_not_in_use">That area code isn\'t in use in %1$s</string>
+    <string name="searching_phone_numbers">Searching for Phone Numbers</string>
+    <string name="search_phone_numbers_failure">Failed to search for phone numbers</string>
+    <string name="available_phone_numbers">Available numbers</string>
+    <string name="no_available_phone_numbers">No numbers are available in this area code.</string>
+    <string name="phone_number_type_local">Local</string>
+    <string name="search_expires_at">Search expires at %1$s</string>
+    <string name="provision">Provision</string>
+    <string name="provision_phone_number_title">Provision %1$s?</string>
+    <string name="provision_phone_number_confirmation">The number will belong to %1$s.</string>
+    <string name="provisioning_phone_number">Provisioning phone number&#8230;</string>
+    <string name="provision_phone_number_failure">Failed to provision phone number</string>
+    <string name="provision_phone_number_learn_more">Choose a country and area code, then search for a number to provision. Its messages can only be read on this device, or on a device that imports this device\'s key backup.</string>
+    <string name="not_entitled_title">Not entitled</string>
+    <string name="not_entitled_message">This user isn\'t entitled to phone numbers.</string>
+    <string name="phone_number_limit_title">Phone number limit reached</string>
+    <string name="phone_number_limit_message">This user already has as many phone numbers as their entitlements allow. Release one to provision another.</string>
+    <string name="number_unavailable_title">Number no longer available</string>
+    <string name="number_unavailable_message">Someone else took that number. The search has been run again.</string>
+    <string name="search_expired_title">Search expired</string>
+    <string name="search_expired_message">The search expired, so it has been run again.</string>
+
+    <!-- PhoneMessagesScreen, PhoneMessageScreen -->
+    <string name="messages">Messages</string>
+    <string name="message">Message</string>
+    <string name="loading_phone_message">Loading Message</string>
+    <string name="list_phone_messages_failure">Failed to list messages</string>
+    <string name="load_phone_message_failure">Failed to load message</string>
+    <string name="no_phone_messages">No messages to this number.</string>
+    <string name="phone_messages_key_missing">Messages for this number can only be read on the device that provisioned it, or after importing that device\'s key backup.</string>
+    <string name="unknown_sender">Unknown sender</string>
+    <string name="no_text">(No text)</string>
+    <string name="media_omitted">(media omitted)</string>
+    <string name="media_omitted_detail">This message included media, which was removed. Only its text was kept.</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="received">Received</string>
+    <string name="delete_phone_message_title">Delete message?</string>
+    <string name="delete_phone_message_confirmation">This message will be deleted. This can\'t be undone.</string>
+    <string name="deleting_phone_message">Deleting message&#8230;</string>
+    <string name="delete_phone_message_failure">Failed to delete message</string>
+    <string name="delete_phone_message_not_deleted">The message couldn\'t be deleted. It may already have been deleted.</string>
+    <string name="message_copied">Message copied</string>
+
+    <!-- SudosScreen: Account -->
+    <string name="account">Account</string>
+    <string name="signed_in_with">Signed in with</string>
+    <string name="sign_out_and_remove_data">Sign Out and Remove Data</string>
+    <string name="sign_out_explanation">Sign Out keeps your keys on this device, so you can read your Sudos and messages when you sign back in. Sign Out and Remove Data deletes them.</string>
+    <string name="remove_data_title">Sign Out and Remove Data?</string>
+    <string name="remove_data_confirmation">This deletes your keys from this device. Without a key backup, you won\'t be able to read your Sudos or messages when you sign in again, here or on another device.</string>
+    <string name="export_keys_first">Export Keys First</string>
+    <string name="signing_out">Signing out&#8230;</string>
+    <string name="sign_out_failure">Unable to sign out: %1$s</string>
+
+    <!-- UserDetailsScreen -->
+    <string name="user_details">User Details</string>
+    <string name="user_id">User ID</string>
+    <string name="subject">Subject</string>
+    <string name="user_details_copy_explanation">Tap the copy button to copy a value, for example to include in a support request.</string>
+    <string name="session">Session</string>
+    <string name="signed_in">Signed in</string>
+    <string name="id_token_expires">ID token expires</string>
+    <string name="refresh_token_expires">Refresh token expires</string>
+    <string name="session_explanation">The ID token is refreshed automatically until the refresh token expires, after which you need to sign in again.</string>
+    <string name="not_available">Not available</string>
+    <string name="copy_value">Copy %1$s</string>
+    <string name="value_copied">%1$s copied</string>
+    <string name="load_user_details_failure">Failed to load user details</string>
+
+    <!-- EntitlementsScreen -->
+    <string name="entitlements">Entitlements</string>
+    <string name="entitlement_set">Entitlement Set</string>
+    <string name="usage">Usage</string>
+    <string name="nothing_used_yet">Nothing used yet.</string>
+    <string name="usage_value">%1$d of %2$d</string>
+    <string name="usage_explanation">Entitlements counted per Sudo are shown for each Sudo.</string>
+    <string name="loading_entitlements">Loading Entitlements</string>
+    <string name="load_entitlements_failure">Failed to load entitlements</string>
+
+    <!-- KeyBackupScreen -->
+    <string name="key_backup">Import/Export Keys</string>
+    <string name="key_backup_explanation">Your Sudos are encrypted with keys kept on this device, and each phone number\'s messages are sealed with a key created when it was provisioned. Back them up to read your Sudos and messages on another device signed in to the same account.</string>
+    <string name="export_keys">Export Keys</string>
+    <string name="export_keys_detail">Creates a backup file protected by a password you choose. Anyone with the file and its password can read your Sudos and messages, so keep both safe.</string>
+    <string name="import_keys">Import Keys</string>
+    <string name="import_keys_detail">Adds the Sudo keys in a backup to this device\'s, and replaces this device\'s phone message keys with the ones in the backup.</string>
+    <string name="import_keys_confirmation_title">Import Keys?</string>
+    <string name="import_keys_confirmation">%1$s. This device\'s phone message keys will be replaced, so messages to numbers provisioned here that aren\'t in this backup will no longer be readable.</string>
+    <string name="backup_description">Exported from %1$s on %2$s</string>
+    <string name="platform_ios" translatable="false">iOS</string>
+    <string name="platform_android" translatable="false">Android</string>
+    <string name="continue_action">Continue</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="export_password_detail">You\'ll need this password to import the backup on another device. It can\'t be recovered if you forget it.</string>
+    <string name="import_password_detail">Enter the password used when this backup was exported. %1$s.</string>
+    <string name="password_too_short">Use at least %1$d characters.</string>
+    <string name="passwords_dont_match">The passwords don\'t match.</string>
+    <string name="export">Export</string>
+    <string name="import_action">Import</string>
+    <string name="exporting_keys">Exporting keys&#8230;</string>
+    <string name="importing_keys">Importing keys&#8230;</string>
+    <string name="please_wait">Please wait&#8230;</string>
+    <string name="export_keys_saved_title">Keys Exported</string>
+    <string name="export_keys_saved">Keep the file and its password safe. Anyone with both can read your Sudos and messages.</string>
+    <string name="import_keys_result_title">Keys Imported</string>
+    <plurals name="imported_sudo_keys">
+        <item quantity="one">Imported %1$d Sudo key.</item>
+        <item quantity="other">Imported %1$d Sudo keys.</item>
+    </plurals>
+    <plurals name="imported_sudo_and_phone_number_keys">
+        <item quantity="one">Imported %1$d Sudo key and the phone number keys.</item>
+        <item quantity="other">Imported %1$d Sudo keys and the phone number keys.</item>
+    </plurals>
+    <string name="unrecognised_sdks_skipped">This backup also contains keys this app doesn\'t use (%1$s), which were skipped.</string>
+    <string name="key_backup_failure">Key backup failed</string>
+
+</resources>

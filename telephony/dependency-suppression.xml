@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress until="2026-12-30">
+        <notes><![CDATA[
+       file name: junit-4.12.jar
+       ]]></notes>
+        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
+        <cve>CVE-2020-15250</cve>
+    </suppress>
+    <suppress until="2026-12-30">
+        <notes><![CDATA[
+   file name: kotlin-stdlib*.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-stdlib.*@.*$</packageUrl>
+        <cve>CVE-2020-29582</cve>
+    </suppress>
+    <suppress until="2026-12-30">
+        <notes><![CDATA[
+        Dependency of AWS Amplify, likely for SSO Auth flows unused in this app.
+        file name: browser-1.4.0.aar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/androidx\.browser/browser@.*$</packageUrl>
+        <cve>CVE-2008-7298</cve>
+    </suppress>
+    <suppress until="2026-12-30">
+        <notes>
+            This CVE relates to Kotlin before 2.4.20 not checking data when it is deserialized
+            from the build cache. We can't update to 2.4.20 yet because none of the matching
+            plugins are available. Suppress this CVE temporarily. This is safe to do because
+            we have strong control over who has access to our build cache.
+        </notes>
+        <cve>CVE-2026-53914</cve>
+    </suppress>
+    <suppress>
+        <notes>False positive: com.sudoplatform packages are matched to the Unix sudo utility's CPE.</notes>
+        <packageUrl regex="true">^pkg:maven/com\.sudoplatform/.*$</packageUrl>
+        <cpe>cpe:/a:sudo:sudo</cpe>
+    </suppress>
+</suppressions>

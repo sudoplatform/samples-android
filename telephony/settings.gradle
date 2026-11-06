@@ -1,2 +1,25 @@
 rootProject.name='Sudo Telephony Example'
-include ':app'
+include ':exampleapp'
+
+// Adds Maven Central or the Gradle Plugin Portal to a repository block, through the CodeArtifact
+// pull-through mirrors when codeArtifactToken and both mirror URLs are set.
+def codeArtifactToken = providers.gradleProperty("codeArtifactToken").orNull
+def mavenCentralUrl = providers.gradleProperty("codeArtifactMavenCentralUrl").orNull
+def gradlePluginsUrl = providers.gradleProperty("codeArtifactGradlePluginsUrl").orNull
+def useCodeArtifact = [codeArtifactToken, mavenCentralUrl, gradlePluginsUrl].every { it?.trim() }
+def addCodeArtifact = { RepositoryHandler repositories, String repoName, String repoUrl ->
+    repositories.maven {
+        name = repoName
+        url = repoUrl
+        credentials {
+            username = "aws"
+            password = codeArtifactToken
+        }
+    }
+}
+gradle.ext.addMavenCentral = { RepositoryHandler repositories ->
+    useCodeArtifact ? addCodeArtifact(repositories, "codeArtifactMavenCentral", mavenCentralUrl) : repositories.mavenCentral()
+}
+gradle.ext.addGradlePlugins = { RepositoryHandler repositories ->
+    useCodeArtifact ? addCodeArtifact(repositories, "codeArtifactGradlePlugins", gradlePluginsUrl) : repositories.gradlePluginPortal()
+}

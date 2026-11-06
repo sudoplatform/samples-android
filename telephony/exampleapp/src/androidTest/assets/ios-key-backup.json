@@ -1,0 +1,16 @@
+{
+  "cipher" : {
+    "algorithm" : "AES-256-GCM",
+    "nonce" : "V/srWfC5CvYMSSc5"
+  },
+  "ciphertext" : "Efv9zD53NRKUGvLcurbpMwbHGmt5+o9Tk/WuzzoEJqcwnQ6KvzJ2jtyFADMneCcSgBAbP6u6HNS4VopGt98TNQuurH4/ONQ6BTreXlG4ckqvuod+QrxHT9Ko65utsWD8injwnsKrpFOVNQ1bSmwx0i+SQ19+OHluHXqxlzi0LYAbY8QdW1F6Ltw4qA6i2Z5yy6/7EMq24Hw9mCYVPl7xMrJgo2cBk8Fmtx/56K1UK2C/AJdcWmsFsyzkSXW0OZU4zKV6POf8lUUSUVdzxjd/BZgXlUFQbhYRIdBzmGcNXOOJt1/MMItBe5LLZM7Ypc+w4A3DFRy3jJxGrXi0M1cJvy0trZhQLRQ3OJ53gI8f8TIS/oOdIrRJEyeFsS+UtJKRuYfy4HgAza5tdwD7FWc+6wMR5rJdB9r4/JPRQ6GXJOrCYvOoRDrRaN/u7kq+5ofzbu57ibv/HDzYnKJmmZzgpyhEd5lX5XQpsANbYM9JU/0V8AeZq+y6KH2nMZSqkJKiHXYKOwkVjIjIVW/JkTRevRrJqcJzAO2MBluakaE2e322C3KzD/oWMYMFD7ee2mkSCxNZjsepJbi10s9EiQxL5iXeyOGntrZaBjFlxD5+2OxIx3LyuNfKT1A6zjbpaMi03gRaskSVuBNUgyZoq7JIGEq1+B+/4NLLn5RRezbB5lWKY+VquFXDwYMJR2CCTNfBT/1tfAt/d7nyBravmTNVbjYXFBCr32GlynNN2jzqyNU8kHeBggfAmFVa059Xfq+/RI57Q6LDXXpf/qWQe9FTLe1ojHgIIkSpdQOq/j0KAJ4p+CHV1s5E1FbaYw97CBVlHVvMqPAcO7IsTLcBp2DzlN/biji0Cf8bcpKX97SqIpCxgboIwb1q7qQ5w97S",
+  "createdAt" : "2026-11-04T00:00:00Z",
+  "format" : "sudoplatform-sample-key-backup",
+  "kdf" : {
+    "algorithm" : "PBKDF2-HMAC-SHA256",
+    "iterations" : 600000,
+    "salt" : "CLpITEIWzetEWikEfEx48tvPZa+672PKqY6l6kG7hDk="
+  },
+  "platform" : "ios",
+  "version" : 1
+}

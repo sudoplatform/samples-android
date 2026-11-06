@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The splash icon is masked to a circle two-thirds of its size, so the mark is drawn small
+     enough to fit inside it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="1100"
+    android:viewportHeight="1100">
+    <group
+        android:translateX="38"
+        android:translateY="189">
+        <path
+            android:pathData="M418.8,179.7A37.0,37.0 0,0 1 471.2,179.7L631.3,339.8A37.0,37.0 0,0 1 631.3,392.2L471.2,552.3A37.0,37.0 0,0 1 418.8,552.3L258.7,392.2A37.0,37.0 0,0 1 258.7,339.8Z"
+            android:strokeWidth="27.6">
+            <aapt:attr name="android:strokeColor">
+                <gradient
+                    android:endX="664.0"
+                    android:endY="210.0"
+                    android:startColor="#FF713AE6"
+                    android:endColor="#FF3293FB"
+                    android:startX="360.7"
+                    android:startY="513.3"
+                    android:type="linear" />
+            </aapt:attr>
+        </path>
+        <path android:pathData="M544.4,159.6A49.0,49.0 0,0 1 613.6,159.6L776.4,322.4A49.0,49.0 0,0 1 776.4,391.6L613.6,554.4A49.0,49.0 0,0 1 544.4,554.4L381.6,391.6A49.0,49.0 0,0 1 381.6,322.4Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:endX="664.0"
+                    android:endY="210.0"
+                    android:startColor="#FF713AE6"
+                    android:endColor="#FF3293FB"
+                    android:startX="360.7"
+                    android:startY="513.3"
+                    android:type="linear" />
+            </aapt:attr>
+        </path>
+    </group>
+</vector>
