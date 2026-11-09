@@ -274,9 +274,9 @@ private fun SearchResults(
 private fun availablePhoneNumberSubtitle(phoneNumber: AvailablePhoneNumber): String? {
     val place = listOfNotNull(phoneNumber.locality, phoneNumber.region).joinToString(", ")
     val type =
-        when (phoneNumber.numberType) {
-            PhoneNumberType.LOCAL -> stringResource(R.string.phone_number_type_local)
-            PhoneNumberType.UNKNOWN -> ""
+        when (val numberType = phoneNumber.numberType) {
+            PhoneNumberType.Local -> stringResource(R.string.phone_number_type_local)
+            is PhoneNumberType.Unknown -> numberType.value
         }
     return listOf(place, type).filter { it.isNotEmpty() }.joinToString(" · ").ifEmpty { null }
 }
@@ -340,7 +340,7 @@ private fun ProvisionPhoneNumberContentPreview() {
                             areaCode = "415",
                             results =
                                 (0..2).map {
-                                    AvailablePhoneNumber("+1415555010$it", "US", PhoneNumberType.LOCAL, "San Francisco", "CA")
+                                    AvailablePhoneNumber("+1415555010$it", "US", PhoneNumberType.Local, "San Francisco", "CA")
                                 },
                             expiresAt = Date(),
                             owner = "owner",

@@ -63,7 +63,10 @@ class TelephonyEvents(
             override fun connectionStatusChanged(state: Subscriber.ConnectionState) {
                 logger.debug("Phone number subscription $state")
                 // The SDK drops every subscriber on disconnect, so the next subscribe() reopens it.
-                if (state == Subscriber.ConnectionState.DISCONNECTED) phoneNumbersSubscribed = false
+                if (state is Subscriber.ConnectionState.Disconnected) {
+                    state.cause?.let { logger.warning("Phone number subscription ended: $it") }
+                    phoneNumbersSubscribed = false
+                }
             }
         }
 
@@ -75,7 +78,10 @@ class TelephonyEvents(
 
             override fun connectionStatusChanged(state: Subscriber.ConnectionState) {
                 logger.debug("Phone message subscription $state")
-                if (state == Subscriber.ConnectionState.DISCONNECTED) phoneMessagesSubscribed = false
+                if (state is Subscriber.ConnectionState.Disconnected) {
+                    state.cause?.let { logger.warning("Phone message subscription ended: $it") }
+                    phoneMessagesSubscribed = false
+                }
             }
         }
 

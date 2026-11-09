@@ -180,7 +180,7 @@ class PhoneNumbersViewModel(
         numbers: List<PhoneNumber>,
     ): Map<String, Set<String>> =
         numbers
-            .filter { it.state == PhoneNumberState.ACTIVE || it.state == PhoneNumberState.SUSPENDED }
+            .filter { it.state == PhoneNumberState.Active || it.state == PhoneNumberState.Suspended }
             .associate { number ->
                 val unread = mutableSetOf<String>()
                 try {
@@ -225,7 +225,7 @@ class PhoneNumbersViewModel(
         _uiState.update { state ->
             val others = state.phoneNumbers.filterNot { it.id == phoneNumber.id }
             val numbers =
-                if (phoneNumber.state == PhoneNumberState.RELEASED) others else (others + phoneNumber).sortedBy { it.createdAt }
+                if (phoneNumber.state == PhoneNumberState.Released) others else (others + phoneNumber).sortedBy { it.createdAt }
             state.withPhoneNumbers(numbers)
         }
     }
@@ -235,8 +235,8 @@ class PhoneNumbersViewModel(
         val ids = unreadMessageIds[event.phoneNumberId].orEmpty()
         val updated =
             when {
-                event.changeType == PhoneMessageChangeType.UNKNOWN -> return
-                event.changeType == PhoneMessageChangeType.DELETED || event.seen -> ids - event.id
+                event.changeType is PhoneMessageChangeType.Unknown -> return
+                event.changeType == PhoneMessageChangeType.Deleted || event.seen -> ids - event.id
                 else -> ids + event.id
             }
         unreadMessageIds = unreadMessageIds + (event.phoneNumberId to updated)

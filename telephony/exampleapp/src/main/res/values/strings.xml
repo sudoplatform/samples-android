@@ -85,6 +85,8 @@
     <string name="release_phone_number_failure">Failed to release phone number</string>
     <string name="failed_number_unavailable">Failed: number unavailable</string>
     <string name="failed_carrier_error">Failed: carrier error</string>
+    <string name="failed_owner_deleted">Failed: Sudo deleted</string>
+    <string name="failed_with_reason">Failed: %1$s</string>
     <string name="failed">Failed</string>
     <string name="unowned_phone_numbers_note">Numbers provisioned without a Sudo appear under every Sudo.</string>
     <plurals name="unread_messages">

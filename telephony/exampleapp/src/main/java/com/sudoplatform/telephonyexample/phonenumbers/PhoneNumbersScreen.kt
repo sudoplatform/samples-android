@@ -235,7 +235,7 @@ private fun PhoneNumberRow(
     onOpen: () -> Unit,
     onRelease: () -> Unit,
 ) {
-    val usable = phoneNumber.state == PhoneNumberState.ACTIVE || phoneNumber.state == PhoneNumberState.SUSPENDED
+    val usable = phoneNumber.state == PhoneNumberState.Active || phoneNumber.state == PhoneNumberState.Suspended
     SwipeToDeleteRow(
         onDelete = onRelease,
         enabled = usable,
@@ -243,13 +243,13 @@ private fun PhoneNumberRow(
         ItemCell(
             text = formatPhoneNumber(phoneNumber),
             subtitle = phoneNumber.stateText(),
-            subtitleColor = if (phoneNumber.state == PhoneNumberState.FAILED) MaterialTheme.colorScheme.error else SecondaryText,
+            subtitleColor = if (phoneNumber.state == PhoneNumberState.Failed) MaterialTheme.colorScheme.error else SecondaryText,
             onClick = if (usable) onOpen else null,
             textLeadingContent = {
                 if (unreadCount > 0) UnreadBadge(modifier = Modifier.padding(end = 6.dp), count = unreadCount)
             },
         ) {
-            if (phoneNumber.state == PhoneNumberState.PROVISIONING) {
+            if (phoneNumber.state == PhoneNumberState.Provisioning) {
                 CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
             }
         }
@@ -258,18 +258,21 @@ private fun PhoneNumberRow(
 
 @Composable
 private fun PhoneNumber.stateText(): String? =
-    when (state) {
-        PhoneNumberState.PROVISIONING -> stringResource(R.string.provisioning)
-        PhoneNumberState.SUSPENDED ->
+    when (val state = state) {
+        PhoneNumberState.Provisioning -> stringResource(R.string.provisioning)
+        PhoneNumberState.Suspended ->
             gracePeriodEndsAt?.let { stringResource(R.string.suspended_until, DateFormat.getDateInstance().format(it)) }
                 ?: stringResource(R.string.suspended)
-        PhoneNumberState.FAILED ->
-            when (failureReason) {
-                PhoneNumberFailureReason.NUMBER_UNAVAILABLE -> stringResource(R.string.failed_number_unavailable)
-                PhoneNumberFailureReason.CARRIER_ERROR -> stringResource(R.string.failed_carrier_error)
-                else -> stringResource(R.string.failed)
+        PhoneNumberState.Failed ->
+            when (val reason = failureReason) {
+                PhoneNumberFailureReason.NumberUnavailable -> stringResource(R.string.failed_number_unavailable)
+                PhoneNumberFailureReason.CarrierError -> stringResource(R.string.failed_carrier_error)
+                PhoneNumberFailureReason.OwnerDeleted -> stringResource(R.string.failed_owner_deleted)
+                is PhoneNumberFailureReason.Unknown -> stringResource(R.string.failed_with_reason, reason.value)
+                null -> stringResource(R.string.failed)
             }
-        else -> null
+        is PhoneNumberState.Unknown -> state.value
+        PhoneNumberState.Active, PhoneNumberState.Released -> null
     }
 
 /** Shows a number in its own country's national format. */
@@ -285,7 +288,7 @@ private fun PhoneNumbersContentPreview() {
                     sudoLabel = "Shopping",
                     hasLoaded = true,
                     phoneNumbers =
-                        listOf(PhoneNumberState.ACTIVE, PhoneNumberState.PROVISIONING, PhoneNumberState.SUSPENDED, PhoneNumberState.FAILED)
+                        listOf(PhoneNumberState.Active, PhoneNumberState.Provisioning, PhoneNumberState.Suspended, PhoneNumberState.Failed)
                             .mapIndexed { index, state -> previewPhoneNumber("$index", "+1415555012$index", state) },
                     includesUnownedNumbers = true,
                     unreadCounts = mapOf("0" to 3),
@@ -329,10 +332,10 @@ private fun previewPhoneNumber(
     keyIds = emptyList(),
     phoneNumber = number,
     countryCode = "US",
-    numberType = PhoneNumberType.LOCAL,
+    numberType = PhoneNumberType.Local,
     areaCode = "415",
     state = state,
-    gracePeriodEndsAt = if (state == PhoneNumberState.SUSPENDED) Date() else null,
+    gracePeriodEndsAt = if (state == PhoneNumberState.Suspended) Date() else null,
     version = 1,
     createdAt = Date(),
     updatedAt = Date(),

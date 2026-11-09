@@ -257,11 +257,11 @@ class PhoneMessagesViewModel(
     private suspend fun applyEvent(event: PhoneMessageEvent) {
         if (event.phoneNumberId != phoneNumberId) return
         when (event.changeType) {
-            PhoneMessageChangeType.DELETED ->
+            PhoneMessageChangeType.Deleted ->
                 _uiState.update { state -> state.copy(messages = state.messages.filterNot { it.id == event.id }) }
-            PhoneMessageChangeType.UPDATED, PhoneMessageChangeType.RECEIVED -> {
+            PhoneMessageChangeType.Updated, PhoneMessageChangeType.Received -> {
                 val listed = _uiState.value.messages.any { it.id == event.id }
-                if (listed && event.changeType == PhoneMessageChangeType.UPDATED) {
+                if (listed && event.changeType == PhoneMessageChangeType.Updated) {
                     _uiState.update { state ->
                         state.copy(messages = state.messages.map { if (it.id == event.id) it.copy(seen = event.seen) else it })
                     }
@@ -269,7 +269,7 @@ class PhoneMessagesViewModel(
                     fetchMessage(event.id)
                 }
             }
-            PhoneMessageChangeType.UNKNOWN -> {}
+            is PhoneMessageChangeType.Unknown -> {}
         }
     }
 
