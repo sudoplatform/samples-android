@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
@@ -16,19 +14,18 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import org.hamcrest.CoreMatchers.instanceOf
 import java.util.UUID
 
-fun provisionEmailMask(func: ProvisionEmailMaskRobot.() -> Unit) = ProvisionEmailMaskRobot().apply { func() }
+fun provisionExternalEmailAlias(func: ProvisionExternalEmailAliasRobot.() -> Unit) = ProvisionExternalEmailAliasRobot().apply { func() }
 
 /**
- * Testing robot that manages the provision email mask screen.
+ * Testing robot that manages the provision external email alias screen.
  */
-class ProvisionEmailMaskRobot : BaseRobot() {
+class ProvisionExternalEmailAliasRobot : BaseRobot() {
     private val toolbarCreateButton = withId(R.id.create)
-    private val maskLocalPartField = withId(R.id.maskLocalPartField)
-    private val realEmailAddressSpinner = withId(R.id.realEmailAddressSpinner)
-    private val maskDomainSpinner = withId(R.id.maskDomainSpinner)
+    private val externalEmailField = withId(R.id.externalEmailField)
+    private val aliasLocalPartField = withId(R.id.aliasLocalPartField)
+    private val aliasDomainSpinner = withId(R.id.aliasDomainSpinner)
     private val availabilityLabel = withId(R.id.availabilityLabel)
     private val sudoText = withId(R.id.sudoText)
     private val sudoLabelText = withId(R.id.sudoLabelText)
@@ -44,13 +41,13 @@ class ProvisionEmailMaskRobot : BaseRobot() {
         onView(isRoot()).perform(waitFor(5_000L))
     }
 
-    fun checkProvisionEmailMaskItemsDisplayed() {
-        waitForViewToDisplay(toolbarCreateButton)
-        waitForViewToDisplay(maskLocalPartField)
-        waitForViewToDisplay(realEmailAddressSpinner)
-        waitForViewToDisplay(maskDomainSpinner)
-        waitForViewToDisplay(sudoText)
-        waitForViewToDisplay(sudoLabelText)
+    fun checkProvisionExternalEmailAliasItemsDisplayed() {
+        waitForViewToDisplay(toolbarCreateButton, 10_000L)
+        waitForViewToDisplay(externalEmailField, 10_000L)
+        waitForViewToDisplay(aliasLocalPartField, 10_000L)
+        waitForViewToDisplay(aliasDomainSpinner, 10_000L)
+        waitForViewToDisplay(sudoText, 10_000L)
+        waitForViewToDisplay(sudoLabelText, 10_000L)
     }
 
     fun checkAvailableAddressMsg() {
@@ -61,6 +58,18 @@ class ProvisionEmailMaskRobot : BaseRobot() {
     fun checkUnavailableAddressMsg() {
         waitForViewToDisplay(availabilityLabel, 10_000L)
         onView(availabilityLabel).check(matches(withText("This email address is not available")))
+    }
+
+    fun enterExternalEmail(email: String) {
+        replaceText(externalEmailField, email)
+    }
+
+    fun setLocalPart(localPart: String? = "") {
+        var input = localPart
+        if (input.isNullOrBlank()) {
+            input = UUID.randomUUID().toString().substring(0, 8)
+        }
+        replaceText(aliasLocalPartField, input)
     }
 
     fun clickOnCreateButton() {
@@ -74,19 +83,7 @@ class ProvisionEmailMaskRobot : BaseRobot() {
         clickOnView(positiveAlertButton)
     }
 
-    fun setLocalPart(localPart: String? = "") {
-        var input = localPart
-        if (input.isNullOrBlank()) {
-            input = UUID.randomUUID().toString().substring(0, 8)
-        }
-        replaceText(maskLocalPartField, input)
-    }
-
-    fun selectRealEmailAddress(position: Int) {
-        clickOnView(realEmailAddressSpinner)
-        onView(isRoot()).perform(waitFor(500L))
-        onData(instanceOf(String::class.java))
-            .atPosition(position)
-            .perform(click())
+    fun checkAlertDialogDisplayed() {
+        waitForViewToDisplay(positiveAlertButton, 10_000L)
     }
 }

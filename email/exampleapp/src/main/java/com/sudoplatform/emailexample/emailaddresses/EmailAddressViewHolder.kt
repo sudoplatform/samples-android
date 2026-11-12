@@ -39,11 +39,11 @@ class EmailAddressViewHolder(
     }
 
     fun bind(emailAddress: EmailAddress) {
-        if (emailAddress.alias != null) {
+        if (emailAddress.displayName != null) {
             binding.name.text =
                 binding.root.context.getString(
                     R.string.email_address_with_display_name,
-                    emailAddress.alias,
+                    emailAddress.displayName,
                     emailAddress.emailAddress,
                 )
         } else {

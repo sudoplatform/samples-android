@@ -10,28 +10,28 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.InternetMessageFormatHeader
-import com.sudoplatform.sudoemail.types.inputs.SendMaskedEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageViaAliasInput
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.random.Random
 
 /**
- * Property-based test for masked email input construction.
+ * Property-based test for aliased email input construction.
  *
- * Feature: send-masked-email, Property 3: Masked email input construction
+ * Feature: send-aliased-email, Property 3: Aliased email input construction
  *
- * For any selected EmailMask and any valid form data (recipients, subject, body,
- * attachments), the constructed SendMaskedEmailMessageInput SHALL have
- * senderEmailMaskId equal to the selected mask's id, and the
+ * For any selected EmailAlias and any valid form data (recipients, subject, body,
+ * attachments), the constructed SendEmailMessageViaAliasInput SHALL have
+ * senderEmailAliasId equal to the selected alias's id, and the
  * InternetMessageFormatHeader.from SHALL be an EmailAddress with the selected
- * mask's maskAddress.
+ * alias's aliasAddress.
  *
  * **Validates: Requirements 2.3, 2.4**
  */
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class MaskedInputConstructionPropertyTest {
+class AliasedInputConstructionPropertyTest {
     companion object {
         private const val ITERATIONS = 100
         private const val MAX_ID_LENGTH = 36
@@ -45,11 +45,11 @@ class MaskedInputConstructionPropertyTest {
     }
 
     /**
-     * Simplified representation of a mask for property testing purposes.
+     * Simplified representation of a alias for property testing purposes.
      */
-    data class TestMask(
+    data class TestAlias(
         val id: String,
-        val maskAddress: String,
+        val aliasAddress: String,
     )
 
     /**
@@ -64,42 +64,42 @@ class MaskedInputConstructionPropertyTest {
     )
 
     /**
-     * Models the masked email input construction logic from
-     * SendEmailMessageFragment.sendMaskedEmailMessage.
+     * Models the aliased email input construction logic from
+     * SendEmailMessageFragment.sendAliasedEmailMessage.
      *
      * This mirrors the actual implementation:
      * ```
      * val emailMessageHeader = InternetMessageFormatHeader(
-     *     from = EmailMessage.EmailAddress(mask.maskAddress),
+     *     from = EmailMessage.EmailAddress(alias.aliasAddress),
      *     to = ...,
      *     cc = ...,
      *     bcc = ...,
      *     replyTo = emptyList(),
      *     subject = ...,
      * )
-     * val input = SendMaskedEmailMessageInput(
-     *     senderEmailMaskId = mask.id,
+     * val input = SendEmailMessageViaAliasInput(
+     *     senderEmailAliasId = alias.id,
      *     emailMessageHeader = emailMessageHeader,
      *     body = ...,
      *     attachments = ...,
      * )
      * ```
      */
-    private fun constructMaskedEmailInput(
-        mask: TestMask,
+    private fun constructAliasedEmailInput(
+        alias: TestAlias,
         formData: TestFormData,
-    ): SendMaskedEmailMessageInput {
+    ): SendEmailMessageViaAliasInput {
         val emailMessageHeader =
             InternetMessageFormatHeader(
-                from = EmailMessage.EmailAddress(mask.maskAddress),
+                from = EmailMessage.EmailAddress(alias.aliasAddress),
                 to = formData.toRecipients.map { EmailMessage.EmailAddress(it) },
                 cc = formData.ccRecipients.map { EmailMessage.EmailAddress(it) },
                 bcc = formData.bccRecipients.map { EmailMessage.EmailAddress(it) },
                 replyTo = emptyList(),
                 subject = formData.subject,
             )
-        return SendMaskedEmailMessageInput(
-            senderEmailMaskId = mask.id,
+        return SendEmailMessageViaAliasInput(
+            senderEmailAliasId = alias.id,
             emailMessageHeader = emailMessageHeader,
             body = formData.body,
             attachments = emptyList(),
@@ -140,12 +140,12 @@ class MaskedInputConstructionPropertyTest {
     }
 
     /**
-     * Generates a random [TestMask] with a random id and mask address.
+     * Generates a random [TestAlias] with a random id and alias address.
      */
-    private fun generateRandomMask(random: Random): TestMask =
-        TestMask(
+    private fun generateRandomAlias(random: Random): TestAlias =
+        TestAlias(
             id = randomAlphaString(random, MAX_ID_LENGTH, 8),
-            maskAddress = randomEmailAddress(random),
+            aliasAddress = randomEmailAddress(random),
         )
 
     /**
@@ -173,49 +173,49 @@ class MaskedInputConstructionPropertyTest {
         )
 
     /**
-     * Property 3: Masked email input construction.
+     * Property 3: Aliased email input construction.
      *
-     * For any selected mask and valid form data, the constructed
-     * SendMaskedEmailMessageInput has senderEmailMaskId == mask.id and
-     * header.from == EmailAddress(mask.maskAddress).
+     * For any selected alias and valid form data, the constructed
+     * SendEmailMessageViaAliasInput has senderEmailAliasId == alias.id and
+     * header.from == EmailAddress(alias.aliasAddress).
      *
      * **Validates: Requirements 2.3, 2.4**
      */
     @Test
-    fun property3_maskedEmailInputConstruction() {
+    fun property3_aliasedEmailInputConstruction() {
         val random = Random(seed = 42)
 
         repeat(ITERATIONS) { iteration ->
-            val mask = generateRandomMask(random)
+            val alias = generateRandomAlias(random)
             val formData = generateRandomFormData(random)
 
-            val input = constructMaskedEmailInput(mask, formData)
+            val input = constructAliasedEmailInput(alias, formData)
 
-            // Assert: senderEmailMaskId == mask.id
+            // Assert: senderEmailAliasId == alias.id
             assertEquals(
-                "Iteration $iteration: senderEmailMaskId should equal mask.id. " +
-                    "Expected '${mask.id}' but got '${input.senderEmailMaskId}'",
-                mask.id,
-                input.senderEmailMaskId,
+                "Iteration $iteration: senderEmailAliasId should equal alias.id. " +
+                    "Expected '${alias.id}' but got '${input.senderEmailAliasId}'",
+                alias.id,
+                input.senderEmailAliasId,
             )
 
-            // Assert: header.from.emailAddress == mask.maskAddress
+            // Assert: header.from.emailAddress == alias.aliasAddress
             assertEquals(
-                "Iteration $iteration: header.from should be EmailAddress(mask.maskAddress). " +
-                    "Expected '${mask.maskAddress}' but got " +
+                "Iteration $iteration: header.from should be EmailAddress(alias.aliasAddress). " +
+                    "Expected '${alias.aliasAddress}' but got " +
                     "'${input.emailMessageHeader.from.emailAddress}'",
-                mask.maskAddress,
+                alias.aliasAddress,
                 input.emailMessageHeader.from.emailAddress,
             )
         }
     }
 
     /**
-     * Edge case: mask with minimal id and address still constructs correctly.
+     * Edge case: alias with minimal id and address still constructs correctly.
      */
     @Test
-    fun property3_minimalMaskConstructsCorrectly() {
-        val mask = TestMask(id = "a", maskAddress = "x@y.z")
+    fun property3_minimalAliasConstructsCorrectly() {
+        val alias = TestAlias(id = "a", aliasAddress = "x@y.z")
         val formData =
             TestFormData(
                 toRecipients = listOf("recipient@example.com"),
@@ -225,21 +225,21 @@ class MaskedInputConstructionPropertyTest {
                 body = "B",
             )
 
-        val input = constructMaskedEmailInput(mask, formData)
+        val input = constructAliasedEmailInput(alias, formData)
 
-        assertEquals("a", input.senderEmailMaskId)
+        assertEquals("a", input.senderEmailAliasId)
         assertEquals("x@y.z", input.emailMessageHeader.from.emailAddress)
     }
 
     /**
-     * Edge case: mask address with special characters constructs correctly.
+     * Edge case: alias address with special characters constructs correctly.
      */
     @Test
-    fun property3_specialCharacterMaskAddress() {
-        val mask =
-            TestMask(
-                id = "mask-id-123-abc-456",
-                maskAddress = "user.name+tag@masks.sudoplatform.com",
+    fun property3_specialCharacterAliasAddress() {
+        val alias =
+            TestAlias(
+                id = "alias-id-123-abc-456",
+                aliasAddress = "user.name+tag@aliases.sudoplatform.com",
             )
         val formData =
             TestFormData(
@@ -250,11 +250,11 @@ class MaskedInputConstructionPropertyTest {
                 body = "Test body content",
             )
 
-        val input = constructMaskedEmailInput(mask, formData)
+        val input = constructAliasedEmailInput(alias, formData)
 
-        assertEquals("mask-id-123-abc-456", input.senderEmailMaskId)
+        assertEquals("alias-id-123-abc-456", input.senderEmailAliasId)
         assertEquals(
-            "user.name+tag@masks.sudoplatform.com",
+            "user.name+tag@aliases.sudoplatform.com",
             input.emailMessageHeader.from.emailAddress,
         )
     }

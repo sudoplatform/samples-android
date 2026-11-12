@@ -18,30 +18,30 @@ import com.sudoplatform.emailexample.R
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.instanceOf
 
-fun sendMaskedEmail(func: SendMaskedEmailRobot.() -> Unit) = SendMaskedEmailRobot().apply { func() }
+fun sendAliasedEmail(func: SendAliasedEmailRobot.() -> Unit) = SendAliasedEmailRobot().apply { func() }
 
 /**
- * Testing robot that manages the send masked email interactions.
+ * Testing robot that manages the send aliased email interactions.
  */
-class SendMaskedEmailRobot : BaseRobot() {
-    private val emailMaskSpinner = withId(R.id.emailMaskSpinner)
+class SendAliasedEmailRobot : BaseRobot() {
+    private val emailAliasSpinner = withId(R.id.emailAliasSpinner)
     private val loadingDialog = withId(R.id.progressBar)
 
-    fun checkEmailMaskSpinnerDisplayed() {
-        waitForViewToDisplay(emailMaskSpinner)
+    fun checkEmailAliasSpinnerDisplayed() {
+        waitForViewToDisplay(emailAliasSpinner)
     }
 
-    fun selectEmailMask(position: Int) {
-        clickOnView(emailMaskSpinner)
+    fun selectEmailAlias(position: Int) {
+        clickOnView(emailAliasSpinner)
         onView(isRoot()).perform(waitFor(500L))
         onData(instanceOf(String::class.java))
             .atPosition(position)
             .perform(click())
     }
 
-    fun checkEmailMaskSpinnerDefaultSelected() {
+    fun checkEmailAliasSpinnerDefaultSelected() {
         onView(isRoot()).perform(waitFor(2_000L))
-        onView(emailMaskSpinner)
+        onView(emailAliasSpinner)
             .check(matches(withSpinnerText(containsString("None (send from email address)"))))
     }
 

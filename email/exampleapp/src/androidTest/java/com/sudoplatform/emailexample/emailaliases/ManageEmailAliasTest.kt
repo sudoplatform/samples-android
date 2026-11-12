@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
@@ -26,11 +26,11 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the email mask management flows (deprovision, enable, disable).
+ * Test the email alias management flows (deprovision, enable, disable).
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class ManageEmailMaskTest {
+class ManageEmailAliasTest {
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
@@ -51,18 +51,18 @@ class ManageEmailMaskTest {
     }
 
     /**
-     * Test: Provision an email mask, then swipe left to delete it.
+     * Test: Provision an email alias, then swipe left to delete it.
      * Verifies the swipe-to-delete flow removes the item from the list.
      */
     @Test
-    fun testSwipeToDeleteEmailMask() {
-        provisionEmailMaskFlow()
+    fun testSwipeToDeleteEmailAlias() {
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            swipeLeftToDeleteMask(0)
+            checkEmailAliasesItemsDisplayed()
+            swipeLeftToDeleteAlias(0)
             waitForActionToComplete()
-            checkEmptyMasksStateDisplayed()
+            checkEmptyAliasesStateDisplayed()
             pressBack()
         }
         sudos {
@@ -74,21 +74,21 @@ class ManageEmailMaskTest {
     }
 
     /**
-     * Test: Provision an email mask, tap it, verify action dialog shows,
-     * then tap Disable to disable the mask.
+     * Test: Provision an email alias, tap it, verify action dialog shows,
+     * then tap Disable to disable the alias.
      */
     @Test
-    fun testTapItemAndDisableEmailMask() {
-        provisionEmailMaskFlow()
+    fun testTapItemAndDisableEmailAlias() {
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnDisableButton()
             waitForActionToComplete()
-            waitForMasksRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            waitForAliasesRecyclerView()
+            checkEmailAliasesItemsDisplayed()
             pressBack()
         }
         sudos {
@@ -100,31 +100,31 @@ class ManageEmailMaskTest {
     }
 
     /**
-     * Test: Provision an email mask, disable it, then tap it and enable it.
+     * Test: Provision an email alias, disable it, then tap it and enable it.
      * Verifies the tap → action dialog → enable flow.
      */
     @Test
-    fun testTapItemAndEnableEmailMask() {
-        provisionEmailMaskFlow()
+    fun testTapItemAndEnableEmailAlias() {
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            // First disable the mask so we can test enabling it
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            // First disable the alias so we can test enabling it
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnDisableButton()
             waitForActionToComplete()
-            // Wait for listEmailMasks() to refresh the list with updated status
+            // Wait for listEmailAliases() to refresh the list with updated status
             onView(isRoot()).perform(waitFor(3_000L))
-            waitForMasksRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            // Now enable the disabled mask
-            clickOnMaskItem(0)
+            waitForAliasesRecyclerView()
+            checkEmailAliasesItemsDisplayed()
+            // Now enable the disabled alias
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnEnableButton()
             waitForActionToComplete()
-            waitForMasksRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            waitForAliasesRecyclerView()
+            checkEmailAliasesItemsDisplayed()
             pressBack()
         }
         sudos {
@@ -137,9 +137,9 @@ class ManageEmailMaskTest {
 
     /**
      * Helper: Registers, creates a sudo, provisions an email address,
-     * and provisions an email mask. Stays on the email addresses screen.
+     * and provisions an email alias. Stays on the email addresses screen.
      */
-    private fun provisionEmailMaskFlow() {
+    private fun provisionEmailAliasFlow() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -158,10 +158,10 @@ class ManageEmailMaskTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            navigateToCreateEmailMaskScreen()
+            navigateToCreateEmailAliasScreen()
         }
-        provisionEmailMask {
-            checkProvisionEmailMaskItemsDisplayed()
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
             selectRealEmailAddress(1)
             setLocalPart()
             waitForRootFocus()

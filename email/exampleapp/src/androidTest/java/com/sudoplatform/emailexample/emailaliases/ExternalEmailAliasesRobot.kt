@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -20,19 +20,19 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 
-fun externalEmailMasks(func: ExternalEmailMasksRobot.() -> Unit) = ExternalEmailMasksRobot().apply { func() }
+fun externalEmailAliases(func: ExternalEmailAliasesRobot.() -> Unit) = ExternalEmailAliasesRobot().apply { func() }
 
 /**
- * Testing robot that manages the external email masks interactions on the
+ * Testing robot that manages the external email aliases interactions on the
  * EmailAddresses screen — switch visibility, toggle filtering, verify button,
  * and verification code dialog.
  */
-class ExternalEmailMasksRobot : BaseRobot() {
+class ExternalEmailAliasesRobot : BaseRobot() {
     private val internalExternalSwitch = withId(R.id.internalExternalSwitch)
-    private val masksDisabledText = withId(R.id.masksDisabledText)
-    private val masksRecyclerView = withId(R.id.masksRecyclerView)
-    private val createEmailMaskButton = withId(R.id.createEmailMaskButton)
-    private val emptyMasksStateText = withId(R.id.emptyMasksStateText)
+    private val aliasesDisabledText = withId(R.id.aliasesDisabledText)
+    private val aliasesRecyclerView = withId(R.id.aliasesRecyclerView)
+    private val createEmailAliasButton = withId(R.id.createEmailAliasButton)
+    private val emptyAliasesStateText = withId(R.id.emptyAliasesStateText)
     private val verifyButton = withId(R.id.verifyButton)
     private val loadingProgress = withId(R.id.progressBar)
     private val positiveAlertButton = withId(android.R.id.button1)
@@ -64,67 +64,67 @@ class ExternalEmailMasksRobot : BaseRobot() {
     // --- Feature gate / disabled state ---
 
     fun checkDisabledMessageDisplayed() {
-        waitForViewToDisplay(masksDisabledText, 10_000L)
+        waitForViewToDisplay(aliasesDisabledText, 10_000L)
     }
 
     fun checkDisabledMessageNotDisplayed() {
-        waitForViewToNotDisplay(masksDisabledText, 10_000L)
+        waitForViewToNotDisplay(aliasesDisabledText, 10_000L)
     }
 
-    fun checkMaskListHidden() {
-        waitForViewToNotDisplay(masksRecyclerView, 10_000L)
+    fun checkAliasListHidden() {
+        waitForViewToNotDisplay(aliasesRecyclerView, 10_000L)
     }
 
     fun checkCreateButtonHidden() {
-        waitForViewToNotDisplay(createEmailMaskButton, 10_000L)
+        waitForViewToNotDisplay(createEmailAliasButton, 10_000L)
     }
 
     // --- Create button text ---
 
     fun checkCreateButtonText(expectedText: String) {
-        waitForViewToDisplay(createEmailMaskButton, 10_000L)
-        onView(createEmailMaskButton).check(matches(withText(expectedText)))
+        waitForViewToDisplay(createEmailAliasButton, 10_000L)
+        onView(createEmailAliasButton).check(matches(withText(expectedText)))
     }
 
     fun checkCreateButtonTextInternal() {
-        waitForViewToDisplay(createEmailMaskButton, 10_000L)
-        onView(createEmailMaskButton).check(matches(withText(R.string.create_email_mask_button)))
+        waitForViewToDisplay(createEmailAliasButton, 10_000L)
+        onView(createEmailAliasButton).check(matches(withText(R.string.create_email_alias_button)))
     }
 
     fun checkCreateButtonTextExternal() {
-        waitForViewToDisplay(createEmailMaskButton, 10_000L)
-        onView(createEmailMaskButton).check(matches(withText(R.string.create_external_email_mask_button)))
+        waitForViewToDisplay(createEmailAliasButton, 10_000L)
+        onView(createEmailAliasButton).check(matches(withText(R.string.create_external_email_alias_button)))
     }
 
     fun clickOnCreateButton() {
-        waitForViewToDisplay(createEmailMaskButton, 10_000L)
-        clickOnView(createEmailMaskButton)
+        waitForViewToDisplay(createEmailAliasButton, 10_000L)
+        clickOnView(createEmailAliasButton)
     }
 
-    // --- Mask list filtering ---
+    // --- Alias list filtering ---
 
-    fun checkMaskListDisplayed() {
-        waitForViewToDisplay(masksRecyclerView, 10_000L)
+    fun checkAliasListDisplayed() {
+        waitForViewToDisplay(aliasesRecyclerView, 10_000L)
     }
 
-    fun checkEmptyMasksStateDisplayed() {
-        waitForViewToDisplay(emptyMasksStateText, 10_000L)
+    fun checkEmptyAliasesStateDisplayed() {
+        waitForViewToDisplay(emptyAliasesStateText, 10_000L)
     }
 
-    fun waitForMasksRecyclerView() {
-        waitForViewToDisplay(masksRecyclerView, 10_000L)
+    fun waitForAliasesRecyclerView() {
+        waitForViewToDisplay(aliasesRecyclerView, 10_000L)
     }
 
-    fun checkMasksRecyclerViewHasItems(minimumCount: Int = 1) {
-        checkRecyclerViewHasMinimumItemAmount(masksRecyclerView, minimumCount, 10_000L)
+    fun checkAliasesRecyclerViewHasItems(minimumCount: Int = 1) {
+        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, minimumCount, 10_000L)
     }
 
     // --- Verify button ---
 
     fun clickVerifyButtonOnItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(masksRecyclerView, position + 1, 10_000L)
-        onView(masksRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMaskViewHolder>(
+        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1, 10_000L)
+        onView(aliasesRecyclerView).perform(
+            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
                 position,
                 clickChildViewWithId(R.id.verifyButton),
             ),
@@ -132,9 +132,9 @@ class ExternalEmailMasksRobot : BaseRobot() {
     }
 
     fun checkVerifyButtonDisplayedOnItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(masksRecyclerView, position + 1, 10_000L)
-        onView(masksRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMaskViewHolder>(
+        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1, 10_000L)
+        onView(aliasesRecyclerView).perform(
+            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
                 position,
                 checkChildViewDisplayed(R.id.verifyButton),
             ),

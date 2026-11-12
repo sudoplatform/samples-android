@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -24,11 +24,11 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the update email mask flows.
+ * Test the update email alias flows.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class UpdateEmailMaskTest {
+class UpdateEmailAliasTest {
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
@@ -49,15 +49,15 @@ class UpdateEmailMaskTest {
     }
 
     /**
-     * Test: Provision a mask, tap item, tap "Update", verify the update dialog appears.
+     * Test: Provision a alias, tap item, tap "Update", verify the update dialog appears.
      */
     @Test
     fun testUpdateDialogDisplay() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
@@ -77,18 +77,18 @@ class UpdateEmailMaskTest {
      */
     @Test
     fun testCancelDismissesWithoutAction() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
             clickOnCancelButton()
             // Verify list is still displayed and unchanged
-            waitForMasksRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            waitForAliasesRecyclerView()
+            checkEmailAliasesItemsDisplayed()
             pressBack()
         }
         sudos {
@@ -105,11 +105,11 @@ class UpdateEmailMaskTest {
      */
     @Test
     fun testSaveWithValidMetadata() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
@@ -117,7 +117,7 @@ class UpdateEmailMaskTest {
             clickSaveButton()
             waitForLoading()
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             checkMetadataDisplayed("key1")
             pressBack()
         }
@@ -134,11 +134,11 @@ class UpdateEmailMaskTest {
      */
     @Test
     fun testSaveWithEmptyMetadata() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
@@ -146,7 +146,7 @@ class UpdateEmailMaskTest {
             clickSaveButton()
             waitForLoading()
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             checkDashDisplayedForMetadata()
             pressBack()
         }
@@ -163,11 +163,11 @@ class UpdateEmailMaskTest {
      */
     @Test
     fun testSaveWithExpirationSet() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
-            clickOnMaskItem(0)
+            checkEmailAliasesItemsDisplayed()
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
@@ -176,7 +176,7 @@ class UpdateEmailMaskTest {
             clickSaveButton()
             waitForLoading()
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             checkExpiresAtDisplayed("Expires: 06/15/2026")
             pressBack()
         }
@@ -193,12 +193,12 @@ class UpdateEmailMaskTest {
      */
     @Test
     fun testSaveWithExpirationCleared() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             // First set an expiration so we can clear it
-            clickOnMaskItem(0)
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
@@ -207,9 +207,9 @@ class UpdateEmailMaskTest {
             clickSaveButton()
             waitForLoading()
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             // Now clear the expiration
-            clickOnMaskItem(0)
+            clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
@@ -217,7 +217,7 @@ class UpdateEmailMaskTest {
             clickSaveButton()
             waitForLoading()
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             checkDashDisplayedForExpiresAt()
             pressBack()
         }
@@ -231,14 +231,14 @@ class UpdateEmailMaskTest {
 
     /**
      * Test: Verify "-" is shown when metadata is null/empty and expiresAt is null/epoch-zero.
-     * A freshly provisioned mask should display dashes for both fields.
+     * A freshly provisioned alias should display dashes for both fields.
      */
     @Test
     fun testDashDisplayForAbsentValues() {
-        provisionEmailMaskFlow()
+        provisionEmailAliasFlow()
         emailAddresses {
             waitForRecyclerView()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             checkDashDisplayedForMetadata()
             checkDashDisplayedForExpiresAt()
             pressBack()
@@ -253,9 +253,9 @@ class UpdateEmailMaskTest {
 
     /**
      * Helper: Registers, creates a sudo, provisions an email address,
-     * and provisions an email mask. Stays on the email addresses screen.
+     * and provisions an email alias. Stays on the email addresses screen.
      */
-    private fun provisionEmailMaskFlow() {
+    private fun provisionEmailAliasFlow() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -274,10 +274,10 @@ class UpdateEmailMaskTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            navigateToCreateEmailMaskScreen()
+            navigateToCreateEmailAliasScreen()
         }
-        provisionEmailMask {
-            checkProvisionEmailMaskItemsDisplayed()
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
             selectRealEmailAddress(1)
             setLocalPart()
             waitForRootFocus()

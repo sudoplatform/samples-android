@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import android.view.LayoutInflater
 import android.view.View
@@ -12,37 +12,37 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoplatform.emailexample.R
-import com.sudoplatform.emailexample.databinding.LayoutEmailMaskItemCellBinding
-import com.sudoplatform.sudoemail.types.EmailMask
-import com.sudoplatform.sudoemail.types.EmailMaskStatus
+import com.sudoplatform.emailexample.databinding.LayoutEmailAliasItemCellBinding
+import com.sudoplatform.sudoemail.types.EmailAlias
+import com.sudoplatform.sudoemail.types.EmailAliasStatus
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * A [RecyclerView.ViewHolder] used to describe the [EmailMask] item view and metadata about its
+ * A [RecyclerView.ViewHolder] used to describe the [EmailAlias] item view and metadata about its
  * place within the [RecyclerView].
  *
- * The item view contains the mask address as primary text and the status as color-coded
+ * The item view contains the alias address as primary text and the status as color-coded
  * secondary text.
  *
- * @property binding [LayoutEmailMaskItemCellBinding] The [EmailMask] item view binding component.
+ * @property binding [LayoutEmailAliasItemCellBinding] The [EmailAlias] item view binding component.
  */
-class EmailMaskViewHolder(
-    private val binding: LayoutEmailMaskItemCellBinding,
+class EmailAliasViewHolder(
+    private val binding: LayoutEmailAliasItemCellBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
     companion object {
-        fun inflate(parent: ViewGroup): EmailMaskViewHolder {
+        fun inflate(parent: ViewGroup): EmailAliasViewHolder {
             val binding =
-                LayoutEmailMaskItemCellBinding.inflate(
+                LayoutEmailAliasItemCellBinding.inflate(
                     LayoutInflater.from(
                         parent.context,
                     ),
                     parent,
                     false,
                 )
-            return EmailMaskViewHolder(binding)
+            return EmailAliasViewHolder(binding)
         }
 
         /**
@@ -58,26 +58,26 @@ class EmailMaskViewHolder(
     }
 
     fun bind(
-        emailMask: EmailMask,
-        onVerifyClick: ((EmailMask) -> Unit)? = null,
+        emailAlias: EmailAlias,
+        onVerifyClick: ((EmailAlias) -> Unit)? = null,
         showVerify: Boolean = false,
     ) {
-        binding.maskAddressText.text = emailMask.maskAddress
-        binding.statusText.text = emailMask.status.name
+        binding.aliasAddressText.text = emailAlias.aliasAddress
+        binding.statusText.text = emailAlias.status.name
 
         val statusColor =
-            when (emailMask.status) {
-                EmailMaskStatus.ENABLED -> ContextCompat.getColor(binding.root.context, R.color.colorPositiveMsg)
-                EmailMaskStatus.DISABLED -> ContextCompat.getColor(binding.root.context, R.color.colorNegativeMsg)
-                EmailMaskStatus.LOCKED -> ContextCompat.getColor(binding.root.context, R.color.colorNegativeMsg)
-                EmailMaskStatus.PENDING -> ContextCompat.getColor(binding.root.context, R.color.colorWarningMsg)
-                EmailMaskStatus.UNKNOWN -> ContextCompat.getColor(binding.root.context, android.R.color.darker_gray)
+            when (emailAlias.status) {
+                EmailAliasStatus.ENABLED -> ContextCompat.getColor(binding.root.context, R.color.colorPositiveMsg)
+                EmailAliasStatus.DISABLED -> ContextCompat.getColor(binding.root.context, R.color.colorNegativeMsg)
+                EmailAliasStatus.LOCKED -> ContextCompat.getColor(binding.root.context, R.color.colorNegativeMsg)
+                EmailAliasStatus.PENDING -> ContextCompat.getColor(binding.root.context, R.color.colorWarningMsg)
+                EmailAliasStatus.UNKNOWN -> ContextCompat.getColor(binding.root.context, android.R.color.darker_gray)
             }
         binding.statusText.setTextColor(statusColor)
-        binding.realAddressText.text = emailMask.realAddress
+        binding.realAddressText.text = emailAlias.realAddress
 
         // Display metadata with title prefix or "-" if absent
-        val metadata = emailMask.metadata
+        val metadata = emailAlias.metadata
         binding.metadataText.text =
             if (!metadata.isNullOrEmpty()) {
                 "Metadata (JSON): ${JSONObject(metadata)}"
@@ -86,14 +86,14 @@ class EmailMaskViewHolder(
             }
 
         // Display expiration date with title prefix or "-" if absent
-        binding.expiresAtText.text = formatExpiresAtForDisplay(emailMask.expiresAt)
+        binding.expiresAtText.text = formatExpiresAtForDisplay(emailAlias.expiresAt)
 
         // Show/hide verify button based on visibility logic
         if (showVerify && onVerifyClick != null) {
             binding.verifyButton.visibility = View.VISIBLE
             binding.verifyButton.isEnabled = true
             binding.verifyButton.setOnClickListener {
-                onVerifyClick(emailMask)
+                onVerifyClick(emailAlias)
             }
         } else {
             binding.verifyButton.visibility = View.GONE

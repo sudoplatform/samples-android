@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -24,11 +24,11 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the email masks flow.
+ * Test the email aliases flow.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class EmailMasksTest {
+class EmailAliasesTest {
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
@@ -49,7 +49,7 @@ class EmailMasksTest {
     }
 
     @Test
-    fun testNavigateToProvisionEmailMaskScreen() {
+    fun testNavigateToProvisionEmailAliasScreen() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -68,10 +68,10 @@ class EmailMasksTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            navigateToCreateEmailMaskScreen()
+            navigateToCreateEmailAliasScreen()
         }
-        provisionEmailMask {
-            checkProvisionEmailMaskItemsDisplayed()
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
             pressBack()
         }
         emailAddresses {
@@ -87,7 +87,7 @@ class EmailMasksTest {
     }
 
     @Test
-    fun testProvisionEmailMask() {
+    fun testProvisionEmailAlias() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -106,10 +106,10 @@ class EmailMasksTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            navigateToCreateEmailMaskScreen()
+            navigateToCreateEmailAliasScreen()
         }
-        provisionEmailMask {
-            checkProvisionEmailMaskItemsDisplayed()
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
             selectRealEmailAddress(1)
             setLocalPart()
             waitForRootFocus()
@@ -120,7 +120,7 @@ class EmailMasksTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            checkEmailMasksItemsDisplayed()
+            checkEmailAliasesItemsDisplayed()
             pressBack()
         }
         sudos {

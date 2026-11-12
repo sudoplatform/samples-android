@@ -4,17 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailmessages
 
 import androidx.test.espresso.Espresso.pressBack
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
-import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
+import com.sudoplatform.emailexample.emailaliases.provisionEmailAlias
 import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
@@ -26,11 +25,11 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the provision external email mask flow.
+ * Test the send aliased email message flow.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class ProvisionExternalEmailMaskTest {
+class SendAliasedEmailTest {
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
@@ -51,7 +50,7 @@ class ProvisionExternalEmailMaskTest {
     }
 
     @Test
-    fun testNavigateToExternalMaskFormFromSwitch() {
+    fun testEmailAliasSpinnerIsDisplayed() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -70,17 +69,25 @@ class ProvisionExternalEmailMaskTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            // Toggle switch to external position
-            waitForViewToDisplay(withId(R.id.internalExternalSwitch), 10_000L)
-            clickOnView(withId(R.id.internalExternalSwitch))
-            // Tap create button which should now navigate to external form
-            clickOnView(withId(R.id.createEmailMaskButton))
+            navigateToEmailMessagesScreen(0)
         }
-        provisionExternalEmailMask {
-            checkProvisionExternalEmailMaskItemsDisplayed()
+        emailMessages {
+            navigateToSendEmailMessageScreen()
+        }
+        sendAliasedEmail {
+            checkEmailAliasSpinnerDisplayed()
+            checkEmailAliasSpinnerDefaultSelected()
+            pressBack()
+        }
+        emailMessages {
+            waitForLoading()
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
             pressBack()
         }
         emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
             pressBack()
         }
@@ -93,7 +100,7 @@ class ProvisionExternalEmailMaskTest {
     }
 
     @Test
-    fun testExternalFormDisplaysCorrectFields() {
+    fun testSendAliasedEmailMessage() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -102,7 +109,23 @@ class ProvisionExternalEmailMaskTest {
             checkEmailAddressesItemsDisplayed()
             navigateToProvisionEmailAddressScreen()
         }
+        var address = ""
         provisionEmailAddress {
+            setLocalPart()
+            waitForRootFocus()
+            checkAvailableAddressMsg()
+            address = getAddressFromTextView()
+            clickOnCreateButton()
+            waitForLoading()
+        }
+        emailAddresses {
+            waitForRecyclerView()
+            checkEmailAddressesItemsDisplayed()
+            navigateToCreateEmailAliasScreen()
+        }
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
+            selectRealEmailAddress(1)
             setLocalPart()
             waitForRootFocus()
             checkAvailableAddressMsg()
@@ -110,20 +133,33 @@ class ProvisionExternalEmailMaskTest {
             waitForLoading()
         }
         emailAddresses {
+            waitForLoading()
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            // Toggle switch to external position
-            waitForViewToDisplay(withId(R.id.internalExternalSwitch), 10_000L)
-            clickOnView(withId(R.id.internalExternalSwitch))
-            // Navigate to external form
-            clickOnView(withId(R.id.createEmailMaskButton))
+            navigateToEmailMessagesScreen(0)
         }
-        provisionExternalEmailMask {
-            // Verify all expected form fields are displayed
-            checkProvisionExternalEmailMaskItemsDisplayed()
+        emailMessages {
+            navigateToSendEmailMessageScreen()
+        }
+        sendAliasedEmail {
+            checkEmailAliasSpinnerDisplayed()
+            selectEmailAlias(1)
+        }
+        sendEmailMessage {
+            setToField(address)
+            setSubjectField("Espresso Aliased Email Test")
+            setContentBodyField("This is a test email sent from an email alias.")
+            clickOnSendEmailButton()
+            waitForLoading()
+        }
+        emailMessages {
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
             pressBack()
         }
         emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
             pressBack()
         }
@@ -136,7 +172,7 @@ class ProvisionExternalEmailMaskTest {
     }
 
     @Test
-    fun testInvalidEmailFormatShowsErrorDialog() {
+    fun testSendEmailWithoutAlias() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -145,36 +181,42 @@ class ProvisionExternalEmailMaskTest {
             checkEmailAddressesItemsDisplayed()
             navigateToProvisionEmailAddressScreen()
         }
+        var address = ""
         provisionEmailAddress {
             setLocalPart()
             waitForRootFocus()
             checkAvailableAddressMsg()
+            address = getAddressFromTextView()
             clickOnCreateButton()
             waitForLoading()
         }
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            // Toggle switch to external position
-            waitForViewToDisplay(withId(R.id.internalExternalSwitch), 10_000L)
-            clickOnView(withId(R.id.internalExternalSwitch))
-            // Navigate to external form
-            clickOnView(withId(R.id.createEmailMaskButton))
+            navigateToEmailMessagesScreen(0)
         }
-        provisionExternalEmailMask {
-            checkProvisionExternalEmailMaskItemsDisplayed()
-            // Enter an invalid email format
-            enterExternalEmail("not-a-valid-email")
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            // Attempt to create - should show error dialog for invalid email format
-            clickOnCreateButton()
-            checkAlertDialogDisplayed()
-            clickOnPositiveAlertDialogButton()
+        emailMessages {
+            navigateToSendEmailMessageScreen()
+        }
+        sendAliasedEmail {
+            checkEmailAliasSpinnerDisplayed()
+            checkEmailAliasSpinnerDefaultSelected()
+        }
+        sendEmailMessage {
+            setToField(address)
+            setSubjectField("Espresso No Alias Email Test")
+            setContentBodyField("This is a test email sent without an email alias.")
+            clickOnSendEmailButton()
+            waitForLoading()
+        }
+        emailMessages {
+            waitForRecyclerView()
+            checkEmailMessagesItemsDisplayed()
             pressBack()
         }
         emailAddresses {
+            waitForLoading()
+            waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
             pressBack()
         }

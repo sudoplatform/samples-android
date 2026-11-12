@@ -83,7 +83,7 @@
                 android:text="@string/create_email_address_button"
                 android:textColor="@color/colorPrimary" />
 
-            <!-- Divider between Email Addresses and Email Masks -->
+            <!-- Divider between Email Addresses and Email Aliases -->
             <View
                 android:id="@+id/sectionDivider"
                 android:layout_width="match_parent"
@@ -92,13 +92,13 @@
                 android:layout_marginBottom="16dp"
                 android:background="@android:color/darker_gray" />
 
-            <!-- Email Masks Section -->
+            <!-- Email Aliases Section -->
             <TextView
-                android:id="@+id/emailMasksSectionLabel"
+                android:id="@+id/emailAliasesSectionLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@string/email_masks_section_title"
+                android:text="@string/email_aliases_section_title"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -108,38 +108,38 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@string/external_email_masks_switch_label"
+                android:text="@string/external_email_aliases_switch_label"
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/masksDisabledText"
+                android:id="@+id/aliasesDisabledText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/email_masks_disabled_message"
+                android:text="@string/email_aliases_disabled_message"
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/masksRecyclerView"
+                android:id="@+id/aliasesRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
 
             <TextView
-                android:id="@+id/emptyMasksStateText"
+                android:id="@+id/emptyAliasesStateText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/no_email_masks"
+                android:text="@string/no_email_aliases"
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:visibility="gone" />
 
             <Button
-                android:id="@+id/createEmailMaskButton"
+                android:id="@+id/createEmailAliasButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:height="55dp"
@@ -148,7 +148,7 @@
                 android:gravity="center|start"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
-                android:text="@string/create_email_mask_button"
+                android:text="@string/create_email_alias_button"
                 android:textColor="@color/colorPrimary" />
 
         </LinearLayout>

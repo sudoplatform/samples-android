@@ -22,8 +22,8 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import com.sudoplatform.emailexample.emailmasks.EmailMaskViewHolder
-import com.sudoplatform.emailexample.emailmasks.provisionEmailMask
+import com.sudoplatform.emailexample.emailaliases.EmailAliasViewHolder
+import com.sudoplatform.emailexample.emailaliases.provisionEmailAlias
 import com.sudoplatform.emailexample.emailmessages.emailMessages
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers.allOf
@@ -35,11 +35,11 @@ fun emailAddresses(func: EmailAddressesRobot.() -> Unit) = EmailAddressesRobot()
  */
 class EmailAddressesRobot : BaseRobot() {
     private val createEmailAddressButton = withId(R.id.createEmailAddressButton)
-    private val createEmailMaskButton = withId(R.id.createEmailMaskButton)
+    private val createEmailAliasButton = withId(R.id.createEmailAliasButton)
     private val emailAddressRecyclerView = withId(R.id.emailAddressRecyclerView)
-    private val masksRecyclerView = withId(R.id.masksRecyclerView)
+    private val aliasesRecyclerView = withId(R.id.aliasesRecyclerView)
     private val loadingProgress = withId(R.id.progressBar)
-    private val emptyMasksStateText = withId(R.id.emptyMasksStateText)
+    private val emptyAliasesStateText = withId(R.id.emptyAliasesStateText)
     private val positiveAlertButton = withId(android.R.id.button1)
     private val negativeAlertButton = withId(android.R.id.button2)
     private val neutralAlertButton = withId(android.R.id.button3)
@@ -75,11 +75,11 @@ class EmailAddressesRobot : BaseRobot() {
         }
     }
 
-    fun navigateToCreateEmailMaskScreen() {
-        waitForViewToDisplay(createEmailMaskButton, 10_000L)
-        clickOnView(createEmailMaskButton)
-        provisionEmailMask {
-            checkProvisionEmailMaskItemsDisplayed()
+    fun navigateToCreateEmailAliasScreen() {
+        waitForViewToDisplay(createEmailAliasButton, 10_000L)
+        clickOnView(createEmailAliasButton)
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
         }
     }
 
@@ -103,34 +103,34 @@ class EmailAddressesRobot : BaseRobot() {
         )
     }
 
-    // --- Email Mask management methods (integrated from EmailMasksRobot) ---
+    // --- Email Alias management methods (integrated from EmailAliasesRobot) ---
 
-    fun waitForMasksRecyclerView() {
-        waitForViewToDisplay(masksRecyclerView, 5_000L)
+    fun waitForAliasesRecyclerView() {
+        waitForViewToDisplay(aliasesRecyclerView, 5_000L)
     }
 
-    fun checkEmailMasksItemsDisplayed() {
-        waitForViewToDisplay(masksRecyclerView, 5_000L)
+    fun checkEmailAliasesItemsDisplayed() {
+        waitForViewToDisplay(aliasesRecyclerView, 5_000L)
     }
 
-    fun checkEmptyMasksStateDisplayed() {
-        waitForViewToDisplay(emptyMasksStateText, 5_000L)
+    fun checkEmptyAliasesStateDisplayed() {
+        waitForViewToDisplay(emptyAliasesStateText, 5_000L)
     }
 
-    fun swipeLeftToDeleteMask(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(masksRecyclerView, position + 1)
-        onView(masksRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMaskViewHolder>(
+    fun swipeLeftToDeleteAlias(position: Int) {
+        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1)
+        onView(aliasesRecyclerView).perform(
+            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
                 position,
                 ViewActions.swipeLeft(),
             ),
         )
     }
 
-    fun clickOnMaskItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(masksRecyclerView, position + 1)
-        onView(masksRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMaskViewHolder>(
+    fun clickOnAliasItem(position: Int) {
+        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1)
+        onView(aliasesRecyclerView).perform(
+            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
                 position,
                 ViewActions.click(),
             ),

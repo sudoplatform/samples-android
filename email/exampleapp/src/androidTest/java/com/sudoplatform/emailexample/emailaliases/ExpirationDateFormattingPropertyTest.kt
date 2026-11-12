@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
@@ -17,7 +17,7 @@ import kotlin.random.Random
 /**
  * Property-based test for expiration date formatting.
  *
- * Feature: update-email-mask, Property 4: Expiration date formatting produces consistent readable output
+ * Feature: update-email-alias, Property 4: Expiration date formatting produces consistent readable output
  *
  * **Validates: Requirements 6.3, 6.4**
  */
@@ -42,7 +42,7 @@ class ExpirationDateFormattingPropertyTest {
             val randomTimeMs = Random.nextLong(1L, 4_102_444_800_000L) // 1ms to Jan 1, 2100
             val randomDate = Date(randomTimeMs)
 
-            val result = EmailMaskViewHolder.formatExpiresAtForDisplay(randomDate)
+            val result = EmailAliasViewHolder.formatExpiresAtForDisplay(randomDate)
 
             assertTrue(
                 "Iteration $iteration: Expected result to match 'Expires: MM/dd/yyyy' pattern " +
@@ -59,7 +59,7 @@ class ExpirationDateFormattingPropertyTest {
      */
     @Test
     fun property4_epochZeroDateProducesDash() {
-        val result = EmailMaskViewHolder.formatExpiresAtForDisplay(Date(0))
+        val result = EmailAliasViewHolder.formatExpiresAtForDisplay(Date(0))
         assertEquals(
             "Date(0) should produce 'Expires: -'",
             "Expires: -",
@@ -74,7 +74,7 @@ class ExpirationDateFormattingPropertyTest {
      */
     @Test
     fun property4_nullDateProducesDash() {
-        val result = EmailMaskViewHolder.formatExpiresAtForDisplay(null)
+        val result = EmailAliasViewHolder.formatExpiresAtForDisplay(null)
         assertEquals(
             "null should produce 'Expires: -'",
             "Expires: -",

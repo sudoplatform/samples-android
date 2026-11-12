@@ -175,7 +175,7 @@ class ProvisionEmailAddressFragment :
                         val input =
                             ProvisionEmailAddressInput(
                                 emailAddress = address,
-                                alias = displayName.ifBlank { null },
+                                displayName = displayName.ifBlank { null },
                                 ownershipProofToken = ownershipProof,
                             )
                         app.sudoEmailClient.provisionEmailAddress(input)
@@ -209,7 +209,11 @@ class ProvisionEmailAddressFragment :
     private fun checkEmailAddressAvailability(localParts: List<String>) {
         launch {
             try {
-                val supportedDomains = app.sudoEmailClient.getSupportedEmailDomains()
+                val supportedDomains =
+                    app.sudoEmailClient
+                        .listEmailDomains()
+                        .filter { !it.isAliasDomain }
+                        .map { it.domain }
                 val emailAddresses =
                     app.sudoEmailClient.checkEmailAddressAvailability(
                         CheckEmailAddressAvailabilityInput(

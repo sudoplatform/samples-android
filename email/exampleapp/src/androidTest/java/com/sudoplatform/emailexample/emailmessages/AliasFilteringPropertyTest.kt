@@ -8,7 +8,7 @@ package com.sudoplatform.emailexample.emailmessages
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.sudoplatform.sudoemail.types.EmailMaskStatus
+import com.sudoplatform.sudoemail.types.EmailAliasStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -16,50 +16,50 @@ import org.junit.runner.RunWith
 import kotlin.random.Random
 
 /**
- * Property-based test for mask filtering correctness.
+ * Property-based test for alias filtering correctness.
  *
- * Feature: send-masked-email, Property 1: Mask filtering correctness
+ * Feature: send-aliased-email, Property 1: Alias filtering correctness
  *
- * For any list of EmailMask objects and any target emailAddressId, the filter
- * function SHALL return only masks where mask.emailAddressId == emailAddressId
- * AND mask.status == EmailMaskStatus.ENABLED, and SHALL not exclude any mask
+ * For any list of EmailAlias objects and any target emailAddressId, the filter
+ * function SHALL return only aliases where alias.emailAddressId == emailAddressId
+ * AND alias.status == EmailAliasStatus.ENABLED, and SHALL not exclude any alias
  * that satisfies both conditions.
  *
  * **Validates: Requirements 1.4, 4.1, 4.2**
  */
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class MaskFilteringPropertyTest {
+class AliasFilteringPropertyTest {
     companion object {
         private const val ITERATIONS = 100
         private const val MAX_LIST_SIZE = 20
         private const val MAX_ID_LENGTH = 12
 
         private val CHARS = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-        private val ALL_STATUSES = EmailMaskStatus.values()
+        private val ALL_STATUSES = EmailAliasStatus.values()
     }
 
     /**
-     * Simplified representation of an EmailMask for property testing purposes.
+     * Simplified representation of an EmailAlias for property testing purposes.
      */
-    data class TestEmailMask(
+    data class TestEmailAlias(
         val id: String,
-        val maskAddress: String,
+        val aliasAddress: String,
         val emailAddressId: String,
-        val status: EmailMaskStatus,
+        val status: EmailAliasStatus,
     )
 
     /**
      * The filter function under test, modelling the filtering logic specified
-     * in the design document: include only masks where emailAddressId matches
+     * in the design document: include only aliases where emailAddressId matches
      * the target AND status is ENABLED.
      */
-    private fun filterMasks(
-        masks: List<TestEmailMask>,
+    private fun filterAliases(
+        aliases: List<TestEmailAlias>,
         targetEmailAddressId: String,
-    ): List<TestEmailMask> =
-        masks.filter { mask ->
-            mask.emailAddressId == targetEmailAddressId && mask.status == EmailMaskStatus.ENABLED
+    ): List<TestEmailAlias> =
+        aliases.filter { alias ->
+            alias.emailAddressId == targetEmailAddressId && alias.status == EmailAliasStatus.ENABLED
         }
 
     /**
@@ -75,43 +75,43 @@ class MaskFilteringPropertyTest {
     }
 
     /**
-     * Generates a random [TestEmailMask] with the given random instance.
+     * Generates a random [TestEmailAlias] with the given random instance.
      * Uses a small pool of emailAddressIds to ensure some collisions with the target.
      */
-    private fun generateRandomMask(
+    private fun generateRandomAlias(
         random: Random,
         emailAddressIdPool: List<String>,
-    ): TestEmailMask =
-        TestEmailMask(
+    ): TestEmailAlias =
+        TestEmailAlias(
             id = randomString(random, MAX_ID_LENGTH),
-            maskAddress = "${randomString(random, 8)}@masks.example.com",
+            aliasAddress = "${randomString(random, 8)}@aliases.example.com",
             emailAddressId = emailAddressIdPool[random.nextInt(emailAddressIdPool.size)],
             status = ALL_STATUSES[random.nextInt(ALL_STATUSES.size)],
         )
 
     /**
-     * Generates a random list of [TestEmailMask] objects.
+     * Generates a random list of [TestEmailAlias] objects.
      */
-    private fun generateRandomMaskList(
+    private fun generateRandomAliasList(
         random: Random,
         emailAddressIdPool: List<String>,
-    ): List<TestEmailMask> {
+    ): List<TestEmailAlias> {
         val size = random.nextInt(0, MAX_LIST_SIZE + 1)
-        return (0 until size).map { generateRandomMask(random, emailAddressIdPool) }
+        return (0 until size).map { generateRandomAlias(random, emailAddressIdPool) }
     }
 
     /**
-     * Property 1: Mask filtering correctness
+     * Property 1: Alias filtering correctness
      *
-     * For any list of EmailMask objects and any target emailAddressId:
-     * 1. Every mask in the filtered result has emailAddressId == target AND status == ENABLED
-     * 2. No mask satisfying both conditions is excluded from the result
+     * For any list of EmailAlias objects and any target emailAddressId:
+     * 1. Every alias in the filtered result has emailAddressId == target AND status == ENABLED
+     * 2. No alias satisfying both conditions is excluded from the result
      *
-     * Feature: send-masked-email, Property 1: Mask filtering correctness
+     * Feature: send-aliased-email, Property 1: Alias filtering correctness
      * **Validates: Requirements 1.4, 4.1, 4.2**
      */
     @Test
-    fun property1_maskFilteringCorrectness() {
+    fun property1_aliasFilteringCorrectness() {
         val random = Random(seed = 42)
 
         repeat(ITERATIONS) { iteration ->
@@ -122,42 +122,42 @@ class MaskFilteringPropertyTest {
             // Pick a target emailAddressId from the pool
             val targetEmailAddressId = emailAddressIdPool[random.nextInt(emailAddressIdPool.size)]
 
-            // Generate a random list of masks
-            val masks = generateRandomMaskList(random, emailAddressIdPool)
+            // Generate a random list of aliases
+            val aliases = generateRandomAliasList(random, emailAddressIdPool)
 
             // Apply the filter
-            val result = filterMasks(masks, targetEmailAddressId)
+            val result = filterAliases(aliases, targetEmailAddressId)
 
-            // Assert 1: Every mask in the result matches the target AND is ENABLED
-            result.forEach { mask ->
+            // Assert 1: Every alias in the result matches the target AND is ENABLED
+            result.forEach { alias ->
                 assertEquals(
-                    "Iteration $iteration: Filtered mask has wrong emailAddressId. " +
-                        "Expected '$targetEmailAddressId' but got '${mask.emailAddressId}'",
+                    "Iteration $iteration: Filtered alias has wrong emailAddressId. " +
+                        "Expected '$targetEmailAddressId' but got '${alias.emailAddressId}'",
                     targetEmailAddressId,
-                    mask.emailAddressId,
+                    alias.emailAddressId,
                 )
                 assertEquals(
-                    "Iteration $iteration: Filtered mask has wrong status. " +
-                        "Expected ENABLED but got '${mask.status}'",
-                    EmailMaskStatus.ENABLED,
-                    mask.status,
+                    "Iteration $iteration: Filtered alias has wrong status. " +
+                        "Expected ENABLED but got '${alias.status}'",
+                    EmailAliasStatus.ENABLED,
+                    alias.status,
                 )
             }
 
-            // Assert 2: No qualifying mask is excluded
+            // Assert 2: No qualifying alias is excluded
             val expectedQualifying =
-                masks.filter { mask ->
-                    mask.emailAddressId == targetEmailAddressId && mask.status == EmailMaskStatus.ENABLED
+                aliases.filter { alias ->
+                    alias.emailAddressId == targetEmailAddressId && alias.status == EmailAliasStatus.ENABLED
                 }
             assertEquals(
-                "Iteration $iteration: Filter excluded qualifying masks. " +
+                "Iteration $iteration: Filter excluded qualifying aliases. " +
                     "Expected ${expectedQualifying.size} results but got ${result.size}. " +
-                    "Masks: $masks, Target: $targetEmailAddressId",
+                    "Aliases: $aliases, Target: $targetEmailAddressId",
                 expectedQualifying.size,
                 result.size,
             )
             assertTrue(
-                "Iteration $iteration: Filter result does not contain all qualifying masks. " +
+                "Iteration $iteration: Filter result does not contain all qualifying aliases. " +
                     "Expected: $expectedQualifying, Got: $result",
                 result.containsAll(expectedQualifying),
             )

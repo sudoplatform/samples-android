@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
+import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
@@ -14,18 +16,19 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
+import org.hamcrest.CoreMatchers.instanceOf
 import java.util.UUID
 
-fun provisionExternalEmailMask(func: ProvisionExternalEmailMaskRobot.() -> Unit) = ProvisionExternalEmailMaskRobot().apply { func() }
+fun provisionEmailAlias(func: ProvisionEmailAliasRobot.() -> Unit) = ProvisionEmailAliasRobot().apply { func() }
 
 /**
- * Testing robot that manages the provision external email mask screen.
+ * Testing robot that manages the provision email alias screen.
  */
-class ProvisionExternalEmailMaskRobot : BaseRobot() {
+class ProvisionEmailAliasRobot : BaseRobot() {
     private val toolbarCreateButton = withId(R.id.create)
-    private val externalEmailField = withId(R.id.externalEmailField)
-    private val maskLocalPartField = withId(R.id.maskLocalPartField)
-    private val maskDomainSpinner = withId(R.id.maskDomainSpinner)
+    private val aliasLocalPartField = withId(R.id.aliasLocalPartField)
+    private val realEmailAddressSpinner = withId(R.id.realEmailAddressSpinner)
+    private val aliasDomainSpinner = withId(R.id.aliasDomainSpinner)
     private val availabilityLabel = withId(R.id.availabilityLabel)
     private val sudoText = withId(R.id.sudoText)
     private val sudoLabelText = withId(R.id.sudoLabelText)
@@ -41,13 +44,13 @@ class ProvisionExternalEmailMaskRobot : BaseRobot() {
         onView(isRoot()).perform(waitFor(5_000L))
     }
 
-    fun checkProvisionExternalEmailMaskItemsDisplayed() {
-        waitForViewToDisplay(toolbarCreateButton, 10_000L)
-        waitForViewToDisplay(externalEmailField, 10_000L)
-        waitForViewToDisplay(maskLocalPartField, 10_000L)
-        waitForViewToDisplay(maskDomainSpinner, 10_000L)
-        waitForViewToDisplay(sudoText, 10_000L)
-        waitForViewToDisplay(sudoLabelText, 10_000L)
+    fun checkProvisionEmailAliasItemsDisplayed() {
+        waitForViewToDisplay(toolbarCreateButton)
+        waitForViewToDisplay(aliasLocalPartField)
+        waitForViewToDisplay(realEmailAddressSpinner)
+        waitForViewToDisplay(aliasDomainSpinner)
+        waitForViewToDisplay(sudoText)
+        waitForViewToDisplay(sudoLabelText)
     }
 
     fun checkAvailableAddressMsg() {
@@ -58,18 +61,6 @@ class ProvisionExternalEmailMaskRobot : BaseRobot() {
     fun checkUnavailableAddressMsg() {
         waitForViewToDisplay(availabilityLabel, 10_000L)
         onView(availabilityLabel).check(matches(withText("This email address is not available")))
-    }
-
-    fun enterExternalEmail(email: String) {
-        replaceText(externalEmailField, email)
-    }
-
-    fun setLocalPart(localPart: String? = "") {
-        var input = localPart
-        if (input.isNullOrBlank()) {
-            input = UUID.randomUUID().toString().substring(0, 8)
-        }
-        replaceText(maskLocalPartField, input)
     }
 
     fun clickOnCreateButton() {
@@ -83,7 +74,19 @@ class ProvisionExternalEmailMaskRobot : BaseRobot() {
         clickOnView(positiveAlertButton)
     }
 
-    fun checkAlertDialogDisplayed() {
-        waitForViewToDisplay(positiveAlertButton, 10_000L)
+    fun setLocalPart(localPart: String? = "") {
+        var input = localPart
+        if (input.isNullOrBlank()) {
+            input = UUID.randomUUID().toString().substring(0, 8)
+        }
+        replaceText(aliasLocalPartField, input)
+    }
+
+    fun selectRealEmailAddress(position: Int) {
+        clickOnView(realEmailAddressSpinner)
+        onView(isRoot()).perform(waitFor(500L))
+        onData(instanceOf(String::class.java))
+            .atPosition(position)
+            .perform(click())
     }
 }

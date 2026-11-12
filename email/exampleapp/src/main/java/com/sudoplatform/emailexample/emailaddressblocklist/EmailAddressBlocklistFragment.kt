@@ -73,6 +73,9 @@ class EmailAddressBlocklistFragment :
     /** A mutable list of the selected blocked email addresses. */
     private var selectedBlockedAddresses = mutableListOf<String>()
 
+    /** Maps a cleartext blocked address to its hashed value, used when unblocking. */
+    private val addressToHashedValue = mutableMapOf<String, String>()
+
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: EmailAddressBlocklistFragmentArgs by navArgs()
 
@@ -137,10 +140,12 @@ class EmailAddressBlocklistFragment :
                         app.sudoEmailClient.getEmailAddressBlocklist()
                     }
                 blockedAddressesList.clear()
+                addressToHashedValue.clear()
                 val cleartextAddresses = mutableListOf<String>()
                 for (blockedAddress in blockedAddresses) {
                     if (blockedAddress.status === UnsealedBlockedAddressStatus.Completed) {
                         cleartextAddresses.add(blockedAddress.address)
+                        addressToHashedValue[blockedAddress.address] = blockedAddress.hashedBlockedValue
                     } else {
                         // Handle error. Likely a missing key in which case the address could be unblocked using the hashed value
                     }
@@ -170,10 +175,14 @@ class EmailAddressBlocklistFragment :
         launch {
             showLoading(R.string.unblocking_addresses)
             try {
-                val response = app.sudoEmailClient.unblockEmailAddresses(addresses)
+                val hashedValues = addresses.mapNotNull { addressToHashedValue[it] }
+                val response =
+                    withContext(Dispatchers.IO) {
+                        app.sudoEmailClient.unblockEmailAddressesByHashedValue(hashedValues)
+                    }
                 when (response.status) {
                     BatchOperationStatus.SUCCESS -> blockedAddressesList.removeAll(addresses)
-                    BatchOperationStatus.PARTIAL -> response.successValues?.let { blockedAddressesList.removeAll(it) }
+                    BatchOperationStatus.PARTIAL -> listBlockedEmailAddresses()
                     else -> {
                         showAlertDialog(
                             titleResId = R.string.unblock_addresses_failure,

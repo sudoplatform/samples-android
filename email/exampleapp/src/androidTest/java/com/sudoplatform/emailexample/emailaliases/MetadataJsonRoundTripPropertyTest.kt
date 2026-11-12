@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -18,7 +18,7 @@ import kotlin.random.Random
 /**
  * Property-based test for metadata JSON round-trip.
  *
- * Feature: update-email-mask, Property 2: Metadata JSON round-trip
+ * Feature: update-email-alias, Property 2: Metadata JSON round-trip
  *
  * For any valid Map<String, String>, formatting the map to a JSON string using
  * JSONObject(map).toString() and then parsing it back with parseMetadataJson

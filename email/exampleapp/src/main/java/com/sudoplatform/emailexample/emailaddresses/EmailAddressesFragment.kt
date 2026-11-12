@@ -30,7 +30,7 @@ import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
 import com.sudoplatform.emailexample.databinding.FragmentEmailAddressesBinding
-import com.sudoplatform.emailexample.emailmasks.EmailMaskAdapter
+import com.sudoplatform.emailexample.emailaliases.EmailAliasAdapter
 import com.sudoplatform.emailexample.emailmessages.EmailMessagesFragment
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.sudos.CreateSudoFragment
@@ -40,17 +40,17 @@ import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
 import com.sudoplatform.sudoemail.types.ConfigurationData
 import com.sudoplatform.sudoemail.types.EmailAddress
-import com.sudoplatform.sudoemail.types.EmailMask
-import com.sudoplatform.sudoemail.types.EmailMaskRealAddressType
-import com.sudoplatform.sudoemail.types.EmailMaskStatus
+import com.sudoplatform.sudoemail.types.EmailAlias
+import com.sudoplatform.sudoemail.types.EmailAliasRealAddressType
+import com.sudoplatform.sudoemail.types.EmailAliasStatus
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.VerifyExternalEmailAddressResult
-import com.sudoplatform.sudoemail.types.inputs.DeprovisionEmailMaskInput
-import com.sudoplatform.sudoemail.types.inputs.DisableEmailMaskInput
-import com.sudoplatform.sudoemail.types.inputs.EnableEmailMaskInput
+import com.sudoplatform.sudoemail.types.inputs.DeprovisionEmailAliasInput
+import com.sudoplatform.sudoemail.types.inputs.DisableEmailAliasInput
+import com.sudoplatform.sudoemail.types.inputs.EnableEmailAliasInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailAddressesForSudoIdInput
-import com.sudoplatform.sudoemail.types.inputs.ListEmailMasksForOwnerInput
-import com.sudoplatform.sudoemail.types.inputs.UpdateEmailMaskInput
+import com.sudoplatform.sudoemail.types.inputs.ListEmailAliasesForOwnerInput
+import com.sudoplatform.sudoemail.types.inputs.UpdateEmailAliasInput
 import com.sudoplatform.sudoemail.types.inputs.VerifyExternalEmailAddressInput
 import com.sudoplatform.sudoprofiles.Sudo
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +67,7 @@ import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [EmailAddressesFragment] presents a list of [EmailAddress]es and [EmailMask]s.
+ * This [EmailAddressesFragment] presents a list of [EmailAddress]es and [EmailAlias]s.
  *
  * - Links From:
  *  - [CreateSudoFragment]: A user chooses the "Create" option from the top right corner of the toolbar.
@@ -78,7 +78,7 @@ import kotlin.coroutines.CoroutineContext
  *  - [ProvisionEmailAddressFragment]: If a user taps the "Create Email Address" button, the
  *   [ProvisionEmailAddressFragment] will be presented so that the user can add a new [EmailAddress]
  *   to their [Sudo].
- *  - [ProvisionEmailMaskFragment]: If a user taps the "Create Email Mask" button.
+ *  - [ProvisionEmailAliasFragment]: If a user taps the "Create Email Alias" button.
  *  - [EmailMessagesFragment]: If a user taps an [EmailAddress] from the list.
  */
 class EmailAddressesFragment :
@@ -108,14 +108,14 @@ class EmailAddressesFragment :
     /** Cached configuration data from the SDK. */
     private var configurationData: ConfigurationData? = null
 
-    /** The full unfiltered list of [EmailMask]s from the SDK. */
-    private var allEmailMaskList = mutableListOf<EmailMask>()
+    /** The full unfiltered list of [EmailAlias]s from the SDK. */
+    private var allEmailAliasList = mutableListOf<EmailAlias>()
 
-    /** The currently displayed (filtered) list of [EmailMask]s. */
-    private var filteredEmailMaskList = mutableListOf<EmailMask>()
+    /** The currently displayed (filtered) list of [EmailAlias]s. */
+    private var filteredEmailAliasList = mutableListOf<EmailAlias>()
 
-    /** A reference to the [RecyclerView.Adapter] handling [EmailMask] data. */
-    private lateinit var maskAdapter: EmailMaskAdapter
+    /** A reference to the [RecyclerView.Adapter] handling [EmailAlias] data. */
+    private lateinit var aliasAdapter: EmailAliasAdapter
 
     /** Fragment arguments handled by Navigation Library safe args */
     private val args: EmailAddressesFragmentArgs by navArgs()
@@ -143,7 +143,7 @@ class EmailAddressesFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         configureRecyclerView()
-        configureMasksRecyclerView()
+        configureAliasesRecyclerView()
         navController = Navigation.findNavController(view)
 
         binding.createEmailAddressButton.setOnClickListener {
@@ -169,8 +169,8 @@ class EmailAddressesFragment :
 
     /**
      * Load configuration data from the [SudoEmailClient] to determine feature availability.
-     * Gates the email masks UI based on [ConfigurationData.emailMasksEnabled] and
-     * [ConfigurationData.externalEmailMasksEnabled].
+     * Gates the email aliases UI based on [ConfigurationData.emailAliasesEnabled] and
+     * [ConfigurationData.externalEmailAliasesEnabled].
      */
     private fun loadConfigurationData() {
         launch {
@@ -182,31 +182,31 @@ class EmailAddressesFragment :
                     }
                 configurationData = config
                 if (bindingDelegate.isAttached()) {
-                    if (config.emailMasksEnabled) {
-                        // Show masks section
-                        binding.masksRecyclerView.visibility = View.VISIBLE
-                        binding.createEmailMaskButton.visibility = View.VISIBLE
-                        binding.masksDisabledText.visibility = View.GONE
+                    if (config.emailAliasesEnabled) {
+                        // Show aliases section
+                        binding.aliasesRecyclerView.visibility = View.VISIBLE
+                        binding.createEmailAliasButton.visibility = View.VISIBLE
+                        binding.aliasesDisabledText.visibility = View.GONE
 
-                        // Show/hide switch based on externalEmailMasksEnabled
-                        if (config.externalEmailMasksEnabled) {
+                        // Show/hide switch based on externalEmailAliasesEnabled
+                        if (config.externalEmailAliasesEnabled) {
                             binding.internalExternalSwitch.visibility = View.VISIBLE
                             configureSwitch()
                         } else {
                             binding.internalExternalSwitch.visibility = View.GONE
                         }
 
-                        // Now load the masks
-                        listEmailMasks()
+                        // Now load the aliases
+                        listEmailAliases()
                     } else {
-                        // Hide mask list, create button, and toggle
-                        binding.masksRecyclerView.visibility = View.GONE
-                        binding.createEmailMaskButton.visibility = View.GONE
+                        // Hide alias list, create button, and toggle
+                        binding.aliasesRecyclerView.visibility = View.GONE
+                        binding.createEmailAliasButton.visibility = View.GONE
                         binding.internalExternalSwitch.visibility = View.GONE
-                        binding.emptyMasksStateText.visibility = View.GONE
+                        binding.emptyAliasesStateText.visibility = View.GONE
 
                         // Show disabled message
-                        binding.masksDisabledText.visibility = View.VISIBLE
+                        binding.aliasesDisabledText.visibility = View.VISIBLE
                     }
                 }
             } catch (e: Exception) {
@@ -275,32 +275,32 @@ class EmailAddressesFragment :
     }
 
     /**
-     * List [EmailMask]s from the [SudoEmailClient].
+     * List [EmailAlias]s from the [SudoEmailClient].
      */
-    private fun listEmailMasks() {
+    private fun listEmailAliases() {
         launch {
             try {
-                val emailMasks =
+                val emailAliases =
                     withContext(Dispatchers.IO) {
-                        app.sudoEmailClient.listEmailMasksForOwner(ListEmailMasksForOwnerInput())
+                        app.sudoEmailClient.listEmailAliasesForOwner(ListEmailAliasesForOwnerInput())
                     }
                 if (bindingDelegate.isAttached()) {
-                    when (emailMasks) {
+                    when (emailAliases) {
                         is ListAPIResult.Success -> {
-                            allEmailMaskList.clear()
-                            allEmailMaskList.addAll(emailMasks.result.items)
-                            filterMasksByType(binding.internalExternalSwitch.isChecked)
+                            allEmailAliasList.clear()
+                            allEmailAliasList.addAll(emailAliases.result.items)
+                            filterAliasesByType(binding.internalExternalSwitch.isChecked)
                         }
                         is ListAPIResult.Partial -> {
                             val cause =
-                                emailMasks.result.failed
+                                emailAliases.result.failed
                                     .first()
                                     .cause
                             showAlertDialog(
-                                titleResId = R.string.list_email_masks_failure,
+                                titleResId = R.string.list_email_aliases_failure,
                                 message = cause.localizedMessage ?: "$cause",
                                 positiveButtonResId = R.string.try_again,
-                                onPositive = { listEmailMasks() },
+                                onPositive = { listEmailAliases() },
                                 negativeButtonResId = android.R.string.cancel,
                             )
                         }
@@ -309,10 +309,10 @@ class EmailAddressesFragment :
             } catch (e: SudoEmailClient.EmailAddressException) {
                 if (bindingDelegate.isAttached()) {
                     showAlertDialog(
-                        titleResId = R.string.list_email_masks_failure,
+                        titleResId = R.string.list_email_aliases_failure,
                         message = e.localizedMessage ?: "$e",
                         positiveButtonResId = R.string.try_again,
-                        onPositive = { listEmailMasks() },
+                        onPositive = { listEmailAliases() },
                         negativeButtonResId = android.R.string.cancel,
                     )
                 }
@@ -354,7 +354,7 @@ class EmailAddressesFragment :
                     EmailAddressesFragmentDirections
                         .actionEmailAddressesFragmentToEmailMessagesFragment(
                             emailAddress = emailAddress.emailAddress,
-                            emailDisplayName = emailAddress.alias ?: "",
+                            emailDisplayName = emailAddress.displayName ?: "",
                             emailAddressId = emailAddress.id,
                         ),
                 )
@@ -366,29 +366,29 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Configures the [RecyclerView] used to display the listed [EmailMask] items with full
+     * Configures the [RecyclerView] used to display the listed [EmailAlias] items with full
      * detail (status, real address, metadata, expiration) and tap-to-action support.
      */
-    private fun configureMasksRecyclerView() {
-        maskAdapter =
-            EmailMaskAdapter(
-                filteredEmailMaskList,
+    private fun configureAliasesRecyclerView() {
+        aliasAdapter =
+            EmailAliasAdapter(
+                filteredEmailAliasList,
                 ::showActionDialog,
                 onVerifyClick = ::initiateVerification,
                 showVerifyButton = ::showVerifyButton,
             )
-        binding.masksRecyclerView.adapter = maskAdapter
-        binding.masksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        configureMaskSwipeToDelete()
+        binding.aliasesRecyclerView.adapter = aliasAdapter
+        binding.aliasesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        configureAliasSwipeToDelete()
     }
 
     /**
-     * Configures the [Internal_External_Switch] listener to filter masks by type
+     * Configures the [Internal_External_Switch] listener to filter aliases by type
      * and update the create button accordingly.
      */
     private fun configureSwitch() {
         binding.internalExternalSwitch.setOnCheckedChangeListener { _, isChecked ->
-            filterMasksByType(isChecked)
+            filterAliasesByType(isChecked)
             updateCreateButtonForSwitchState(isChecked)
         }
         // Set initial state (switch defaults to OFF = internal)
@@ -396,25 +396,25 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Filters [allEmailMaskList] into [filteredEmailMaskList] based on the switch state.
+     * Filters [allEmailAliasList] into [filteredEmailAliasList] based on the switch state.
      *
-     * @param showExternal [Boolean] If true, show only EXTERNAL masks. If false, show INTERNAL and UNKNOWN masks.
+     * @param showExternal [Boolean] If true, show only EXTERNAL aliases. If false, show INTERNAL and UNKNOWN aliases.
      */
-    private fun filterMasksByType(showExternal: Boolean) {
-        filteredEmailMaskList.clear()
+    private fun filterAliasesByType(showExternal: Boolean) {
+        filteredEmailAliasList.clear()
         if (showExternal) {
-            filteredEmailMaskList.addAll(
-                allEmailMaskList.filter { it.realAddressType == EmailMaskRealAddressType.EXTERNAL },
+            filteredEmailAliasList.addAll(
+                allEmailAliasList.filter { it.realAddressType == EmailAliasRealAddressType.EXTERNAL },
             )
         } else {
-            filteredEmailMaskList.addAll(
-                allEmailMaskList.filter {
-                    it.realAddressType == EmailMaskRealAddressType.INTERNAL ||
-                        it.realAddressType == EmailMaskRealAddressType.UNKNOWN
+            filteredEmailAliasList.addAll(
+                allEmailAliasList.filter {
+                    it.realAddressType == EmailAliasRealAddressType.INTERNAL ||
+                        it.realAddressType == EmailAliasRealAddressType.UNKNOWN
                 },
             )
         }
-        maskAdapter.notifyDataSetChanged()
+        aliasAdapter.notifyDataSetChanged()
         updateEmptyStateVisibility(showExternal)
     }
 
@@ -424,41 +424,41 @@ class EmailAddressesFragment :
      * @param showExternal [Boolean] If true, show external empty message. If false, show internal empty message.
      */
     private fun updateEmptyStateVisibility(showExternal: Boolean) {
-        if (filteredEmailMaskList.isEmpty()) {
-            binding.emptyMasksStateText.text =
+        if (filteredEmailAliasList.isEmpty()) {
+            binding.emptyAliasesStateText.text =
                 if (showExternal) {
-                    getString(R.string.no_external_masks)
+                    getString(R.string.no_external_aliases)
                 } else {
-                    getString(R.string.no_internal_masks)
+                    getString(R.string.no_internal_aliases)
                 }
-            binding.emptyMasksStateText.visibility = View.VISIBLE
+            binding.emptyAliasesStateText.visibility = View.VISIBLE
         } else {
-            binding.emptyMasksStateText.visibility = View.GONE
+            binding.emptyAliasesStateText.visibility = View.GONE
         }
     }
 
     /**
      * Updates the create button text and click target based on the switch state.
      *
-     * @param isExternal [Boolean] If true, button creates external mask. If false, button creates internal mask.
+     * @param isExternal [Boolean] If true, button creates external alias. If false, button creates internal alias.
      */
     private fun updateCreateButtonForSwitchState(isExternal: Boolean) {
         if (isExternal) {
-            binding.createEmailMaskButton.text = getString(R.string.create_external_email_mask_button)
-            binding.createEmailMaskButton.setOnClickListener {
+            binding.createEmailAliasButton.text = getString(R.string.create_external_email_alias_button)
+            binding.createEmailAliasButton.setOnClickListener {
                 navController.navigate(
                     EmailAddressesFragmentDirections
-                        .actionEmailAddressesFragmentToProvisionExternalEmailMaskFragment(
+                        .actionEmailAddressesFragmentToProvisionExternalEmailAliasFragment(
                             sudo,
                         ),
                 )
             }
         } else {
-            binding.createEmailMaskButton.text = getString(R.string.create_email_mask_button)
-            binding.createEmailMaskButton.setOnClickListener {
+            binding.createEmailAliasButton.text = getString(R.string.create_email_alias_button)
+            binding.createEmailAliasButton.setOnClickListener {
                 navController.navigate(
                     EmailAddressesFragmentDirections
-                        .actionEmailAddressesFragmentToProvisionEmailMaskFragment(
+                        .actionEmailAddressesFragmentToProvisionEmailAliasFragment(
                             sudo,
                         ),
                 )
@@ -467,57 +467,57 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Determines whether the verify button should be shown for the given [EmailMask].
+     * Determines whether the verify button should be shown for the given [EmailAlias].
      *
      * The verify button is visible only when:
      * - The internal/external switch is in the external (enabled) position
-     * - The mask's [EmailMaskRealAddressType] is EXTERNAL
-     * - The mask's status is not ENABLED (i.e., verification has not been completed)
+     * - The alias's [EmailAliasRealAddressType] is EXTERNAL
+     * - The alias's status is not ENABLED (i.e., verification has not been completed)
      *
-     * @param emailMask [EmailMask] The email mask to check.
+     * @param emailAlias [EmailAlias] The email alias to check.
      * @return [Boolean] True if the verify button should be shown, false otherwise.
      */
-    internal fun showVerifyButton(emailMask: EmailMask): Boolean {
+    internal fun showVerifyButton(emailAlias: EmailAlias): Boolean {
         val switchIsExternal = binding.internalExternalSwitch.isChecked
         return switchIsExternal &&
-            emailMask.realAddressType == EmailMaskRealAddressType.EXTERNAL &&
-            emailMask.status == EmailMaskStatus.PENDING
+            emailAlias.realAddressType == EmailAliasRealAddressType.EXTERNAL &&
+            emailAlias.status == EmailAliasStatus.PENDING
     }
 
     /**
-     * Re-enables the verify button for the given [EmailMask] in the RecyclerView.
+     * Re-enables the verify button for the given [EmailAlias] in the RecyclerView.
      *
      * Called when the verification flow is cancelled or fails, so the user can
      * tap "Verify" again to retry.
      *
-     * @param emailMask [EmailMask] The email mask whose verify button should be re-enabled.
+     * @param emailAlias [EmailAlias] The email alias whose verify button should be re-enabled.
      */
-    private fun reEnableVerifyButton(emailMask: EmailMask) {
-        val position = filteredEmailMaskList.indexOf(emailMask)
+    private fun reEnableVerifyButton(emailAlias: EmailAlias) {
+        val position = filteredEmailAliasList.indexOf(emailAlias)
         if (position >= 0) {
-            val viewHolder = binding.masksRecyclerView.findViewHolderForAdapterPosition(position)
-            if (viewHolder is com.sudoplatform.emailexample.emailmasks.EmailMaskViewHolder) {
+            val viewHolder = binding.aliasesRecyclerView.findViewHolderForAdapterPosition(position)
+            if (viewHolder is com.sudoplatform.emailexample.emailaliases.EmailAliasViewHolder) {
                 viewHolder.itemView.findViewById<android.widget.Button>(R.id.verifyButton)?.isEnabled = true
             }
         }
     }
 
     /**
-     * Initiates the verification process for an external [EmailMask] by calling
+     * Initiates the verification process for an external [EmailAlias] by calling
      * [SudoEmailClient.verifyExternalEmailAddress] without a verification code.
      *
      * Shows a loading indicator on the tapped item and disables the verify button during
      * the initiation call. On success, shows the verification code dialog. On failure,
      * shows an error dialog with "Try Again" and "Cancel" options.
      *
-     * @param emailMask [EmailMask] The external email mask to verify.
+     * @param emailAlias [EmailAlias] The external email alias to verify.
      */
-    private fun initiateVerification(emailMask: EmailMask) {
-        // Find the position of the mask in the filtered list to update the ViewHolder
-        val position = filteredEmailMaskList.indexOf(emailMask)
+    private fun initiateVerification(emailAlias: EmailAlias) {
+        // Find the position of the alias in the filtered list to update the ViewHolder
+        val position = filteredEmailAliasList.indexOf(emailAlias)
         if (position >= 0) {
-            val viewHolder = binding.masksRecyclerView.findViewHolderForAdapterPosition(position)
-            if (viewHolder is com.sudoplatform.emailexample.emailmasks.EmailMaskViewHolder) {
+            val viewHolder = binding.aliasesRecyclerView.findViewHolderForAdapterPosition(position)
+            if (viewHolder is com.sudoplatform.emailexample.emailaliases.EmailAliasViewHolder) {
                 viewHolder.itemView.findViewById<android.widget.Button>(R.id.verifyButton)?.isEnabled = false
             }
         }
@@ -528,25 +528,25 @@ class EmailAddressesFragment :
                 withContext(Dispatchers.IO) {
                     app.sudoEmailClient.verifyExternalEmailAddress(
                         VerifyExternalEmailAddressInput(
-                            emailAddress = emailMask.realAddress,
-                            emailMaskId = emailMask.id,
+                            emailAddress = emailAlias.realAddress,
+                            emailAliasId = emailAlias.id,
                         ),
                     )
                 }
                 hideDeleteAlert()
                 if (bindingDelegate.isAttached()) {
-                    showVerificationCodeDialog(emailMask)
+                    showVerificationCodeDialog(emailAlias)
                 }
             } catch (e: Exception) {
                 hideDeleteAlert()
                 // Re-enable the verify button on failure
-                reEnableVerifyButton(emailMask)
+                reEnableVerifyButton(emailAlias)
                 if (bindingDelegate.isAttached()) {
                     showAlertDialog(
                         titleResId = R.string.verification_initiation_failure,
                         message = e.localizedMessage ?: e.toString(),
                         positiveButtonResId = R.string.try_again,
-                        onPositive = { initiateVerification(emailMask) },
+                        onPositive = { initiateVerification(emailAlias) },
                         negativeButtonResId = android.R.string.cancel,
                     )
                 }
@@ -555,16 +555,16 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Shows the verification code input dialog for the given [EmailMask].
+     * Shows the verification code input dialog for the given [EmailAlias].
      *
      * Displays an [AlertDialog] with a text input field (max 10 characters) prompting the user
      * to enter the verification code received at their external email address. If the user
      * confirms with an empty input, the dialog remains open with a validation message. If the
      * user enters a non-empty code and confirms, [completeVerification] is called.
      *
-     * @param emailMask [EmailMask] The email mask being verified.
+     * @param emailAlias [EmailAlias] The email alias being verified.
      */
-    private fun showVerificationCodeDialog(emailMask: EmailMask) {
+    private fun showVerificationCodeDialog(emailAlias: EmailAlias) {
         val context = requireContext()
         val padding = (16 * resources.displayMetrics.density).toInt()
 
@@ -598,7 +598,7 @@ class EmailAddressesFragment :
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel) { d, _ ->
                     d.dismiss()
-                    reEnableVerifyButton(emailMask)
+                    reEnableVerifyButton(emailAlias)
                 }.create()
 
         dialog.setOnShowListener {
@@ -609,7 +609,7 @@ class EmailAddressesFragment :
                     validationMessage.visibility = View.VISIBLE
                 } else {
                     dialog.dismiss()
-                    completeVerification(emailMask, code)
+                    completeVerification(emailAlias, code)
                 }
             }
         }
@@ -618,18 +618,18 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Completes the verification process for an external [EmailMask] by calling
+     * Completes the verification process for an external [EmailAlias] by calling
      * [SudoEmailClient.verifyExternalEmailAddress] with the verification code.
      *
      * On success: dismisses any loading dialog, shows a Toast success message, and refreshes
-     * the mask list. On failure: shows an error dialog with "Try Again" (re-opens the code
+     * the alias list. On failure: shows an error dialog with "Try Again" (re-opens the code
      * dialog) and "Cancel" options.
      *
-     * @param emailMask [EmailMask] The external email mask being verified.
+     * @param emailAlias [EmailAlias] The external email alias being verified.
      * @param code [String] The verification code entered by the user.
      */
     private fun completeVerification(
-        emailMask: EmailMask,
+        emailAlias: EmailAlias,
         code: String,
     ) {
         launch {
@@ -639,8 +639,8 @@ class EmailAddressesFragment :
                     withContext(Dispatchers.IO) {
                         app.sudoEmailClient.verifyExternalEmailAddress(
                             VerifyExternalEmailAddressInput(
-                                emailAddress = emailMask.realAddress,
-                                emailMaskId = emailMask.id,
+                                emailAddress = emailAlias.realAddress,
+                                emailAliasId = emailAlias.id,
                                 verificationCode = code,
                             ),
                         )
@@ -654,9 +654,9 @@ class EmailAddressesFragment :
                                 R.string.verification_success,
                                 Toast.LENGTH_SHORT,
                             ).show()
-                        listEmailMasks()
+                        listEmailAliases()
                     } else {
-                        reEnableVerifyButton(emailMask)
+                        reEnableVerifyButton(emailAlias)
                         val reason =
                             result.reason
                                 ?: getString(R.string.verification_completion_failure)
@@ -664,20 +664,20 @@ class EmailAddressesFragment :
                             titleResId = R.string.verification_completion_failure,
                             message = reason,
                             positiveButtonResId = R.string.try_again,
-                            onPositive = { showVerificationCodeDialog(emailMask) },
+                            onPositive = { showVerificationCodeDialog(emailAlias) },
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
             } catch (e: Exception) {
                 hideDeleteAlert()
-                reEnableVerifyButton(emailMask)
+                reEnableVerifyButton(emailAlias)
                 if (bindingDelegate.isAttached()) {
                     showAlertDialog(
                         titleResId = R.string.verification_completion_failure,
                         message = e.localizedMessage ?: e.toString(),
                         positiveButtonResId = R.string.try_again,
-                        onPositive = { showVerificationCodeDialog(emailMask) },
+                        onPositive = { showVerificationCodeDialog(emailAlias) },
                         negativeButtonResId = android.R.string.cancel,
                     )
                 }
@@ -686,35 +686,35 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Shows an action dialog for the given [EmailMask] with status-based options.
+     * Shows an action dialog for the given [EmailAlias] with status-based options.
      *
-     * @param emailMask [EmailMask] The email mask to show actions for.
+     * @param emailAlias [EmailAlias] The email alias to show actions for.
      */
-    private fun showActionDialog(emailMask: EmailMask) {
+    private fun showActionDialog(emailAlias: EmailAlias) {
         val builder =
             AlertDialog
                 .Builder(requireContext())
-                .setTitle(emailMask.maskAddress)
+                .setTitle(emailAlias.aliasAddress)
                 .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                     dialog.dismiss()
                 }
 
-        when (emailMask.status) {
-            EmailMaskStatus.ENABLED -> {
+        when (emailAlias.status) {
+            EmailAliasStatus.ENABLED -> {
                 builder.setPositiveButton(R.string.disable) { dialog, _ ->
                     dialog.dismiss()
-                    disableEmailMask(emailMask.id)
+                    disableEmailAlias(emailAlias.id)
                 }
             }
-            EmailMaskStatus.DISABLED -> {
+            EmailAliasStatus.DISABLED -> {
                 builder.setPositiveButton(R.string.enable) { dialog, _ ->
                     dialog.dismiss()
-                    enableEmailMask(emailMask.id)
+                    enableEmailAlias(emailAlias.id)
                 }
             }
-            EmailMaskStatus.LOCKED,
-            EmailMaskStatus.PENDING,
-            EmailMaskStatus.UNKNOWN,
+            EmailAliasStatus.LOCKED,
+            EmailAliasStatus.PENDING,
+            EmailAliasStatus.UNKNOWN,
             -> {
                 // No additional positive button for these statuses
             }
@@ -722,21 +722,21 @@ class EmailAddressesFragment :
 
         builder.setNeutralButton(R.string.update) { dialog, _ ->
             dialog.dismiss()
-            showUpdateDialog(emailMask)
+            showUpdateDialog(emailAlias)
         }
 
         builder.show()
     }
 
     /**
-     * Shows the update dialog for the given [EmailMask].
+     * Shows the update dialog for the given [EmailAlias].
      * Presents a form with a "Metadata:" label followed by a pre-filled EditText,
      * an "Expires:" label followed by a button showing the current date or "Pick Date",
      * and Save/Cancel buttons.
      *
-     * @param emailMask [EmailMask] The email mask to update.
+     * @param emailAlias [EmailAlias] The email alias to update.
      */
-    private fun showUpdateDialog(emailMask: EmailMask) {
+    private fun showUpdateDialog(emailAlias: EmailAlias) {
         val context = requireContext()
         val padding = (16 * resources.displayMetrics.density).toInt()
         val smallPadding = (8 * resources.displayMetrics.density).toInt()
@@ -763,8 +763,8 @@ class EmailAddressesFragment :
                 hint = getString(R.string.metadata_json_hint)
                 inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 minLines = 3
-                if (!emailMask.metadata.isNullOrEmpty()) {
-                    setText(JSONObject(emailMask.metadata!!).toString())
+                if (!emailAlias.metadata.isNullOrEmpty()) {
+                    setText(JSONObject(emailAlias.metadata!!).toString())
                 }
             }
         layout.addView(metadataEditText)
@@ -785,7 +785,7 @@ class EmailAddressesFragment :
             }
 
         // Date button - shows current date or "Pick Date"
-        var selectedDate: Date? = emailMask.expiresAt?.takeIf { it.time != 0L }
+        var selectedDate: Date? = emailAlias.expiresAt?.takeIf { it.time != 0L }
         val dateButton =
             Button(context).apply {
                 text =
@@ -840,7 +840,7 @@ class EmailAddressesFragment :
         val dialog =
             AlertDialog
                 .Builder(context)
-                .setTitle(emailMask.maskAddress)
+                .setTitle(emailAlias.aliasAddress)
                 .setView(layout)
                 .setPositiveButton(R.string.save, null)
                 .setNegativeButton(android.R.string.cancel) { d, _ ->
@@ -866,35 +866,35 @@ class EmailAddressesFragment :
                 val expiresAt: Date? = selectedDate ?: Date(0)
 
                 dialog.dismiss()
-                updateEmailMask(emailMask.id, metadata, expiresAt)
+                updateEmailAlias(emailAlias.id, metadata, expiresAt)
             }
         }
         dialog.show()
     }
 
     /**
-     * Enable a disabled [EmailMask] via the [SudoEmailClient].
+     * Enable a disabled [EmailAlias] via the [SudoEmailClient].
      *
-     * @param maskId [String] The identifier of the [EmailMask] to enable.
+     * @param aliasId [String] The identifier of the [EmailAlias] to enable.
      */
-    private fun enableEmailMask(maskId: String) {
+    private fun enableEmailAlias(aliasId: String) {
         launch {
             try {
-                showDeleteAlert(R.string.enabling_email_mask)
+                showDeleteAlert(R.string.enabling_email_alias)
                 withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.enableEmailMask(
-                        EnableEmailMaskInput(emailMaskId = maskId),
+                    app.sudoEmailClient.enableEmailAlias(
+                        EnableEmailAliasInput(emailAliasId = aliasId),
                     )
                 }
                 hideDeleteAlert()
-                listEmailMasks()
+                listEmailAliases()
             } catch (e: Exception) {
                 hideDeleteAlert()
                 showAlertDialog(
-                    titleResId = R.string.enable_email_mask_failure,
+                    titleResId = R.string.enable_email_alias_failure,
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { enableEmailMask(maskId) },
+                    onPositive = { enableEmailAlias(aliasId) },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -902,28 +902,28 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Disable an enabled [EmailMask] via the [SudoEmailClient].
+     * Disable an enabled [EmailAlias] via the [SudoEmailClient].
      *
-     * @param maskId [String] The identifier of the [EmailMask] to disable.
+     * @param aliasId [String] The identifier of the [EmailAlias] to disable.
      */
-    private fun disableEmailMask(maskId: String) {
+    private fun disableEmailAlias(aliasId: String) {
         launch {
             try {
-                showDeleteAlert(R.string.disabling_email_mask)
+                showDeleteAlert(R.string.disabling_email_alias)
                 withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.disableEmailMask(
-                        DisableEmailMaskInput(emailMaskId = maskId),
+                    app.sudoEmailClient.disableEmailAlias(
+                        DisableEmailAliasInput(emailAliasId = aliasId),
                     )
                 }
                 hideDeleteAlert()
-                listEmailMasks()
+                listEmailAliases()
             } catch (e: Exception) {
                 hideDeleteAlert()
                 showAlertDialog(
-                    titleResId = R.string.disable_email_mask_failure,
+                    titleResId = R.string.disable_email_alias_failure,
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { disableEmailMask(maskId) },
+                    onPositive = { disableEmailAlias(aliasId) },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -931,38 +931,38 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Update an [EmailMask] via the [SudoEmailClient].
+     * Update an [EmailAlias] via the [SudoEmailClient].
      *
-     * @param maskId [String] The identifier of the [EmailMask] to update.
+     * @param aliasId [String] The identifier of the [EmailAlias] to update.
      * @param metadata [Map]? The metadata map to set, or null to leave unchanged.
      * @param expiresAt [Date]? The expiration date to set, or null to leave unchanged.
      */
-    private fun updateEmailMask(
-        maskId: String,
+    private fun updateEmailAlias(
+        aliasId: String,
         metadata: Map<String, String>?,
         expiresAt: Date?,
     ) {
         launch {
             try {
-                showDeleteAlert(R.string.updating_email_mask)
+                showDeleteAlert(R.string.updating_email_alias)
                 withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.updateEmailMask(
-                        UpdateEmailMaskInput(
-                            emailMaskId = maskId,
+                    app.sudoEmailClient.updateEmailAlias(
+                        UpdateEmailAliasInput(
+                            emailAliasId = aliasId,
                             metadata = metadata,
                             expiresAt = expiresAt,
                         ),
                     )
                 }
                 hideDeleteAlert()
-                listEmailMasks()
+                listEmailAliases()
             } catch (e: Exception) {
                 hideDeleteAlert()
                 showAlertDialog(
-                    titleResId = R.string.update_email_mask_failure,
+                    titleResId = R.string.update_email_alias_failure,
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { updateEmailMask(maskId, metadata, expiresAt) },
+                    onPositive = { updateEmailAlias(aliasId, metadata, expiresAt) },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -970,39 +970,39 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Deprovision a selected [EmailMask] from the [SudoEmailClient].
+     * Deprovision a selected [EmailAlias] from the [SudoEmailClient].
      *
-     * @param maskId [String] The identifier of the [EmailMask] to deprovision.
+     * @param aliasId [String] The identifier of the [EmailAlias] to deprovision.
      * @param position [Int] The adapter position of the item being deprovisioned.
      */
-    private fun deprovisionEmailMask(
-        maskId: String,
+    private fun deprovisionEmailAlias(
+        aliasId: String,
         position: Int,
     ) {
         launch {
             try {
-                showDeleteAlert(R.string.deleting_email_mask)
+                showDeleteAlert(R.string.deleting_email_alias)
                 withContext(Dispatchers.IO) {
-                    app.sudoEmailClient.deprovisionEmailMask(
-                        DeprovisionEmailMaskInput(emailMaskId = maskId),
+                    app.sudoEmailClient.deprovisionEmailAlias(
+                        DeprovisionEmailAliasInput(emailAliasId = aliasId),
                     )
                 }
                 hideDeleteAlert()
                 // Remove from both lists
-                allEmailMaskList.removeAll { it.id == maskId }
-                filteredEmailMaskList.removeAt(position)
-                maskAdapter.notifyItemRemoved(position)
-                if (filteredEmailMaskList.isEmpty()) {
+                allEmailAliasList.removeAll { it.id == aliasId }
+                filteredEmailAliasList.removeAt(position)
+                aliasAdapter.notifyItemRemoved(position)
+                if (filteredEmailAliasList.isEmpty()) {
                     updateEmptyStateVisibility(binding.internalExternalSwitch.isChecked)
                 }
             } catch (e: Exception) {
                 hideDeleteAlert()
-                maskAdapter.notifyItemChanged(position)
+                aliasAdapter.notifyItemChanged(position)
                 showAlertDialog(
-                    titleResId = R.string.delete_email_mask_failure,
+                    titleResId = R.string.delete_email_alias_failure,
                     message = e.localizedMessage ?: e.toString(),
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { deprovisionEmailMask(maskId, position) },
+                    onPositive = { deprovisionEmailAlias(aliasId, position) },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -1037,7 +1037,7 @@ class EmailAddressesFragment :
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         binding.createEmailAddressButton.isEnabled = isEnabled
-        binding.createEmailMaskButton.isEnabled = isEnabled
+        binding.createEmailAliasButton.isEnabled = isEnabled
         binding.emailAddressRecyclerView.isEnabled = isEnabled
     }
 
@@ -1051,7 +1051,7 @@ class EmailAddressesFragment :
         binding.progressBar.visibility = View.VISIBLE
         binding.progressText.visibility = View.VISIBLE
         binding.emailAddressRecyclerView.visibility = View.GONE
-        binding.masksRecyclerView.visibility = View.GONE
+        binding.aliasesRecyclerView.visibility = View.GONE
         setItemsEnabled(false)
     }
 
@@ -1061,7 +1061,7 @@ class EmailAddressesFragment :
             binding.progressBar.visibility = View.GONE
             binding.progressText.visibility = View.GONE
             binding.emailAddressRecyclerView.visibility = View.VISIBLE
-            binding.masksRecyclerView.visibility = View.VISIBLE
+            binding.aliasesRecyclerView.visibility = View.VISIBLE
             setItemsEnabled(true)
         }
     }
@@ -1101,18 +1101,18 @@ class EmailAddressesFragment :
     }
 
     /**
-     * Configures the swipe to delete action for email masks.
+     * Configures the swipe to delete action for email aliases.
      */
-    private fun configureMaskSwipeToDelete() {
-        val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onMaskSwiped)
-        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.masksRecyclerView)
+    private fun configureAliasSwipeToDelete() {
+        val itemTouchCallback = SwipeLeftActionHelper(requireContext(), onSwipedAction = ::onAliasSwiped)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(binding.aliasesRecyclerView)
     }
 
-    private fun onMaskSwiped(
+    private fun onAliasSwiped(
         viewHolder: RecyclerView.ViewHolder,
         direction: Int,
     ) {
-        val emailMask = filteredEmailMaskList[viewHolder.adapterPosition]
-        deprovisionEmailMask(emailMask.id, viewHolder.adapterPosition)
+        val emailAlias = filteredEmailAliasList[viewHolder.adapterPosition]
+        deprovisionEmailAlias(emailAlias.id, viewHolder.adapterPosition)
     }
 }

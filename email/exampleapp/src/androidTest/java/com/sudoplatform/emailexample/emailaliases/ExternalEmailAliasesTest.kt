@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -24,12 +24,12 @@ import org.junit.runner.RunWith
 import timber.log.Timber
 
 /**
- * Test the external email masks feature: feature gating, switch filtering,
+ * Test the external email aliases feature: feature gating, switch filtering,
  * and verification flow.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class ExternalEmailMasksTest {
+class ExternalEmailAliasesTest {
     @get:Rule
     val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
@@ -51,8 +51,8 @@ class ExternalEmailMasksTest {
 
     /**
      * Test: Verify the feature gate UI state is consistent with the configuration.
-     * In the test environment, emailMasksEnabled=true and externalEmailMasksEnabled=true,
-     * so the masks section should be visible with the switch displayed.
+     * In the test environment, emailAliasesEnabled=true and externalEmailAliasesEnabled=true,
+     * so the aliases section should be visible with the switch displayed.
      */
     @Test
     fun testFeatureGateEnabledState() {
@@ -75,9 +75,9 @@ class ExternalEmailMasksTest {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
         }
-        externalEmailMasks {
-            // In the test environment, email masks are enabled.
-            // Verify the masks section is visible with the switch displayed.
+        externalEmailAliases {
+            // In the test environment, email aliases are enabled.
+            // Verify the aliases section is visible with the switch displayed.
             checkSwitchDisplayed()
             checkDisabledMessageNotDisplayed()
         }
@@ -91,30 +91,30 @@ class ExternalEmailMasksTest {
     }
 
     /**
-     * Test: Toggling the Internal/External switch filters the mask list
-     * to show the correct mask types.
+     * Test: Toggling the Internal/External switch filters the alias list
+     * to show the correct alias types.
      */
     @Test
-    fun testSwitchFilteringMasks() {
-        provisionInternalMaskFlow()
-        externalEmailMasks {
-            // Switch should be visible if externalEmailMasksEnabled=true
+    fun testSwitchFilteringAliases() {
+        provisionInternalAliasFlow()
+        externalEmailAliases {
+            // Switch should be visible if externalEmailAliasesEnabled=true
             checkSwitchDisplayed()
-            // Default state (off) shows internal masks
+            // Default state (off) shows internal aliases
             checkCreateButtonTextInternal()
-            checkMaskListDisplayed()
+            checkAliasListDisplayed()
             // Toggle to external
             toggleSwitch()
             // Create button should update to external text
             checkCreateButtonTextExternal()
-            // Since we only provisioned an internal mask, external list should be empty
-            checkEmptyMasksStateDisplayed()
+            // Since we only provisioned an internal alias, external list should be empty
+            checkEmptyAliasesStateDisplayed()
             // Toggle back to internal
             toggleSwitch()
-            // Should show internal masks again
+            // Should show internal aliases again
             checkCreateButtonTextInternal()
-            checkMaskListDisplayed()
-            checkMasksRecyclerViewHasItems(1)
+            checkAliasListDisplayed()
+            checkAliasesRecyclerViewHasItems(1)
         }
         pressBack()
         sudos {
@@ -126,21 +126,21 @@ class ExternalEmailMasksTest {
     }
 
     /**
-     * Test: Tapping the verify button on an unverified external mask opens
+     * Test: Tapping the verify button on an unverified external alias opens
      * the verification code dialog, and confirming with a code triggers
      * the verification completion call.
      */
     @Test
-    fun testVerifyExternalMaskFlow() {
-        provisionExternalMaskFlow()
-        externalEmailMasks {
+    fun testVerifyExternalAliasFlow() {
+        provisionExternalAliasFlow()
+        externalEmailAliases {
             // Switch to external view
             checkSwitchDisplayed()
             toggleSwitch()
-            // Wait for the external masks to appear
-            waitForMasksRecyclerView()
-            checkMasksRecyclerViewHasItems(1)
-            // Tap verify button on the first external mask
+            // Wait for the external aliases to appear
+            waitForAliasesRecyclerView()
+            checkAliasesRecyclerViewHasItems(1)
+            // Tap verify button on the first external alias
             clickVerifyButtonOnItem(0)
             // Verification code dialog should appear
             checkVerificationCodeDialogDisplayed()
@@ -161,9 +161,9 @@ class ExternalEmailMasksTest {
 
     /**
      * Helper: Registers, creates a sudo, provisions an email address,
-     * and provisions an internal email mask. Stays on the email addresses screen.
+     * and provisions an internal email alias. Stays on the email addresses screen.
      */
-    private fun provisionInternalMaskFlow() {
+    private fun provisionInternalAliasFlow() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -182,10 +182,10 @@ class ExternalEmailMasksTest {
         emailAddresses {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
-            navigateToCreateEmailMaskScreen()
+            navigateToCreateEmailAliasScreen()
         }
-        provisionEmailMask {
-            checkProvisionEmailMaskItemsDisplayed()
+        provisionEmailAlias {
+            checkProvisionEmailAliasItemsDisplayed()
             selectRealEmailAddress(1)
             setLocalPart()
             waitForRootFocus()
@@ -197,10 +197,10 @@ class ExternalEmailMasksTest {
 
     /**
      * Helper: Registers, creates a sudo, provisions an email address,
-     * and provisions an external email mask via the external mask form.
+     * and provisions an external email alias via the external alias form.
      * Stays on the email addresses screen.
      */
-    private fun provisionExternalMaskFlow() {
+    private fun provisionExternalAliasFlow() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -220,15 +220,15 @@ class ExternalEmailMasksTest {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
         }
-        externalEmailMasks {
+        externalEmailAliases {
             // Toggle to external to access the external create button
             checkSwitchDisplayed()
             toggleSwitch()
             checkCreateButtonTextExternal()
             clickOnCreateButton()
         }
-        provisionExternalEmailMask {
-            checkProvisionExternalEmailMaskItemsDisplayed()
+        provisionExternalEmailAlias {
+            checkProvisionExternalEmailAliasItemsDisplayed()
             enterExternalEmail("testuser@gmail.com")
             setLocalPart()
             waitForRootFocus()

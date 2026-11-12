@@ -16,11 +16,11 @@ import kotlin.random.Random
 /**
  * Property-based test for spinner item ordering.
  *
- * Feature: send-masked-email, Property 4: Spinner item ordering
+ * Feature: send-aliased-email, Property 4: Spinner item ordering
  *
- * For any filtered list of email masks, the spinner items shall be ordered as
+ * For any filtered list of email aliases, the spinner items shall be ordered as
  * the string "None (send from email address)" at position 0, followed by the
- * maskAddress of each filtered mask in the same order as the input list.
+ * aliasAddress of each filtered alias in the same order as the input list.
  *
  * **Validates: Requirements 4.3, 1.5**
  */
@@ -34,34 +34,34 @@ class SpinnerOrderingPropertyTest {
         private const val MAX_ADDRESS_LENGTH = 40
 
         /**
-         * Characters used for generating random mask addresses.
+         * Characters used for generating random alias addresses.
          */
         private val ADDRESS_CHARS = ('a'..'z') + ('0'..'9') + listOf('.', '-', '_', '@')
     }
 
     /**
      * Models the spinner item construction logic from
-     * SendEmailMessageFragment.populateEmailMaskSpinner.
+     * SendEmailMessageFragment.populateEmailAliasSpinner.
      *
      * This mirrors the actual implementation:
      * ```
-     * val spinnerItems = mutableListOf(getString(R.string.send_masked_email_none_option))
-     * spinnerItems.addAll(emailMaskList.map { it.maskAddress })
+     * val spinnerItems = mutableListOf(getString(R.string.send_aliased_email_none_option))
+     * spinnerItems.addAll(emailAliasList.map { it.aliasAddress })
      * ```
      *
-     * @param maskAddresses The list of mask addresses from the filtered email mask list
+     * @param aliasAddresses The list of alias addresses from the filtered email alias list
      * @return The ordered list of spinner items
      */
-    private fun buildSpinnerItems(maskAddresses: List<String>): List<String> {
+    private fun buildSpinnerItems(aliasAddresses: List<String>): List<String> {
         val spinnerItems = mutableListOf(NONE_OPTION)
-        spinnerItems.addAll(maskAddresses)
+        spinnerItems.addAll(aliasAddresses)
         return spinnerItems
     }
 
     /**
-     * Generates a random email-like mask address string.
+     * Generates a random email-like alias address string.
      */
-    private fun randomMaskAddress(random: Random): String {
+    private fun randomAliasAddress(random: Random): String {
         val localLength = random.nextInt(3, MAX_ADDRESS_LENGTH / 2)
         val domainLength = random.nextInt(3, MAX_ADDRESS_LENGTH / 2)
         val local =
@@ -78,23 +78,23 @@ class SpinnerOrderingPropertyTest {
     }
 
     /**
-     * Generates a random list of mask addresses.
+     * Generates a random list of alias addresses.
      */
-    private fun generateRandomMaskAddresses(random: Random): List<String> {
+    private fun generateRandomAliasAddresses(random: Random): List<String> {
         val size = random.nextInt(0, MAX_LIST_SIZE + 1)
-        return (1..size).map { randomMaskAddress(random) }
+        return (1..size).map { randomAliasAddress(random) }
     }
 
     /**
      * Property 4: Spinner item ordering.
      *
-     * For any filtered list of masks, the spinner items are "None (send from email address)"
-     * at position 0 followed by each mask's maskAddress in original order.
+     * For any filtered list of aliases, the spinner items are "None (send from email address)"
+     * at position 0 followed by each alias's aliasAddress in original order.
      *
      * Verifies:
      * - Position 0 is always "None (send from email address)"
-     * - Positions 1..N correspond to maskAddress values in original order
-     * - Total size is masks.size + 1
+     * - Positions 1..N correspond to aliasAddress values in original order
+     * - Total size is aliases.size + 1
      *
      * **Validates: Requirements 4.3, 1.5**
      */
@@ -103,15 +103,15 @@ class SpinnerOrderingPropertyTest {
         val random = Random(seed = 42)
 
         repeat(ITERATIONS) { iteration ->
-            val maskAddresses = generateRandomMaskAddresses(random)
+            val aliasAddresses = generateRandomAliasAddresses(random)
 
-            val spinnerItems = buildSpinnerItems(maskAddresses)
+            val spinnerItems = buildSpinnerItems(aliasAddresses)
 
-            // Total size is masks.size + 1
+            // Total size is aliases.size + 1
             assertEquals(
-                "Iteration $iteration: Expected spinner size to be ${maskAddresses.size + 1} " +
+                "Iteration $iteration: Expected spinner size to be ${aliasAddresses.size + 1} " +
                     "but got ${spinnerItems.size}",
-                maskAddresses.size + 1,
+                aliasAddresses.size + 1,
                 spinnerItems.size,
             )
 
@@ -123,8 +123,8 @@ class SpinnerOrderingPropertyTest {
                 spinnerItems[0],
             )
 
-            // Positions 1..N correspond to maskAddress values in original order
-            maskAddresses.forEachIndexed { index, address ->
+            // Positions 1..N correspond to aliasAddress values in original order
+            aliasAddresses.forEachIndexed { index, address ->
                 assertEquals(
                     "Iteration $iteration: Expected position ${index + 1} to be '$address' " +
                         "but got '${spinnerItems[index + 1]}'",
@@ -136,13 +136,13 @@ class SpinnerOrderingPropertyTest {
     }
 
     /**
-     * Edge case: empty mask list produces spinner with only the "None" option.
+     * Edge case: empty alias list produces spinner with only the "None" option.
      */
     @Test
-    fun property4_emptyMaskListProducesOnlyNoneOption() {
+    fun property4_emptyAliasListProducesOnlyNoneOption() {
         val spinnerItems = buildSpinnerItems(emptyList())
 
-        assertEquals("Expected spinner size to be 1 for empty mask list", 1, spinnerItems.size)
+        assertEquals("Expected spinner size to be 1 for empty alias list", 1, spinnerItems.size)
         assertEquals(
             "Expected only item to be '$NONE_OPTION'",
             NONE_OPTION,
@@ -151,11 +151,11 @@ class SpinnerOrderingPropertyTest {
     }
 
     /**
-     * Edge case: single mask address is placed at position 1.
+     * Edge case: single alias address is placed at position 1.
      */
     @Test
-    fun property4_singleMaskAddressAtPosition1() {
-        val address = "mask123@example.com"
+    fun property4_singleAliasAddressAtPosition1() {
+        val address = "alias123@example.com"
         val spinnerItems = buildSpinnerItems(listOf(address))
 
         assertEquals("Expected spinner size to be 2", 2, spinnerItems.size)

@@ -62,7 +62,7 @@ dependencies {
     implementation 'com.sudoplatform:sudoprofiles:17.0.0'
     implementation 'com.sudoplatform:sudoentitlements:13.0.0'
     implementation 'com.sudoplatform:sudonotification:5.0.1'
-    implementation 'com.sudoplatform:sudoemail:22.7.0'
+    implementation 'com.sudoplatform:sudoemail:24.0.0'
 
     implementation platform('com.google.firebase:firebase-bom:34.2.0')
 
@@ -102,6 +102,25 @@ dependencies {
     }
     androidTestImplementation "com.jakewharton.timber:timber:5.0.1"
     androidTestImplementation "androidx.test.uiautomator:uiautomator:2.3.0"
+}
+
+// Force patched versions of vulnerable transitive dependencies (OWASP dependency-check findings).
+// Direct dependencies cannot clear these because the vulnerable artifacts are pulled in by parent libraries.
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        def group = details.requested.group
+        def name = details.requested.name
+        if (group == 'io.netty') {
+            details.useVersion '4.1.130.Final'
+            details.because 'Netty CVEs (CVE-2023-44487, CVE-2025-24970, CVE-2025-25193, CVE-2025-55163, CVE-2025-58056/58057, CVE-2025-67735, ...)'
+        } else if (group == 'com.google.protobuf' && name in ['protobuf-java', 'protobuf-java-util', 'protobuf-kotlin']) {
+            details.useVersion '3.25.5'
+            details.because 'CVE-2024-7254 fixed in protobuf 3.25.5'
+        } else if (group == 'io.opentelemetry' && name in ['opentelemetry-api', 'opentelemetry-context']) {
+            details.useVersion '1.49.0'
+            details.because 'opentelemetry-api/context 1.41.0 vulnerabilities'
+        }
+    }
 }
 
 // Kotlin Lint

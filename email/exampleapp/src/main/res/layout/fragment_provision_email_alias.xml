@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".emailmasks.ProvisionEmailMaskFragment">
+    tools:context=".emailaliases.ProvisionEmailAliasFragment">
 
     <include
         android:id="@+id/toolbar"
@@ -45,17 +45,17 @@
                 android:paddingEnd="12dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="5dp"
-                android:text="@string/mask_local_part_label"
+                android:text="@string/alias_local_part_label"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
             <EditText
-                android:id="@+id/maskLocalPartField"
+                android:id="@+id/aliasLocalPartField"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:autofillHints=""
                 android:background="@android:color/white"
-                android:hint="@string/enter_mask_local_part"
+                android:hint="@string/enter_alias_local_part"
                 android:inputType="text"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp" />
@@ -67,12 +67,12 @@
                 android:paddingEnd="12dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="5dp"
-                android:text="@string/mask_domain_label"
+                android:text="@string/alias_domain_label"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
             <Spinner
-                android:id="@+id/maskDomainSpinner"
+                android:id="@+id/aliasDomainSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@android:color/white"

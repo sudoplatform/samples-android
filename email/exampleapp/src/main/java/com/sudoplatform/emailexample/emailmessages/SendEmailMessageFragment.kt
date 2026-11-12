@@ -46,19 +46,19 @@ import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.emailexample.util.Rfc822MessageFactory
 import com.sudoplatform.emailexample.util.SimplifiedEmailMessage
 import com.sudoplatform.sudoemail.SudoEmailClient
+import com.sudoplatform.sudoemail.types.EmailAlias
+import com.sudoplatform.sudoemail.types.EmailAliasStatus
 import com.sudoplatform.sudoemail.types.EmailAttachment
-import com.sudoplatform.sudoemail.types.EmailMask
-import com.sudoplatform.sudoemail.types.EmailMaskStatus
 import com.sudoplatform.sudoemail.types.EmailMessage
 import com.sudoplatform.sudoemail.types.InternetMessageFormatHeader
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.inputs.CancelScheduledDraftMessageInput
 import com.sudoplatform.sudoemail.types.inputs.CreateDraftEmailMessageInput
-import com.sudoplatform.sudoemail.types.inputs.ListEmailMasksForOwnerInput
+import com.sudoplatform.sudoemail.types.inputs.ListEmailAliasesForOwnerInput
 import com.sudoplatform.sudoemail.types.inputs.LookupEmailAddressesPublicInfoInput
 import com.sudoplatform.sudoemail.types.inputs.ScheduleSendDraftMessageInput
 import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageInput
-import com.sudoplatform.sudoemail.types.inputs.SendMaskedEmailMessageInput
+import com.sudoplatform.sudoemail.types.inputs.SendEmailMessageViaAliasInput
 import com.sudoplatform.sudoemail.types.inputs.UpdateDraftEmailMessageInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -156,11 +156,11 @@ class SendEmailMessageFragment :
     /** A mutable list of [EmailAttachment]s. */
     private val emailAttachmentList: MutableList<EmailAttachment> = mutableListOf()
 
-    /** List of filtered email masks available for the current email address. */
-    private var emailMaskList = mutableListOf<EmailMask>()
+    /** List of filtered email aliases available for the current email address. */
+    private var emailAliasList = mutableListOf<EmailAlias>()
 
-    /** The currently selected email mask, or null if "None" is selected. */
-    private var selectedEmailMask: EmailMask? = null
+    /** The currently selected email alias, or null if "None" is selected. */
+    private var selectedEmailAlias: EmailAlias? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -234,7 +234,7 @@ class SendEmailMessageFragment :
             }
         }
 
-        loadEmailMasks()
+        loadEmailAliases()
     }
 
     override fun onDestroy() {
@@ -255,8 +255,8 @@ class SendEmailMessageFragment :
             )
             return
         }
-        if (selectedEmailMask != null) {
-            sendMaskedEmailMessage()
+        if (selectedEmailAlias != null) {
+            sendAliasedEmailMessage()
             return
         }
         launch {
@@ -323,16 +323,16 @@ class SendEmailMessageFragment :
         }
     }
 
-    /** Sends a masked email message using the selected email mask. */
-    private fun sendMaskedEmailMessage() {
-        val mask = selectedEmailMask ?: return
+    /** Sends a aliased email message using the selected email alias. */
+    private fun sendAliasedEmailMessage() {
+        val alias = selectedEmailAlias ?: return
         launch {
             try {
                 showLoading(R.string.sending)
                 withContext(Dispatchers.IO) {
                     val emailMessageHeader =
                         InternetMessageFormatHeader(
-                            from = EmailMessage.EmailAddress(mask.maskAddress),
+                            from = EmailMessage.EmailAddress(alias.aliasAddress),
                             to =
                                 if (binding.toTextView.text.isNotEmpty()) {
                                     addressesToArray(
@@ -361,13 +361,13 @@ class SendEmailMessageFragment :
                             subject = binding.subjectTextView.text.toString(),
                         )
                     val input =
-                        SendMaskedEmailMessageInput(
-                            senderEmailMaskId = mask.id,
+                        SendEmailMessageViaAliasInput(
+                            senderEmailAliasId = alias.id,
                             emailMessageHeader = emailMessageHeader,
                             body = binding.contentBody.text.toString(),
                             attachments = emailAttachmentList,
                         )
-                    app.sudoEmailClient.sendMaskedEmailMessage(input)
+                    app.sudoEmailClient.sendEmailMessageViaAlias(input)
                 }
                 Toast.makeText(context, getString(R.string.sent), Toast.LENGTH_SHORT).show()
                 navController.popBackStack()
@@ -376,7 +376,7 @@ class SendEmailMessageFragment :
                     titleResId = R.string.send_email_message_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { sendMaskedEmailMessage() },
+                    onPositive = { sendAliasedEmailMessage() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -384,54 +384,54 @@ class SendEmailMessageFragment :
         }
     }
 
-    /** Loads email masks and populates the spinner with filtered results. */
-    private fun loadEmailMasks() {
+    /** Loads email aliases and populates the spinner with filtered results. */
+    private fun loadEmailAliases() {
         launch {
             try {
-                val emailMasks =
+                val emailAliases =
                     withContext(Dispatchers.IO) {
-                        app.sudoEmailClient.listEmailMasksForOwner(ListEmailMasksForOwnerInput())
+                        app.sudoEmailClient.listEmailAliasesForOwner(ListEmailAliasesForOwnerInput())
                     }
-                when (emailMasks) {
+                when (emailAliases) {
                     is ListAPIResult.Success -> {
-                        emailMaskList.clear()
-                        emailMaskList.addAll(
-                            emailMasks.result.items.filter { mask ->
-                                mask.realAddress == emailAddress && mask.status == EmailMaskStatus.ENABLED
+                        emailAliasList.clear()
+                        emailAliasList.addAll(
+                            emailAliases.result.items.filter { alias ->
+                                alias.realAddress == emailAddress && alias.status == EmailAliasStatus.ENABLED
                             },
                         )
-                        populateEmailMaskSpinner()
+                        populateEmailAliasSpinner()
                     }
                     is ListAPIResult.Partial -> {
                         val cause =
-                            emailMasks.result.failed
+                            emailAliases.result.failed
                                 .first()
                                 .cause
                         showAlertDialog(
-                            titleResId = R.string.list_email_masks_failure,
+                            titleResId = R.string.list_email_aliases_failure,
                             message = cause.localizedMessage ?: "$cause",
                             positiveButtonResId = R.string.try_again,
-                            onPositive = { loadEmailMasks() },
+                            onPositive = { loadEmailAliases() },
                             negativeButtonResId = android.R.string.cancel,
                         )
                     }
                 }
             } catch (e: SudoEmailClient.EmailAddressException) {
                 showAlertDialog(
-                    titleResId = R.string.list_email_masks_failure,
+                    titleResId = R.string.list_email_aliases_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { loadEmailMasks() },
+                    onPositive = { loadEmailAliases() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
         }
     }
 
-    /** Populates the email mask spinner with the filtered mask list. */
-    private fun populateEmailMaskSpinner() {
-        val spinnerItems = mutableListOf(getString(R.string.send_masked_email_none_option))
-        spinnerItems.addAll(emailMaskList.map { it.maskAddress })
+    /** Populates the email alias spinner with the filtered alias list. */
+    private fun populateEmailAliasSpinner() {
+        val spinnerItems = mutableListOf(getString(R.string.send_aliased_email_none_option))
+        spinnerItems.addAll(emailAliasList.map { it.aliasAddress })
 
         val adapter =
             ArrayAdapter(
@@ -440,9 +440,9 @@ class SendEmailMessageFragment :
                 spinnerItems,
             )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.emailMaskSpinner.adapter = adapter
+        binding.emailAliasSpinner.adapter = adapter
 
-        binding.emailMaskSpinner.onItemSelectedListener =
+        binding.emailAliasSpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -450,16 +450,16 @@ class SendEmailMessageFragment :
                     position: Int,
                     id: Long,
                 ) {
-                    selectedEmailMask =
+                    selectedEmailAlias =
                         if (position == 0) {
                             null
                         } else {
-                            emailMaskList[position - 1]
+                            emailAliasList[position - 1]
                         }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    selectedEmailMask = null
+                    selectedEmailAlias = null
                 }
             }
     }

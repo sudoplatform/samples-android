@@ -4,22 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.sudoplatform.sudoemail.types.EmailMaskStatus
+import com.sudoplatform.sudoemail.types.EmailAliasStatus
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.random.Random
 
 /**
- * Property-based test for Update button availability across all mask statuses.
+ * Property-based test for Update button availability across all alias statuses.
  *
- * Feature: update-email-mask, Property 1: Update button is available for all mask statuses
+ * Feature: update-email-alias, Property 1: Update button is available for all alias statuses
  *
- * For any EmailMaskStatus value (ENABLED, DISABLED, LOCKED, PENDING, UNKNOWN),
+ * For any EmailAliasStatus value (ENABLED, DISABLED, LOCKED, PENDING, UNKNOWN),
  * the action dialog options should always include an "Update" button, regardless
  * of which other actions are available.
  *
@@ -52,26 +52,26 @@ class UpdateButtonAvailabilityPropertyTest {
      * - A positive button ("Disable"/"Enable") is set only for ENABLED/DISABLED statuses
      * - A neutral "Update" button is set OUTSIDE the when block, so it applies to ALL statuses
      *
-     * @param status The EmailMaskStatus to configure the dialog for
+     * @param status The EmailAliasStatus to configure the dialog for
      * @return The resulting DialogConfiguration
      */
-    private fun configureActionDialog(status: EmailMaskStatus): DialogConfiguration {
+    private fun configureActionDialog(status: EmailAliasStatus): DialogConfiguration {
         var hasPositiveButton = false
         var positiveButtonLabel: String? = null
 
         // This mirrors the when block in showActionDialog
         when (status) {
-            EmailMaskStatus.ENABLED -> {
+            EmailAliasStatus.ENABLED -> {
                 hasPositiveButton = true
                 positiveButtonLabel = "Disable"
             }
-            EmailMaskStatus.DISABLED -> {
+            EmailAliasStatus.DISABLED -> {
                 hasPositiveButton = true
                 positiveButtonLabel = "Enable"
             }
-            EmailMaskStatus.LOCKED,
-            EmailMaskStatus.PENDING,
-            EmailMaskStatus.UNKNOWN,
+            EmailAliasStatus.LOCKED,
+            EmailAliasStatus.PENDING,
+            EmailAliasStatus.UNKNOWN,
             -> {
                 // No additional positive button for these statuses
             }
@@ -96,18 +96,18 @@ class UpdateButtonAvailabilityPropertyTest {
     }
 
     /**
-     * Property 1: Update button is available for all mask statuses.
+     * Property 1: Update button is available for all alias statuses.
      *
-     * For any EmailMaskStatus value, the action dialog configuration always includes
+     * For any EmailAliasStatus value, the action dialog configuration always includes
      * a neutral "Update" button. This test randomly selects statuses over 100 iterations
      * to verify the property holds universally.
      *
-     * Feature: update-email-mask, Property 1: Update button is available for all mask statuses
+     * Feature: update-email-alias, Property 1: Update button is available for all alias statuses
      * **Validates: Requirements 1.2**
      */
     @Test
     fun property1_updateButtonAvailableForAllStatuses() {
-        val allStatuses = EmailMaskStatus.values()
+        val allStatuses = EmailAliasStatus.values()
         val random = Random(seed = 42)
 
         repeat(ITERATIONS) { iteration ->
@@ -130,12 +130,12 @@ class UpdateButtonAvailabilityPropertyTest {
     }
 
     /**
-     * Exhaustive verification: explicitly tests every EmailMaskStatus value
+     * Exhaustive verification: explicitly tests every EmailAliasStatus value
      * to ensure complete coverage beyond random sampling.
      */
     @Test
     fun property1_exhaustiveStatusCoverage() {
-        val allStatuses = EmailMaskStatus.values()
+        val allStatuses = EmailAliasStatus.values()
 
         for (status in allStatuses) {
             val config = configureActionDialog(status)
@@ -158,7 +158,7 @@ class UpdateButtonAvailabilityPropertyTest {
      */
     @Test
     fun property1_cancelButtonAlwaysPresentAlongsideUpdate() {
-        val allStatuses = EmailMaskStatus.values()
+        val allStatuses = EmailAliasStatus.values()
         val random = Random(seed = 123)
 
         repeat(ITERATIONS) { iteration ->

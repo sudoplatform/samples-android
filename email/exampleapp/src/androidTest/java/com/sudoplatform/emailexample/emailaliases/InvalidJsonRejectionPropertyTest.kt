@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -17,7 +17,7 @@ import kotlin.random.Random
 /**
  * Property-based test: Invalid JSON strings are rejected.
  *
- * Feature: update-email-mask, Property 3: Invalid JSON strings are rejected
+ * Feature: update-email-alias, Property 3: Invalid JSON strings are rejected
  *
  * For any string that is not a valid JSON object (e.g., plain text, malformed JSON,
  * JSON arrays, numbers), parseMetadataJson should return null.
@@ -147,7 +147,7 @@ class InvalidJsonRejectionPropertyTest {
      * For any string that is not a valid JSON object, parseMetadataJson returns null.
      * We generate 100+ invalid JSON inputs and verify each returns null.
      *
-     * Feature: update-email-mask, Property 3: Invalid JSON strings are rejected
+     * Feature: update-email-alias, Property 3: Invalid JSON strings are rejected
      * **Validates: Requirements 3.3**
      */
     @Test

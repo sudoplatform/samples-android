@@ -13,8 +13,8 @@ import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
-import com.sudoplatform.emailexample.emailmasks.externalEmailMasks
-import com.sudoplatform.emailexample.emailmasks.provisionExternalEmailMask
+import com.sudoplatform.emailexample.emailaliases.externalEmailAliases
+import com.sudoplatform.emailexample.emailaliases.provisionExternalEmailAlias
 import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
@@ -381,7 +381,7 @@ class SendEmailMessageTest {
     }
 
     @Test
-    fun testExternalMaskAddressDoesNotShowEncryptedIndicator() {
+    fun testExternalAliasAddressDoesNotShowEncryptedIndicator() {
         createSudo {
             registerAndCreateSudoFlow()
         }
@@ -403,21 +403,21 @@ class SendEmailMessageTest {
             waitForRecyclerView()
             checkEmailAddressesItemsDisplayed()
         }
-        // Provision an external email mask
-        var externalMaskAddress = ""
-        externalEmailMasks {
+        // Provision an external email alias
+        var externalAliasAddress = ""
+        externalEmailAliases {
             checkSwitchDisplayed()
             toggleSwitch()
             checkCreateButtonTextExternal()
             clickOnCreateButton()
         }
-        provisionExternalEmailMask {
-            checkProvisionExternalEmailMaskItemsDisplayed()
+        provisionExternalEmailAlias {
+            checkProvisionExternalEmailAliasItemsDisplayed()
             enterExternalEmail("testuser@gmail.com")
             setLocalPart()
             waitForRootFocus()
             checkAvailableAddressMsg()
-            externalMaskAddress = "testuser@gmail.com"
+            externalAliasAddress = "testuser@gmail.com"
             clickOnCreateButton()
             waitForLoading()
         }
@@ -430,10 +430,10 @@ class SendEmailMessageTest {
             navigateToSendEmailMessageScreen()
         }
         sendEmailMessage {
-            // External mask address should NOT show encrypted indicator
-            // because enableEncryption is false for external masks
+            // External alias address should NOT show encrypted indicator
+            // because enableEncryption is false for external aliases
             checkEncryptedIndicatorNotVisible()
-            setToField(externalMaskAddress)
+            setToField(externalAliasAddress)
             checkEncryptedIndicatorNotVisible()
 
             // Internal platform address should still show encrypted indicator
@@ -441,7 +441,7 @@ class SendEmailMessageTest {
             checkEncryptedIndicatorVisible()
 
             // Mixing internal and external should NOT show encrypted indicator
-            setToField("$address,$externalMaskAddress")
+            setToField("$address,$externalAliasAddress")
             checkEncryptedIndicatorNotVisible()
             pressBack()
         }

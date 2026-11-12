@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -17,7 +17,7 @@ import kotlin.random.Random
 /**
  * Property-based test for email format validation.
  *
- * Feature: external-email-masks, Property 2: Email format validation
+ * Feature: external-email-aliases, Property 2: Email format validation
  *
  * For any string input, the email validation function SHALL accept the input if and only if
  * it matches the pattern `local-part@domain` (contains exactly one `@` with non-empty local
@@ -42,7 +42,7 @@ class EmailFormatValidationPropertyTest {
     /**
      * Instance of the fragment used to access the isValidEmail function under test.
      */
-    private val fragment = ProvisionExternalEmailMaskFragment()
+    private val fragment = ProvisionExternalEmailAliasFragment()
 
     /**
      * Reference implementation of email validation that mirrors the expected behavior:

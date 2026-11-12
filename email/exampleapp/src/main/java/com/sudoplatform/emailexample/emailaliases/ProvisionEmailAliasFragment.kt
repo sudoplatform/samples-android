@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.sudoplatform.emailexample.emailmasks
+package com.sudoplatform.emailexample.emailaliases
 
 import android.os.Bundle
 import android.text.Editable
@@ -27,7 +27,7 @@ import androidx.navigation.fragment.navArgs
 import com.sudoplatform.emailexample.App
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.createLoadingAlertDialog
-import com.sudoplatform.emailexample.databinding.FragmentProvisionEmailMaskBinding
+import com.sudoplatform.emailexample.databinding.FragmentProvisionEmailAliasBinding
 import com.sudoplatform.emailexample.showAlertDialog
 import com.sudoplatform.emailexample.util.ObjectDelegate
 import com.sudoplatform.sudoemail.SudoEmailClient
@@ -35,7 +35,7 @@ import com.sudoplatform.sudoemail.types.EmailAddress
 import com.sudoplatform.sudoemail.types.ListAPIResult
 import com.sudoplatform.sudoemail.types.inputs.CheckEmailAddressAvailabilityInput
 import com.sudoplatform.sudoemail.types.inputs.ListEmailAddressesForSudoIdInput
-import com.sudoplatform.sudoemail.types.inputs.ProvisionEmailMaskInput
+import com.sudoplatform.sudoemail.types.inputs.ProvisionEmailAliasInput
 import com.sudoplatform.sudoprofiles.Sudo
 import com.sudoplatform.sudoprofiles.exceptions.SudoProfileException
 import kotlinx.coroutines.CoroutineScope
@@ -49,17 +49,17 @@ import java.util.TimerTask
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This [ProvisionEmailMaskFragment] presents a form so that a user can provision an Email Mask.
+ * This [ProvisionEmailAliasFragment] presents a form so that a user can provision an Email Alias.
  *
  * - Links From:
- *  - [EmailAddressesFragment]: A user taps the "Create Email Mask" button at the bottom of the
+ *  - [EmailAddressesFragment]: A user taps the "Create Email Alias" button at the bottom of the
  *   list.
  *
  * - Links To:
- *  - [EmailAddressesFragment]: If a user successfully provisions an Email Mask, they will be
+ *  - [EmailAddressesFragment]: If a user successfully provisions an Email Alias, they will be
  *   returned to this view.
  */
-class ProvisionEmailMaskFragment :
+class ProvisionEmailAliasFragment :
     Fragment(),
     CoroutineScope {
     companion object {
@@ -82,7 +82,7 @@ class ProvisionEmailMaskFragment :
     private lateinit var app: App
 
     /** View binding to the views defined in the layout. */
-    private val bindingDelegate = ObjectDelegate<FragmentProvisionEmailMaskBinding>()
+    private val bindingDelegate = ObjectDelegate<FragmentProvisionEmailAliasBinding>()
     private val binding by bindingDelegate
 
     /** Toolbar [Menu] displaying title and create button. */
@@ -92,7 +92,7 @@ class ProvisionEmailMaskFragment :
     private var loading: AlertDialog? = null
 
     /** Fragment arguments handled by Navigation Library safe args */
-    private val args: ProvisionEmailMaskFragmentArgs by navArgs()
+    private val args: ProvisionEmailAliasFragmentArgs by navArgs()
 
     /** A [Sudo] used to retrieve the ownership proof. */
     private lateinit var sudo: Sudo
@@ -103,14 +103,14 @@ class ProvisionEmailMaskFragment :
     /** A list of provisioned email addresses for the current Sudo. */
     private var emailAddressList = mutableListOf<EmailAddress>()
 
-    /** A list of available mask domains. */
-    private var maskDomainsList = mutableListOf<String>()
+    /** A list of available alias domains. */
+    private var aliasDomainsList = mutableListOf<String>()
 
     /** The currently selected real email address. */
     private var selectedRealEmailAddress: EmailAddress? = null
 
-    /** The currently selected mask domain. */
-    private var selectedMaskDomain: String? = null
+    /** The currently selected alias domain. */
+    private var selectedAliasDomain: String? = null
 
     /** A mutable list of available email addresses. */
     private var availableAddresses = mutableListOf<String>()
@@ -120,14 +120,14 @@ class ProvisionEmailMaskFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        bindingDelegate.attach(FragmentProvisionEmailMaskBinding.inflate(inflater, container, false))
+        bindingDelegate.attach(FragmentProvisionEmailAliasBinding.inflate(inflater, container, false))
         with(binding.toolbar.root) {
-            title = getString(R.string.provision_email_mask)
+            title = getString(R.string.provision_email_alias)
             inflateMenu(R.menu.nav_menu_with_create_button)
             setOnMenuItemClickListener {
                 when (it?.itemId) {
                     R.id.create -> {
-                        provisionEmailMask()
+                        provisionEmailAlias()
                     }
                 }
                 true
@@ -151,7 +151,7 @@ class ProvisionEmailMaskFragment :
 
         getOwnershipProof()
         loadEmailAddresses()
-        loadMaskDomains()
+        loadAliasDomains()
     }
 
     override fun onDestroy() {
@@ -206,7 +206,7 @@ class ProvisionEmailMaskFragment :
                         emailAddressList.addAll(emailAddresses.result.items)
                         if (emailAddressList.isEmpty()) {
                             showAlertDialog(
-                                titleResId = R.string.no_email_addresses_for_mask,
+                                titleResId = R.string.no_email_addresses_for_alias,
                                 positiveButtonResId = android.R.string.ok,
                             )
                             setItemsEnabled(false)
@@ -242,33 +242,35 @@ class ProvisionEmailMaskFragment :
     }
 
     /**
-     * Load available mask domains and populate the mask domain spinner.
+     * Load available alias domains and populate the alias domain spinner.
      */
-    private fun loadMaskDomains() {
+    private fun loadAliasDomains() {
         launch {
             try {
-                @Suppress("DEPRECATION")
                 val domains =
                     withContext(Dispatchers.IO) {
-                        app.sudoEmailClient.getEmailMaskDomains()
+                        app.sudoEmailClient
+                            .listEmailDomains()
+                            .filter { it.isAliasDomain }
+                            .map { it.domain }
                     }
-                maskDomainsList.clear()
-                maskDomainsList.addAll(domains)
-                if (maskDomainsList.isEmpty()) {
+                aliasDomainsList.clear()
+                aliasDomainsList.addAll(domains)
+                if (aliasDomainsList.isEmpty()) {
                     showAlertDialog(
-                        titleResId = R.string.no_mask_domains_available,
+                        titleResId = R.string.no_alias_domains_available,
                         positiveButtonResId = android.R.string.ok,
                     )
                     toolbarMenu.getItem(0)?.isEnabled = false
                 } else {
-                    populateMaskDomainSpinner()
+                    populateAliasDomainSpinner()
                 }
             } catch (e: SudoEmailClient.EmailAddressException) {
                 showAlertDialog(
-                    titleResId = R.string.load_mask_domains_failure,
+                    titleResId = R.string.load_alias_domains_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { loadMaskDomains() },
+                    onPositive = { loadAliasDomains() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -313,19 +315,19 @@ class ProvisionEmailMaskFragment :
     }
 
     /**
-     * Populate the mask domain spinner with the loaded mask domains.
+     * Populate the alias domain spinner with the loaded alias domains.
      */
-    private fun populateMaskDomainSpinner() {
+    private fun populateAliasDomainSpinner() {
         if (!bindingDelegate.isAttached()) return
         val adapter =
             ArrayAdapter(
                 requireContext(),
                 android.R.layout.simple_spinner_item,
-                maskDomainsList,
+                aliasDomainsList,
             )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.maskDomainSpinner.adapter = adapter
-        binding.maskDomainSpinner.onItemSelectedListener =
+        binding.aliasDomainSpinner.adapter = adapter
+        binding.aliasDomainSpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -333,25 +335,25 @@ class ProvisionEmailMaskFragment :
                     position: Int,
                     id: Long,
                 ) {
-                    selectedMaskDomain = maskDomainsList[position]
+                    selectedAliasDomain = aliasDomainsList[position]
                     val localPart =
-                        binding.maskLocalPartField.text
+                        binding.aliasLocalPartField.text
                             .toString()
                             .trim()
                     if (localPart.isNotEmpty()) {
                         checkEmailAddressAvailability(
                             listOf(localPart),
-                            listOf(selectedMaskDomain ?: return),
+                            listOf(selectedAliasDomain ?: return),
                         )
                     }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    selectedMaskDomain = null
+                    selectedAliasDomain = null
                 }
             }
-        if (maskDomainsList.isNotEmpty()) {
-            selectedMaskDomain = maskDomainsList[0]
+        if (aliasDomainsList.isNotEmpty()) {
+            selectedAliasDomain = aliasDomainsList[0]
         }
     }
 
@@ -361,7 +363,7 @@ class ProvisionEmailMaskFragment :
      */
     private fun configureLocalPartFieldListener() {
         binding.availabilityLabel.isVisible = false
-        binding.maskLocalPartField.addTextChangedListener(
+        binding.aliasLocalPartField.addTextChangedListener(
             object : TextWatcher {
                 override fun afterTextChanged(p0: Editable?) { /* no-op */ }
 
@@ -391,7 +393,7 @@ class ProvisionEmailMaskFragment :
                                 override fun run() {
                                     checkEmailAddressAvailability(
                                         listOf(localPart),
-                                        listOf(selectedMaskDomain ?: return),
+                                        listOf(selectedAliasDomain ?: return),
                                     )
                                 }
                             },
@@ -403,46 +405,46 @@ class ProvisionEmailMaskFragment :
         )
     }
 
-    /** Provisions an Email Mask from the [SudoEmailClient] based on the form inputs. */
-    private fun provisionEmailMask() {
+    /** Provisions an Email Alias from the [SudoEmailClient] based on the form inputs. */
+    private fun provisionEmailAlias() {
         val localPart =
-            binding.maskLocalPartField.text
+            binding.aliasLocalPartField.text
                 .toString()
                 .trim()
         if (localPart.isEmpty()) {
             showAlertDialog(
-                titleResId = R.string.enter_mask_local_part,
+                titleResId = R.string.enter_alias_local_part,
                 positiveButtonResId = android.R.string.ok,
             )
             return
         }
-        val domain = selectedMaskDomain ?: return
+        val domain = selectedAliasDomain ?: return
         val realEmail = selectedRealEmailAddress ?: return
-        val maskAddress = "$localPart@$domain"
+        val aliasAddress = "$localPart@$domain"
         launch {
             try {
-                showLoading(R.string.provisioning_email_mask)
+                showLoading(R.string.provisioning_email_alias)
                 withContext(Dispatchers.IO) {
                     val input =
-                        ProvisionEmailMaskInput(
+                        ProvisionEmailAliasInput(
                             realAddress = realEmail.emailAddress,
-                            maskAddress = maskAddress,
+                            aliasAddress = aliasAddress,
                             ownershipProofToken = ownershipProof,
                         )
-                    app.sudoEmailClient.provisionEmailMask(input)
+                    app.sudoEmailClient.provisionEmailAlias(input)
                 }
                 navController.navigate(
-                    ProvisionEmailMaskFragmentDirections
-                        .actionProvisionEmailMaskFragmentToEmailAddressesFragment(
+                    ProvisionEmailAliasFragmentDirections
+                        .actionProvisionEmailAliasFragmentToEmailAddressesFragment(
                             sudo,
                         ),
                 )
             } catch (e: SudoEmailClient.EmailAddressException) {
                 showAlertDialog(
-                    titleResId = R.string.provision_email_mask_failure,
+                    titleResId = R.string.provision_email_alias_failure,
                     message = e.localizedMessage ?: "$e",
                     positiveButtonResId = R.string.try_again,
-                    onPositive = { provisionEmailMask() },
+                    onPositive = { provisionEmailAlias() },
                     negativeButtonResId = android.R.string.cancel,
                 )
             }
@@ -527,9 +529,9 @@ class ProvisionEmailMaskFragment :
      */
     private fun setItemsEnabled(isEnabled: Boolean) {
         toolbarMenu.getItem(0)?.isEnabled = isEnabled
-        binding.maskLocalPartField.isEnabled = isEnabled
+        binding.aliasLocalPartField.isEnabled = isEnabled
         binding.realEmailAddressSpinner.isEnabled = isEnabled
-        binding.maskDomainSpinner.isEnabled = isEnabled
+        binding.aliasDomainSpinner.isEnabled = isEnabled
     }
 
     /** Displays the loading [AlertDialog] indicating that an operation is occurring. */

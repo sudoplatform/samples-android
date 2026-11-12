@@ -8,7 +8,7 @@ package com.sudoplatform.emailexample.emailmessages
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.sudoplatform.sudoemail.types.EmailMaskStatus
+import com.sudoplatform.sudoemail.types.EmailAliasStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,11 +17,11 @@ import kotlin.random.Random
 /**
  * Property-based test for send routing decision.
  *
- * Feature: send-masked-email, Property 2: Send routing decision
+ * Feature: send-aliased-email, Property 2: Send routing decision
  *
- * For any valid compose form state, if a non-null selectedEmailMask is present
- * then the system SHALL use the sendMaskedEmailMessage path, and if
- * selectedEmailMask is null then the system SHALL use the sendEmailMessage path.
+ * For any valid compose form state, if a non-null selectedEmailAlias is present
+ * then the system SHALL use the sendAliasedEmailMessage path, and if
+ * selectedEmailAlias is null then the system SHALL use the sendEmailMessage path.
  *
  * **Validates: Requirements 2.1, 2.2, 3.1**
  */
@@ -33,35 +33,35 @@ class SendRoutingPropertyTest {
         private const val MAX_ID_LENGTH = 12
 
         private val CHARS = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-        private val ALL_STATUSES = EmailMaskStatus.values()
+        private val ALL_STATUSES = EmailAliasStatus.values()
     }
 
     /**
      * Represents the two possible send paths.
      */
     enum class SendRoute {
-        MASKED,
+        ALIASED,
         REGULAR,
     }
 
     /**
-     * Simplified representation of an EmailMask for property testing purposes.
+     * Simplified representation of an EmailAlias for property testing purposes.
      */
-    data class TestEmailMask(
+    data class TestEmailAlias(
         val id: String,
-        val maskAddress: String,
+        val aliasAddress: String,
         val emailAddressId: String,
-        val status: EmailMaskStatus,
+        val status: EmailAliasStatus,
     )
 
     /**
      * Models the routing decision as a pure function.
      * This mirrors the logic in SendEmailMessageFragment.sendEmailMessage():
-     * if selectedEmailMask != null → MASKED path, else → REGULAR path.
+     * if selectedEmailAlias != null → ALIASED path, else → REGULAR path.
      */
-    private fun determineSendRoute(selectedEmailMask: TestEmailMask?): SendRoute =
-        if (selectedEmailMask != null) {
-            SendRoute.MASKED
+    private fun determineSendRoute(selectedEmailAlias: TestEmailAlias?): SendRoute =
+        if (selectedEmailAlias != null) {
+            SendRoute.ALIASED
         } else {
             SendRoute.REGULAR
         }
@@ -79,23 +79,23 @@ class SendRoutingPropertyTest {
     }
 
     /**
-     * Generates a random [TestEmailMask] with the given random instance.
+     * Generates a random [TestEmailAlias] with the given random instance.
      */
-    private fun generateRandomMask(random: Random): TestEmailMask =
-        TestEmailMask(
+    private fun generateRandomAlias(random: Random): TestEmailAlias =
+        TestEmailAlias(
             id = randomString(random, MAX_ID_LENGTH),
-            maskAddress = "${randomString(random, 8)}@masks.example.com",
+            aliasAddress = "${randomString(random, 8)}@aliases.example.com",
             emailAddressId = randomString(random, MAX_ID_LENGTH),
             status = ALL_STATUSES[random.nextInt(ALL_STATUSES.size)],
         )
 
     /**
-     * Generates a random nullable [TestEmailMask].
+     * Generates a random nullable [TestEmailAlias].
      * Approximately 50% chance of being null to ensure both paths are exercised.
      */
-    private fun generateRandomSelectedMask(random: Random): TestEmailMask? =
+    private fun generateRandomSelectedAlias(random: Random): TestEmailAlias? =
         if (random.nextBoolean()) {
-            generateRandomMask(random)
+            generateRandomAlias(random)
         } else {
             null
         }
@@ -103,10 +103,10 @@ class SendRoutingPropertyTest {
     /**
      * Property 2: Send routing decision
      *
-     * For any compose state, if selectedEmailMask is non-null then the masked
+     * For any compose state, if selectedEmailAlias is non-null then the aliased
      * path is chosen; if null then the regular path is chosen.
      *
-     * Feature: send-masked-email, Property 2: Send routing decision
+     * Feature: send-aliased-email, Property 2: Send routing decision
      * **Validates: Requirements 2.1, 2.2, 3.1**
      */
     @Test
@@ -114,24 +114,24 @@ class SendRoutingPropertyTest {
         val random = Random(seed = 42)
 
         repeat(ITERATIONS) { iteration ->
-            // Generate a random selectedEmailMask (nullable)
-            val selectedEmailMask = generateRandomSelectedMask(random)
+            // Generate a random selectedEmailAlias (nullable)
+            val selectedEmailAlias = generateRandomSelectedAlias(random)
 
             // Determine the route
-            val route = determineSendRoute(selectedEmailMask)
+            val route = determineSendRoute(selectedEmailAlias)
 
-            // Assert: non-null mask → MASKED path
-            if (selectedEmailMask != null) {
+            // Assert: non-null alias → ALIASED path
+            if (selectedEmailAlias != null) {
                 assertEquals(
-                    "Iteration $iteration: Expected MASKED route when selectedEmailMask " +
-                        "is non-null ($selectedEmailMask), but got $route",
-                    SendRoute.MASKED,
+                    "Iteration $iteration: Expected ALIASED route when selectedEmailAlias " +
+                        "is non-null ($selectedEmailAlias), but got $route",
+                    SendRoute.ALIASED,
                     route,
                 )
             } else {
-                // Assert: null mask → REGULAR path
+                // Assert: null alias → REGULAR path
                 assertEquals(
-                    "Iteration $iteration: Expected REGULAR route when selectedEmailMask " +
+                    "Iteration $iteration: Expected REGULAR route when selectedEmailAlias " +
                         "is null, but got $route",
                     SendRoute.REGULAR,
                     route,
