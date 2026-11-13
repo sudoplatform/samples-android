@@ -6,13 +6,18 @@
 
 package com.sudoplatform.telephonyexample.sudos
 
+import android.content.Context
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.core.content.edit
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sudoplatform.sudoprofiles.EncryptionKey
 import com.sudoplatform.telephonyexample.App
 import com.sudoplatform.telephonyexample.MainActivity
+import com.sudoplatform.telephonyexample.register.register
+import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +37,10 @@ class SudosTest {
             navigateBackToSudos()
             deregister()
         }
+        ApplicationProvider
+            .getApplicationContext<App>()
+            .getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
+            .edit { remove(App.ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE) }
     }
 
     @Test
@@ -81,6 +90,22 @@ class SudosTest {
             refreshByOpeningSudo("Work")
             waitForKeyImportNotice()
         }
+    }
+
+    @Test
+    fun testSignInWithOneKeyForAllNumbersCreatesTheSharedKey() {
+        register(composeRule) {
+            waitForRegisterScreen()
+            clickOnEnforceSingletonKeyPair()
+            clickOnRegister()
+        }
+        sudos(composeRule) {
+            waitForSudos()
+            waitForTelephonyKeyBackupNotice()
+        }
+        val app = ApplicationProvider.getApplicationContext<App>()
+        // Sign in created the key, so asking again finds it.
+        assertFalse(runBlocking { app.sudoTelephonyClient.createSingletonKeysIfAbsent() }.keyPair.created)
     }
 
     /**

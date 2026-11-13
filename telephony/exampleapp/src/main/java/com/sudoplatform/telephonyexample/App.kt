@@ -20,6 +20,7 @@ import com.sudoplatform.sudoprofiles.SudoProfilesClient
 import com.sudoplatform.sudotelephony.SudoTelephonyClient
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -31,6 +32,12 @@ class App : Application() {
         /** True if Federated Single Sign On was used. */
         const val FSSO_USED_PREFERENCE = "usedFSSO"
 
+        /**
+         * True if every phone number shares one key pair, chosen on the register screen and
+         * applied to the telephony client created at sign in.
+         */
+        const val ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE = "com.sudoplatform.enforce-singleton-key-pair"
+
         /** User name of the last user to sign in, used to notice when a different user signs in. */
         private const val LAST_SIGNED_IN_USER_PREFERENCE = "lastSignedInUser"
     }
@@ -39,10 +46,37 @@ class App : Application() {
     lateinit var sudoUserClient: SudoUserClient
     lateinit var sudoEntitlementsClient: SudoEntitlementsClient
     lateinit var sudoProfilesClient: SudoProfilesClient
-    lateinit var sudoTelephonyClient: SudoTelephonyClient
 
     lateinit var logger: Logger
-    lateinit var telephonyEvents: TelephonyEvents
+
+    @Volatile private var telephonyClient: SudoTelephonyClient? = null
+    private var telephonyEventsOrNull: TelephonyEvents? = null
+
+    /**
+     * The telephony client, to search for and provision phone numbers and read their messages.
+     * Created by [startTelephony] when the user signs in.
+     */
+    val sudoTelephonyClient: SudoTelephonyClient
+        get() {
+            restoreTelephonyIfNeeded()
+            return checkNotNull(telephonyClient)
+        }
+
+    /** The telephony subscriptions shared between screens for the signed in session. */
+    val telephonyEvents: TelephonyEvents
+        get() {
+            restoreTelephonyIfNeeded()
+            return checkNotNull(telephonyEventsOrNull)
+        }
+
+    private var enforceSingletonKeyPair = false
+
+    /**
+     * True if this device created a new shared phone number key that no key backup contains yet,
+     * so the user should export one.
+     */
+    var telephonyKeyNeedsBackup: Boolean = false
+        private set
 
     /**
      * Set when the Sudo Platform clients could not be constructed, most commonly because
@@ -86,17 +120,6 @@ class App : Application() {
                     .setSudoUserClient(sudoUserClient)
                     .setLogger(logger)
                     .build()
-
-            // Create an instance of SudoTelephonyClient to search for and provision phone numbers, and
-            // to read their messages.
-            sudoTelephonyClient =
-                SudoTelephonyClient
-                    .builder()
-                    .setContext(this)
-                    .setSudoUserClient(sudoUserClient)
-                    .setLogger(logger)
-                    .build()
-            telephonyEvents = TelephonyEvents(sudoTelephonyClient, logger)
         } catch (e: Exception) {
             logger.error("Failed to initialize Sudo Platform clients: ${e.localizedMessage}")
             initializationError = e
@@ -106,11 +129,45 @@ class App : Application() {
     private val signInPreferences get() = getSharedPreferences(SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
 
     /**
+     * Create the telephony client for the user who has just signed in, replacing any left from an
+     * earlier sign in.
+     *
+     * @param enforceSingletonKeyPair true if every phone number shares one key pair, as chosen on
+     * the register screen.
+     */
+    suspend fun startTelephony(enforceSingletonKeyPair: Boolean) {
+        stopTelephony()
+        setTelephony(enforceSingletonKeyPair)
+    }
+
+    /**
+     * Create the shared phone number key if the session uses one and this device doesn't have it.
+     * Provisioning never creates it, so this must run before the user gets a number.
+     *
+     * Call once the user is signed in and prepared for, since preparing for a different user removes
+     * the previous user's keys, and again after importing keys, in case the backup didn't contain one.
+     */
+    suspend fun prepareTelephonyKeys() {
+        val client = telephonyClient ?: return
+        if (!enforceSingletonKeyPair) return
+        val result = client.createSingletonKeysIfAbsent()
+        telephonyKeyNeedsBackup = result.keyPair.created
+        if (result.keyPair.created) {
+            logger.info("Created the shared phone number key ${result.keyPair.keyId}")
+        }
+    }
+
+    /** Notes that the user has exported a key backup, which now contains the shared phone number key. */
+    fun didExportKeys() {
+        telephonyKeyNeedsBackup = false
+    }
+
+    /**
      * Deregister from the Sudo Platform and clear all local data, including the keys that seal
      * phone messages, so the next registration starts afresh.
      */
     suspend fun deregister() {
-        telephonyEvents.unsubscribe()
+        stopTelephony()
         sudoUserClient.deregister()
         removeUserData()
         sudoUserClient.reset()
@@ -124,7 +181,7 @@ class App : Application() {
      * be left unable to clear the auth cookies.
      */
     suspend fun signOutFederated(removeData: Boolean) {
-        telephonyEvents.unsubscribe()
+        stopTelephony()
         // Opens the browser to clear the sign in cookies. The result isn't awaited because it is
         // never delivered when the sign out redirect returns to the app.
         sudoUserClient.presentFederatedSignOutUI { result ->
@@ -135,6 +192,10 @@ class App : Application() {
         withContext(Dispatchers.IO) {
             try {
                 sudoUserClient.globalSignOut()
+            } catch (e: SudoUserException) {
+                // An expired session can't sign out globally, but must still sign out locally,
+                // otherwise the federated user stays registered and blocks every sign in.
+                logger.warning("Global sign out failed, signing out on this device only: ${e.localizedMessage}")
             } finally {
                 sudoUserClient.clearAuthTokens()
             }
@@ -167,7 +228,60 @@ class App : Application() {
         sudoProfilesClient.reset()
         // reset() removes the Sudo encryption key, which the client only generates when constructed.
         sudoProfilesClient.generateEncryptionKey()
-        sudoTelephonyClient.reset()
+        // reset() clears the whole telephony key namespace whatever the key mode, so without a
+        // signed in session a temporary client does it.
+        val client = telephonyClient
+        if (client != null) {
+            client.reset()
+        } else {
+            buildTelephonyClient(enforceSingletonKeyPair = false).use { it.reset() }
+        }
         signInPreferences.edit { remove(LAST_SIGNED_IN_USER_PREFERENCE) }
     }
+
+    /**
+     * If the process was restarted on a screen past sign in, starts telephony with the stored key
+     * mode, as sign in would have.
+     */
+    @Synchronized
+    private fun restoreTelephonyIfNeeded() {
+        if (telephonyClient != null) return
+        check(::sudoUserClient.isInitialized && sudoUserClient.isSignedIn()) {
+            "The telephony client is only available once the user has signed in"
+        }
+        setTelephony(signInPreferences.getBoolean(ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE, false))
+    }
+
+    @Synchronized
+    private fun setTelephony(enforceSingletonKeyPair: Boolean) {
+        val client = buildTelephonyClient(enforceSingletonKeyPair)
+        telephonyEventsOrNull = TelephonyEvents(client, logger)
+        this.enforceSingletonKeyPair = enforceSingletonKeyPair
+        telephonyKeyNeedsBackup = false
+        telephonyClient = client
+    }
+
+    /** Close the client's subscriptions and drop it, so the next sign in creates one. */
+    private suspend fun stopTelephony() {
+        val client = telephonyClient ?: return
+        val events = telephonyEventsOrNull
+        telephonyClient = null
+        telephonyEventsOrNull = null
+        enforceSingletonKeyPair = false
+        telephonyKeyNeedsBackup = false
+        try {
+            events?.unsubscribe()
+        } finally {
+            client.close()
+        }
+    }
+
+    private fun buildTelephonyClient(enforceSingletonKeyPair: Boolean): SudoTelephonyClient =
+        SudoTelephonyClient
+            .builder()
+            .setContext(this)
+            .setSudoUserClient(sudoUserClient)
+            .setLogger(logger)
+            .setEnforceSingletonKeyPair(enforceSingletonKeyPair)
+            .build()
 }

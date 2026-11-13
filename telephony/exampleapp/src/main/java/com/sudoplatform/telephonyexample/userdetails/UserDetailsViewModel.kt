@@ -27,6 +27,8 @@ data class UserDetailsUiState(
     /** The user's subject, which services record as the owner of the user's data. */
     val subject: String? = null,
     val usedFsso: Boolean = false,
+    /** Whether every phone number shares one key pair, as chosen at sign in. */
+    val enforceSingletonKeyPair: Boolean = false,
     /** When the user last signed in, from the ID token's `auth_time` claim. */
     val signedInAt: Date? = null,
     /** When the current ID token expires, from its `exp` claim. */
@@ -65,6 +67,10 @@ class UserDetailsViewModel(
                         app
                             .getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
                             .getBoolean(App.FSSO_USED_PREFERENCE, false),
+                    enforceSingletonKeyPair =
+                        app
+                            .getSharedPreferences(App.SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
+                            .getBoolean(App.ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE, false),
                     signedInAt = dateFromClaim(client.getUserClaim("auth_time")),
                     idTokenExpiresAt = dateFromClaim(client.getUserClaim("exp")),
                     refreshTokenExpiresAt = client.getRefreshTokenExpiry(),

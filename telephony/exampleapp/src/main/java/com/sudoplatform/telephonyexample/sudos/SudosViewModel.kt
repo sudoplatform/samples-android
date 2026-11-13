@@ -54,6 +54,8 @@ data class SudosUiState(
      * they were created on another device. Importing a key backup fixes this.
      */
     val sudosNeedKeyImport: Boolean = false,
+    /** True if this device created a new shared phone number key that no key backup contains yet. */
+    val telephonyKeyNeedsBackup: Boolean = false,
 )
 
 /** Emitted once the user has deregistered or signed out, so the app can return to registration. */
@@ -93,6 +95,7 @@ class SudosViewModel(
 
     /** Fetch the Sudos from the service, for example after one was created or edited. */
     fun refresh() {
+        _uiState.update { it.copy(telephonyKeyNeedsBackup = app.telephonyKeyNeedsBackup) }
         listSudos(ListOption.REMOTE_ONLY)
     }
 

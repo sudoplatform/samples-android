@@ -14,6 +14,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +23,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +52,7 @@ import com.sudoplatform.telephonyexample.ui.components.DropdownField
 import com.sudoplatform.telephonyexample.ui.components.MessageDialog
 import com.sudoplatform.telephonyexample.ui.components.PrimaryButton
 import com.sudoplatform.telephonyexample.ui.components.StatusBarIcons
+import com.sudoplatform.telephonyexample.ui.theme.SecondaryText
 import com.sudoplatform.telephonyexample.ui.theme.TelephonyExampleTheme
 import com.sudoplatform.telephonyexample.ui.theme.WindowBackground
 
@@ -93,6 +99,7 @@ fun RegisterScreen(
     RegisterContent(
         uiState = uiState,
         onRegistrationMethodSelected = viewModel::selectRegistrationMethod,
+        onEnforceSingletonKeyPairChanged = viewModel::setEnforceSingletonKeyPair,
         onRegister = { viewModel.registerAndSignIn(context as Activity) },
         onSignOutOrReset = viewModel::signOutOrReset,
     )
@@ -112,6 +119,7 @@ fun RegisterScreen(
 private fun RegisterContent(
     uiState: RegisterUiState,
     onRegistrationMethodSelected: (RegistrationMethod) -> Unit,
+    onEnforceSingletonKeyPairChanged: (Boolean) -> Unit,
     onRegister: () -> Unit,
     onSignOutOrReset: () -> Unit,
 ) {
@@ -167,6 +175,13 @@ private fun RegisterContent(
                 modifier = Modifier.width(240.dp),
             )
             Spacer(Modifier.height(16.dp))
+            KeyModeToggle(
+                enforceSingletonKeyPair = uiState.enforceSingletonKeyPair,
+                onChanged = onEnforceSingletonKeyPairChanged,
+                enabled = !uiState.isLoading,
+                modifier = Modifier.width(240.dp),
+            )
+            Spacer(Modifier.height(16.dp))
             PrimaryButton(
                 text = stringResource(R.string.register_login),
                 onClick = onRegister,
@@ -174,6 +189,50 @@ private fun RegisterContent(
                 modifier = Modifier.size(width = 160.dp, height = 50.dp).testTag(TestTags.REGISTER_BUTTON),
             )
         }
+    }
+}
+
+/**
+ * Chooses whether every phone number shares one key pair. Chosen before signing in because the
+ * telephony client is created with it at sign in.
+ */
+@Composable
+private fun KeyModeToggle(
+    enforceSingletonKeyPair: Boolean,
+    onChanged: (Boolean) -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .toggleable(
+                        value = enforceSingletonKeyPair,
+                        enabled = enabled,
+                        role = Role.Switch,
+                        onValueChange = onChanged,
+                    ).testTag(TestTags.ENFORCE_SINGLETON_KEY_PAIR_TOGGLE),
+        ) {
+            Text(
+                stringResource(R.string.single_key_for_all_numbers),
+                color = Color.Black,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(checked = enforceSingletonKeyPair, onCheckedChange = null, enabled = enabled)
+        }
+        Text(
+            stringResource(
+                if (enforceSingletonKeyPair) R.string.single_key_explanation else R.string.key_per_number_explanation,
+            ),
+            color = SecondaryText,
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 
@@ -191,6 +250,7 @@ private fun RegisterContentPreview() {
         RegisterContent(
             uiState = RegisterUiState(),
             onRegistrationMethodSelected = {},
+            onEnforceSingletonKeyPairChanged = {},
             onRegister = {},
             onSignOutOrReset = {},
         )

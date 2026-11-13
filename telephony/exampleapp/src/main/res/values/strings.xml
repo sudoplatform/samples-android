@@ -28,6 +28,9 @@
     <string name="test_registration">TEST Registration</string>
     <string name="federated_signin">Federated SignIn</string>
     <string name="reset">Reset</string>
+    <string name="single_key_for_all_numbers">Single key for all numbers</string>
+    <string name="single_key_explanation">Single key is used to decrypt content across all numbers. You should backup the key to avoid data loss. Refer to developer docs for more information.</string>
+    <string name="key_per_number_explanation">Each number has its own key used to decrypt content. You should backup the keys to avoid data loss. Refer to developer docs for more information.</string>
 
     <!-- MainMenuScreen -->
     <string name="deregister">Deregister</string>
@@ -43,7 +46,9 @@
     <string name="delete_sudo_failure">Failed to delete Sudo</string>
     <string name="what_is_a_sudo">What is a Sudo?</string>
     <string name="sudo_explanation">Phone numbers must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
-    <string name="sudos_need_key_import">Your Sudos were created on another device or before this device\'s data was removed, so it doesn\'t have the keys to read them. Import your keys from Import/Export Keys below.</string>
+    <string name="sudos_need_key_import">Your Sudos were created on another device or before this device\'s data was removed, so it doesn\'t have the keys to read them. Import your keys from Import/Export Keys below. Creating a Sudo is unavailable until then, so new phone numbers aren\'t sealed to keys your other devices don\'t have.</string>
+    <string name="telephony_key_created">This device created a new key for your phone numbers.</string>
+    <string name="telephony_key_needs_backup">This device created a new key for your phone numbers. Export a key backup from Import/Export Keys below, so their messages can be read on your other devices or after reinstalling.</string>
     <string name="key_backup_needs_fsso_title">Key Backup Needs Federated Sign In</string>
     <string name="key_backup_needs_fsso">A TEST registration is tied to this device, so another device that registers with a TEST key becomes a different user and can\'t see these Sudos. Sign in with Federated Sign In to back up your keys.</string>
     <string name="no_sudos">No Sudos yet. Create one to get started.</string>
@@ -166,6 +171,9 @@
     <string name="user_details_copy_explanation">Tap the copy button to copy a value, for example to include in a support request.</string>
     <string name="session">Session</string>
     <string name="signed_in">Signed in</string>
+    <string name="key_config">Key config</string>
+    <string name="single_key_for_phone_numbers">Single key for phone numbers</string>
+    <string name="key_per_phone_number">Key per phone number</string>
     <string name="id_token_expires">ID token expires</string>
     <string name="refresh_token_expires">Refresh token expires</string>
     <string name="session_explanation">The ID token is refreshed automatically until the refresh token expires, after which you need to sign in again.</string>

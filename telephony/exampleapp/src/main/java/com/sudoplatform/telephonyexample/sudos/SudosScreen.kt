@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -269,6 +270,9 @@ private fun SudosContent(
                 item { SectionHeader(stringResource(R.string.sudos)) }
                 if (uiState.sudosNeedKeyImport) {
                     item { KeyImportNotice() }
+                } else if (uiState.telephonyKeyNeedsBackup) {
+                    // Not shown while keys need importing, since importing replaces the new key.
+                    item { TelephonyKeyBackupNotice(canExportKeys = uiState.usedFsso) }
                 }
                 items(uiState.sudos, key = { it.id ?: it.hashCode() }) { sudo ->
                     SudoRow(
@@ -293,7 +297,9 @@ private fun SudosContent(
                     MenuButton(
                         text = stringResource(R.string.create_sudo_button),
                         onClick = onCreateSudo,
-                        enabled = !uiState.isDeleting,
+                        // Existing Sudos this device can't read mean keys need importing first.
+                        // With no Sudos there is nothing to import, so a new user can create one.
+                        enabled = !uiState.isDeleting && !uiState.sudosNeedKeyImport,
                         modifier = Modifier.testTag(TestTags.CREATE_SUDO_BUTTON),
                     )
                 }
@@ -470,7 +476,36 @@ private fun SudoRow(
     }
 }
 
-/** Explains that the Sudos can't be read here until the user imports their keys. */
+/**
+ * Says this device has just created a new shared phone number key, and suggests exporting a key
+ * backup when [canExportKeys]. TEST registrations can't back up keys.
+ */
+@Composable
+private fun TelephonyKeyBackupNotice(canExportKeys: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .padding(bottom = 2.dp)
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(16.dp)
+                .testTag(TestTags.TELEPHONY_KEY_BACKUP_NOTICE),
+    ) {
+        Icon(Icons.Filled.Lock, contentDescription = null, tint = WarningIcon)
+        Text(
+            stringResource(if (canExportKeys) R.string.telephony_key_needs_backup else R.string.telephony_key_created),
+            color = PrimaryText,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 16.dp),
+        )
+    }
+}
+
+/**
+ * Explains that the Sudos can't be read here, and new ones can't be created, until the user
+ * imports their keys.
+ */
 @Composable
 private fun KeyImportNotice() {
     Row(
@@ -532,4 +567,10 @@ private fun SudosContentTestRegistrationPreview() {
 @Composable
 private fun SudosContentFederatedNeedsKeysPreview() {
     SudosContentPreview(SudosUiState(usedFsso = true, sudosNeedKeyImport = true))
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun SudosContentTelephonyKeyNeedsBackupPreview() {
+    SudosContentPreview(SudosUiState(usedFsso = true, telephonyKeyNeedsBackup = true))
 }

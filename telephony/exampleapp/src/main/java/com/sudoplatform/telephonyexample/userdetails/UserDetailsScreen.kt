@@ -114,6 +114,13 @@ private fun UserDetailsContent(
                 name = stringResource(R.string.signed_in_with),
                 value = stringResource(if (uiState.usedFsso) R.string.federated_signin else R.string.test_registration),
             )
+            DetailCell(
+                name = stringResource(R.string.key_config),
+                value =
+                    stringResource(
+                        if (uiState.enforceSingletonKeyPair) R.string.single_key_for_phone_numbers else R.string.key_per_phone_number,
+                    ),
+            )
             DetailCell(name = stringResource(R.string.signed_in), value = uiState.signedInAt.formatted())
             DetailCell(name = stringResource(R.string.id_token_expires), value = uiState.idTokenExpiresAt.formatted())
             DetailCell(name = stringResource(R.string.refresh_token_expires), value = uiState.refreshTokenExpiresAt.formatted())
@@ -169,6 +176,7 @@ private fun UserDetailsContentPreview() {
                     userId = "5fbc915ab340c40076859bc1",
                     subject = "2b6e7f4c-8d1a-4c3e-9f50-1a2b3c4d5e6f",
                     usedFsso = true,
+                    enforceSingletonKeyPair = true,
                     signedInAt = Date(1_793_746_224_000),
                     idTokenExpiresAt = Date(1_793_749_824_000),
                     refreshTokenExpiresAt = Date(1_793_832_624_000),

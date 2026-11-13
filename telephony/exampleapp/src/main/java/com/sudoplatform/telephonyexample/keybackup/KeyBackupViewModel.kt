@@ -100,6 +100,7 @@ class KeyBackupViewModel(
             try {
                 // Key derivation is deliberately slow, so keep it off the main thread.
                 exportedBackup = withContext(Dispatchers.Default) { keyBackupService.exportBackup(password) }
+                app.didExportKeys()
                 _uiState.update { it.copy(passwordPrompt = null) }
                 _createDocument.send(CreateBackupDocument(exportFileName()))
             } catch (e: CancellationException) {
@@ -178,6 +179,7 @@ class KeyBackupViewModel(
             try {
                 val result = withContext(Dispatchers.Default) { keyBackupService.importBackup(prompt.file, password) }
                 _uiState.update { it.copy(passwordPrompt = null, importResult = result) }
+                prepareTelephonyKeysAfterImport()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -186,6 +188,18 @@ class KeyBackupViewModel(
             } finally {
                 _uiState.update { it.copy(isWorking = false) }
             }
+        }
+    }
+
+    /** Creates the shared phone number key if the backup didn't contain one, so provisioning still works. */
+    private suspend fun prepareTelephonyKeysAfterImport() {
+        try {
+            withContext(Dispatchers.IO) { app.prepareTelephonyKeys() }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            app.logger.error("Failed to prepare phone number keys after import: $e")
+            _uiState.update { it.copy(error = e.describe()) }
         }
     }
 

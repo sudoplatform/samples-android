@@ -12,6 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudotelephony.SudoTelephonyClient
 import com.sudoplatform.sudotelephony.SudoTelephonyClient.PhoneMessageException
 import com.sudoplatform.sudotelephony.types.ListAPIResult
@@ -82,6 +83,7 @@ class PhoneMessagesViewModel(
     private val phoneNumberId: String,
     private val telephonyClient: SudoTelephonyClient,
     private val telephonyEvents: TelephonyEvents,
+    private val logger: Logger,
 ) : ViewModel() {
     companion object {
         const val PHONE_NUMBER_ID_ARG = "phoneNumberId"
@@ -96,6 +98,7 @@ class PhoneMessagesViewModel(
                         phoneNumberId = checkNotNull(createSavedStateHandle().get<String>(PHONE_NUMBER_ID_ARG)),
                         telephonyClient = app.sudoTelephonyClient,
                         telephonyEvents = app.telephonyEvents,
+                        logger = app.logger,
                     )
                 }
             }
@@ -194,6 +197,12 @@ class PhoneMessagesViewModel(
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) { telephonyClient.deprovisionPhoneNumber(phoneNumberId) }
+                _released.send(PhoneNumberReleased)
+            } catch (e: SudoTelephonyClient.PhoneNumberException.KeyPairRemovalFailedException) {
+                // The number was released; only removing its key from this device failed. This
+                // screen closes once the number is released, so log the failure instead of
+                // showing it on the way out.
+                logger.error("Released phone number ${e.deprovisioned.id}, but couldn't remove its key: ${e.cause}")
                 _released.send(PhoneNumberReleased)
             } catch (e: SudoTelephonyClient.PhoneNumberException) {
                 _uiState.update { it.copy(isReleasing = false, releaseError = e.describe()) }

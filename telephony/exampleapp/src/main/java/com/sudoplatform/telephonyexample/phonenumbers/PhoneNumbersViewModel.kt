@@ -140,6 +140,14 @@ class PhoneNumbersViewModel(
                 _uiState.update { state ->
                     state.copy(isReleasing = false).withPhoneNumbers(state.phoneNumbers.filterNot { it.id == phoneNumber.id })
                 }
+            } catch (e: SudoTelephonyClient.PhoneNumberException.KeyPairRemovalFailedException) {
+                // The number was released; only removing its key from this device failed, so drop
+                // it from the list before saying why.
+                _uiState.update { state ->
+                    state
+                        .copy(isReleasing = false, releaseError = e.describe())
+                        .withPhoneNumbers(state.phoneNumbers.filterNot { it.id == phoneNumber.id })
+                }
             } catch (e: SudoTelephonyClient.PhoneNumberException) {
                 _uiState.update { it.copy(isReleasing = false, releaseError = e.describe()) }
             }

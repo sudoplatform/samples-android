@@ -132,6 +132,10 @@ class SudosRobot(
         waitForTag(TestTags.KEY_IMPORT_NOTICE)
     }
 
+    fun waitForTelephonyKeyBackupNotice() {
+        waitForTag(TestTags.TELEPHONY_KEY_BACKUP_NOTICE)
+    }
+
     /** Open Entitlements and wait for the user's entitlements, which registration redeems. */
     fun checkEntitlements() {
         clickOnAccountRow(TestTags.ENTITLEMENTS_ACTION)

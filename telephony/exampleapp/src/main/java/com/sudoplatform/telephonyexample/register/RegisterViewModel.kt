@@ -48,6 +48,8 @@ data class RegisterUiState(
     val isLoading: Boolean = false,
     /** True if the last sign in used FSSO, in which case the corner button signs out rather than resets. */
     val usedFsso: Boolean = false,
+    /** True if every phone number shares one key pair, for the telephony client created at sign in. */
+    val enforceSingletonKeyPair: Boolean = false,
     val configurationError: String? = null,
 )
 
@@ -77,7 +79,10 @@ class RegisterViewModel(
         private const val FEDERATED_ID_REGISTRATION_TIMEOUT_MS = 15_000L
     }
 
-    private val _uiState = MutableStateFlow(RegisterUiState())
+    private val _uiState =
+        MutableStateFlow(
+            RegisterUiState(enforceSingletonKeyPair = preferences.getBoolean(App.ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE, false)),
+        )
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
     private val _events = Channel<RegisterEvent>(Channel.BUFFERED)
@@ -92,6 +97,11 @@ class RegisterViewModel(
 
     fun selectRegistrationMethod(method: RegistrationMethod) {
         _uiState.update { it.copy(registrationMethod = method) }
+    }
+
+    fun setEnforceSingletonKeyPair(enforceSingletonKeyPair: Boolean) {
+        preferences.edit { putBoolean(App.ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE, enforceSingletonKeyPair) }
+        _uiState.update { it.copy(enforceSingletonKeyPair = enforceSingletonKeyPair) }
     }
 
     /**
@@ -166,8 +176,9 @@ class RegisterViewModel(
             return
         }
         viewModelScope.launch {
+            val usedFsso = _uiState.value.usedFsso
             try {
-                if (_uiState.value.usedFsso) {
+                if (usedFsso) {
                     app.signOutFederated(removeData = false)
                     _uiState.update { it.copy(usedFsso = false) }
                 } else {
@@ -178,7 +189,8 @@ class RegisterViewModel(
                     }
                 }
             } catch (e: SudoUserException) {
-                _events.send(RegisterEvent.ShowMessage(R.string.register_failure, e.describe()))
+                val messageResId = if (usedFsso) R.string.sign_out_failure else R.string.deregister_failure
+                _events.send(RegisterEvent.ShowMessage(messageResId, e.describe()))
             }
         }
     }
@@ -324,7 +336,16 @@ class RegisterViewModel(
             return
         }
         try {
-            withContext(Dispatchers.IO) { app.prepareForSignedInUser() }
+            val enforceSingletonKeyPair = preferences.getBoolean(App.ENFORCE_SINGLETON_KEY_PAIR_PREFERENCE, false)
+            withContext(Dispatchers.IO) {
+                // Before preparing for the user, so a different user's phone number keys are
+                // removed along with their other data.
+                app.startTelephony(enforceSingletonKeyPair)
+                app.prepareForSignedInUser()
+                // After preparing for the user, which removes a different user's keys, including
+                // a shared phone number key.
+                app.prepareTelephonyKeys()
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
