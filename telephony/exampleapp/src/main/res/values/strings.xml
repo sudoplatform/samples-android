@@ -152,6 +152,9 @@
     <string name="delete_phone_message_failure">Failed to delete message</string>
     <string name="delete_phone_message_not_deleted">The message couldn\'t be deleted. It may already have been deleted.</string>
     <string name="message_copied">Message copied</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="notification_setting_failure">Failed to change notifications</string>
 
     <!-- SudosScreen: Account -->
     <string name="account">Account</string>

@@ -92,6 +92,7 @@ fun PhoneMessagesScreen(
         onCopyMessage = { message -> context.copyMessageText(message.body) },
         onDeleteMessage = viewModel::requestDelete,
         onRelease = viewModel::requestRelease,
+        onToggleNotifications = viewModel::toggleNotifications,
     )
 
     val phoneNumber = uiState.phoneNumber
@@ -120,6 +121,15 @@ fun PhoneMessagesScreen(
     }
     if (uiState.isReleasing) {
         LoadingDialog(stringResource(R.string.releasing_phone_number))
+    }
+    uiState.notificationSettingError?.let { message ->
+        MessageDialog(
+            title = stringResource(R.string.notification_setting_failure),
+            message = message,
+            confirmText = stringResource(R.string.ok),
+            onConfirm = viewModel::dismissNotificationSettingError,
+            onDismissRequest = viewModel::dismissNotificationSettingError,
+        )
     }
 
     uiState.listError?.let { message ->
@@ -162,6 +172,7 @@ private fun PhoneMessagesContent(
     onCopyMessage: (PhoneMessage) -> Unit,
     onDeleteMessage: (messageId: String) -> Unit,
     onRelease: () -> Unit,
+    onToggleNotifications: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -183,6 +194,12 @@ private fun PhoneMessagesContent(
                 title = uiState.phoneNumber?.let { formatPhoneNumber(it.phoneNumber, it.countryCode) } ?: stringResource(R.string.messages),
                 onNavigateBack = onNavigateBack,
                 actions = {
+                    uiState.notificationsEnabled?.let { enabled ->
+                        ToolbarTextAction(
+                            text = stringResource(if (enabled) R.string.mute else R.string.unmute),
+                            onClick = onToggleNotifications,
+                        )
+                    }
                     ToolbarTextAction(
                         text = stringResource(R.string.release),
                         onClick = onRelease,
@@ -314,6 +331,7 @@ private fun PhoneMessagesContentPreview() {
             onCopyMessage = {},
             onDeleteMessage = {},
             onRelease = {},
+            onToggleNotifications = {},
         )
     }
 }
@@ -331,6 +349,7 @@ private fun PhoneMessagesContentKeyMissingPreview() {
             onCopyMessage = {},
             onDeleteMessage = {},
             onRelease = {},
+            onToggleNotifications = {},
         )
     }
 }

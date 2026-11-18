@@ -31,9 +31,14 @@
         </notes>
         <cve>CVE-2026-53914</cve>
     </suppress>
-    <suppress>
+    <suppress until="2026-12-30">
         <notes>False positive: com.sudoplatform packages are matched to the Unix sudo utility's CPE.</notes>
         <packageUrl regex="true">^pkg:maven/com\.sudoplatform/.*$</packageUrl>
         <cpe>cpe:/a:sudo:sudo</cpe>
+    </suppress>
+    <suppress until="2026-12-30">
+        <notes>False positive: kotlinx-coroutines-play-services (kotlinx.coroutines.tasks) is matched to the Tasks.org Android app's CPE.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlinx/kotlinx-coroutines-play-services@.*$</packageUrl>
+        <cpe>cpe:/a:tasks:tasks</cpe>
     </suppress>
 </suppressions>

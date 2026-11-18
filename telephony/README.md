@@ -24,9 +24,11 @@ To build this app you first need to obtain an SDK configuration file. If you are
 
    If the application does not already have an assets folder, create one under `exampleapp/src/main/assets/` or in Android Studio, right click on the application module and select `New > Folder > Assets Folder`. Then drag the files to that folder.
 
-3. Build the app
+3. Optionally, to receive push notifications for incoming messages, add a Firebase project's `google-services.json` for the package `com.sudoplatform.telephonyexample` to the `exampleapp` folder. Your environment must have notifications enabled for telephony. Without the file, the app builds and runs without push notifications.
 
-4. Run the app on an emulator (AVD) or Android device running Android 8 (API level 26) or later that is not rooted and does not have an unlocked bootloader.
+4. Build the app
+
+5. Run the app on an emulator (AVD) or Android device running Android 8 (API level 26) or later that is not rooted and does not have an unlocked bootloader.
 
 ## More Documentation
 

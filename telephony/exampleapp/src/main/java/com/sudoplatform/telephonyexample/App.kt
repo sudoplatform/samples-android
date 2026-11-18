@@ -10,6 +10,7 @@ import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.edit
+import com.google.firebase.FirebaseApp
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudokeymanager.KeyManager
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
@@ -21,6 +22,7 @@ import com.sudoplatform.sudotelephony.SudoTelephonyClient
 import com.sudoplatform.sudouser.ApiResult
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.exceptions.SudoUserException
+import com.sudoplatform.telephonyexample.notifications.TelephonyNotifications
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -48,6 +50,13 @@ class App : Application() {
     lateinit var sudoProfilesClient: SudoProfilesClient
 
     lateinit var logger: Logger
+
+    /**
+     * Push notifications for received messages, or null when this build has no Firebase
+     * configuration or the environment doesn't send telephony notifications.
+     */
+    var telephonyNotifications: TelephonyNotifications? = null
+        private set
 
     @Volatile private var telephonyClient: SudoTelephonyClient? = null
     private var telephonyEventsOrNull: TelephonyEvents? = null
@@ -123,7 +132,28 @@ class App : Application() {
         } catch (e: Exception) {
             logger.error("Failed to initialize Sudo Platform clients: ${e.localizedMessage}")
             initializationError = e
+            return
         }
+
+        telephonyNotifications = createTelephonyNotifications()
+    }
+
+    private fun createTelephonyNotifications(): TelephonyNotifications? {
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            logger.info("Push notifications are off: this build has no google-services.json")
+            return null
+        }
+        return try {
+            TelephonyNotifications(this, sudoUserClient, logger)
+        } catch (e: Exception) {
+            logger.warning("Push notifications are off: ${e.localizedMessage}")
+            null
+        }
+    }
+
+    /** Register for push notifications once the user has signed in. */
+    fun registerForNotifications() {
+        telephonyNotifications?.registerInBackground()
     }
 
     private val signInPreferences get() = getSharedPreferences(SIGN_IN_PREFERENCES, Context.MODE_PRIVATE)
@@ -167,6 +197,7 @@ class App : Application() {
      * phone messages, so the next registration starts afresh.
      */
     suspend fun deregister() {
+        telephonyNotifications?.deregister()
         stopTelephony()
         sudoUserClient.deregister()
         removeUserData()
@@ -181,6 +212,7 @@ class App : Application() {
      * be left unable to clear the auth cookies.
      */
     suspend fun signOutFederated(removeData: Boolean) {
+        telephonyNotifications?.deregister()
         stopTelephony()
         // Opens the browser to clear the sign in cookies. The result isn't awaited because it is
         // never delivered when the sign out redirect returns to the app.

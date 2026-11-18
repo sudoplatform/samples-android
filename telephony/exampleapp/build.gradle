@@ -1,6 +1,11 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+// Push notifications need the app's Firebase configuration. Without it the app builds and runs
+// without them.
+if (file('google-services.json').exists()) {
+    apply plugin: 'com.google.gms.google-services'
+}
 
 android {
     compileSdkVersion 35
@@ -53,8 +58,11 @@ dependencies {
     implementation 'com.sudoplatform:sudouser:21.2.2'
     implementation 'com.sudoplatform:sudoentitlements:13.0.1'
     implementation 'com.sudoplatform:sudoprofiles:18.0.2'
-    implementation 'com.sudoplatform:sudotelephony:8.0.0'
+    implementation 'com.sudoplatform:sudotelephony:8.1.0'
     implementation 'com.sudoplatform:sudokeymanager:9.0.3'
+    implementation 'com.sudoplatform:sudonotification:5.0.1'
+
+    implementation 'com.google.firebase:firebase-messaging:24.1.2'
 
     def coroutine_version = '1.10.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"

@@ -13,6 +13,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:$kotlin_version"
         classpath "org.jmailen.gradle:kotlinter-gradle:5.2.0"
+        classpath "com.google.gms:google-services:4.4.3"
         if (project.file("${rootProject.projectDir}/util/vulnerability-scan.gradle").exists()) {
             classpath "org.owasp:dependency-check-gradle:12.2.2"
         }

@@ -24,6 +24,8 @@ import com.sudoplatform.sudotelephony.types.inputs.DeletePhoneMessagesInput
 import com.sudoplatform.sudotelephony.types.inputs.ListPhoneMessagesForPhoneNumberIdInput
 import com.sudoplatform.telephonyexample.App
 import com.sudoplatform.telephonyexample.TelephonyEvents
+import com.sudoplatform.telephonyexample.notifications.TelephonyNotifications
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -70,6 +72,9 @@ data class PhoneMessagesUiState(
     val confirmRelease: Boolean = false,
     val isReleasing: Boolean = false,
     val releaseError: String? = null,
+    /** Whether notifications are on for this number, or null when they aren't available. */
+    val notificationsEnabled: Boolean? = null,
+    val notificationSettingError: String? = null,
 )
 
 /** Emitted once the number has been released, so the screen can close. */
@@ -77,12 +82,14 @@ data object PhoneNumberReleased
 
 /**
  * Lists a phone number's messages a page at a time, keeps them up to date from the telephony
- * subscription, deletes them on request, and releases the number.
+ * subscription, deletes them on request, releases the number, and turns its notifications on
+ * or off.
  */
 class PhoneMessagesViewModel(
     private val phoneNumberId: String,
     private val telephonyClient: SudoTelephonyClient,
     private val telephonyEvents: TelephonyEvents,
+    private val telephonyNotifications: TelephonyNotifications?,
     private val logger: Logger,
 ) : ViewModel() {
     companion object {
@@ -98,6 +105,7 @@ class PhoneMessagesViewModel(
                         phoneNumberId = checkNotNull(createSavedStateHandle().get<String>(PHONE_NUMBER_ID_ARG)),
                         telephonyClient = app.sudoTelephonyClient,
                         telephonyEvents = app.telephonyEvents,
+                        telephonyNotifications = app.telephonyNotifications,
                         logger = app.logger,
                     )
                 }
@@ -123,6 +131,7 @@ class PhoneMessagesViewModel(
             }
         }
         viewModelScope.launch { telephonyEvents.phoneMessages.collect(::applyEvent) }
+        loadNotificationSetting()
     }
 
     /** Fetch the first page again, for example to pick up messages that arrived or were read. */
@@ -210,6 +219,26 @@ class PhoneMessagesViewModel(
         }
     }
 
+    /** Turn this number's notifications off if they are on, or on if they are off. */
+    fun toggleNotifications() {
+        val notifications = telephonyNotifications ?: return
+        val enabled = _uiState.value.notificationsEnabled ?: return
+        _uiState.update { it.copy(notificationsEnabled = !enabled) }
+        viewModelScope.launch {
+            try {
+                notifications.setEnabled(phoneNumberId, !enabled)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update { it.copy(notificationsEnabled = enabled, notificationSettingError = e.describe()) }
+            }
+        }
+    }
+
+    fun dismissNotificationSettingError() {
+        _uiState.update { it.copy(notificationSettingError = null) }
+    }
+
     fun dismissReleaseError() {
         _uiState.update { it.copy(releaseError = null) }
     }
@@ -293,6 +322,21 @@ class PhoneMessagesViewModel(
         _uiState.update { state ->
             val messages = (state.messages.filterNot { it.id == message.id } + message).sortedByDescending { it.receivedAt }
             state.copy(messages = messages)
+        }
+    }
+
+    /** If reading the setting fails, the toggle stays hidden. */
+    private fun loadNotificationSetting() {
+        val notifications = telephonyNotifications ?: return
+        viewModelScope.launch {
+            try {
+                val enabled = notifications.isEnabled(phoneNumberId)
+                _uiState.update { it.copy(notificationsEnabled = enabled) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                logger.warning("Failed to read the notification setting: ${e.describe()}")
+            }
         }
     }
 

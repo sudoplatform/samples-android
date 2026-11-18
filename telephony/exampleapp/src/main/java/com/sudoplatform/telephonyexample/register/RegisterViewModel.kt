@@ -352,6 +352,7 @@ class RegisterViewModel(
             fail(R.string.signin_failure, e)
             return
         }
+        app.registerForNotifications()
         _events.send(RegisterEvent.NavigateToSudos)
         setLoading(false)
     }

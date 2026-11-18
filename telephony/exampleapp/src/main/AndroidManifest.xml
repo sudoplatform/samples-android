@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name="com.sudoplatform.telephonyexample.App"
         android:allowBackup="false"
@@ -30,6 +32,13 @@
                     android:scheme="com.sudoplatform.baseapp" />
             </intent-filter>
         </activity>
+        <service
+            android:name="com.sudoplatform.telephonyexample.notifications.TelephonyMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
