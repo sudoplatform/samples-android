@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sudoplatform.telephonyexample.App
 import com.sudoplatform.telephonyexample.MainActivity
+import com.sudoplatform.telephonyexample.withNotificationPermission
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -27,8 +28,10 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class RegisterKeyModeTest {
-    @get:Rule
     val composeRule = createEmptyComposeRule()
+
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     private val preferences
         get() =

@@ -17,6 +17,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
+import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudouser.FederatedSignInResult
 import com.sudoplatform.sudouser.SignInResult
 import com.sudoplatform.sudouser.SudoUserClient
@@ -74,6 +75,9 @@ class RegisterViewModel(
             viewModelFactory {
                 initializer { RegisterViewModel(this[APPLICATION_KEY] as App) }
             }
+
+        /** Key namespace that holds the TEST registration key. */
+        private const val KEY_NAMESPACE = "telephony-example"
 
         private const val IDENTITY_ID_CLAIM = "custom:identityId"
         private const val FEDERATED_ID_REGISTRATION_TIMEOUT_MS = 15_000L
@@ -219,21 +223,24 @@ class RegisterViewModel(
                     return@launch
                 }
 
-            val authProvider =
-                TESTAuthenticationProvider(
-                    "testRegisterAudience",
-                    privateKey,
-                    null,
-                    app.keyManager,
-                    keyId,
-                )
-            try {
-                withContext(Dispatchers.IO) {
-                    sudoUserClient.registerWithAuthenticationProvider(authProvider, "dummy_rid")
+            // The provider stores the TEST registration key in this key manager and signs with it.
+            KeyManagerFactory(app).createAndroidKeyManager(KEY_NAMESPACE).use { keyManager ->
+                val authProvider =
+                    TESTAuthenticationProvider(
+                        "testRegisterAudience",
+                        privateKey,
+                        null,
+                        keyManager,
+                        keyId,
+                    )
+                try {
+                    withContext(Dispatchers.IO) {
+                        sudoUserClient.registerWithAuthenticationProvider(authProvider, "dummy_rid")
+                    }
+                    signIn()
+                } catch (e: SudoUserException) {
+                    fail(R.string.register_failure, e)
                 }
-                signIn()
-            } catch (e: SudoUserException) {
-                fail(R.string.register_failure, e)
             }
         }
     }

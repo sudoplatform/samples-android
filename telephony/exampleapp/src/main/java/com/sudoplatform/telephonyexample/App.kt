@@ -12,8 +12,6 @@ import android.net.Uri
 import androidx.core.content.edit
 import com.google.firebase.FirebaseApp
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
-import com.sudoplatform.sudokeymanager.KeyManager
-import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
@@ -28,6 +26,12 @@ import kotlinx.coroutines.withContext
 
 class App : Application() {
     companion object {
+        /**
+         * Key namespace of the telephony clients. Key backups import only into the namespace they
+         * were exported from, so the sample uses the same value on every platform.
+         */
+        const val TELEPHONY_KEY_NAMESPACE = "sudo-telephony-example"
+
         /** Name of the preference set that holds sign in information. */
         const val SIGN_IN_PREFERENCES = "SignIn"
 
@@ -44,7 +48,6 @@ class App : Application() {
         private const val LAST_SIGNED_IN_USER_PREFERENCE = "lastSignedInUser"
     }
 
-    lateinit var keyManager: KeyManager
     lateinit var sudoUserClient: SudoUserClient
     lateinit var sudoEntitlementsClient: SudoEntitlementsClient
     lateinit var sudoProfilesClient: SudoProfilesClient
@@ -116,9 +119,6 @@ class App : Application() {
                     .builder(this, sudoUserClient, Uri.fromFile(cacheDir))
                     .setLogger(logger)
                     .build()
-
-            // Create an instance of KeyManager to perform key management.
-            keyManager = KeyManagerFactory(this).createAndroidKeyManager() as KeyManager
 
             // Create an instance of the SudoEntitlementsClient to redeem and check what resources the
             // user is entitled to use.
@@ -313,6 +313,7 @@ class App : Application() {
             .builder()
             .setContext(this)
             .setSudoUserClient(sudoUserClient)
+            .setNamespace(TELEPHONY_KEY_NAMESPACE)
             .setLogger(logger)
             .setEnforceSingletonKeyPair(enforceSingletonKeyPair)
             .build()

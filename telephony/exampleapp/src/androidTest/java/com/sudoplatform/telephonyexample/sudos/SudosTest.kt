@@ -15,6 +15,7 @@ import com.sudoplatform.sudoprofiles.EncryptionKey
 import com.sudoplatform.telephonyexample.App
 import com.sudoplatform.telephonyexample.MainActivity
 import com.sudoplatform.telephonyexample.register.register
+import com.sudoplatform.telephonyexample.withNotificationPermission
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -28,8 +29,10 @@ import java.util.Base64
  */
 @RunWith(AndroidJUnit4::class)
 class SudosTest {
-    @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {

@@ -34,7 +34,7 @@ class KeyBackupFileTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
 
     // Only the stateless crypto methods are used, so the app's key store isn't touched.
-    private val keyManager = KeyManagerFactory(instrumentation.targetContext).createAndroidKeyManager()
+    private val keyManager = KeyManagerFactory(instrumentation.targetContext).createAndroidKeyManager("keyBackupFileTest")
 
     private val payload =
         KeyBackupPayload(

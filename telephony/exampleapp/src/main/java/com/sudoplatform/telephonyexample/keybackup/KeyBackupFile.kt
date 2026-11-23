@@ -50,8 +50,7 @@ sealed class KeyBackupException(
  * The file is plain JSON describing how the payload was encrypted. The payload, a
  * [KeyBackupPayload], is only readable with the password.
  *
- * Only the stateless methods of [KeyManagerInterface] are used: the app's key manager has no
- * namespace, so its key store methods would reach every key on the device.
+ * Only the stateless methods of [KeyManagerInterface] are used, so no keys are stored.
  */
 class KeyBackupFile private constructor(
     val version: Int,

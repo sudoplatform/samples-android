@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sudoplatform.telephonyexample.MainActivity
 import com.sudoplatform.telephonyexample.sudos.sudos
+import com.sudoplatform.telephonyexample.withNotificationPermission
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,8 +20,10 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class RegisterTest {
-    @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @Test
     fun testRegisterAndDeregister() {

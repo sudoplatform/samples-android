@@ -23,6 +23,7 @@ import com.sudoplatform.sudotelephony.initTelephonyNotifications
 import com.sudoplatform.sudotelephony.isTelephonyNotificationForPhoneNumberIdEnabled
 import com.sudoplatform.sudotelephony.setTelephonyNotificationsForPhoneNumberId
 import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.telephonyexample.App
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,8 @@ class TelephonyNotifications(
         SudoTelephonyNotifiableClient
             .builder()
             .setContext(context)
+            // Must match the telephony client's namespace, or notifications can't be decrypted.
+            .setNamespace(App.TELEPHONY_KEY_NAMESPACE)
             .setNotificationHandler(PhoneMessageNotifier(context))
             .setLogger(logger)
             .build()

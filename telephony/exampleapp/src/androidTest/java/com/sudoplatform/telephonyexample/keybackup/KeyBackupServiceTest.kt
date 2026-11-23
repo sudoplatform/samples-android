@@ -41,12 +41,26 @@ class KeyBackupServiceTest {
     }
 
     private val app = ApplicationProvider.getApplicationContext<App>()
-    private val source = Device("keyBackupSource")
-    private val target = Device("keyBackupTarget")
 
-    /** One device's Sudo and telephony key stores, signed in as [subject]. */
+    // Only the stateless crypto methods are used, to seal backups the way another device would.
+    private val keyManager = KeyManagerFactory(app).createAndroidKeyManager("keyBackupServiceTest")
+    private val devices = mutableListOf<Device>()
+    private val source = device("keyBackupSource")
+    private val target = device("keyBackupTarget")
+
+    private fun device(
+        name: String,
+        telephonyNamespace: String = "$name-tel",
+    ) = Device(name, telephonyNamespace).also { devices.add(it) }
+
+    /**
+     * One device's Sudo and telephony key stores, signed in as [subject]. Telephony key archives
+     * import only into the namespace they were exported from, so a device restoring another's
+     * telephony keys uses that device's [telephonyNamespace].
+     */
     private inner class Device(
         name: String,
+        val telephonyNamespace: String,
         var subject: String? = SUBJECT,
     ) {
         val profilesClient: SudoProfilesClient =
@@ -56,7 +70,7 @@ class KeyBackupServiceTest {
                 .setDatabaseName(DATABASE)
                 .setLogger(app.logger)
                 .build()
-        val telephonyKeyManager = KeyManagerFactory(app).createAndroidKeyManager("$name-tel", DATABASE)
+        val telephonyKeyManager = KeyManagerFactory(app).createAndroidKeyManager(telephonyNamespace, DATABASE)
         val telephonyClient: SudoTelephonyClient =
             SudoTelephonyClient
                 .builder()
@@ -65,7 +79,7 @@ class KeyBackupServiceTest {
                 .setKeyManager(telephonyKeyManager)
                 .setLogger(app.logger)
                 .build()
-        val service = DefaultKeyBackupService(profilesClient, telephonyClient, app.keyManager, app.logger) { subject }
+        val service = DefaultKeyBackupService(app, profilesClient, telephonyClient, app.logger) { subject }
 
         val sudoKeyIds get() = profilesClient.exportEncryptionKeys().map { it.id }.toSet()
     }
@@ -73,7 +87,7 @@ class KeyBackupServiceTest {
     @After
     fun fini() {
         runBlocking {
-            for (device in listOf(source, target)) {
+            for (device in devices) {
                 device.profilesClient.reset()
                 device.telephonyKeyManager.removeAllKeys()
             }
@@ -84,29 +98,49 @@ class KeyBackupServiceTest {
     fun importShouldAddSudoKeysAndReplaceTelephonyKeys() =
         runBlocking {
             source.telephonyKeyManager.generateKeyPair(NUMBER_KEY)
-            target.telephonyKeyManager.generateKeyPair(TARGET_NUMBER_KEY)
+            val sourceNumberKey = source.telephonyKeyManager.getPrivateKeyData(NUMBER_KEY)
             val sourceKeyId = source.profilesClient.getSymmetricKeyId()!!
-            val targetKeyId = target.profilesClient.getSymmetricKeyId()!!
-
             val backup = source.service.exportBackup(PASSWORD)
-            val result = target.service.importBackup(target.service.readBackup(backup), PASSWORD)
+            // The restoring device uses the source's telephony namespace. The two share this emulator's key
+            // store, so the source's telephony keys are removed before the restoring device creates its own.
+            source.telephonyKeyManager.removeAllKeys()
+            val restoring = device("keyBackupTarget", telephonyNamespace = source.telephonyNamespace)
+            restoring.telephonyKeyManager.generateKeyPair(TARGET_NUMBER_KEY)
+            val targetKeyId = restoring.profilesClient.getSymmetricKeyId()!!
+
+            val result = restoring.service.importBackup(restoring.service.readBackup(backup), PASSWORD)
 
             assertEquals(KeyBackupImportResult(sudoKeyCount = 1, importedTelephonyKeys = true, unrecognisedSdks = emptyList()), result)
-            assertEquals(sourceKeyId, target.profilesClient.getSymmetricKeyId())
+            assertEquals(sourceKeyId, restoring.profilesClient.getSymmetricKeyId())
             // Sudos created on the target before the import stay readable.
-            assertEquals(setOf(sourceKeyId, targetKeyId), target.sudoKeyIds)
+            assertEquals(setOf(sourceKeyId, targetKeyId), restoring.sudoKeyIds)
             assertEquals(
                 SUBJECT,
-                target.service
+                restoring.service
                     .readBackup(backup)
-                    .open(PASSWORD, app.keyManager)
+                    .open(PASSWORD, keyManager)
                     .userSubject,
             )
-            assertArrayEquals(
-                source.telephonyKeyManager.getPrivateKeyData(NUMBER_KEY),
-                target.telephonyKeyManager.getPrivateKeyData(NUMBER_KEY),
-            )
-            assertNull(target.telephonyKeyManager.getPrivateKeyData(TARGET_NUMBER_KEY))
+            assertArrayEquals(sourceNumberKey, restoring.telephonyKeyManager.getPrivateKeyData(NUMBER_KEY))
+            assertNull(restoring.telephonyKeyManager.getPrivateKeyData(TARGET_NUMBER_KEY))
+        }
+
+    @Test
+    fun telephonyKeysFromAnotherNamespaceShouldFailAndRestoreBothSetsOfKeys() =
+        runBlocking {
+            source.telephonyKeyManager.generateKeyPair(NUMBER_KEY)
+            target.telephonyKeyManager.generateKeyPair(TARGET_NUMBER_KEY)
+            val targetKeyId = target.profilesClient.getSymmetricKeyId()!!
+            val backup = source.service.exportBackup(PASSWORD)
+
+            assertThrows<SudoTelephonyClient.CryptographicKeysException> {
+                target.service.importBackup(target.service.readBackup(backup), PASSWORD)
+            }
+
+            assertEquals(targetKeyId, target.profilesClient.getSymmetricKeyId())
+            assertEquals(setOf(targetKeyId), target.sudoKeyIds)
+            assertNotNull(target.telephonyKeyManager.getPrivateKeyData(TARGET_NUMBER_KEY))
+            assertNull(target.telephonyKeyManager.getPrivateKeyData(NUMBER_KEY))
         }
 
     @Test
@@ -138,7 +172,7 @@ class KeyBackupServiceTest {
             assertNull(
                 target.service
                     .readBackup(backup)
-                    .open(PASSWORD, app.keyManager)
+                    .open(PASSWORD, keyManager)
                     .userSubject,
             )
             assertEquals(sourceKeyId, target.profilesClient.getSymmetricKeyId())
@@ -153,7 +187,7 @@ class KeyBackupServiceTest {
             val file = target.service.readBackup(backup)
             val result = target.service.importBackup(file, PASSWORD)
 
-            assertNull(file.open(PASSWORD, app.keyManager).sudoTelephony)
+            assertNull(file.open(PASSWORD, keyManager).sudoTelephony)
             assertFalse(result.importedTelephonyKeys)
             assertEquals(source.profilesClient.getSymmetricKeyId(), target.profilesClient.getSymmetricKeyId())
             assertNotNull(target.telephonyKeyManager.getPrivateKeyData(TARGET_NUMBER_KEY))
@@ -169,7 +203,7 @@ class KeyBackupServiceTest {
                     sudoProfiles = KeyBackupPayload.SudoProfilesKeys("NEW-KEY", listOf(sudoKey("NEW-KEY"))),
                     sudoTelephony = KeyBackupPayload.SudoTelephonyKeys("not a key archive".toByteArray()),
                 )
-            val file = KeyBackupFile.seal(payload, PASSWORD, app.keyManager)
+            val file = KeyBackupFile.seal(payload, PASSWORD, keyManager)
 
             assertThrows<SudoTelephonyClient.CryptographicKeysException> {
                 target.service.importBackup(file, PASSWORD)
@@ -191,8 +225,8 @@ class KeyBackupServiceTest {
                     .open("ios-key-backup.json")
                     .use { it.readBytes() }
             // The fixture's telephony archive is placeholder bytes, so only its Sudo keys are imported.
-            val iosPayload = target.service.readBackup(data).open("café key backup", app.keyManager)
-            val file = KeyBackupFile.seal(iosPayload.copy(sudoTelephony = null), PASSWORD, app.keyManager)
+            val iosPayload = target.service.readBackup(data).open("café key backup", keyManager)
+            val file = KeyBackupFile.seal(iosPayload.copy(sudoTelephony = null), PASSWORD, keyManager)
 
             val result = target.service.importBackup(file, PASSWORD)
 
@@ -216,7 +250,7 @@ class KeyBackupServiceTest {
                 )
 
             for (sudoKeys in invalidBackups) {
-                val file = KeyBackupFile.seal(KeyBackupPayload(sudoKeys, sudoTelephony = null), PASSWORD, app.keyManager)
+                val file = KeyBackupFile.seal(KeyBackupPayload(sudoKeys, sudoTelephony = null), PASSWORD, keyManager)
                 assertThrows<KeyBackupServiceException.InvalidBackupContents> {
                     target.service.importBackup(file, PASSWORD)
                 }
@@ -233,7 +267,7 @@ class KeyBackupServiceTest {
                 KeyBackupFile.seal(
                     KeyBackupPayload(sudoProfiles = null, sudoTelephony = KeyBackupPayload.SudoTelephonyKeys(byteArrayOf(1))),
                     PASSWORD,
-                    app.keyManager,
+                    keyManager,
                 )
 
             assertThrows<KeyBackupServiceException.NoSudoKeysInBackup> {

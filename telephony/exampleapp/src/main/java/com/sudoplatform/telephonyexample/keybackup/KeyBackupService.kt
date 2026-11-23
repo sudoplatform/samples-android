@@ -6,6 +6,8 @@
 
 package com.sudoplatform.telephonyexample.keybackup
 
+import android.content.Context
+import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudokeymanager.KeyManagerInterface
 import com.sudoplatform.sudokeymanager.SecureKeyArchiveException
 import com.sudoplatform.sudologging.Logger
@@ -59,16 +61,20 @@ interface KeyBackupService {
 }
 
 class DefaultKeyBackupService(
+    context: Context,
     private val profilesClient: SudoProfilesClient,
     private val telephonyClient: SudoTelephonyClient,
-    private val keyManager: KeyManagerInterface,
     private val logger: Logger,
     /** Returns the signed in user's subject, which a backup records so it can't be imported for another user. */
     private val userSubject: () -> String?,
 ) : KeyBackupService {
     private companion object {
         const val SUDO_KEY_SIZE = 32
+        const val KEY_NAMESPACE = "key-backup"
     }
+
+    /** Used only for random data, password key derivation and encryption, so it stores no keys. */
+    private val keyManager: KeyManagerInterface = KeyManagerFactory(context).createAndroidKeyManager(KEY_NAMESPACE)
 
     override suspend fun exportBackup(password: String): ByteArray {
         val currentKeyId = profilesClient.getSymmetricKeyId() ?: throw KeyBackupServiceException.NoKeysToExport()

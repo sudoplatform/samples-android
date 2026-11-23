@@ -73,7 +73,7 @@ class KeyBackupViewModel(
                     val app = this[APPLICATION_KEY] as App
                     KeyBackupViewModel(
                         app,
-                        DefaultKeyBackupService(app.sudoProfilesClient, app.sudoTelephonyClient, app.keyManager, app.logger) {
+                        DefaultKeyBackupService(app, app.sudoProfilesClient, app.sudoTelephonyClient, app.logger) {
                             app.sudoUserClient.getSubject()
                         },
                     )

@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sudoplatform.telephonyexample.MainActivity
 import com.sudoplatform.telephonyexample.optionalArgument
 import com.sudoplatform.telephonyexample.sudos.sudos
+import com.sudoplatform.telephonyexample.withNotificationPermission
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -27,8 +28,10 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class PhoneNumbersTest {
-    @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     private val areaCode = optionalArgument("AREA_CODE", "415")
 
