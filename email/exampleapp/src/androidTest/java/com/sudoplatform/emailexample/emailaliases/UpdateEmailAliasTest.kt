@@ -6,22 +6,20 @@
 
 package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
-import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
+import java.time.LocalDate
 
 /**
  * Test the update email alias flows.
@@ -29,46 +27,40 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class UpdateEmailAliasTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
+
+    /** An expiry date that is always in the future: the 15th of next month. */
+    private val expiryDate = LocalDate.now().plusMonths(1).withDayOfMonth(15)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     /**
-     * Test: Provision a alias, tap item, tap "Update", verify the update dialog appears.
+     * Test: Provision an alias, tap item, tap "Update", verify the update dialog appears.
      */
     @Test
     fun testUpdateDialogDisplay() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
             clickOnCancelButton()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -78,8 +70,8 @@ class UpdateEmailAliasTest {
     @Test
     fun testCancelDismissesWithoutAction() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
@@ -87,27 +79,25 @@ class UpdateEmailAliasTest {
             checkUpdateDialogDisplayed()
             clickOnCancelButton()
             // Verify list is still displayed and unchanged
-            waitForAliasesRecyclerView()
             checkEmailAliasesItemsDisplayed()
-            pressBack()
+            checkDashDisplayedForMetadata()
+            checkDashDisplayedForExpiresAt()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     /**
-     * Test: Enter valid JSON metadata, tap Save, verify loading shown and list refreshes
-     * with metadata displayed.
+     * Test: Enter valid JSON metadata, tap Save, verify the list refreshes with metadata
+     * displayed.
      */
     @Test
     fun testSaveWithValidMetadata() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
@@ -115,17 +105,12 @@ class UpdateEmailAliasTest {
             checkUpdateDialogDisplayed()
             enterMetadataJson("{\"key1\":\"value1\"}")
             clickSaveButton()
-            waitForLoading()
-            waitForRecyclerView()
             checkEmailAliasesItemsDisplayed()
             checkMetadataDisplayed("key1")
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -135,8 +120,8 @@ class UpdateEmailAliasTest {
     @Test
     fun testSaveWithEmptyMetadata() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
@@ -144,17 +129,12 @@ class UpdateEmailAliasTest {
             checkUpdateDialogDisplayed()
             // Leave metadata empty (default state)
             clickSaveButton()
-            waitForLoading()
-            waitForRecyclerView()
             checkEmailAliasesItemsDisplayed()
             checkDashDisplayedForMetadata()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -164,27 +144,22 @@ class UpdateEmailAliasTest {
     @Test
     fun testSaveWithExpirationSet() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
             clickPickDate()
-            selectDate(2026, 6, 15)
+            selectDateInNextMonth(expiryDate)
             clickSaveButton()
-            waitForLoading()
-            waitForRecyclerView()
             checkEmailAliasesItemsDisplayed()
-            checkExpiresAtDisplayed("Expires: 06/15/2026")
-            pressBack()
+            checkExpiresAtDisplayed(expiryDate)
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -194,8 +169,8 @@ class UpdateEmailAliasTest {
     @Test
     fun testSaveWithExpirationCleared() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             // First set an expiration so we can clear it
             clickOnAliasItem(0)
@@ -203,11 +178,10 @@ class UpdateEmailAliasTest {
             clickOnUpdateButton()
             checkUpdateDialogDisplayed()
             clickPickDate()
-            selectDate(2026, 6, 15)
+            selectDateInNextMonth(expiryDate)
             clickSaveButton()
-            waitForLoading()
-            waitForRecyclerView()
             checkEmailAliasesItemsDisplayed()
+            checkExpiresAtDisplayed(expiryDate)
             // Now clear the expiration
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
@@ -215,17 +189,12 @@ class UpdateEmailAliasTest {
             checkUpdateDialogDisplayed()
             clickClearDate()
             clickSaveButton()
-            waitForLoading()
-            waitForRecyclerView()
             checkEmailAliasesItemsDisplayed()
             checkDashDisplayedForExpiresAt()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -236,54 +205,44 @@ class UpdateEmailAliasTest {
     @Test
     fun testDashDisplayForAbsentValues() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             checkDashDisplayedForMetadata()
             checkDashDisplayedForExpiresAt()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     /**
-     * Helper: Registers, creates a sudo, provisions an email address,
-     * and provisions an email alias. Stays on the email addresses screen.
+     * Registers, creates a sudo, provisions an email address, and provisions an email alias.
+     * Stays on the email addresses screen.
      */
     private fun provisionEmailAliasFlow() {
-        createSudo {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToCreateEmailAliasScreen()
         }
-        provisionEmailAlias {
+        provisionEmailAlias(composeRule) {
             checkProvisionEmailAliasItemsDisplayed()
-            selectRealEmailAddress(1)
+            selectRealEmailAddress(0)
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
     }
 }

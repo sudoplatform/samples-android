@@ -6,19 +6,16 @@
 
 package com.sudoplatform.emailexample.util
 
-import android.os.Parcelable
 import jakarta.mail.Message
 import jakarta.mail.MessagingException
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
-import kotlinx.parcelize.Parcelize
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.Date
 
-@Parcelize
 data class SimplifiedEmailMessage(
     val id: String,
     val from: List<String>,
@@ -29,7 +26,7 @@ data class SimplifiedEmailMessage(
     val body: String,
     val isDraft: Boolean = false,
     val sendAt: Date? = null,
-) : Parcelable
+)
 
 /**
  * A parser of RFC 822 compatible email message content.

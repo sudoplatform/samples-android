@@ -6,87 +6,130 @@
 
 package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.onData
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isEnabled
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import org.hamcrest.CoreMatchers.instanceOf
+import com.sudoplatform.emailexample.emailaddresses.emailAddresses
+import com.sudoplatform.emailexample.ui.TestTags
+import org.junit.Assume.assumeFalse
 import java.util.UUID
 
-fun provisionEmailAlias(func: ProvisionEmailAliasRobot.() -> Unit) = ProvisionEmailAliasRobot().apply { func() }
+fun provisionEmailAlias(
+    composeRule: ComposeTestRule,
+    func: ProvisionEmailAliasRobot.() -> Unit,
+) = ProvisionEmailAliasRobot(composeRule).apply { func() }
+
+/** The SDK's InsufficientEntitlementsException message. */
+private const val INSUFFICIENT_ENTITLEMENTS_MESSAGE = "Entitlements have been exceeded"
 
 /**
- * Testing robot that manages the provision email alias screen.
+ * Testing robot that manages the provision email alias screen, which provisions internal aliases
+ * and, opened for external aliases, external ones.
  */
-class ProvisionEmailAliasRobot : BaseRobot() {
-    private val toolbarCreateButton = withId(R.id.create)
-    private val aliasLocalPartField = withId(R.id.aliasLocalPartField)
-    private val realEmailAddressSpinner = withId(R.id.realEmailAddressSpinner)
-    private val aliasDomainSpinner = withId(R.id.aliasDomainSpinner)
-    private val availabilityLabel = withId(R.id.availabilityLabel)
-    private val sudoText = withId(R.id.sudoText)
-    private val sudoLabelText = withId(R.id.sudoLabelText)
-    private val loadingDialog = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 60_000L)
-    }
-
-    fun waitForRootFocus() {
-        onView(isRoot()).perform(waitFor(5_000L))
-    }
-
+class ProvisionEmailAliasRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkProvisionEmailAliasItemsDisplayed() {
-        waitForViewToDisplay(toolbarCreateButton)
-        waitForViewToDisplay(aliasLocalPartField)
-        waitForViewToDisplay(realEmailAddressSpinner)
-        waitForViewToDisplay(aliasDomainSpinner)
-        waitForViewToDisplay(sudoText)
-        waitForViewToDisplay(sudoLabelText)
+        waitForTag(TestTags.PROVISION_EMAIL_ALIAS_ACTION)
+        waitForTag(TestTags.REAL_ADDRESS_FIELD)
+        checkCommonItemsDisplayed()
     }
 
+    fun checkProvisionExternalEmailAliasItemsDisplayed() {
+        waitForTag(TestTags.PROVISION_EMAIL_ALIAS_ACTION)
+        waitForTag(TestTags.EXTERNAL_ADDRESS_FIELD)
+        checkCommonItemsDisplayed()
+    }
+
+    /** Wait for the availability check, which runs a moment after typing stops, to find the alias available. */
     fun checkAvailableAddressMsg() {
-        waitForViewToDisplay(availabilityLabel, 10_000L)
-        onView(availabilityLabel).check(matches(withText("This email address is available")))
+        checkAvailabilityText(string(R.string.email_address_available))
     }
 
     fun checkUnavailableAddressMsg() {
-        waitForViewToDisplay(availabilityLabel, 10_000L)
-        onView(availabilityLabel).check(matches(withText("This email address is not available")))
+        checkAvailabilityText(string(R.string.email_address_unavailable))
     }
 
-    fun clickOnCreateButton() {
-        onView(toolbarCreateButton).check(matches(isEnabled()))
-        clickOnView(toolbarCreateButton)
+    /** Choose the real address at [position] among the Sudo's email addresses. */
+    fun selectRealEmailAddress(position: Int) {
+        selectDropdownOption(TestTags.REAL_ADDRESS_FIELD, position)
     }
 
-    fun clickOnPositiveAlertDialogButton() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        onView(isRoot()).perform(waitFor(1_000L))
-        clickOnView(positiveAlertButton)
+    fun enterExternalEmail(email: String) {
+        replaceText(TestTags.EXTERNAL_ADDRESS_FIELD, email)
     }
 
+    /** Enter [localPart], or a random one when it is blank. */
     fun setLocalPart(localPart: String? = "") {
         var input = localPart
         if (input.isNullOrBlank()) {
             input = UUID.randomUUID().toString().substring(0, 8)
         }
-        replaceText(aliasLocalPartField, input)
+        replaceText(TestTags.ALIAS_LOCAL_PART_FIELD, input)
     }
 
-    fun selectRealEmailAddress(position: Int) {
-        clickOnView(realEmailAddressSpinner)
-        onView(isRoot()).perform(waitFor(500L))
-        onData(instanceOf(String::class.java))
-            .atPosition(position)
-            .perform(click())
+    /** Create the alias and wait for the email addresses, which the app returns to. */
+    fun clickOnCreateButton() {
+        clickOnCreateButtonExpectingAlert()
+        skipIfAliasProvisioningNotEntitled()
+        waitForTagToDisappear(TestTags.ALIAS_LOCAL_PART_FIELD)
+        emailAddresses(composeRule) {
+            checkEmailAddressesItemsDisplayed()
+        }
+    }
+
+    /** Tap Create when the form is expected to be rejected with an alert. */
+    fun clickOnCreateButtonExpectingAlert() {
+        clickOnEnabledTag(TestTags.PROVISION_EMAIL_ALIAS_ACTION)
+    }
+
+    fun checkAlertDialogDisplayed() {
+        waitForTag(TestTags.DIALOG_CONFIRM)
+    }
+
+    /** Check the alert says the external address isn't a valid email address. */
+    fun checkInvalidEmailFormatAlertDisplayed() {
+        checkAlertDialogDisplayed()
+        waitForText(string(R.string.invalid_email_format))
+    }
+
+    fun clickOnPositiveAlertDialogButton() {
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        waitForTagToDisappear(TestTags.DIALOG_CONFIRM)
+    }
+
+    /**
+     * Skips the test if the service refused the alias because the test user isn't entitled to
+     * provision one, as on environments whose TEST entitlement set lacks the alias entitlements.
+     * Any other failure still fails the test.
+     */
+    @OptIn(ExperimentalTestApi::class)
+    private fun skipIfAliasProvisioningNotEntitled() {
+        val failureTitle = hasText(string(R.string.provision_email_alias_failure))
+        composeRule.waitUntil(DEFAULT_TIMEOUT_MS) {
+            composeRule.onAllNodes(hasTestTag(TestTags.ALIAS_LOCAL_PART_FIELD)).fetchSemanticsNodes().isEmpty() ||
+                composeRule.onAllNodes(failureTitle).fetchSemanticsNodes().isNotEmpty()
+        }
+        val refused =
+            composeRule
+                .onAllNodes(
+                    hasText(INSUFFICIENT_ENTITLEMENTS_MESSAGE, substring = true),
+                ).fetchSemanticsNodes()
+                .isNotEmpty()
+        assumeFalse("The test user isn't entitled to provision email aliases in this environment", refused)
+    }
+
+    private fun checkCommonItemsDisplayed() {
+        waitForTag(TestTags.ALIAS_LOCAL_PART_FIELD)
+        waitForTag(TestTags.ALIAS_DOMAIN_FIELD)
+        waitForText(string(R.string.sudo))
+        waitForTag(TestTags.SUDO_LABEL_TEXT)
+    }
+
+    private fun checkAvailabilityText(text: String) {
+        waitForNode(hasTestTag(TestTags.AVAILABILITY_TEXT) and hasText(text))
     }
 }

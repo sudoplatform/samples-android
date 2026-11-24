@@ -6,23 +6,19 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
 import com.sudoplatform.emailexample.emailaliases.provisionEmailAlias
-import com.sudoplatform.emailexample.mainmenu.mainMenu
-import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
 /**
  * Test the send aliased email message flow.
@@ -30,201 +26,130 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class SendAliasedEmailTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
-    fun testEmailAliasSpinnerIsDisplayed() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+    fun testSendFromDropdownIsDisplayed() {
+        registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendAliasedEmail {
-            checkEmailAliasSpinnerDisplayed()
-            checkEmailAliasSpinnerDefaultSelected()
-            pressBack()
+        sendAliasedEmail(composeRule) {
+            checkSendFromDropdownDisplayed()
+            checkSendFromDropdownDefaultSelected()
+            navigateBack()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testSendAliasedEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToCreateEmailAliasScreen()
         }
-        provisionEmailAlias {
+        provisionEmailAlias(composeRule) {
             checkProvisionEmailAliasItemsDisplayed()
-            selectRealEmailAddress(1)
+            selectRealEmailAddress(0)
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendAliasedEmail {
-            checkEmailAliasSpinnerDisplayed()
+        sendAliasedEmail(composeRule) {
+            checkSendFromDropdownDisplayed()
+            // The first option sends from the email address; the alias follows it.
             selectEmailAlias(1)
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField(address)
             setSubjectField("Espresso Aliased Email Test")
             setContentBodyField("This is a test email sent from an email alias.")
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForMessages()
         }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
+        emailMessages(composeRule) {
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testSendEmailWithoutAlias() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendAliasedEmail {
-            checkEmailAliasSpinnerDisplayed()
-            checkEmailAliasSpinnerDefaultSelected()
+        sendAliasedEmail(composeRule) {
+            checkSendFromDropdownDisplayed()
+            checkSendFromDropdownDefaultSelected()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField(address)
             setSubjectField("Espresso No Alias Email Test")
             setContentBodyField("This is a test email sent without an email alias.")
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForMessages()
         }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
+        emailMessages(composeRule) {
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
+    }
+
+    /**
+     * Registers, creates a Sudo and provisions an email address, ending on the email addresses.
+     *
+     * @return the provisioned address.
+     */
+    private fun registerAndProvisionEmailAddress(): String {
+        var address = ""
+        provisionEmailAddress(composeRule) {
+            address = provisionEmailAddressFlow()
+        }
+        return address
     }
 }

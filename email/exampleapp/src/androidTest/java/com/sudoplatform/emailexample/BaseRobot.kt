@@ -6,260 +6,221 @@
 
 package com.sudoplatform.emailexample
 
-import android.view.View
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.espresso.NoMatchingViewException
-import androidx.test.espresso.UiController
-import androidx.test.espresso.ViewAction
-import androidx.test.espresso.ViewInteraction
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.longClick
-import androidx.test.espresso.action.ViewActions.pressImeActionButton
-import androidx.test.espresso.action.ViewActions.replaceText
-import androidx.test.espresso.action.ViewActions.scrollTo
-import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.DrawerActions
-import androidx.test.espresso.contrib.NavigationViewActions.navigateTo
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
-import androidx.test.espresso.contrib.RecyclerViewActions.scrollTo
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import junit.framework.AssertionFailedError
-import org.hamcrest.CoreMatchers.not
-import org.hamcrest.Matcher
+import androidx.annotation.StringRes
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isPopup
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import com.sudoplatform.emailexample.ui.TestTags
 
 /**
  * Base class of the visual testing robots.
+ *
+ * Operations against the platform are slow, so waits default to a generous timeout.
  */
-open class BaseRobot {
-    // Assumes that the view is visible on screen.
+@OptIn(ExperimentalTestApi::class)
+open class BaseRobot(
+    protected val composeRule: ComposeTestRule,
+) {
+    companion object {
+        const val DEFAULT_TIMEOUT_MS = 60_000L
+    }
+
+    /** A string from the app's resources, so robots match what the screens show. */
+    fun string(
+        @StringRes resId: Int,
+        vararg formatArgs: Any,
+    ): String =
+        InstrumentationRegistry
+            .getInstrumentation()
+            .targetContext
+            .getString(resId, *formatArgs)
+
+    fun waitForTag(
+        tag: String,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    ) {
+        composeRule.waitUntilAtLeastOneExists(hasTestTag(tag), timeoutMs)
+    }
+
+    fun waitForText(
+        text: String,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    ) {
+        composeRule.waitUntilAtLeastOneExists(hasText(text), timeoutMs)
+    }
+
+    /**
+     * Wait for a node matching [matcher].
+     *
+     * @param useUnmergedTree true to find a node inside a clickable row, which merges its
+     *  children's semantics and drops their test tags.
+     */
+    fun waitForNode(
+        matcher: SemanticsMatcher,
+        useUnmergedTree: Boolean = false,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    ) {
+        composeRule.waitUntil(timeoutMs) {
+            composeRule.onAllNodes(matcher, useUnmergedTree).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun waitForTagToDisappear(
+        tag: String,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    ) {
+        composeRule.waitUntilDoesNotExist(hasTestTag(tag), timeoutMs)
+    }
+
+    /** Wait for the control tagged [tag] to show and be enabled, such as an action waiting on a load. */
+    fun waitForTagToBeEnabled(
+        tag: String,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    ) {
+        composeRule.waitUntilAtLeastOneExists(hasTestTag(tag) and isEnabled(), timeoutMs)
+    }
+
+    /** Wait for any loading dialog or in-place spinner to go away. */
+    fun waitForLoading(timeoutMs: Long = DEFAULT_TIMEOUT_MS) {
+        waitForTagToDisappear(TestTags.LOADING, timeoutMs)
+    }
+
+    /** Wait for at least [count] nodes tagged [tag]. */
+    fun waitForTagCount(
+        tag: String,
+        count: Int,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+    ) {
+        composeRule.waitUntil(timeoutMs) {
+            composeRule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().size >= count
+        }
+    }
+
+    fun clickOnTag(tag: String) {
+        waitForTag(tag)
+        composeRule.onNodeWithTag(tag).performClick()
+    }
+
+    /** Click the control tagged [tag] once it is enabled. */
+    fun clickOnEnabledTag(tag: String) {
+        waitForTagToBeEnabled(tag)
+        composeRule.onNodeWithTag(tag).performClick()
+    }
+
+    fun clickOnText(text: String) {
+        waitForText(text)
+        composeRule.onNodeWithText(text).performClick()
+    }
+
+    /** Click the node tagged [tag] at [position] among those currently shown, such as a list row. */
+    fun clickOnTagAtPosition(
+        tag: String,
+        position: Int,
+    ) {
+        waitForTagCount(tag, position + 1)
+        composeRule.onAllNodes(hasTestTag(tag))[position].performClick()
+    }
+
+    /** Swipe the node tagged [tag] at [position] to the left, as to delete a list row. */
+    fun swipeLeftOnTagAtPosition(
+        tag: String,
+        position: Int,
+    ) {
+        waitForTagCount(tag, position + 1)
+        composeRule.onAllNodes(hasTestTag(tag))[position].performTouchInput { swipeLeft() }
+    }
+
+    /** Replace the text in the field tagged [tag]. */
     fun replaceText(
-        matcher: Matcher<View>,
+        tag: String,
         text: String,
     ) {
-        onView(matcher)
-            .perform(click())
-            .perform(replaceText(text))
-            .perform(pressImeActionButton())
-            .perform(closeSoftKeyboard())
+        waitForTag(tag)
+        composeRule.onNodeWithTag(tag).performTextClearance()
+        if (text.isNotEmpty()) {
+            composeRule.onNodeWithTag(tag).performTextInput(text)
+        }
     }
 
-    // Assumes that the view is visible on screen.
-    fun fillEditText(
-        resourceId: Int,
+    /** The text shown by the node tagged [tag], or the text in it if it is a field. */
+    fun textOf(tag: String): String {
+        waitForTag(tag)
+        val config = composeRule.onNodeWithTag(tag).fetchSemanticsNode().config
+        return config.getOrNull(SemanticsProperties.EditableText)?.text
+            ?: config.getOrNull(SemanticsProperties.Text)?.joinToString { it.text }.orEmpty()
+    }
+
+    /** Open the dropdown field tagged [fieldTag] and choose the option showing [text]. */
+    fun selectDropdownOption(
+        fieldTag: String,
         text: String,
     ) {
-        onView(withId(resourceId))
-            .perform(click())
-            .perform(typeText(text))
-            .perform(pressImeActionButton())
-            .perform(closeSoftKeyboard())
+        clickOnEnabledTag(fieldTag)
+        val option = dropdownOption() and hasText(text)
+        waitForNode(option)
+        composeRule.onNode(option).performClick()
     }
 
-    // Assumes that the view is visible on screen.
-    fun fillText(
-        matcher: Matcher<View>,
-        text: String,
+    /** Open the dropdown field tagged [fieldTag] and choose the option at [position]. */
+    fun selectDropdownOption(
+        fieldTag: String,
+        position: Int,
     ) {
-        onView(matcher)
-            .perform(click())
-            .perform(typeText(text))
-            .perform(pressImeActionButton())
-            .perform(closeSoftKeyboard())
+        clickOnEnabledTag(fieldTag)
+        composeRule.waitUntil(DEFAULT_TIMEOUT_MS) {
+            composeRule.onAllNodes(dropdownOption()).fetchSemanticsNodes().size > position
+        }
+        composeRule.onAllNodes(dropdownOption())[position].performClick()
     }
 
-    fun clickOnView(matcher: Matcher<View>) {
-        onView(matcher)
-            .perform(click())
-    }
-
-    fun longClickOnView(matcher: Matcher<View>) {
-        onView(matcher)
-            .perform(longClick())
-    }
-
-    fun scrollToView(matcher: Matcher<View>) {
-        onView(matcher)
-            .perform(scrollTo())
-    }
-
-    // Use this when the method to open the Drawer does not matter.
-    fun openNavigationDrawer(matcher: Matcher<View>) {
-        onView(matcher)
-            .perform(DrawerActions.open())
-    }
-
-    // Navigate via the drawer
-    fun selectNavigationDrawerDestination(
-        matcher: Matcher<View>,
-        resourceId: Int,
+    /**
+     * Scroll the list tagged [listTag] until a node matching [matcher] shows. Rows further down
+     * a lazy list aren't composed until they are scrolled to.
+     */
+    fun scrollListTo(
+        listTag: String,
+        matcher: SemanticsMatcher,
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
     ) {
-        onView(matcher)
-            .perform(navigateTo(resourceId))
-    }
-
-    // Scroll to the View in the Recycler View
-    fun scrollToViewInRecyclerView(
-        recyclerViewId: Int,
-        matcher: Matcher<View>,
-    ) {
-        onView(withId(recyclerViewId))
-            .perform(scrollTo<ViewHolder>(matcher))
-    }
-
-    // Click on the View in the Recycler View
-    fun clickViewInRecyclerView(
-        recyclerViewId: Int,
-        matcher: Matcher<View>,
-    ) {
-        onView(withId(recyclerViewId))
-            .perform(actionOnItem<ViewHolder>(matcher, click()))
-    }
-
-    // Check that the recycler view has the minimum amount of items specified
-    fun checkRecyclerViewHasMinimumItemAmount(
-        matcher: Matcher<View>,
-        minimumAmount: Int,
-        timeout: Long = 10_000L,
-    ) {
-        val retryInterval = 100L // 100 ms between retries var attempts = 1
-        for (x in 0..timeout step retryInterval) {
+        waitForNode(hasTestTag(listTag) and hasScrollToNodeAction(), timeoutMs = timeoutMs)
+        composeRule.waitUntil(timeoutMs) {
             try {
-                onView(matcher).check(matches(hasMinimumChildCount(minimumAmount)))
-                break
-            } catch (e: NoMatchingViewException) {
-                println("NoMatchingViewException Exception")
-                Thread.sleep(retryInterval)
-            } catch (e: AssertionFailedError) {
-                println("AssertionFailedError Exception")
-                Thread.sleep(retryInterval)
+                composeRule.onNodeWithTag(listTag).performScrollToNode(matcher)
+                true
+            } catch (e: AssertionError) {
+                false
             }
         }
     }
 
-    // Check view is displayed
-    fun checkIsDisplayed(vararg matchers: Matcher<View>) {
-        for (matcher in matchers) {
-            onView(matcher)
-                .check(matches(isDisplayed()))
-        }
+    /** Go back with the back arrow in the screen's top bar. */
+    fun navigateBack() {
+        clickOnTag(TestTags.NAVIGATE_BACK)
     }
 
-    // Check view is NOT displayed
-    fun checkIsNotDisplayed(vararg matchers: Matcher<View>) {
-        for (matcher in matchers) {
-            onView(matcher)
-                .check(matches(not(isDisplayed())))
-        }
+    /** Press the system back button, which also closes the keyboard or a dialog. */
+    fun pressBack() {
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
     }
 
-    // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
-    // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToDisplay(
-        matcher: Matcher<View>,
-        timeout: Long = 10_000L,
-    ) {
-        val retryInterval = 250L // 250 ms between retries var attempts = 1
-        for (x in 0..timeout step retryInterval) {
-            try {
-                onView(matcher)
-                    .check(matches(isDisplayed()))
-                break
-            } catch (e: NoMatchingViewException) {
-                println("NoMatchingViewException Exception")
-                Thread.sleep(retryInterval)
-            } catch (e: AssertionFailedError) {
-                println("AssertionFailedError Exception")
-                Thread.sleep(retryInterval)
-            }
-        }
-    }
-
-    // NoMatchingViewException thrown when onView(matcher) fails to find a matching view in the ViewHierarchy.
-    // AssertionFailedErrors are generally thrown when views are present in the View Hierarchy but are not visible/blocked.
-    fun waitForViewToNotDisplay(
-        matcher: Matcher<View>,
-        timeout: Long = 10_000L,
-    ) {
-        val retryInterval = 250L // 250 ms between retries var attempts = 1
-        for (x in 0..timeout step retryInterval) {
-            try {
-                onView(matcher)
-                    .check(matches(not(isDisplayed())))
-                return
-            } catch (e: NoMatchingViewException) {
-                return
-            } catch (e: AssertionFailedError) {
-                println("AssertionFailedError Exception")
-                Thread.sleep(retryInterval)
-            }
-        }
-        try {
-            onView(matcher)
-                .check(matches(not(isDisplayed())))
-        } catch (e: NoMatchingViewException) {
-        }
-    }
-
-    // Perform a delay when executing an action on a view.
-    fun waitFor(delay: Long): ViewAction =
-        object : ViewAction {
-            override fun getConstraints(): Matcher<View> = isRoot()
-
-            override fun getDescription(): String = "wait for " + delay + "milliseconds"
-
-            override fun perform(
-                uiController: UiController?,
-                view: View?,
-            ) {
-                uiController?.loopMainThreadForAtLeast(delay)
-            }
-        }
-
-    fun pressBackUntilViewIsDisplayed(
-        matcher: Matcher<View>,
-        timeout: Long = 5_000L,
-    ) {
-        val retryInterval = 250L // 250 ms between retries var attempts = 1
-        Thread.sleep(1_000L)
-        for (x in 0..timeout step retryInterval) {
-            try {
-                onView(matcher).check(matches(isDisplayed()))
-                return
-            } catch (e: NoMatchingViewException) {
-                Thread.sleep(retryInterval)
-                pressBack()
-            }
-        }
-        onView(matcher).check(matches(isDisplayed()))
-    }
-
-    // Matcher used to retrieve the text from a TextView.
-    fun getTextFromTextView(matcher: ViewInteraction): String {
-        var text = String()
-        matcher.perform(
-            object : ViewAction {
-                override fun getConstraints(): Matcher<View> = ViewMatchers.isAssignableFrom(TextView::class.java)
-
-                override fun getDescription(): String = "Get text from the view"
-
-                override fun perform(
-                    uiController: UiController,
-                    view: View,
-                ) {
-                    val textView = view as TextView
-                    text = textView.text.toString()
-                }
-            },
-        )
-        return text
-    }
+    private fun dropdownOption() = hasAnyAncestor(isPopup()) and hasClickAction()
 }

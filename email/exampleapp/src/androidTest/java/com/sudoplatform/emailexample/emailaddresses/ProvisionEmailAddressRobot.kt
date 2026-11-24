@@ -6,123 +6,92 @@
 
 package com.sudoplatform.emailexample.emailaddresses
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isEnabled
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.sudos.createSudo
+import com.sudoplatform.emailexample.ui.TestTags
 import java.util.UUID
 
-fun provisionEmailAddress(func: ProvisionEmailAddressRobot.() -> Unit) = ProvisionEmailAddressRobot().apply { func() }
+fun provisionEmailAddress(
+    composeRule: ComposeTestRule,
+    func: ProvisionEmailAddressRobot.() -> Unit,
+) = ProvisionEmailAddressRobot(composeRule).apply { func() }
 
 /**
  * Testing robot that manages the provision email address screen.
  */
-class ProvisionEmailAddressRobot : BaseRobot() {
-    private val toolbarCreateButton = withId(R.id.create)
-    private val addressEditText = withId(R.id.addressField)
-    private val addressHolder = withId(R.id.addressHolder)
-    private val availabilityLabel = withId(R.id.availabilityLabel)
-    private val sudoTextView = withId(R.id.sudoText)
-    private val learnMoreTextView = withId(R.id.learnMoreTextView)
-    private val learnMoreButton = withId(R.id.learnMoreButton)
-    private val loadingDialog = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 60_000L)
-    }
-
-    fun waitForRootFocus() {
-        onView(isRoot()).perform(waitFor(5_000L))
-    }
-
+class ProvisionEmailAddressRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkProvisionEmailAddressItemsDisplayed() {
-        waitForViewToDisplay(toolbarCreateButton)
-        waitForViewToDisplay(addressEditText)
-        waitForViewToDisplay(sudoTextView)
-        waitForViewToDisplay(learnMoreTextView)
-        waitForViewToDisplay(learnMoreButton)
+        waitForTag(TestTags.PROVISION_EMAIL_ADDRESS_ACTION)
+        waitForTag(TestTags.LOCAL_PART_FIELD)
+        waitForTag(TestTags.SUDO_LABEL_TEXT)
+        waitForText(string(R.string.provision_email_address_learn_more))
+        waitForTag(TestTags.LEARN_MORE_BUTTON)
     }
 
-    fun getAddressFromTextView(): String = getTextFromTextView(onView(addressHolder))
+    /** The address that will be provisioned, once the local part is found to be available. */
+    fun getAddressFromTextView(): String = textOf(TestTags.AVAILABLE_ADDRESS_TEXT)
 
+    /** Wait for the availability check, which runs a moment after typing stops, to find the address available. */
     fun checkAvailableAddressMsg() {
-        onView(availabilityLabel).check(matches(withText("This email address is available")))
+        checkAvailabilityText(string(R.string.email_address_available))
     }
 
     fun checkUnavailableAddressMsg() {
-        onView(availabilityLabel).check(matches(withText("This email address is not available")))
+        checkAvailabilityText(string(R.string.email_address_unavailable))
     }
 
+    /** The service rejects the local part, and the screen shows its reason. */
     fun checkInvalidAddressMsg() {
-        onView(availabilityLabel).check(matches(withText("Invalid email address")))
+        checkAvailabilityText("Invalid email address")
     }
 
+    /** Create the address and wait for the email addresses, which the app returns to. */
     fun clickOnCreateButton() {
-        waitForViewToBeEnabled(toolbarCreateButton, 5_000L)
-        clickOnView(toolbarCreateButton)
-    }
-
-    private fun waitForViewToBeEnabled(
-        matcher: org.hamcrest.Matcher<android.view.View>,
-        timeout: Long,
-    ) {
-        val retryInterval = 250L
-        for (x in 0..timeout step retryInterval) {
-            try {
-                onView(matcher).check(matches(isEnabled()))
-                return
-            } catch (e: junit.framework.AssertionFailedError) {
-                Thread.sleep(retryInterval)
-            }
+        clickOnEnabledTag(TestTags.PROVISION_EMAIL_ADDRESS_ACTION)
+        waitForTagToDisappear(TestTags.LOCAL_PART_FIELD)
+        emailAddresses(composeRule) {
+            checkEmailAddressesItemsDisplayed()
         }
-        onView(matcher).check(matches(isEnabled()))
     }
 
-    fun clickOnPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
-    }
-
+    /** Enter [localPart], or a random one when it is blank. */
     fun setLocalPart(localPart: String? = "") {
         var input = localPart
         if (input.isNullOrBlank()) {
             input = UUID.randomUUID().toString().substring(0, 8)
         }
-        setTextFieldValue(input)
+        replaceText(TestTags.LOCAL_PART_FIELD, input)
     }
 
-    fun provisionEmailAddressFlow() {
-        createSudo {
+    /**
+     * Register, create a Sudo and provision an address for it, ending on the email addresses.
+     *
+     * @return the provisioned address.
+     */
+    fun provisionEmailAddressFlow(): String {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
         setLocalPart()
-        waitForRootFocus()
         checkAvailableAddressMsg()
+        val address = getAddressFromTextView()
         clickOnCreateButton()
-        waitForLoading()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+        }
+        return address
     }
 
-    private fun setTextFieldValue(inputText: String) {
-        replaceText(addressEditText, inputText)
-    }
-
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        Thread.sleep(1_000L)
-        onView(positiveAlertButton)
-            .check(matches(withText(android.R.string.ok)))
+    private fun checkAvailabilityText(text: String) {
+        waitForNode(hasTestTag(TestTags.AVAILABILITY_TEXT) and hasText(text))
     }
 }

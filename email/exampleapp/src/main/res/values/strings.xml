@@ -9,57 +9,165 @@
     <string name="learn_more">Learn More</string>
     <string name="success">Success</string>
     <string name="delete">Delete</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="navigate_back">Navigate up</string>
 
-    <!-- RegisterFragment -->
+    <!-- RegisterScreen -->
     <string name="sample_app">Sample App</string>
     <string name="registration_method">Registration Method</string>
     <string name="register_login">Register / Login</string>
     <string name="register_failure">Failed to register: %1$s</string>
     <string name="sign_out">Sign Out</string>
     <string name="signin_failure">Failed to Sign In: %1$s</string>
+    <string name="session_expired">Your session has expired. Sign in again.</string>
     <string name="registration_keys_failure">Failed to load TEST registration keys: %1$s</string>
     <string name="test_registration">TEST Registration</string>
     <string name="federated_signin">Federated SignIn</string>
     <string name="reset">Reset</string>
+    <string name="single_key_for_all_email">Single key for all email</string>
+    <string name="single_key_explanation">Single key is used to decrypt content across all email addresses and aliases. You should backup the key to avoid data loss. Refer to developer docs for more information.</string>
+    <string name="key_per_address_explanation">Each email address and alias has its own key used to decrypt content. You should backup the keys to avoid data loss. Refer to developer docs for more information.</string>
+    <string name="caller_managed_keys">Caller-managed keys</string>
+    <string name="caller_managed_keys_single_key_explanation">Single key keeps every key, so this has no effect.</string>
+    <string name="caller_managed_keys_explanation">Keys are kept when an email address is deleted, as the app manages them.</string>
+    <string name="client_managed_keys_explanation">An email address\'s keys are removed from the device when it\'s deleted, unless another address or alias still uses them.</string>
+    <string name="fsso_not_configured">This environment does not support federated sign in. Use TEST registration.</string>
+    <string name="configuration_failure">Unable to initialise the Sudo Platform clients. Check that sudoplatformconfig.json is in the app assets.\n\n%1$s</string>
 
-    <!-- MainMenuFragment -->
+    <!-- SudosScreen: Deregister -->
     <string name="deregister">Deregister</string>
     <string name="deregister_confirmation">Are you sure you want to deregister? All Sudos, email addresses and associated data will be deleted.</string>
     <string name="deregistering">Deregistering&#8230;</string>
     <string name="deregister_failure">Unable to deregister: %1$s</string>
 
-    <!-- SudosFragment -->
+    <!-- SudosScreen -->
     <string name="email_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email</string>
-    <string name="loading_sudos">Loading Sudos</string>
     <string name="deleting_sudos">Deleting Sudos&#8230;</string>
     <string name="list_sudos_failure">Failed to list Sudos</string>
     <string name="delete_sudo_failure">Failed to delete Sudo</string>
     <string name="try_again">Try Again</string>
     <string name="what_is_a_sudo">What is a Sudo?</string>
     <string name="sudo_explanation">Email addresses must belong to a Sudo. A Sudo is a digital identity created and owned by a real person</string>
+    <string name="error">Error</string>
+    <string name="no_sudos">No Sudos yet. Create one to get started.</string>
+    <string name="delete_sudo_title">Delete Sudo?</string>
+    <string name="delete_sudo_confirmation">Deleting %1$s also deletes its email addresses, along with all of their messages. This cannot be undone.</string>
+    <string name="sudos_need_key_import">Your Sudos were created on another device or before this device\'s data was removed, so it doesn\'t have the keys to read them. Import your keys from Import/Export Keys below. Creating a Sudo is unavailable until then, so new email addresses aren\'t sealed to keys your other devices don\'t have.</string>
+    <string name="email_key_created">This device created a new key for your email.</string>
+    <string name="email_key_needs_backup">This device created a new key for your email. Export a key backup from Import/Export Keys below, so your email can be read on your other devices or after reinstalling.</string>
+    <string name="key_backup_needs_fsso_title">Key Backup Needs Federated Sign In</string>
+    <string name="key_backup_needs_fsso">A TEST registration is tied to this device, so another device that registers with a TEST key becomes a different user and can\'t see these Sudos. Sign in with Federated Sign In to back up your keys.</string>
 
-    <!-- CreateSudoFragment -->
+    <!-- SudosScreen: Account -->
+    <string name="account">Account</string>
+    <string name="signed_in_with">Signed in with</string>
+    <string name="sign_out_and_remove_data">Sign Out and Remove Data</string>
+    <string name="sign_out_explanation">Sign Out keeps your keys on this device, so you can read your Sudos and email when you sign back in. Sign Out and Remove Data deletes them.</string>
+    <string name="remove_data_title">Sign Out and Remove Data?</string>
+    <string name="remove_data_confirmation">This deletes your keys from this device. Without a key backup, you won\'t be able to read your Sudos or email when you sign in again, here or on another device.</string>
+    <string name="export_keys_first">Export Keys First</string>
+    <string name="signing_out">Signing out&#8230;</string>
+    <string name="sign_out_failure">Unable to sign out: %1$s</string>
+
+    <!-- UserDetailsScreen -->
+    <string name="user_details">User Details</string>
+    <string name="user_id">User ID</string>
+    <string name="user_details_copy_explanation">Tap the copy button to copy a value, for example to include in a support request.</string>
+    <string name="session">Session</string>
+    <string name="signed_in">Signed in</string>
+    <string name="key_config">Key config</string>
+    <string name="single_key_for_email">Single key for email</string>
+    <string name="key_per_email_address">Key per email address</string>
+    <string name="key_removal">Key removal</string>
+    <string name="key_removal_never">Never (single key)</string>
+    <string name="key_removal_caller_managed">Caller-managed</string>
+    <string name="key_removal_on_deprovision">Removed on deprovision</string>
+    <string name="id_token_expires">ID token expires</string>
+    <string name="refresh_token_expires">Refresh token expires</string>
+    <string name="session_explanation">The ID token is refreshed automatically until the refresh token expires, after which you need to sign in again.</string>
+    <string name="not_available">Not available</string>
+    <string name="copy_value">Copy %1$s</string>
+    <string name="value_copied">%1$s copied</string>
+    <string name="load_user_details_failure">Failed to load user details</string>
+
+    <!-- EntitlementsScreen -->
+    <string name="entitlements">Entitlements</string>
+    <string name="entitlement_set">Entitlement Set</string>
+    <string name="usage">Usage</string>
+    <string name="nothing_used_yet">Nothing used yet.</string>
+    <string name="usage_value">%1$d of %2$d</string>
+    <string name="usage_explanation">Entitlements counted per Sudo are shown for each Sudo.</string>
+    <string name="load_entitlements_failure">Failed to load entitlements</string>
+    <string name="loading_entitlements">Loading Entitlements</string>
+
+    <!-- KeyBackupScreen -->
+    <string name="key_backup">Import/Export Keys</string>
+    <string name="key_backup_explanation">Your Sudos are encrypted with keys kept on this device, and each email address\'s messages are sealed with a key created when it was provisioned. Back them up to read your Sudos and email on another device signed in to the same account.</string>
+    <string name="export_keys">Export Keys</string>
+    <string name="export_keys_detail">Creates a backup file protected by a password you choose. Anyone with the file and its password can read your Sudos and email, so keep both safe.</string>
+    <string name="import_keys">Import Keys</string>
+    <string name="import_keys_detail">Adds the Sudo keys in a backup to this device\'s, and replaces this device\'s email keys with the ones in the backup.</string>
+    <string name="import_keys_confirmation_title">Import Keys?</string>
+    <string name="import_keys_confirmation">%1$s. This device\'s email keys will be replaced, so messages to addresses provisioned here that aren\'t in this backup will no longer be readable.</string>
+    <string name="backup_description">Exported from %1$s on %2$s</string>
+    <string name="platform_ios" translatable="false">iOS</string>
+    <string name="platform_android" translatable="false">Android</string>
+    <string name="continue_action">Continue</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="export_password_detail">You\'ll need this password to import the backup on another device. It can\'t be recovered if you forget it.</string>
+    <string name="import_password_detail">Enter the password used when this backup was exported. %1$s.</string>
+    <string name="password_too_short">Use at least %1$d characters.</string>
+    <string name="passwords_dont_match">The passwords don\'t match.</string>
+    <string name="export">Export</string>
+    <string name="import_action">Import</string>
+    <string name="exporting_keys">Exporting keys&#8230;</string>
+    <string name="importing_keys">Importing keys&#8230;</string>
+    <string name="please_wait">Please wait&#8230;</string>
+    <string name="export_keys_saved_title">Keys Exported</string>
+    <string name="export_keys_saved">Keep the file and its password safe. Anyone with both can read your Sudos and email.</string>
+    <string name="import_keys_result_title">Keys Imported</string>
+    <plurals name="imported_sudo_keys">
+        <item quantity="one">Imported %1$d Sudo key.</item>
+        <item quantity="other">Imported %1$d Sudo keys.</item>
+    </plurals>
+    <plurals name="imported_sudo_and_email_keys">
+        <item quantity="one">Imported %1$d Sudo key and the email keys.</item>
+        <item quantity="other">Imported %1$d Sudo keys and the email keys.</item>
+    </plurals>
+    <string name="unrecognised_sdks_skipped">This backup also contains keys this app doesn\'t use (%1$s), which were skipped.</string>
+    <string name="key_backup_failure">Key backup failed</string>
+
+    <!-- CreateSudoScreen -->
     <string name="create_sudo_button">+ Create Sudo</string>
     <string name="create_sudo">Create Sudo</string>
     <string name="enter_sudo_name">Enter a name for your Sudo</string>
-    <string name="enter_sudo_label">Enter Sudo Label</string>
     <string name="something_wrong">Something went wrong</string>
     <string name="choose_label_detail">Choose any label you would like for your Sudo: Shopping, Dating, etc.</string>
     <string name="creating_sudo">Creating Sudo&#8230;</string>
     <string name="create_sudo_learn_more">Email addresses must belong to a Sudo. A Sudo is a digital identity created and owned by a real person.</string>
     <string name="create_sudo_doc_url" translatable="false">https://docs.sudoplatform.com/guides/sudos</string>
+    <string name="sudo_label">Sudo label</string>
 
-    <!-- CreateCustomFolderFragment -->
+    <!-- EditSudoScreen -->
+    <string name="edit_sudo">Edit Sudo</string>
+    <string name="edit_sudo_label">Edit %1$s</string>
+    <string name="saving_sudo">Saving Sudo&#8230;</string>
+    <string name="loading_sudo">Loading Sudo&#8230;</string>
+    <string name="load_sudo_failure">Failed to load Sudo</string>
+
+    <!-- EmailMessagesScreen: create custom folder -->
     <string name="enter_custom_folder_name_label">Enter folder name</string>
     <string name="create_custom_folder">Create Custom Folder</string>
     <string name="enter_custom_folder_name">Enter a name for your folder</string>
     <string name="creating_custom_folder">Creating folder&#8230;</string>
 
-    <!-- EditCustomFolderFragment -->
+    <!-- EmailMessagesScreen: edit custom folder -->
     <string name="edit_custom_folder">Edit Custom Folder</string>
     <string name="saving_custom_folder">Saving folder&#8230;</string>
 
-    <!-- EmailAddressesFragment.kt -->
+    <!-- EmailAddressesScreen: addresses -->
     <string name="email_addresses">Email Addresses</string>
     <string name="email_addresses_section_title">Email Addresses</string>
     <string name="email_aliases_section_title">Email Aliases</string>
@@ -68,26 +176,35 @@
     <string name="list_email_addresses_failure">Failed to list email addresses</string>
     <string name="deleting_email_address">Deleting email address&#8230;</string>
     <string name="deleting_email_address_failure">Failed to delete email address</string>
+    <string name="email_address_deleted">Email Address Deleted</string>
+    <string name="email_address_key_not_removed">%1$s was deleted, but its key couldn\'t be removed from this device.</string>
+    <string name="email_address">Email address</string>
     <string name="email_address_with_display_name">%1$s &#60;%2$s&#62;</string>
 
-    <!-- ProvisionEmailAddressFragment -->
+    <!-- EmailAddressesScreen -->
+    <string name="addresses_need_key_import">This device doesn\'t have the keys for some of this Sudo\'s email addresses, for example because they were provisioned on another device. Import your keys to read them.</string>
+    <string name="delete_email_address_title">Delete Email Address?</string>
+    <string name="delete_email_address_confirmation">Deleting %1$s also deletes all of its messages. This cannot be undone.</string>
+    <string name="delete_email_alias_title">Delete Email Alias?</string>
+    <string name="delete_email_alias_confirmation">%1$s will stop receiving email. This cannot be undone.</string>
+    <string name="internal_email_aliases">Internal</string>
+    <string name="alias_metadata_value">Metadata (JSON): %1$s</string>
+    <string name="verification_code">Verification code</string>
+
+    <!-- ProvisionEmailAddressScreen -->
     <string name="provision_email_address">Create Email Address</string>
     <string name="enter_address_label">Enter local part of the email address</string>
     <string name="optional_enter_display_name_label">Enter display name (Optional)</string>
     <string name="email_address_unavailable">This email address is not available</string>
     <string name="email_address_available">This email address is available</string>
-    <string name="enter_local_part">Enter the local part for your email address</string>
     <string name="provisioning_email_address">Provisioning email address&#8230;</string>
     <string name="provision_email_address_failure">Failed to provision an email address</string>
-    <string name="check_address_availability_failure">Failed to retrieve available addresses</string>
-    <string name="ownership_proof_error">Ownership proof cannot be found</string>
     <string name="sudo">Sudo</string>
     <string name="provision_email_address_learn_more">Addresses from different configured domains can be provisioned and used to communicate with other recipients. Entering the local part of the email address above will perform an address availability check based on the currently configured domains.</string>
     <string name="provision_email_address_doc_url" translatable="false">https://docs.sudoplatform.com/guides/email/manage-email-addresses</string>
 
-    <!-- EmailMessagesFragment.kt -->
+    <!-- EmailMessagesScreen: messages -->
     <string name="email_messages">Email Messages</string>
-    <string name="loading_email_messages">Loading Email Messages</string>
     <string name="list_email_messages_failure">Failed to list email messages</string>
     <string name="list_email_folders_failure">Failed to list email folders</string>
     <string name="from_recipient">%2$sFrom: %1$s</string>
@@ -102,28 +219,45 @@
     <string name="deleted">Deleted!</string>
     <string name="moving_email_message_to_trash">Moving to trash&#8230;</string>
     <string name="moving_email_message_failure">Failed to move email message</string>
-    <string name="subscribe_email_messages_failure">Failed to subscribe to email message updates</string>
-    <string name="subscribe_lost_connection">The subscription for email message updates has disconnected</string>
     <string name="confirm_delete_custom_folder_title">Delete Custom Folder</string>
-    <string name="confirm_delete_custom_folder">Delete this custom folder and all of it\'s messages?</string>
+    <string name="confirm_delete_custom_folder">Delete %1$s and all of its messages?</string>
     <string name="scheduled_at">Sending at %1$s</string>
 
-    <!-- EmailAddressSettingsFragment.kt -->
-    <string name="loading_email_address_settings">Loading settings</string>
-    <string name="notifications_enabled">Notifications enabled</string>
-    <string name="email_address_settings">Email Address Settings</string>
-    <string name="load_email_address_settings_failure">Failed to load email address settings</string>
+    <!-- EmailMessagesScreen -->
+    <string name="folder">Folder</string>
+    <string name="drafts_folder">DRAFTS</string>
+    <string name="more_options">More options</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="notification_setting_failure">Failed to change notifications</string>
+    <string name="no_email_messages">No messages in this folder</string>
+    <string name="has_attachments">Has attachments</string>
+    <string name="messages_need_key_import">This device doesn\'t have the keys for this email address or some of its messages, for example because the address was provisioned on another device. Import your keys to read them.</string>
+    <string name="delete_email_message_title">Delete Message?</string>
+    <string name="delete_email_message_confirmation">The message will be permanently deleted. This cannot be undone.</string>
+    <string name="empty_trash">Empty Trash</string>
+    <string name="empty_trash_title">Empty Trash?</string>
+    <string name="empty_trash_confirmation">The messages in the trash will be permanently deleted. This cannot be undone.</string>
+    <string name="delete_custom_folder">Delete Custom Folder</string>
+    <string name="deleting_custom_folder">Deleting folder&#8230;</string>
+    <string name="delete_custom_folder_failure">Failed to delete folder</string>
+    <string name="create_custom_folder_failure">Failed to create folder</string>
+    <string name="save_custom_folder_failure">Failed to save folder</string>
+    <string name="batch_operation_failed">The service couldn\'t complete the request for some or all of the messages.</string>
 
-    <!-- EmailAddressBlocklistFragment.kt -->
+    <!-- EmailAddressBlocklistScreen: blocked addresses -->
     <string name="blocked_addresses">Blocked Addresses</string>
-    <string name="loading_address_blocklist">Loading Email Address Blocklist</string>
     <string name="list_blocked_addresses_failure">Failed to list blocked addresses</string>
     <string name="blocking_address">Blocking email address&#8230;</string>
     <string name="unblocking_addresses">Unblocking email address(es)</string>
     <string name="unblock_addresses_failure">Failed to unblock addresses</string>
     <string name="block_address_failure">Failed to block address</string>
 
-    <!-- SendEmailMessageFragment.kt -->
+    <!-- EmailAddressBlocklistScreen -->
+    <string name="unblock">Unblock</string>
+    <string name="no_blocked_addresses">No addresses are blocked</string>
+
+    <!-- ComposeEmailMessageScreen: send -->
     <string name="email_alias">Email Alias</string>
     <string name="send_aliased_email_none_option">None (send from email address)</string>
     <string name="to">To:&#xA0;&#xA0;</string>
@@ -154,30 +288,38 @@
     <string name="encrypted_email_address_lookup_failure">Failed to lookup email address encryption status</string>
     <string name="file_size">%1$s KB</string>
 
-    <!-- ReadEmailMessageFragment.kt -->
+    <!-- ComposeEmailMessageScreen -->
+    <string name="send">Send</string>
+    <string name="save_draft">Save draft</string>
+    <string name="attach_file">Attach file</string>
+    <string name="schedule_send">Schedule send</string>
+    <string name="cancel_scheduled_send">Cancel scheduled send</string>
+    <string name="schedule_send_date_title">Select when to send the email</string>
+    <string name="schedule_send_time_title">Select time</string>
+    <string name="schedule_in_past">Choose a time in the future.</string>
+    <string name="add_attachment_failure">Failed to add attachment</string>
+
+    <!-- ReadEmailMessageScreen: message -->
     <string name="read_email_message">Read Email Message</string>
     <string name="from">From:&#xA0;&#xA0;</string>
-    <string name="email_placeholder">test@example.com</string>
-    <string name="content_placeholder">Email text body goes here</string>
     <string name="reading">Reading&#8230;</string>
     <string name="read_email_message_failure">Failed to read email message</string>
 
-    <!-- Layout -->
-    <string name="item_name">Item Name</string>
-    <string name="folder_name">Folder Name</string>
-    <string name="placeholder">-</string>
+    <!-- ReadEmailMessageScreen -->
+    <string name="block_sender">Block sender</string>
+    <string name="reply">Reply</string>
+    <string name="forward">Forward</string>
+    <string name="attachments">Attachments</string>
+    <string name="email_message_not_found">The message could not be found.</string>
+    <string name="open_attachment_failure_title">Unable to open attachment</string>
+    <string name="open_attachment_failure">No app on this device can open this attachment.</string>
+
+    <!-- Toolbar actions -->
     <string name="create">Create</string>
     <string name="save">Save</string>
-    <string name="recipient_placeholder">Recipient/s</string>
-    <string name="subject_placeholder">Subject</string>
-    <string name="date_placeholder">Date</string>
-    <string name="scheduled_placeholder">Scheduled</string>
 
-    <!-- EmailAliasesFragment -->
-    <string name="email_aliases">Email Aliases</string>
-    <string name="loading_email_aliases">Loading email aliases&#8230;</string>
+    <!-- EmailAddressesScreen: aliases -->
     <string name="list_email_aliases_failure">Failed to list email aliases</string>
-    <string name="no_email_aliases">No email aliases have been created yet</string>
     <string name="email_alias_status_enabled">ENABLED</string>
     <string name="email_alias_status_disabled">DISABLED</string>
     <string name="email_alias_status_locked">LOCKED</string>
@@ -189,7 +331,6 @@
     <string name="enable_email_alias_failure">Failed to enable email alias</string>
     <string name="disabling_email_alias">Disabling email alias</string>
     <string name="disable_email_alias_failure">Failed to disable email alias</string>
-    <string name="no_actions_available">No actions available for this status</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
     <string name="update">Update</string>
@@ -202,11 +343,10 @@
     <string name="clear_date">Clear</string>
     <string name="invalid_json_error">Invalid JSON format</string>
 
-    <!-- ProvisionEmailAliasFragment -->
+    <!-- ProvisionEmailAliasScreen -->
     <string name="provision_email_alias">Create Email Alias</string>
     <string name="create_email_alias_button">+ Create Email Alias</string>
     <string name="real_email_address_label">Real Email Address</string>
-    <string name="choose_email_address">Choose the email address</string>
     <string name="alias_local_part_label">Enter local part of the alias address</string>
     <string name="alias_domain_label">Alias Domain</string>
     <string name="provisioning_email_alias">Provisioning email alias&#8230;</string>

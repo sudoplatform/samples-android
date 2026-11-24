@@ -6,132 +6,124 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withSubstring
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import org.hamcrest.CoreMatchers.not
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun sendEmailMessage(func: SendEmailMessageRobot.() -> Unit) = SendEmailMessageRobot().apply { func() }
+fun sendEmailMessage(
+    composeRule: ComposeTestRule,
+    func: SendEmailMessageRobot.() -> Unit,
+) = SendEmailMessageRobot(composeRule).apply { func() }
 
 /**
- * Testing robot that manages the send email message screen.
+ * Testing robot that manages the compose screen, which sends new messages, replies, forwards
+ * and drafts.
  */
-class SendEmailMessageRobot : BaseRobot() {
-    private val toolbarSendButton = withId(R.id.send)
-    private val toolbarSaveButton = withId(R.id.save)
-    private val encryptedIndicator = withId(R.id.encryptedIndicator)
-    private val toField = R.id.toTextView
-    private val toLabel = withId(R.id.toLabel)
-    private val ccField = R.id.ccTextView
-    private val ccLabel = withId(R.id.ccLabel)
-    private val bccField = R.id.bccTextView
-    private val bccLabel = withId(R.id.bccLabel)
-    private val subjectField = R.id.subjectTextView
-    private val subjectLabel = withId(R.id.subjectLabel)
-    private val bodyField = R.id.contentBody
-    private val loadingDialog = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
-    private val negativeAlertButton = withId(android.R.id.button2)
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 60_000L)
-    }
-
+class SendEmailMessageRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkSendEmailMessageItemsDisplayed() {
-        waitForViewToDisplay(toolbarSendButton)
-        waitForViewToDisplay(withId(toField))
-        waitForViewToDisplay(toLabel)
-        waitForViewToDisplay(withId(ccField))
-        waitForViewToDisplay(ccLabel)
-        waitForViewToDisplay(withId(bccField))
-        waitForViewToDisplay(bccLabel)
-        waitForViewToDisplay(withId(subjectField))
-        waitForViewToDisplay(subjectLabel)
-        waitForViewToDisplay(withId(bodyField))
+        waitForTag(TestTags.SEND_ACTION)
+        waitForTag(TestTags.TO_FIELD)
+        waitForTag(TestTags.CC_FIELD)
+        waitForTag(TestTags.BCC_FIELD)
+        waitForTag(TestTags.SUBJECT_FIELD)
+        waitForTag(TestTags.BODY_FIELD)
     }
 
+    /** Tap Send, which is enabled once the sending address has loaded. */
     fun clickOnSendEmailButton() {
-        clickOnView(toolbarSendButton)
+        clickOnEnabledTag(TestTags.SEND_ACTION)
     }
 
+    /** Send the message and wait for the messages, which the app returns to once it is sent. */
+    fun sendAndWaitForMessages() {
+        clickOnSendEmailButton()
+        waitForMessages()
+    }
+
+    /** Send a reply or forward and wait for the message it came from, which the app returns to once it is sent. */
+    fun sendAndWaitForReadMessage() {
+        clickOnSendEmailButton()
+        waitForTagToDisappear(TestTags.SEND_ACTION)
+        readEmailMessage(composeRule) {
+            checkReadEmailMessageItemsDisplayed()
+        }
+    }
+
+    /** Save the draft and wait for the messages, which the app returns to once it is saved. */
     fun clickOnSaveDraftEmailButton() {
-        clickOnView(toolbarSaveButton)
+        clickOnEnabledTag(TestTags.SAVE_DRAFT_ACTION)
+        waitForMessages()
     }
 
+    /** Close the alert asking for a To address. */
     fun clickOnPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
+        waitForText(string(R.string.validate_to_address))
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        waitForTagToDisappear(TestTags.DIALOG_CONFIRM)
     }
 
+    /** Cancel the alert reporting that the message couldn't be sent, which offers to try again. */
     fun clickOnNegativeErrorAlertDialogButton() {
-        checkErrorAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(negativeAlertButton)
+        waitForText(string(R.string.send_email_message_failure))
+        composeRule.onNodeWithTag(TestTags.DIALOG_CONFIRM).assert(hasText(string(R.string.try_again).uppercase()))
+        composeRule.onNodeWithTag(TestTags.DIALOG_DISMISS).assert(hasText(string(R.string.cancel).uppercase()))
+        clickOnTag(TestTags.DIALOG_DISMISS)
+        waitForTagToDisappear(TestTags.DIALOG_DISMISS)
     }
 
     fun setToField(to: String) {
-        fillEditText(toField, to)
+        replaceText(TestTags.TO_FIELD, to)
     }
 
     fun setCcField(cc: String) {
-        fillEditText(ccField, cc)
+        replaceText(TestTags.CC_FIELD, cc)
     }
 
     fun setBccField(bcc: String) {
-        fillEditText(bccField, bcc)
+        replaceText(TestTags.BCC_FIELD, bcc)
     }
 
     fun setSubjectField(subject: String) {
-        fillEditText(subjectField, subject)
+        replaceText(TestTags.SUBJECT_FIELD, subject)
     }
 
     fun setContentBodyField(body: String) {
-        fillEditText(bodyField, body)
+        replaceText(TestTags.BODY_FIELD, body)
     }
 
+    /** Wait for To to be filled in, as it is for a reply. */
     fun checkToFieldFilled() {
-        onView(withId(toField)).check(matches(not(withText(""))))
-    }
-
-    fun checkSubjectFieldFilled() {
-        onView(withId(subjectField)).check(matches(not(withText(""))))
+        composeRule.waitUntil(DEFAULT_TIMEOUT_MS) { textOf(TestTags.TO_FIELD).isNotBlank() }
     }
 
     fun checkSubjectFieldContainsReply() {
-        onView(withId(subjectField)).check(matches(withSubstring("Re:")))
+        waitForNode(hasTestTag(TestTags.SUBJECT_FIELD) and hasText("Re:", substring = true))
     }
 
     fun checkSubjectFieldContainsForward() {
-        onView(withId(subjectField)).check(matches(withSubstring("Fwd:")))
+        waitForNode(hasTestTag(TestTags.SUBJECT_FIELD) and hasText("Fwd:", substring = true))
     }
 
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        Thread.sleep(1_000L)
-        onView(positiveAlertButton)
-            .check(matches(withText(android.R.string.ok)))
-    }
-
-    private fun checkErrorAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 15_000L)
-        waitForViewToDisplay(negativeAlertButton, 15_000L)
-        onView(positiveAlertButton)
-            .check(matches(withText(R.string.try_again)))
-        onView(negativeAlertButton)
-            .check(matches(withText(android.R.string.cancel)))
-    }
-
+    /** Wait for the end-to-end encrypted indicator, which follows the recipients a moment after they change. */
     fun checkEncryptedIndicatorVisible() {
-        waitForViewToDisplay(encryptedIndicator, 15_000L)
+        waitForTag(TestTags.ENCRYPTED_INDICATOR)
     }
 
     fun checkEncryptedIndicatorNotVisible() {
-        waitForViewToNotDisplay(encryptedIndicator, 15_000L)
+        waitForTagToDisappear(TestTags.ENCRYPTED_INDICATOR)
+    }
+
+    private fun waitForMessages() {
+        waitForTagToDisappear(TestTags.SEND_ACTION)
+        emailMessages(composeRule) {
+            checkEmailMessagesItemsDisplayed()
+        }
     }
 }

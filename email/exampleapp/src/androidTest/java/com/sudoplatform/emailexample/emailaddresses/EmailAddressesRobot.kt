@@ -6,238 +6,233 @@
 
 package com.sudoplatform.emailexample.emailaddresses
 
-import android.widget.DatePicker
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.replaceText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.PickerActions
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withHint
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import android.text.format.DateFormat
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performClick
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import com.sudoplatform.emailexample.emailaliases.EmailAliasViewHolder
+import com.sudoplatform.emailexample.emailaliases.formatExpiryDate
 import com.sudoplatform.emailexample.emailaliases.provisionEmailAlias
 import com.sudoplatform.emailexample.emailmessages.emailMessages
-import org.hamcrest.CoreMatchers.containsString
-import org.hamcrest.Matchers.allOf
+import com.sudoplatform.emailexample.ui.TestTags
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
-fun emailAddresses(func: EmailAddressesRobot.() -> Unit) = EmailAddressesRobot().apply { func() }
+fun emailAddresses(
+    composeRule: ComposeTestRule,
+    func: EmailAddressesRobot.() -> Unit,
+) = EmailAddressesRobot(composeRule).apply { func() }
 
 /**
- * Testing robot that manages the email addresses screen.
+ * Testing robot that manages the email addresses screen, which also lists the email aliases.
  */
-class EmailAddressesRobot : BaseRobot() {
-    private val createEmailAddressButton = withId(R.id.createEmailAddressButton)
-    private val createEmailAliasButton = withId(R.id.createEmailAliasButton)
-    private val emailAddressRecyclerView = withId(R.id.emailAddressRecyclerView)
-    private val aliasesRecyclerView = withId(R.id.aliasesRecyclerView)
-    private val loadingProgress = withId(R.id.progressBar)
-    private val emptyAliasesStateText = withId(R.id.emptyAliasesStateText)
-    private val positiveAlertButton = withId(android.R.id.button1)
-    private val negativeAlertButton = withId(android.R.id.button2)
-    private val neutralAlertButton = withId(android.R.id.button3)
-    private val metadataText = withId(R.id.metadataText)
-    private val expiresAtText = withId(R.id.expiresAtText)
+class EmailAddressesRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
+    private companion object {
+        /** The skeleton Material's date picker formats each day's description with. */
+        const val DAY_DESCRIPTION_SKELETON = "yMMMMEEEEd"
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingProgress, 5_000L)
-        waitForViewToNotDisplay(loadingProgress, 60_000L)
+        /** The description of Material's date picker button that shows the next month. */
+        const val NEXT_MONTH_DESCRIPTION = "Change to next month"
     }
 
     fun checkEmailAddressesItemsDisplayed() {
-        waitForViewToDisplay(createEmailAddressButton)
+        waitForTag(TestTags.CREATE_EMAIL_ADDRESS_BUTTON)
     }
 
-    fun waitForRecyclerView() {
-        waitForViewToDisplay(emailAddressRecyclerView, 5_000L)
+    /** Wait for the list to show at least [count] email addresses. */
+    fun waitForEmailAddresses(count: Int = 1) {
+        waitForTagCount(TestTags.EMAIL_ADDRESS_ROW, count)
     }
 
     fun navigateToProvisionEmailAddressScreen() {
-        clickOnView(createEmailAddressButton)
-        provisionEmailAddress {
-            waitForLoading()
+        clickOnTag(TestTags.CREATE_EMAIL_ADDRESS_BUTTON)
+        provisionEmailAddress(composeRule) {
             checkProvisionEmailAddressItemsDisplayed()
         }
     }
 
     fun navigateToEmailMessagesScreen(position: Int) {
-        clickRecyclerViewItem(position)
-        emailMessages {
-            waitForLoading()
+        clickOnTagAtPosition(TestTags.EMAIL_ADDRESS_ROW, position)
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
         }
     }
 
     fun navigateToCreateEmailAliasScreen() {
-        waitForViewToDisplay(createEmailAliasButton, 10_000L)
-        clickOnView(createEmailAliasButton)
-        provisionEmailAlias {
+        scrollToAliases(hasTestTag(TestTags.CREATE_EMAIL_ALIAS_BUTTON))
+        clickOnTag(TestTags.CREATE_EMAIL_ALIAS_BUTTON)
+        provisionEmailAlias(composeRule) {
             checkProvisionEmailAliasItemsDisplayed()
         }
     }
 
+    /** Swipe the email address at [position] away, confirm deprovisioning it and wait for it to go. */
     fun swipeLeftToDelete(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(emailAddressRecyclerView, position + 1)
-        onView(emailAddressRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
-                position,
-                ViewActions.swipeLeft(),
-            ),
-        )
+        val count = rowCount(TestTags.EMAIL_ADDRESS_ROW, position)
+        swipeLeftOnTagAtPosition(TestTags.EMAIL_ADDRESS_ROW, position)
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        waitForLoading()
+        waitForRowCountBelow(TestTags.EMAIL_ADDRESS_ROW, count)
     }
 
-    private fun clickRecyclerViewItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(emailAddressRecyclerView, position + 1)
-        onView(emailAddressRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAddressViewHolder>(
-                position,
-                ViewActions.click(),
-            ),
-        )
-    }
+    // --- Email Alias management methods ---
 
-    // --- Email Alias management methods (integrated from EmailAliasesRobot) ---
-
-    fun waitForAliasesRecyclerView() {
-        waitForViewToDisplay(aliasesRecyclerView, 5_000L)
-    }
-
+    /** Wait for the list to show at least one alias of the selected type. */
     fun checkEmailAliasesItemsDisplayed() {
-        waitForViewToDisplay(aliasesRecyclerView, 5_000L)
+        scrollToAliases(hasTestTag(TestTags.EMAIL_ALIAS_ROW))
     }
 
     fun checkEmptyAliasesStateDisplayed() {
-        waitForViewToDisplay(emptyAliasesStateText, 5_000L)
+        scrollToAliases(hasTestTag(TestTags.EMPTY_ALIASES_TEXT))
     }
 
+    /** Swipe the alias at [position] away, confirm deprovisioning it and wait for it to go. */
     fun swipeLeftToDeleteAlias(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1)
-        onView(aliasesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
-                position,
-                ViewActions.swipeLeft(),
-            ),
-        )
+        val count = rowCount(TestTags.EMAIL_ALIAS_ROW, position)
+        swipeLeftOnTagAtPosition(TestTags.EMAIL_ALIAS_ROW, position)
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        waitForLoading()
+        waitForRowCountBelow(TestTags.EMAIL_ALIAS_ROW, count)
     }
 
     fun clickOnAliasItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1)
-        onView(aliasesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
-                position,
-                ViewActions.click(),
-            ),
-        )
+        checkEmailAliasesItemsDisplayed()
+        clickOnTagAtPosition(TestTags.EMAIL_ALIAS_ROW, position)
     }
 
     fun checkActionDialogDisplayed() {
-        waitForViewToDisplay(negativeAlertButton, 5_000L)
+        waitForTag(TestTags.UPDATE_ALIAS_ACTION)
+        waitForTag(TestTags.DIALOG_DISMISS)
     }
 
     fun clickOnEnableButton() {
-        waitForViewToDisplay(positiveAlertButton, 5_000L)
-        onView(positiveAlertButton).check(matches(withText(R.string.enable)))
-        clickOnView(positiveAlertButton)
+        clickOnTag(TestTags.ENABLE_ALIAS_ACTION)
     }
 
     fun clickOnDisableButton() {
-        waitForViewToDisplay(positiveAlertButton, 5_000L)
-        onView(positiveAlertButton).check(matches(withText(R.string.disable)))
-        clickOnView(positiveAlertButton)
+        clickOnTag(TestTags.DISABLE_ALIAS_ACTION)
     }
 
     fun clickOnCancelButton() {
-        waitForViewToDisplay(negativeAlertButton, 5_000L)
-        clickOnView(negativeAlertButton)
+        clickOnTag(TestTags.DIALOG_DISMISS)
+        waitForTagToDisappear(TestTags.DIALOG_DISMISS)
     }
 
     fun waitForActionToComplete() {
-        waitForViewToNotDisplay(loadingProgress, 60_000L)
+        waitForLoading()
+    }
+
+    /**
+     * Wait for an alias to show [statusResId]. The list is reloaded after enabling or disabling,
+     * and the actions offered when an alias is tapped follow its listed status.
+     */
+    fun waitForAliasStatus(statusResId: Int) {
+        waitForNode(hasTestTag(TestTags.ALIAS_STATUS_TEXT) and hasText(string(statusResId)), useUnmergedTree = true)
     }
 
     // --- Update-related methods ---
 
-    /** Clicks the neutral "Update" button in the action dialog. */
     fun clickOnUpdateButton() {
-        waitForViewToDisplay(neutralAlertButton, 5_000L)
-        onView(neutralAlertButton).check(matches(withText(R.string.update)))
-        clickOnView(neutralAlertButton)
+        clickOnTag(TestTags.UPDATE_ALIAS_ACTION)
     }
 
-    /** Verifies the update dialog is visible by checking for the metadata hint EditText. */
     fun checkUpdateDialogDisplayed() {
-        waitForViewToDisplay(withHint(R.string.metadata_json_hint), 5_000L)
+        waitForTag(TestTags.ALIAS_METADATA_FIELD)
     }
 
-    /** Types into the metadata EditText (identified by its hint text). */
     fun enterMetadataJson(json: String) {
-        onView(withHint(R.string.metadata_json_hint))
-            .perform(click())
-            .perform(replaceText(json))
-            .perform(closeSoftKeyboard())
+        replaceText(TestTags.ALIAS_METADATA_FIELD, json)
     }
 
-    /** Clicks the "Pick Date" button/label to open the DatePickerDialog. */
+    /** Open the date picker for the alias's expiry. */
     fun clickPickDate() {
-        onView(withText(R.string.pick_date)).perform(click())
+        clickOnTag(TestTags.ALIAS_EXPIRY_BUTTON)
     }
 
-    /** Clicks the "Clear" button to reset the expiration date. */
     fun clickClearDate() {
-        onView(withText(R.string.clear_date)).perform(click())
+        clickOnTag(TestTags.CLEAR_ALIAS_EXPIRY_BUTTON)
     }
 
-    /** Selects a date in the DatePickerDialog and confirms with OK. */
-    fun selectDate(
-        year: Int,
-        month: Int,
-        day: Int,
-    ) {
-        onView(isAssignableFrom(DatePicker::class.java))
-            .perform(PickerActions.setDate(year, month, day))
-        // Click OK on the DatePickerDialog
-        onView(withId(android.R.id.button1)).perform(click())
+    /**
+     * Pick [date], which must be in the month after the current one, in the open date picker and
+     * confirm it. The picker opens on the current month.
+     */
+    fun selectDateInNextMonth(date: LocalDate) {
+        val nextMonth = hasContentDescription(NEXT_MONTH_DESCRIPTION) and hasClickAction()
+        waitForNode(nextMonth)
+        composeRule.onNode(nextMonth).performClick()
+        val pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), DAY_DESCRIPTION_SKELETON)
+        val description = date.format(DateTimeFormatter.ofPattern(pattern, Locale.getDefault()))
+        val day = hasText(description, substring = true) and hasClickAction()
+        waitForNode(day)
+        composeRule.onNode(day).performClick()
+        clickOnTag(TestTags.DATE_PICKER_CONFIRM)
     }
 
-    /** Clicks the "Save" positive button in the update dialog. */
+    /** Save the update dialog and wait for the aliases to reload. */
     fun clickSaveButton() {
-        waitForViewToDisplay(positiveAlertButton, 5_000L)
-        onView(positiveAlertButton).check(matches(withText(R.string.save)))
-        clickOnView(positiveAlertButton)
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        waitForTagToDisappear(TestTags.ALIAS_METADATA_FIELD)
+        waitForLoading()
     }
 
-    /** Verifies metadata text is displayed in the list item. */
     fun checkMetadataDisplayed(expectedJson: String) {
-        val matcher = allOf(withId(R.id.metadataText), withText(containsString(expectedJson)))
-        waitForViewToDisplay(matcher, 10_000L)
-        onView(matcher).check(matches(isDisplayed()))
+        waitForNode(
+            hasTestTag(TestTags.ALIAS_METADATA_TEXT) and hasText(expectedJson, substring = true),
+            useUnmergedTree = true,
+        )
     }
 
-    /** Verifies expiration text is displayed in the list item. */
-    fun checkExpiresAtDisplayed(expectedText: String) {
-        val matcher = allOf(withId(R.id.expiresAtText), withText(expectedText))
-        waitForViewToDisplay(matcher, 10_000L)
-        onView(matcher).check(matches(isDisplayed()))
+    /** Check an alias shows that it expires on [date]. */
+    fun checkExpiresAtDisplayed(date: LocalDate) {
+        val expiry = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())
+        checkExpiresAtText("${string(R.string.set_expiration)} ${formatExpiryDate(expiry)}")
     }
 
-    /** Verifies "-" is shown for metadata in the list item. */
     fun checkDashDisplayedForMetadata() {
-        val matcher = allOf(withId(R.id.metadataText), withText("Metadata (JSON): -"))
-        waitForViewToDisplay(matcher, 10_000L)
-        onView(matcher).check(matches(isDisplayed()))
+        waitForNode(
+            hasTestTag(TestTags.ALIAS_METADATA_TEXT) and hasText(string(R.string.alias_metadata_value, "-")),
+            useUnmergedTree = true,
+        )
     }
 
-    /** Verifies "-" is shown for expiration in the list item. */
     fun checkDashDisplayedForExpiresAt() {
-        val matcher = allOf(withId(R.id.expiresAtText), withText("Expires: -"))
-        waitForViewToDisplay(matcher, 10_000L)
-        onView(matcher).check(matches(isDisplayed()))
+        checkExpiresAtText("${string(R.string.set_expiration)} -")
+    }
+
+    private fun checkExpiresAtText(text: String) {
+        waitForNode(hasTestTag(TestTags.ALIAS_EXPIRES_TEXT) and hasText(text), useUnmergedTree = true)
+    }
+
+    private fun scrollToAliases(matcher: SemanticsMatcher) {
+        scrollListTo(TestTags.EMAIL_ADDRESSES_LIST, matcher)
+    }
+
+    /** The number of rows tagged [tag], once there is one at [position]. */
+    private fun rowCount(
+        tag: String,
+        position: Int,
+    ): Int {
+        waitForTagCount(tag, position + 1)
+        return composeRule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().size
+    }
+
+    private fun waitForRowCountBelow(
+        tag: String,
+        count: Int,
+    ) {
+        composeRule.waitUntil(DEFAULT_TIMEOUT_MS) {
+            composeRule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().size < count
+        }
     }
 }

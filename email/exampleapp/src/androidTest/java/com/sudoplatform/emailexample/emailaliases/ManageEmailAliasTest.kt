@@ -6,24 +6,20 @@
 
 package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
+import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
-import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
 /**
  * Test the email alias management flows (deprovision, enable, disable).
@@ -31,45 +27,36 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ManageEmailAliasTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     /**
-     * Test: Provision an email alias, then swipe left to delete it.
+     * Test: Provision an email alias, then swipe left and confirm to delete it.
      * Verifies the swipe-to-delete flow removes the item from the list.
      */
     @Test
     fun testSwipeToDeleteEmailAlias() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             swipeLeftToDeleteAlias(0)
             waitForActionToComplete()
             checkEmptyAliasesStateDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -80,22 +67,19 @@ class ManageEmailAliasTest {
     @Test
     fun testTapItemAndDisableEmailAlias() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnDisableButton()
             waitForActionToComplete()
-            waitForAliasesRecyclerView()
+            waitForAliasStatus(R.string.email_alias_status_disabled)
             checkEmailAliasesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
@@ -106,68 +90,55 @@ class ManageEmailAliasTest {
     @Test
     fun testTapItemAndEnableEmailAlias() {
         provisionEmailAliasFlow()
-        emailAddresses {
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
             // First disable the alias so we can test enabling it
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnDisableButton()
             waitForActionToComplete()
-            // Wait for listEmailAliases() to refresh the list with updated status
-            onView(isRoot()).perform(waitFor(3_000L))
-            waitForAliasesRecyclerView()
-            checkEmailAliasesItemsDisplayed()
+            waitForAliasStatus(R.string.email_alias_status_disabled)
             // Now enable the disabled alias
             clickOnAliasItem(0)
             checkActionDialogDisplayed()
             clickOnEnableButton()
             waitForActionToComplete()
-            waitForAliasesRecyclerView()
+            waitForAliasStatus(R.string.email_alias_status_enabled)
             checkEmailAliasesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     /**
-     * Helper: Registers, creates a sudo, provisions an email address,
-     * and provisions an email alias. Stays on the email addresses screen.
+     * Registers, creates a sudo, provisions an email address, and provisions an email alias.
+     * Stays on the email addresses screen.
      */
     private fun provisionEmailAliasFlow() {
-        createSudo {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToCreateEmailAliasScreen()
         }
-        provisionEmailAlias {
+        provisionEmailAlias(composeRule) {
             checkProvisionEmailAliasItemsDisplayed()
-            selectRealEmailAddress(1)
+            selectRealEmailAddress(0)
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
     }
 }

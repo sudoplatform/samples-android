@@ -6,201 +6,131 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
-import com.sudoplatform.emailexample.mainmenu.mainMenu
-import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
+/**
+ * Test saving, editing, sending and deleting draft email messages.
+ */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class DraftEmailMessageTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
     fun testSaveEmptyDraftEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             clickOnSaveDraftEmailButton()
-            waitForLoading()
         }
     }
 
     @Test
     fun testSaveRetrieveAndSendDraftEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField(address)
             setSubjectField("Espresso Test Draft Email")
             setContentBodyField("This is a test of a draft email")
             clickOnSaveDraftEmailButton()
-            waitForLoading()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-
-            // Navigate to DRAFT folder
-            clickEmailFolderSpinner("DRAFTS")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
+        emailMessages(composeRule) {
+            // Navigate to DRAFTS folder
+            selectDraftsFolder()
+            waitForMessages()
             navigateToEditDraftEmailMessageScreen(0)
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setCcField(address)
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForMessages()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
+        emailMessages(composeRule) {
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testDeleteDraftEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField("test-recipient@test.com")
             setSubjectField("Espresso test draft email")
             setContentBodyField("This is a test of a draft email")
             clickOnSaveDraftEmailButton()
-            waitForLoading()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-
+        emailMessages(composeRule) {
             // Navigate to DRAFTS folder and swipe to delete draft message
-            clickEmailFolderSpinner("DRAFTS")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
+            selectDraftsFolder()
+            waitForMessages()
             swipeLeftToDelete(0)
-            waitForLoading()
+            waitForNoMessages()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
+    }
+
+    /**
+     * Registers, creates a Sudo and provisions an email address, ending on the email addresses.
+     *
+     * @return the provisioned address.
+     */
+    private fun registerAndProvisionEmailAddress(): String {
+        var address = ""
+        provisionEmailAddress(composeRule) {
+            address = provisionEmailAddressFlow()
+        }
+        return address
     }
 }

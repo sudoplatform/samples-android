@@ -7,67 +7,82 @@
 package com.sudoplatform.emailexample
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.sudoplatform.emailexample.notifications.MessageTarget
+import com.sudoplatform.emailexample.ui.theme.EmailExampleTheme
 
 /**
  * This is the first activity that is invoked when the app is launched.
- * It acts as the host to the navigation graph.
+ * It hosts the Compose navigation graph, receives Federated Single Sign On redirects, and opens
+ * the message for a tapped notification.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
+    /** An FSSO redirect not yet handed to the register screen. */
+    private var federatedSignInUri: Uri? by mutableStateOf(null)
+
+    /** A message from a tapped notification, not yet opened. */
+    private var pendingMessage: MessageTarget? by mutableStateOf(null)
+
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        askNotificationPermission()
-    }
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission(),
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                Log.w("Main", "Granted notification permission")
-                // FCM SDK (and your app) can post notifications.
-            } else {
-                AlertDialog
-                    .Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
-                    .setTitle("Alert")
-                    .setMessage("Notifications will not be displayed")
-                    .setNeutralButton("Dismiss") { dialog, _ ->
-                        dialog.dismiss()
-                    }.show()
-            }
+        // Screens draw behind the system bars and pad their content to fit.
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
         }
-
-    private fun askNotificationPermission() {
-        // This is only necessary for API level >= 33 (TIRAMISU)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                // FCM SDK (and your app) can post notifications.
-                Log.w("Main", "notification permission granted")
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                AlertDialog
-                    .Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
-                    .setTitle("Alert")
-                    .setMessage("This App requires Push Notification permission.")
-                    .setPositiveButton("Allow") { _, _ ->
-                        if (Build.VERSION.SDK_INT >= 33) {
-                            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }.setNegativeButton("Do not allow", null)
-                    .show()
-            } else {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        if (savedInstanceState == null) {
+            federatedSignInUri = intent?.federatedSignInUri()
+            pendingMessage = intent?.messageTarget()
+            requestNotificationPermissionIfNeeded()
+        }
+        setContent {
+            EmailExampleTheme {
+                AppNavHost(
+                    federatedSignInUri = federatedSignInUri,
+                    onFederatedSignInUriConsumed = { federatedSignInUri = null },
+                    pendingMessage = pendingMessage,
+                    onPendingMessageConsumed = { pendingMessage = null },
+                )
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.federatedSignInUri()?.let { federatedSignInUri = it }
+        intent.messageTarget()?.let { pendingMessage = it }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    /** The message to open if this intent came from a notification, unless relaunched from Recents. */
+    private fun Intent.messageTarget(): MessageTarget? =
+        MessageTarget.fromIntent(this).takeIf { flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0 }
+
+    /** The redirect URI if this intent carries an FSSO sign in result, not a sign out redirect. */
+    private fun Intent.federatedSignInUri(): Uri? =
+        data?.takeIf { it.getQueryParameter("code") != null || it.getQueryParameter("error") != null }
 }

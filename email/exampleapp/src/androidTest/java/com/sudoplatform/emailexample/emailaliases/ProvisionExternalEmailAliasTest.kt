@@ -6,24 +6,19 @@
 
 package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
-import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
-import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
 /**
  * Test the provision external email alias flow.
@@ -31,158 +26,98 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ProvisionExternalEmailAliasTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
     fun testNavigateToExternalAliasFormFromSwitch() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            // Toggle switch to external position
-            waitForViewToDisplay(withId(R.id.internalExternalSwitch), 10_000L)
-            clickOnView(withId(R.id.internalExternalSwitch))
-            // Tap create button which should now navigate to external form
-            clickOnView(withId(R.id.createEmailAliasButton))
-        }
-        provisionExternalEmailAlias {
+        provisionEmailAddressAndOpenExternalAliasForm()
+        provisionEmailAlias(composeRule) {
             checkProvisionExternalEmailAliasItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
+        emailAddresses(composeRule) {
             checkEmailAddressesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testExternalFormDisplaysCorrectFields() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            // Toggle switch to external position
-            waitForViewToDisplay(withId(R.id.internalExternalSwitch), 10_000L)
-            clickOnView(withId(R.id.internalExternalSwitch))
-            // Navigate to external form
-            clickOnView(withId(R.id.createEmailAliasButton))
-        }
-        provisionExternalEmailAlias {
+        provisionEmailAddressAndOpenExternalAliasForm()
+        provisionEmailAlias(composeRule) {
             // Verify all expected form fields are displayed
             checkProvisionExternalEmailAliasItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
+        emailAddresses(composeRule) {
             checkEmailAddressesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testInvalidEmailFormatShowsErrorDialog() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            // Toggle switch to external position
-            waitForViewToDisplay(withId(R.id.internalExternalSwitch), 10_000L)
-            clickOnView(withId(R.id.internalExternalSwitch))
-            // Navigate to external form
-            clickOnView(withId(R.id.createEmailAliasButton))
-        }
-        provisionExternalEmailAlias {
+        provisionEmailAddressAndOpenExternalAliasForm()
+        provisionEmailAlias(composeRule) {
             checkProvisionExternalEmailAliasItemsDisplayed()
             // Enter an invalid email format
             enterExternalEmail("not-a-valid-email")
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             // Attempt to create - should show error dialog for invalid email format
-            clickOnCreateButton()
-            checkAlertDialogDisplayed()
+            clickOnCreateButtonExpectingAlert()
+            checkInvalidEmailFormatAlertDisplayed()
             clickOnPositiveAlertDialogButton()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
+        emailAddresses(composeRule) {
             checkEmailAddressesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
+        }
+    }
+
+    /**
+     * Registers, creates a sudo and provisions an email address, then chooses External and taps
+     * the create button, which opens the alias form for an external alias.
+     */
+    private fun provisionEmailAddressAndOpenExternalAliasForm() {
+        createSudo(composeRule) {
+            registerAndCreateSudoFlow()
+        }
+        emailAddresses(composeRule) {
+            navigateToProvisionEmailAddressScreen()
+        }
+        provisionEmailAddress(composeRule) {
+            setLocalPart()
+            checkAvailableAddressMsg()
+            clickOnCreateButton()
+        }
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+        }
+        externalEmailAliases(composeRule) {
+            selectExternalAliases()
+            clickOnCreateButton()
         }
     }
 }

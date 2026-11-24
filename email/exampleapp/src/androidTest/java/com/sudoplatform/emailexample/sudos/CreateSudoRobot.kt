@@ -6,62 +6,48 @@
 
 package com.sudoplatform.emailexample.sudos
 
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import com.sudoplatform.emailexample.mainmenu.mainMenu
+import com.sudoplatform.emailexample.emailaddresses.emailAddresses
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun createSudo(func: CreateSudoRobot.() -> Unit) = CreateSudoRobot().apply { func() }
+fun createSudo(
+    composeRule: ComposeTestRule,
+    func: CreateSudoRobot.() -> Unit,
+) = CreateSudoRobot(composeRule).apply { func() }
 
 /**
  * Testing robot that manages the Create Sudo screen.
  */
-class CreateSudoRobot : BaseRobot() {
-    private val toolbarCreateButton = withId(R.id.create)
-    private val sudoLabelEditText = withId(R.id.editText)
-    private val detailTextView = withId(R.id.textView)
-    private val learnMoreButton = withId(R.id.learnMoreButton)
-    private val learnMoreTextView = withId(R.id.learnMoreTextView)
-    private val loadingDialog = withId(R.id.progressBar)
-
+class CreateSudoRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkCreateSudoItemsDisplayed() {
-        waitForViewToDisplay(toolbarCreateButton)
-        waitForViewToDisplay(sudoLabelEditText)
-        waitForViewToDisplay(detailTextView)
-        waitForViewToDisplay(learnMoreTextView)
-        waitForViewToDisplay(learnMoreButton)
+        waitForTag(TestTags.CREATE_SUDO_ACTION)
+        waitForTag(TestTags.SUDO_LABEL_FIELD)
+        waitForText(string(R.string.create_sudo_learn_more))
+        waitForText(string(R.string.learn_more).uppercase())
     }
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 60_000L)
-    }
-
+    /** Register, create a Sudo and wait for its email addresses, which the app shows next. */
     fun registerAndCreateSudoFlow() {
-        mainMenu {
-            navigateFromLaunchToMainMenu()
-            navigateToSudosScreen()
-        }
-        sudos {
-            waitForLoading()
+        sudos(composeRule) {
+            navigateFromLaunchToSudos()
             navigateToCreateSudoScreen()
         }
-        createSudo {
-            setSudoName("Shopping")
-            clickOnCreateButton()
-            waitForLoading()
+        setSudoName("Shopping")
+        clickOnCreateButton()
+        emailAddresses(composeRule) {
+            checkEmailAddressesItemsDisplayed()
         }
     }
 
     private fun setSudoName(name: String) {
-        setTextFieldValue(name)
+        replaceText(TestTags.SUDO_LABEL_FIELD, name)
     }
 
     private fun clickOnCreateButton() {
-        clickOnView(toolbarCreateButton)
-    }
-
-    private fun setTextFieldValue(inputText: String) {
-        replaceText(sudoLabelEditText, inputText)
+        clickOnEnabledTag(TestTags.CREATE_SUDO_ACTION)
     }
 }

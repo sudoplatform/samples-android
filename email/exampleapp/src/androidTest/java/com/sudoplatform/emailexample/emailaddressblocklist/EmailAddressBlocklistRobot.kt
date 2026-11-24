@@ -6,44 +6,38 @@
 
 package com.sudoplatform.emailexample.emailaddressblocklist
 
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
-import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
-import com.sudoplatform.emailexample.R
-import org.hamcrest.core.AllOf.allOf
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun emailAddressBlocklist(func: EmailAddressBlocklistRobot.() -> Unit) = EmailAddressBlocklistRobot().apply { func() }
+fun emailAddressBlocklist(
+    composeRule: ComposeTestRule,
+    func: EmailAddressBlocklistRobot.() -> Unit,
+) = EmailAddressBlocklistRobot(composeRule).apply { func() }
 
 /**
  * Testing robot that manages the email address blocklist screen.
  */
-class EmailAddressBlocklistRobot : BaseRobot() {
-    private val toolbarDeleteButton = withId(R.id.delete)
-    private val blockedAddressesRecyclerView = withId(R.id.blockedAddressesRecyclerView)
-    private val loadingProgress = withId(R.id.progressBar)
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingProgress, 5_000L)
-        waitForViewToNotDisplay(loadingProgress, 60_000L)
-    }
-
+class EmailAddressBlocklistRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkEmailAddressBlocklistItemsDisplayed() {
-        waitForViewToDisplay(toolbarDeleteButton, 5_000L)
-        waitForViewToDisplay(blockedAddressesRecyclerView, 5_000L)
+        waitForTag(TestTags.UNBLOCK_ACTION)
+        waitForTag(TestTags.BLOCKED_ADDRESSES_LIST)
     }
 
-    fun clickCheckboxOnRecyclerViewItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(blockedAddressesRecyclerView, position + 1)
-        onView(blockedAddressesRecyclerView).perform(scrollToPosition<RecyclerView.ViewHolder>(position))
-        val checkBoxMatcher = allOf(withId(R.id.checkbox), isDescendantOfA(blockedAddressesRecyclerView))
-        onView(checkBoxMatcher).perform(click())
+    fun clickCheckboxOnItem(position: Int) {
+        clickOnTagAtPosition(TestTags.BLOCKED_ADDRESS_CHECKBOX, position)
     }
 
+    /** Unblock the ticked addresses and wait for them to leave the list. */
     fun clickOnDeleteButton() {
-        clickOnView(toolbarDeleteButton)
+        val count = composeRule.onAllNodes(hasTestTag(TestTags.BLOCKED_ADDRESS_ROW)).fetchSemanticsNodes().size
+        clickOnEnabledTag(TestTags.UNBLOCK_ACTION)
+        waitForLoading()
+        composeRule.waitUntil(DEFAULT_TIMEOUT_MS) {
+            composeRule.onAllNodes(hasTestTag(TestTags.BLOCKED_ADDRESS_ROW)).fetchSemanticsNodes().size < count
+        }
     }
 }

@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#0B4B90</color>
-    <color name="colorPrimaryDark">#06407F</color>
-    <color name="colorAccent">#009688</color>
-    <color name="colorBackground">#EDEDED</color>
-    <color name="colorPositiveMsg">#ff669900</color>
-    <color name="colorNegativeMsg">#ffcc0000</color>
-    <color name="colorWarningMsg">#ffff8800</color>
+    <!-- Mirrors WindowBackground in ui/theme/Color.kt. -->
+    <color name="windowBackground">#FAFAFA</color>
 </resources>

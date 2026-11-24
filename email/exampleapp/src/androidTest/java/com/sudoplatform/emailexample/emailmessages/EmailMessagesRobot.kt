@@ -6,94 +6,92 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
 import com.sudoplatform.emailexample.emailaddressblocklist.emailAddressBlocklist
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun emailMessages(func: EmailMessagesRobot.() -> Unit) = EmailMessagesRobot().apply { func() }
+fun emailMessages(
+    composeRule: ComposeTestRule,
+    func: EmailMessagesRobot.() -> Unit,
+) = EmailMessagesRobot(composeRule).apply { func() }
 
 /**
  * Testing robot that manages the email messages screen.
  */
-class EmailMessagesRobot : BaseRobot() {
-    private val toolbarComposeButton = withId(R.id.compose)
-    private val emailMessagesRecyclerView = withId(R.id.emailMessageRecyclerView)
-    private val loadingProgress = withId(R.id.progressBar)
-    private val dropdownSpinner = withId(R.id.foldersSpinner)
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingProgress, 5_000L)
-        waitForViewToNotDisplay(loadingProgress, 60_000L)
-    }
-
+class EmailMessagesRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkEmailMessagesItemsDisplayed() {
-        waitForViewToDisplay(toolbarComposeButton)
+        waitForTag(TestTags.COMPOSE_BUTTON)
+        waitForTag(TestTags.FOLDER_DROPDOWN)
     }
 
-    fun waitForRecyclerView() {
-        waitForViewToDisplay(emailMessagesRecyclerView, 5_000L)
+    /** Wait for the selected folder to show at least one message. */
+    fun waitForMessages() {
+        waitForTag(TestTags.EMAIL_MESSAGE_ROW)
     }
 
     fun navigateToSendEmailMessageScreen() {
-        clickOnView(toolbarComposeButton)
-        sendEmailMessage {
+        clickOnTag(TestTags.COMPOSE_BUTTON)
+        sendEmailMessage(composeRule) {
             checkSendEmailMessageItemsDisplayed()
         }
     }
 
+    /** Open the draft at [position], with the Drafts folder selected. */
     fun navigateToEditDraftEmailMessageScreen(position: Int) {
-        clickRecyclerViewItem(position)
-        sendEmailMessage {
-            waitForLoading()
+        clickOnTagAtPosition(TestTags.EMAIL_MESSAGE_ROW, position)
+        sendEmailMessage(composeRule) {
             checkSendEmailMessageItemsDisplayed()
         }
     }
 
     fun navigateToReadEmailMessageScreen(position: Int) {
-        clickRecyclerViewItem(position)
-        readEmailMessage {
-            waitForLoading()
+        clickOnTagAtPosition(TestTags.EMAIL_MESSAGE_ROW, position)
+        readEmailMessage(composeRule) {
             checkReadEmailMessageItemsDisplayed()
         }
     }
 
-    fun clickEmailFolderSpinner(folderName: String) {
-        clickOnView(dropdownSpinner)
-        onView(withText(folderName)).perform(click())
+    /** Select the folder named [folderName], such as "SENT", or "DRAFTS" for the drafts. */
+    fun selectEmailFolder(folderName: String) {
+        selectDropdownOption(TestTags.FOLDER_DROPDOWN, folderName)
+    }
+
+    fun selectDraftsFolder() {
+        selectEmailFolder(string(R.string.drafts_folder))
     }
 
     fun navigateToBlocklistScreen() {
-        Thread.sleep(1_000L)
-        clickEmailFolderSpinner("BLOCKLIST")
-        emailAddressBlocklist {
-            waitForLoading()
+        clickOnTag(TestTags.MORE_ACTIONS)
+        clickOnTag(TestTags.BLOCKLIST_MENU_ITEM)
+        emailAddressBlocklist(composeRule) {
             checkEmailAddressBlocklistItemsDisplayed()
         }
     }
 
+    /**
+     * Swipe the message at [position] away. Outside the trash and drafts this moves it to the
+     * trash; in the trash, [confirmDeleteMessage] must follow.
+     */
     fun swipeLeftToDelete(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(emailMessagesRecyclerView, position + 1)
-        onView(emailMessagesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
-                position,
-                ViewActions.swipeLeft(),
-            ),
-        )
+        swipeLeftOnTagAtPosition(TestTags.EMAIL_MESSAGE_ROW, position)
     }
 
-    private fun clickRecyclerViewItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(emailMessagesRecyclerView, position + 1)
-        onView(emailMessagesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailMessageViewHolder>(
-                position,
-                click(),
-            ),
-        )
+    /** Confirm permanently deleting a message swiped away in the trash. */
+    fun confirmDeleteMessage() {
+        waitForText(string(R.string.delete_email_message_title))
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+    }
+
+    /** Wait for the selected folder to show no messages, once a delete has finished. */
+    fun waitForNoMessages() {
+        waitForLoading()
+        composeRule.waitUntil(DEFAULT_TIMEOUT_MS) {
+            composeRule.onAllNodes(hasTestTag(TestTags.EMAIL_MESSAGE_ROW)).fetchSemanticsNodes().isEmpty()
+        }
     }
 }

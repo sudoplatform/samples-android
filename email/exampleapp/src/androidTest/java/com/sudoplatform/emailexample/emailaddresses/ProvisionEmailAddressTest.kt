@@ -6,20 +6,17 @@
 
 package com.sudoplatform.emailexample.emailaddresses
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
-import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 import java.util.UUID
 
 /**
@@ -28,150 +25,116 @@ import java.util.UUID
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ProvisionEmailAddressTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
     fun testProvisionAndDeprovisionEmailAddress() {
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             provisionEmailAddressFlow()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             swipeLeftToDelete(0)
-            waitForLoading()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testAttemptToProvisionUnavailableEmailAddress() {
         val localPart = UUID.randomUUID().toString().substring(0, 8)
-        createSudo {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart(localPart)
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             swipeLeftToDelete(0)
-            waitForLoading()
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart(localPart)
-            waitForRootFocus()
             checkUnavailableAddressMsg()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            pressBack()
-        }
-        sudos {
-            pressBack()
+        emailAddresses(composeRule) {
+            checkEmailAddressesItemsDisplayed()
+            navigateBack()
         }
     }
 
     @Test
     fun testProvisionEmailAddressAndDeleteSudo() {
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             provisionEmailAddressFlow()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
-            checkSudosItemsDisplayed()
+        sudos(composeRule) {
+            checkSudoCount(1)
             swipeLeftToDelete(0)
-            waitForLoading()
-            pressBack()
+            checkSudoCount(0)
         }
     }
 
     @Test
     fun testProvisionMultipleEmailAddresses() {
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             provisionEmailAddressFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            pressBack()
-        }
-        sudos {
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses(2)
+            navigateBack()
         }
     }
 
     @Test
     fun testAttemptToProvisionInvalidEmailAddress() {
-        createSudo {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart("_)(**")
-            waitForRootFocus()
             checkInvalidAddressMsg()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            pressBack()
-        }
-        sudos {
-            pressBack()
+        emailAddresses(composeRule) {
+            checkEmailAddressesItemsDisplayed()
+            navigateBack()
         }
     }
 }

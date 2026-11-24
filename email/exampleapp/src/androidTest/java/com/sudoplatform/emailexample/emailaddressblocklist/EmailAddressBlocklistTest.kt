@@ -6,8 +6,7 @@
 
 package com.sudoplatform.emailexample.emailaddressblocklist
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
@@ -16,15 +15,12 @@ import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
 import com.sudoplatform.emailexample.emailmessages.emailMessages
 import com.sudoplatform.emailexample.emailmessages.readEmailMessage
 import com.sudoplatform.emailexample.emailmessages.sendEmailMessage
-import com.sudoplatform.emailexample.mainmenu.mainMenu
-import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
 /**
  * Test the email address blocklist flow.
@@ -32,153 +28,101 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class EmailAddressBlocklistTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
     fun testNavigateToBlocklistScreen() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToBlocklistScreen()
         }
-        emailAddressBlocklist {
-            pressBack()
+        emailAddressBlocklist(composeRule) {
+            navigateBack()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testSendAndBlockThenUnblockEmailAddress() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField(address)
             setSubjectField("Espresso Test Email")
             setContentBodyField("This is test email from an Espresso test.")
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForMessages()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            clickEmailFolderSpinner("SENT")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-        }
-        emailMessages {
+        emailMessages(composeRule) {
+            selectEmailFolder("SENT")
+            waitForMessages()
             navigateToReadEmailMessageScreen(0)
         }
-        readEmailMessage {
+        readEmailMessage(composeRule) {
             // Block the email address
             clickOnBlockEmailAddressButton()
-            waitForLoading()
             clickOnPositiveAlertDialogButton()
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToBlocklistScreen()
         }
-        emailAddressBlocklist {
+        emailAddressBlocklist(composeRule) {
             // Unblock the email address
-            waitForLoading()
-            checkEmailAddressBlocklistItemsDisplayed()
-            clickCheckboxOnRecyclerViewItem(0)
+            clickCheckboxOnItem(0)
             clickOnDeleteButton()
-            waitForLoading()
-            pressBack()
+            navigateBack()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
+    }
+
+    /**
+     * Registers, creates a Sudo and provisions an email address, ending on the email addresses.
+     *
+     * @return the provisioned address.
+     */
+    private fun registerAndProvisionEmailAddress(): String {
+        var address = ""
+        provisionEmailAddress(composeRule) {
+            address = provisionEmailAddressFlow()
+        }
+        return address
     }
 }

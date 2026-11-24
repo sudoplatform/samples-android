@@ -6,22 +6,19 @@
 
 package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
-import com.sudoplatform.emailexample.mainmenu.mainMenu
 import com.sudoplatform.emailexample.sudos.createSudo
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
 /**
  * Test the email aliases flow.
@@ -29,105 +26,80 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class EmailAliasesTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
     fun testNavigateToProvisionEmailAliasScreen() {
-        createSudo {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToCreateEmailAliasScreen()
         }
-        provisionEmailAlias {
+        provisionEmailAlias(composeRule) {
             checkProvisionEmailAliasItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
+        emailAddresses(composeRule) {
             checkEmailAddressesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testProvisionEmailAlias() {
-        createSudo {
+        createSudo(composeRule) {
             registerAndCreateSudoFlow()
         }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
             navigateToProvisionEmailAddressScreen()
         }
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToCreateEmailAliasScreen()
         }
-        provisionEmailAlias {
+        provisionEmailAlias(composeRule) {
             checkProvisionEmailAliasItemsDisplayed()
-            selectRealEmailAddress(1)
+            selectRealEmailAddress(0)
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             checkEmailAliasesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 }

@@ -6,24 +6,20 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.sudoplatform.emailexample.MainActivity
 import com.sudoplatform.emailexample.emailaddresses.emailAddresses
 import com.sudoplatform.emailexample.emailaddresses.provisionEmailAddress
 import com.sudoplatform.emailexample.emailaliases.externalEmailAliases
-import com.sudoplatform.emailexample.emailaliases.provisionExternalEmailAlias
-import com.sudoplatform.emailexample.mainmenu.mainMenu
-import com.sudoplatform.emailexample.sudos.createSudo
+import com.sudoplatform.emailexample.emailaliases.provisionEmailAlias
 import com.sudoplatform.emailexample.sudos.sudos
+import com.sudoplatform.emailexample.withNotificationPermission
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 
 /**
  * Test the send email message flow.
@@ -31,326 +27,174 @@ import timber.log.Timber
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class SendEmailMessageTest {
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Before
-    fun setup() {
-        Timber.plant(Timber.DebugTree())
-    }
+    @get:Rule
+    val rules = withNotificationPermission(composeRule)
 
     @After
     fun fini() {
-        mainMenu {
-            pressBackUntilDeregisterToolbarButtonIsDisplayed()
-            clickOnDeregister()
-            clickOnPositiveDeregisterAlertDialogButton()
-            waitForLoading()
+        sudos(composeRule) {
+            pressBackUntilSudosAreDisplayed()
+            deregister()
         }
-        Timber.uprootAll()
     }
 
     @Test
     fun testSendAndDeleteEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             // Attempt to send without filling out any fields
             clickOnSendEmailButton()
-            waitForLoading()
             clickOnPositiveAlertDialogButton()
 
             // Attempt to send with fields filled out
             setToField(address)
             setSubjectField("Espresso Test Email")
             setContentBodyField("This is test email from an Espresso test.")
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForMessages()
         }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-
+        emailMessages(composeRule) {
             // Navigate to SENT folder and swipe to move message to TRASH
-            clickEmailFolderSpinner("SENT")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
+            selectEmailFolder("SENT")
+            waitForMessages()
             swipeLeftToDelete(0)
-            waitForLoading()
+            waitForNoMessages()
 
             // Navigate to TRASH folder and swipe to permanently delete message
-            clickEmailFolderSpinner("TRASH")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
+            selectEmailFolder("TRASH")
+            waitForMessages()
             swipeLeftToDelete(0)
-            waitForLoading()
-            pressBack()
+            confirmDeleteMessage()
+            waitForNoMessages()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testAttemptToSendEmailMessageWithInvalidAddress() {
-        provisionEmailAddress {
+        provisionEmailAddress(composeRule) {
             provisionEmailAddressFlow()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField("fooBar123")
             clickOnSendEmailButton()
-            waitForLoading()
             clickOnNegativeErrorAlertDialogButton()
-            pressBack()
+            navigateBack()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testSendReceiveForwardEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        sendMessageToSelfAndCheckSent(address)
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
-            navigateToSendEmailMessageScreen()
-        }
-        sendEmailMessage {
-            // Attempt to send with fields filled out
-            setToField(address)
-            setSubjectField("Espresso Test Email")
-            setContentBodyField("This is test email from an Espresso test.")
-            clickOnSendEmailButton()
-            waitForLoading()
-        }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            clickEmailFolderSpinner("SENT")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
-        }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            navigateToEmailMessagesScreen(0)
-        }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToReadEmailMessageScreen(0)
         }
-        readEmailMessage {
+        readEmailMessage(composeRule) {
             navigateToForwardScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             setToField(address)
             checkSubjectFieldContainsForward()
             setContentBodyField("This is a forwarded email sent from an Espresso test.")
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForReadMessage()
         }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
+        readEmailMessage(composeRule) {
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailMessages(composeRule) {
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
+        }
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testSendReceiveReplyEmailMessage() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        sendMessageToSelfAndCheckSent(address)
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
-            navigateToSendEmailMessageScreen()
-        }
-        sendEmailMessage {
-            // Attempt to send with fields filled out
-            setToField(address)
-            setSubjectField("Espresso Test Email")
-            setContentBodyField("This is test email from an Espresso test.")
-            clickOnSendEmailButton()
-            waitForLoading()
-        }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            clickEmailFolderSpinner("SENT")
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
-        }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            navigateToEmailMessagesScreen(0)
-        }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToReadEmailMessageScreen(0)
         }
-        readEmailMessage {
+        readEmailMessage(composeRule) {
             navigateToReplyScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             checkToFieldFilled()
             checkSubjectFieldContainsReply()
             setContentBodyField("This is a reply email sent from an Espresso test.")
-            clickOnSendEmailButton()
-            waitForLoading()
+            sendAndWaitForReadMessage()
         }
-        emailMessages {
-            waitForRecyclerView()
-            checkEmailMessagesItemsDisplayed()
-            pressBack()
+        readEmailMessage(composeRule) {
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailMessages(composeRule) {
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
+        }
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testEncryptedEmailAddressHandlesEncryptedIndicator() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        val address = registerAndProvisionEmailAddress()
+        emailAddresses(composeRule) {
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             checkEncryptedIndicatorNotVisible()
             setToField("$address,$address")
             checkEncryptedIndicatorVisible()
@@ -358,78 +202,46 @@ class SendEmailMessageTest {
             checkEncryptedIndicatorVisible()
             setToField("not-an-address")
             checkEncryptedIndicatorNotVisible()
-            pressBack()
+            navigateBack()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
         }
     }
 
     @Test
     fun testExternalAliasAddressDoesNotShowEncryptedIndicator() {
-        createSudo {
-            registerAndCreateSudoFlow()
-        }
-        emailAddresses {
-            waitForLoading()
-            checkEmailAddressesItemsDisplayed()
-            navigateToProvisionEmailAddressScreen()
-        }
-        var address = ""
-        provisionEmailAddress {
-            setLocalPart()
-            waitForRootFocus()
-            checkAvailableAddressMsg()
-            address = getAddressFromTextView()
-            clickOnCreateButton()
-            waitForLoading()
-        }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-        }
+        val address = registerAndProvisionEmailAddress()
         // Provision an external email alias
-        var externalAliasAddress = ""
-        externalEmailAliases {
-            checkSwitchDisplayed()
-            toggleSwitch()
+        val externalAliasAddress = "testuser@gmail.com"
+        externalEmailAliases(composeRule) {
+            selectExternalAliases()
             checkCreateButtonTextExternal()
             clickOnCreateButton()
         }
-        provisionExternalEmailAlias {
+        provisionEmailAlias(composeRule) {
             checkProvisionExternalEmailAliasItemsDisplayed()
-            enterExternalEmail("testuser@gmail.com")
+            enterExternalEmail(externalAliasAddress)
             setLocalPart()
-            waitForRootFocus()
             checkAvailableAddressMsg()
-            externalAliasAddress = "testuser@gmail.com"
             clickOnCreateButton()
-            waitForLoading()
         }
-        emailAddresses {
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
             navigateToEmailMessagesScreen(0)
         }
-        emailMessages {
+        emailMessages(composeRule) {
             navigateToSendEmailMessageScreen()
         }
-        sendEmailMessage {
+        sendEmailMessage(composeRule) {
             // External alias address should NOT show encrypted indicator
             // because enableEncryption is false for external aliases
             checkEncryptedIndicatorNotVisible()
@@ -443,25 +255,55 @@ class SendEmailMessageTest {
             // Mixing internal and external should NOT show encrypted indicator
             setToField("$address,$externalAliasAddress")
             checkEncryptedIndicatorNotVisible()
-            pressBack()
+            navigateBack()
         }
-        emailMessages {
-            waitForLoading()
-            waitForRecyclerView()
+        emailMessages(composeRule) {
             checkEmailMessagesItemsDisplayed()
-            pressBack()
+            navigateBack()
         }
-        emailAddresses {
-            waitForLoading()
-            waitForRecyclerView()
-            checkEmailAddressesItemsDisplayed()
-            pressBack()
+        emailAddresses(composeRule) {
+            waitForEmailAddresses()
+            navigateBack()
         }
-        sudos {
-            waitForLoading()
-            waitForRecyclerView()
+        sudos(composeRule) {
             checkSudosItemsDisplayed()
-            pressBack()
+        }
+    }
+
+    /**
+     * Registers, creates a Sudo and provisions an email address, ending on the email addresses.
+     *
+     * @return the provisioned address.
+     */
+    private fun registerAndProvisionEmailAddress(): String {
+        var address = ""
+        provisionEmailAddress(composeRule) {
+            address = provisionEmailAddressFlow()
+        }
+        return address
+    }
+
+    /**
+     * Sends a message from the email addresses screen to [address], checks it is in SENT, and
+     * goes back to the email addresses.
+     */
+    private fun sendMessageToSelfAndCheckSent(address: String) {
+        emailAddresses(composeRule) {
+            navigateToEmailMessagesScreen(0)
+        }
+        emailMessages(composeRule) {
+            navigateToSendEmailMessageScreen()
+        }
+        sendEmailMessage(composeRule) {
+            setToField(address)
+            setSubjectField("Espresso Test Email")
+            setContentBodyField("This is test email from an Espresso test.")
+            sendAndWaitForMessages()
+        }
+        emailMessages(composeRule) {
+            selectEmailFolder("SENT")
+            waitForMessages()
+            navigateBack()
         }
     }
 }

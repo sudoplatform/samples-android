@@ -6,82 +6,57 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun readEmailMessage(func: ReadEmailMessageRobot.() -> Unit) = ReadEmailMessageRobot().apply { func() }
+fun readEmailMessage(
+    composeRule: ComposeTestRule,
+    func: ReadEmailMessageRobot.() -> Unit,
+) = ReadEmailMessageRobot(composeRule).apply { func() }
 
 /**
  * Testing robot that manages the read email message screen.
  */
-class ReadEmailMessageRobot : BaseRobot() {
-    private val toolbarReplyButton = withId(R.id.reply)
-    private val toolbarForwardButton = withId(R.id.forward)
-    private val toolbarBlockEmailAddressButton = withId(R.id.block)
-    private val fromValue = withId(R.id.fromValue)
-    private val fromLabel = withId(R.id.fromLabel)
-    private val dateValue = withId(R.id.dateValue)
-    private val toValue = withId(R.id.toValue)
-    private val toLabel = withId(R.id.toLabel)
-    private val ccValue = withId(R.id.ccValue)
-    private val ccLabel = withId(R.id.ccLabel)
-    private val subjectField = withId(R.id.subject)
-    private val bodyField = withId(R.id.contentBody)
-    private val loadingDialog = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 60_000L)
-    }
-
+class ReadEmailMessageRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
     fun checkReadEmailMessageItemsDisplayed() {
-        waitForViewToDisplay(toolbarReplyButton)
-        waitForViewToDisplay(toolbarForwardButton)
-        waitForViewToDisplay(fromValue)
-        waitForViewToDisplay(fromLabel)
-        waitForViewToDisplay(dateValue)
-        waitForViewToDisplay(toValue)
-        waitForViewToDisplay(toLabel)
-        waitForViewToDisplay(ccValue)
-        waitForViewToDisplay(ccLabel)
-        waitForViewToDisplay(subjectField)
-        waitForViewToDisplay(bodyField)
+        waitForTag(TestTags.REPLY_ACTION)
+        waitForTag(TestTags.FORWARD_ACTION)
+        waitForTag(TestTags.MESSAGE_DATE_TEXT)
+        waitForTag(TestTags.MESSAGE_FROM_TEXT)
+        waitForTag(TestTags.MESSAGE_TO_TEXT)
+        waitForTag(TestTags.MESSAGE_CC_TEXT)
+        waitForTag(TestTags.MESSAGE_SUBJECT_TEXT)
+        waitForTag(TestTags.MESSAGE_BODY_TEXT)
     }
 
     fun navigateToReplyScreen() {
-        clickOnView(toolbarReplyButton)
-        sendEmailMessage {
+        clickOnTag(TestTags.REPLY_ACTION)
+        sendEmailMessage(composeRule) {
             checkSendEmailMessageItemsDisplayed()
         }
     }
 
     fun navigateToForwardScreen() {
-        clickOnView(toolbarForwardButton)
-        sendEmailMessage {
+        clickOnTag(TestTags.FORWARD_ACTION)
+        sendEmailMessage(composeRule) {
             checkSendEmailMessageItemsDisplayed()
         }
     }
 
     fun clickOnBlockEmailAddressButton() {
-        clickOnView(toolbarBlockEmailAddressButton)
+        clickOnTag(TestTags.BLOCK_ACTION)
     }
 
+    /** Close the alert reporting the sender was blocked, which returns to the messages. */
     fun clickOnPositiveAlertDialogButton() {
-        checkAlertDialog()
-        Thread.sleep(1_000L)
-        clickOnView(positiveAlertButton)
-    }
-
-    private fun checkAlertDialog() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
-        Thread.sleep(1_000L)
-        Espresso
-            .onView(positiveAlertButton)
-            .check(ViewAssertions.matches(ViewMatchers.withText(android.R.string.ok)))
+        waitForText(string(R.string.success))
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        emailMessages(composeRule) {
+            checkEmailMessagesItemsDisplayed()
+        }
     }
 }

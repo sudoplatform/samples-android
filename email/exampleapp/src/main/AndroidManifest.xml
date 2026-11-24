@@ -17,7 +17,7 @@ xmlns:tools="http://schemas.android.com/tools">
     <activity
         android:name="com.sudoplatform.emailexample.MainActivity"
         android:exported="true"
-        android:theme="@style/AppThemeNoActionBar">
+        android:theme="@style/AppTheme.Starting">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -41,9 +41,8 @@ xmlns:tools="http://schemas.android.com/tools">
     </provider>
 
     <service
-        android:name=".notifications.EmailExampleNotificationHandler"
-        android:exported="false"
-        tools:ignore="MissingClass">
+        android:name="com.sudoplatform.emailexample.notifications.EmailMessagingService"
+        android:exported="false">
         <intent-filter>
             <action android:name="com.google.firebase.MESSAGING_EVENT" />
         </intent-filter>

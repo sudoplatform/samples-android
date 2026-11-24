@@ -6,47 +6,38 @@
 
 package com.sudoplatform.emailexample.emailmessages
 
-import androidx.test.espresso.Espresso.onData
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withSpinnerText
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
-import org.hamcrest.CoreMatchers.containsString
-import org.hamcrest.CoreMatchers.instanceOf
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun sendAliasedEmail(func: SendAliasedEmailRobot.() -> Unit) = SendAliasedEmailRobot().apply { func() }
+fun sendAliasedEmail(
+    composeRule: ComposeTestRule,
+    func: SendAliasedEmailRobot.() -> Unit,
+) = SendAliasedEmailRobot(composeRule).apply { func() }
 
 /**
- * Testing robot that manages the send aliased email interactions.
+ * Testing robot that manages the compose screen's choice of sending from the email address or
+ * from one of its aliases.
  */
-class SendAliasedEmailRobot : BaseRobot() {
-    private val emailAliasSpinner = withId(R.id.emailAliasSpinner)
-    private val loadingDialog = withId(R.id.progressBar)
-
-    fun checkEmailAliasSpinnerDisplayed() {
-        waitForViewToDisplay(emailAliasSpinner)
+class SendAliasedEmailRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
+    fun checkSendFromDropdownDisplayed() {
+        waitForTag(TestTags.SEND_FROM_FIELD)
     }
 
+    /**
+     * Choose the option at [position]: 0 sends from the email address, and the aliases that
+     * forward to it follow once they have loaded.
+     */
     fun selectEmailAlias(position: Int) {
-        clickOnView(emailAliasSpinner)
-        onView(isRoot()).perform(waitFor(500L))
-        onData(instanceOf(String::class.java))
-            .atPosition(position)
-            .perform(click())
+        selectDropdownOption(TestTags.SEND_FROM_FIELD, position)
     }
 
-    fun checkEmailAliasSpinnerDefaultSelected() {
-        onView(isRoot()).perform(waitFor(2_000L))
-        onView(emailAliasSpinner)
-            .check(matches(withSpinnerText(containsString("None (send from email address)"))))
-    }
-
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingDialog, 5_000L)
-        waitForViewToNotDisplay(loadingDialog, 60_000L)
+    fun checkSendFromDropdownDefaultSelected() {
+        waitForNode(hasTestTag(TestTags.SEND_FROM_FIELD) and hasText(string(R.string.send_aliased_email_none_option)))
     }
 }

@@ -6,200 +6,127 @@
 
 package com.sudoplatform.emailexample.emailaliases
 
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.replaceText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withHint
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import com.sudoplatform.emailexample.BaseRobot
 import com.sudoplatform.emailexample.R
+import com.sudoplatform.emailexample.ui.TestTags
 
-fun externalEmailAliases(func: ExternalEmailAliasesRobot.() -> Unit) = ExternalEmailAliasesRobot().apply { func() }
+fun externalEmailAliases(
+    composeRule: ComposeTestRule,
+    func: ExternalEmailAliasesRobot.() -> Unit,
+) = ExternalEmailAliasesRobot(composeRule).apply { func() }
 
 /**
- * Testing robot that manages the external email aliases interactions on the
- * EmailAddresses screen — switch visibility, toggle filtering, verify button,
- * and verification code dialog.
+ * Testing robot that manages the external email aliases interactions on the email addresses
+ * screen: the Internal/External choice, filtering, the verify button and the verification code
+ * dialog.
  */
-class ExternalEmailAliasesRobot : BaseRobot() {
-    private val internalExternalSwitch = withId(R.id.internalExternalSwitch)
-    private val aliasesDisabledText = withId(R.id.aliasesDisabledText)
-    private val aliasesRecyclerView = withId(R.id.aliasesRecyclerView)
-    private val createEmailAliasButton = withId(R.id.createEmailAliasButton)
-    private val emptyAliasesStateText = withId(R.id.emptyAliasesStateText)
-    private val verifyButton = withId(R.id.verifyButton)
-    private val loadingProgress = withId(R.id.progressBar)
-    private val positiveAlertButton = withId(android.R.id.button1)
-    private val negativeAlertButton = withId(android.R.id.button2)
+class ExternalEmailAliasesRobot(
+    composeRule: ComposeTestRule,
+) : BaseRobot(composeRule) {
+    // --- Internal/External choice ---
 
-    fun waitForLoading() {
-        waitForViewToDisplay(loadingProgress, 5_000L)
-        waitForViewToNotDisplay(loadingProgress, 60_000L)
-    }
-
-    fun waitForRootFocus() {
-        onView(isRoot()).perform(waitFor(5_000L))
-    }
-
-    // --- Switch visibility ---
-
+    /** The Internal/External buttons show when the configuration enables external aliases. */
     fun checkSwitchDisplayed() {
-        waitForViewToDisplay(internalExternalSwitch, 10_000L)
+        scrollToAliases(hasTestTag(TestTags.EXTERNAL_ALIASES_BUTTON))
+        waitForTag(TestTags.INTERNAL_ALIASES_BUTTON)
     }
 
-    fun checkSwitchNotDisplayed() {
-        waitForViewToNotDisplay(internalExternalSwitch, 10_000L)
+    fun selectExternalAliases() {
+        checkSwitchDisplayed()
+        clickOnTag(TestTags.EXTERNAL_ALIASES_BUTTON)
+        composeRule.onNodeWithTag(TestTags.EXTERNAL_ALIASES_BUTTON).assertIsSelected()
     }
 
-    fun toggleSwitch() {
-        clickOnView(internalExternalSwitch)
+    fun selectInternalAliases() {
+        checkSwitchDisplayed()
+        clickOnTag(TestTags.INTERNAL_ALIASES_BUTTON)
+        composeRule.onNodeWithTag(TestTags.INTERNAL_ALIASES_BUTTON).assertIsSelected()
     }
 
     // --- Feature gate / disabled state ---
 
-    fun checkDisabledMessageDisplayed() {
-        waitForViewToDisplay(aliasesDisabledText, 10_000L)
-    }
-
     fun checkDisabledMessageNotDisplayed() {
-        waitForViewToNotDisplay(aliasesDisabledText, 10_000L)
-    }
-
-    fun checkAliasListHidden() {
-        waitForViewToNotDisplay(aliasesRecyclerView, 10_000L)
-    }
-
-    fun checkCreateButtonHidden() {
-        waitForViewToNotDisplay(createEmailAliasButton, 10_000L)
+        composeRule.onNodeWithTag(TestTags.ALIASES_DISABLED_TEXT).assertDoesNotExist()
     }
 
     // --- Create button text ---
 
-    fun checkCreateButtonText(expectedText: String) {
-        waitForViewToDisplay(createEmailAliasButton, 10_000L)
-        onView(createEmailAliasButton).check(matches(withText(expectedText)))
-    }
-
     fun checkCreateButtonTextInternal() {
-        waitForViewToDisplay(createEmailAliasButton, 10_000L)
-        onView(createEmailAliasButton).check(matches(withText(R.string.create_email_alias_button)))
+        checkCreateButtonText(string(R.string.create_email_alias_button))
     }
 
     fun checkCreateButtonTextExternal() {
-        waitForViewToDisplay(createEmailAliasButton, 10_000L)
-        onView(createEmailAliasButton).check(matches(withText(R.string.create_external_email_alias_button)))
+        checkCreateButtonText(string(R.string.create_external_email_alias_button))
     }
 
     fun clickOnCreateButton() {
-        waitForViewToDisplay(createEmailAliasButton, 10_000L)
-        clickOnView(createEmailAliasButton)
+        scrollToAliases(hasTestTag(TestTags.CREATE_EMAIL_ALIAS_BUTTON))
+        clickOnTag(TestTags.CREATE_EMAIL_ALIAS_BUTTON)
     }
 
     // --- Alias list filtering ---
 
+    /** Wait for the list to show at least one alias of the selected type. */
     fun checkAliasListDisplayed() {
-        waitForViewToDisplay(aliasesRecyclerView, 10_000L)
+        scrollToAliases(hasTestTag(TestTags.EMAIL_ALIAS_ROW))
     }
 
     fun checkEmptyAliasesStateDisplayed() {
-        waitForViewToDisplay(emptyAliasesStateText, 10_000L)
+        scrollToAliases(hasTestTag(TestTags.EMPTY_ALIASES_TEXT))
     }
 
-    fun waitForAliasesRecyclerView() {
-        waitForViewToDisplay(aliasesRecyclerView, 10_000L)
-    }
-
-    fun checkAliasesRecyclerViewHasItems(minimumCount: Int = 1) {
-        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, minimumCount, 10_000L)
+    fun checkAliasesHaveItems(minimumCount: Int = 1) {
+        checkAliasListDisplayed()
+        waitForTagCount(TestTags.EMAIL_ALIAS_ROW, minimumCount)
     }
 
     // --- Verify button ---
 
     fun clickVerifyButtonOnItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1, 10_000L)
-        onView(aliasesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
-                position,
-                clickChildViewWithId(R.id.verifyButton),
-            ),
-        )
-    }
-
-    fun checkVerifyButtonDisplayedOnItem(position: Int) {
-        checkRecyclerViewHasMinimumItemAmount(aliasesRecyclerView, position + 1, 10_000L)
-        onView(aliasesRecyclerView).perform(
-            RecyclerViewActions.actionOnItemAtPosition<EmailAliasViewHolder>(
-                position,
-                checkChildViewDisplayed(R.id.verifyButton),
-            ),
-        )
+        checkAliasListDisplayed()
+        clickOnTagAtPosition(TestTags.VERIFY_BUTTON, position)
     }
 
     // --- Verification code dialog ---
 
     fun checkVerificationCodeDialogDisplayed() {
-        waitForViewToDisplay(positiveAlertButton, 60_000L)
+        waitForTag(TestTags.VERIFICATION_CODE_FIELD)
     }
 
     fun enterVerificationCode(code: String) {
-        // The verification code dialog uses a custom EditText with a hint
-        onView(withHint(R.string.verification_code_prompt))
-            .perform(click())
-            .perform(replaceText(code))
-            .perform(closeSoftKeyboard())
+        replaceText(TestTags.VERIFICATION_CODE_FIELD, code)
     }
 
     fun clickConfirmVerificationCode() {
-        waitForViewToDisplay(positiveAlertButton, 10_000L)
-        clickOnView(positiveAlertButton)
+        clickOnTag(TestTags.DIALOG_CONFIRM)
+        waitForTagToDisappear(TestTags.VERIFICATION_CODE_FIELD)
     }
 
-    fun clickCancelVerificationDialog() {
-        waitForViewToDisplay(negativeAlertButton, 10_000L)
-        clickOnView(negativeAlertButton)
-    }
-
+    /**
+     * Wait for the code to be checked. A code the service doesn't accept is reported with
+     * **TRY AGAIN** and **CANCEL**, so cancel that report if it shows.
+     */
     fun waitForVerificationToComplete() {
-        waitForViewToNotDisplay(loadingProgress, 60_000L)
+        waitForLoading()
+        if (composeRule.onAllNodes(hasTestTag(TestTags.DIALOG_DISMISS)).fetchSemanticsNodes().isNotEmpty()) {
+            clickOnTag(TestTags.DIALOG_DISMISS)
+            waitForTagToDisappear(TestTags.DIALOG_DISMISS)
+        }
     }
 
-    // --- Helper ViewActions for RecyclerView child views ---
+    /** Check the create button's label, which the button shows in upper case. */
+    private fun checkCreateButtonText(text: String) {
+        scrollToAliases(hasTestTag(TestTags.CREATE_EMAIL_ALIAS_BUTTON))
+        waitForNode(hasTestTag(TestTags.CREATE_EMAIL_ALIAS_BUTTON) and hasText(text.uppercase()))
+    }
 
-    private fun clickChildViewWithId(id: Int): androidx.test.espresso.ViewAction =
-        object : androidx.test.espresso.ViewAction {
-            override fun getConstraints(): org.hamcrest.Matcher<android.view.View> = isDisplayed()
-
-            override fun getDescription(): String = "Click on a child view with specified id."
-
-            override fun perform(
-                uiController: androidx.test.espresso.UiController,
-                view: android.view.View,
-            ) {
-                val childView = view.findViewById<android.view.View>(id)
-                childView?.performClick()
-            }
-        }
-
-    private fun checkChildViewDisplayed(id: Int): androidx.test.espresso.ViewAction =
-        object : androidx.test.espresso.ViewAction {
-            override fun getConstraints(): org.hamcrest.Matcher<android.view.View> = isDisplayed()
-
-            override fun getDescription(): String = "Check that a child view with specified id is displayed."
-
-            override fun perform(
-                uiController: androidx.test.espresso.UiController,
-                view: android.view.View,
-            ) {
-                val childView = view.findViewById<android.view.View>(id)
-                if (childView == null || childView.visibility != android.view.View.VISIBLE) {
-                    throw AssertionError("View with id $id is not visible")
-                }
-            }
-        }
+    private fun scrollToAliases(matcher: SemanticsMatcher) {
+        scrollListTo(TestTags.EMAIL_ADDRESSES_LIST, matcher)
+    }
 }
